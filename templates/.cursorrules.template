@@ -1,0 +1,227 @@
+# Cursor AI Rules para Trivance Platform
+
+## Contexto del Proyecto
+
+Trivance Platform es una plataforma multi-repo para gestión de organizaciones, eventos y donaciones.
+
+### Arquitectura
+- **Multi-repo**: 4 repositorios principales
+- **Backend**: 2 servicios NestJS (Management + Auth)
+- **Frontend**: React + Vite + TypeScript
+- **Mobile**: React Native + Expo
+
+### Stack Tecnológico
+- **Backend**: NestJS, MongoDB, GraphQL, JWT
+- **Frontend**: React 18, TypeScript, Tailwind CSS, Redux Toolkit
+- **Mobile**: React Native, Expo, TypeScript
+- **Database**: MongoDB con Prisma/Mongoose
+- **Cloud**: AWS S3, Firebase
+
+## Reglas de Desarrollo
+
+### Idioma
+- **Comunicación**: Siempre en español
+- **Comentarios**: En español
+- **Documentación**: En español
+- **Variables**: En inglés (camelCase)
+
+### Patrones de Código
+
+#### React Components (Frontend)
+```typescript
+// Estructura estándar
+interface ComponentProps {
+  id?: string;
+  className?: string;
+  children?: React.ReactNode;
+}
+
+export const ComponentName: React.FC<ComponentProps> = ({ id, className, children }) => {
+  // Hooks primero
+  const [state, setState] = useState();
+  
+  // Custom hooks
+  const { data, loading } = useCustomLogic();
+  
+  // Handlers
+  const handleAction = useCallback(() => {
+    // lógica
+  }, []);
+  
+  // Early returns
+  if (loading) return <Spinner />;
+  
+  return (
+    <div id={id} className={clsx("base-class", className)}>
+      {children}
+    </div>
+  );
+};
+```
+
+#### NestJS Modules (Backend)
+```typescript
+// Controller pattern
+@Controller('entity')
+@UseGuards(JwtAuthGuard)
+export class EntityController {
+  constructor(private readonly entityService: EntityService) {}
+
+  @Get()
+  async findAll(@Query() query: FindAllDto) {
+    return this.entityService.findAll(query);
+  }
+}
+
+// Service pattern
+@Injectable()
+export class EntityService {
+  constructor(
+    @InjectModel(Entity.name) private entityModel: Model<EntityDocument>
+  ) {}
+
+  async findAll(query: FindAllDto): Promise<Entity[]> {
+    // implementación
+  }
+}
+```
+
+#### React Native Screens (Mobile)
+```typescript
+interface ScreenProps {
+  navigation: NavigationProp<any>;
+  route: RouteProp<any>;
+}
+
+export const ScreenName: React.FC<ScreenProps> = ({ navigation, route }) => {
+  // Redux hooks
+  const dispatch = useAppDispatch();
+  const { data } = useAppSelector(state => state.slice);
+  
+  // Local state
+  const [localState, setLocalState] = useState();
+  
+  return (
+    <SafeAreaView style={styles.container}>
+      {/* contenido */}
+    </SafeAreaView>
+  );
+};
+```
+
+### Convenciones de Nomenclatura
+- **Archivos**: camelCase para TS/JS, PascalCase para componentes
+- **Carpetas**: kebab-case
+- **Variables**: camelCase
+- **Constantes**: UPPER_SNAKE_CASE
+- **Interfaces**: PascalCase + sufijo (Props, Dto, Args)
+
+### Importaciones
+```typescript
+// Orden de importaciones:
+import React from 'react';              // External libraries
+import { useState } from 'react';       // External named imports
+
+import { Component } from '@/components';  // Internal absolute
+import { utility } from '../utils';       // Internal relative
+
+import './styles.css';                     // Styles last
+```
+
+### Estructura de Archivos
+```
+src/
+├── components/           # Componentes reutilizables
+│   └── ComponentName/
+│       ├── ComponentName.tsx
+│       ├── ComponentName.logic.ts
+│       └── index.ts
+├── pages/               # Páginas/Pantallas
+├── api/                 # Servicios de API
+├── utils/               # Utilidades
+└── types/               # Definiciones de tipos
+```
+
+## Mejores Prácticas
+
+### TypeScript
+- Usar interfaces en lugar de types cuando sea posible
+- Evitar `any`, usar `unknown` si es necesario
+- Definir tipos estrictos para props y estado
+- Usar generic types para reutilización
+
+### React
+- Usar funcional components siempre
+- Separar lógica en custom hooks
+- Memorizar callbacks costosos con useCallback
+- Usar React.memo para componentes que no cambian frecuentemente
+
+### NestJS
+- Un módulo por funcionalidad
+- DTOs con validación class-validator
+- Guards para autenticación
+- Interceptors para logging y transformación
+- Exception filters para manejo de errores
+
+### Base de Datos
+- Usar transacciones para operaciones complejas
+- Validar datos en múltiples capas
+- Indexar campos frecuentemente consultados
+- Usar agregaciones MongoDB para queries complejas
+
+### Testing
+- Unit tests para lógica de negocio
+- Integration tests para APIs
+- Component tests para UI crítica
+- Mock dependencies apropiadamente
+
+### Seguridad
+- Validar inputs siempre
+- Sanitizar datos
+- Usar HTTPS en producción
+- No loggear información sensible
+- JWT con expiración apropiada
+
+## Comandos Frecuentes
+
+### Desarrollo
+```bash
+./scripts/start-all-services.sh     # Iniciar todo
+./scripts/stop-all-services.sh      # Detener todo
+./scripts/check-health.sh           # Verificar estado
+```
+
+### Por Repositorio
+```bash
+npm run dev          # Desarrollo
+npm run build        # Build
+npm run lint         # Linting
+npm run test         # Tests
+```
+
+## Environments
+- **local**: Desarrollo local (default)
+- **qa**: Testing y staging
+- **production**: Producción
+
+## Urls Importantes
+- Management API: http://localhost:3000
+- Auth Service: http://localhost:3001
+- Frontend: http://localhost:5173
+- GraphQL: http://localhost:3000/graphql
+- Swagger: http://localhost:3001/api-docs
+
+## Contexto Adicional
+- Lee .ai-config/context.md para contexto completo
+- Lee .ai-config/patterns.md para patrones específicos
+- Consulta scripts/ para automatización
+- Usa .claude/ para configuración Claude Code específica
+
+## Instrucciones Especiales para Cursor AI
+1. Prioriza siempre español para comunicación
+2. Sigue patrones establecidos en el proyecto
+3. Usa configuraciones del workspace para consistencia
+4. Sugiere mejoras basadas en mejores prácticas
+5. Considera contexto multi-repo en sugerencias
+6. Incluye tests apropiados en implementaciones
+7. Optimiza para performance y mantenibilidad

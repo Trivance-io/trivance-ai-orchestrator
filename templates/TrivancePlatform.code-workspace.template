@@ -1,0 +1,54 @@
+{
+  "folders": [
+    { 
+      "name": "📁 Configuraciones", 
+      "path": "." 
+    },
+    { 
+      "name": "🖥️ Backend - Management", 
+      "path": "./ms_level_up_management" 
+    },
+    { 
+      "name": "🔐 Backend - Auth", 
+      "path": "./ms_trivance_auth" 
+    },
+    { 
+      "name": "🌐 Frontend - Backoffice", 
+      "path": "./level_up_backoffice" 
+    },
+    { 
+      "name": "📱 Mobile App", 
+      "path": "./trivance-mobile" 
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/node_modules": true,
+      "**/dist": true,
+      "**/build": true,
+      "**/.expo": true,
+      "**/coverage": true,
+      "**/.git": true,
+      "**/ios/build": true,
+      "**/android/build": true
+    },
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/dist": true,
+      "**/build": true,
+      "**/.expo": true,
+      "**/coverage": true,
+      "**/ios/build": true,
+      "**/android/build": true
+    }
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-vscode.vscode-typescript-next",
+      "bradlc.vscode-tailwindcss",
+      "GraphQL.vscode-graphql",
+      "expo.vscode-expo-tools",
+      "ms-vscode.vscode-eslint"
+    ]
+  }
+}

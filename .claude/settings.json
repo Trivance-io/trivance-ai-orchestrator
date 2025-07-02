@@ -1,0 +1,94 @@
+{
+  "language": "es",
+  "defaultBehavior": {
+    "alwaysRunLint": true,
+    "alwaysRunTypeCheck": true,
+    "confirmBeforeCommit": true,
+    "useSpanish": true
+  },
+  "workspace": {
+    "type": "multi-repo",
+    "primaryLanguages": ["typescript", "javascript"],
+    "frameworks": ["react", "nestjs", "react-native", "expo"],
+    "packageManager": "npm"
+  },
+  "repositories": {
+    "level_up_backoffice": {
+      "type": "frontend",
+      "framework": "react-vite",
+      "language": "typescript",
+      "devPort": 5173,
+      "buildCommand": "npm run build",
+      "lintCommand": "npm run lint",
+      "testCommand": "npm run test",
+      "startCommand": "npm run dev"
+    },
+    "ms_level_up_management": {
+      "type": "backend",
+      "framework": "nestjs",
+      "language": "typescript", 
+      "devPort": 3000,
+      "buildCommand": "npm run build",
+      "lintCommand": "npm run lint",
+      "testCommand": "npm run test",
+      "startCommand": "npm run start:dev",
+      "apiEndpoints": {
+        "graphql": "http://localhost:3000/graphql",
+        "rest": "http://localhost:3000/api",
+        "health": "http://localhost:3000/health"
+      }
+    },
+    "ms_trivance_auth": {
+      "type": "backend",
+      "framework": "nestjs",
+      "language": "typescript",
+      "devPort": 3001,
+      "buildCommand": "npm run build", 
+      "lintCommand": "npm run lint",
+      "testCommand": "npm run test",
+      "startCommand": "npm run start:dev",
+      "apiEndpoints": {
+        "rest": "http://localhost:3001",
+        "swagger": "http://localhost:3001/api-docs",
+        "health": "http://localhost:3001/health"
+      }
+    },
+    "trivance-mobile": {
+      "type": "mobile",
+      "framework": "react-native-expo",
+      "language": "typescript",
+      "buildCommand": "npm run build:qa",
+      "lintCommand": "npm run lint",
+      "testCommand": "npm test",
+      "startCommand": "EXPO_ENV=qa npm start",
+      "environments": {
+        "local": "EXPO_ENV=local npm start",
+        "qa": "EXPO_ENV=qa npm start", 
+        "production": "EXPO_ENV=production npm start"
+      }
+    }
+  },
+  "commonPatterns": {
+    "ignorePatterns": [
+      "node_modules/",
+      "dist/",
+      "build/",
+      ".expo/",
+      "ios/build/",
+      "android/build/",
+      "coverage/"
+    ],
+    "importantFiles": [
+      "package.json",
+      "tsconfig.json",
+      "src/",
+      "docs/",
+      "README.md"
+    ]
+  },
+  "shortcuts": {
+    "devSetup": "npm install && npm run build && npm run lint",
+    "fullTest": "npm run lint && npm run test && npm run build",
+    "startAll": "scripts/start-all-services.sh"
+  }
+}
