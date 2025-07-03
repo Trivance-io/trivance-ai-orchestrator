@@ -256,9 +256,9 @@ The setup automatically configures AI assistants for optimal development:
 - GraphQL Playground: http://localhost:3000/graphql
 
 ### QA Environment
-- Frontend: https://staging-admin.trivance.com
-- Backend API: https://apiqa.trivance.com
-- Auth Service: https://authqa.trivance.com
+- Frontend: https://staging-admin.example.com
+- Backend API: https://apiqa.example.com
+- Auth Service: https://authqa.example.com
 
 ## Troubleshooting
 
@@ -317,12 +317,11 @@ curl http://localhost:5173           # Frontend
 - [Complete Onboarding Guide](docs/ONBOARDING.md)
 - [Development Workflows](docs/WORKFLOWS.md)
 - [Troubleshooting Guide](docs/TROUBLESHOOTING.md)
-- [Architecture Overview](docs/ARCHITECTURE.md)
 
 ## Support
 
 - **Slack**: #dev-support for technical assistance
-- **Email**: dev-team@trivance.com for general inquiries
+- **Email**: Contact your development team for general inquiries
 - **Issues**: Create GitHub Issues in this repository for bugs or feature requests
 
 ## Contributing

@@ -6,7 +6,7 @@
       "frontend_url": "http://localhost:5173",
       "graphql_url": "http://localhost:3000/graphql",
       "database": {
-        "postgresql": "postgresql://trivance_user:trivance_password@localhost:5432/trivance_management",
+        "postgresql": "postgresql://username:password@localhost:5432/database_name",
         "mongodb": "mongodb://localhost:27017/trivance_auth"
       }
     },
