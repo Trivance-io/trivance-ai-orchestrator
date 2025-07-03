@@ -1,26 +1,64 @@
 {
   "environments": {
     "development": {
+      "auto_configure": true,
+      "description": "Configuración automática para desarrollo local - Sin intervención manual requerida",
       "api_base_url": "http://localhost:3000",
       "auth_api_url": "http://localhost:3001", 
       "frontend_url": "http://localhost:5173",
       "graphql_url": "http://localhost:3000/graphql",
       "database": {
-        "postgresql": "postgresql://username:password@localhost:5432/database_name",
-        "mongodb": "mongodb://localhost:27017/trivance_auth"
+        "postgresql": "postgresql://trivance_dev:trivance_dev_pass@localhost:5432/trivance_development",
+        "mongodb": "mongodb://localhost:27017/trivance_auth_development"
+      },
+      "jwt_config": {
+        "secret": "dev-jwt-secret-2024-local-only-not-for-production",
+        "expiration": "24h"
+      },
+      "defaults": {
+        "log_level": "debug",
+        "cors_origin": "http://localhost:5173,http://localhost:3000",
+        "graphql_playground": true,
+        "graphql_introspection": true
       }
     },
     "qa": {
-      "api_base_url": "https://apiqa.trivance.com",
-      "auth_api_url": "https://authqa.trivance.com",
-      "frontend_url": "https://staging-admin.trivance.com", 
-      "graphql_url": "https://apiqa.trivance.com/graphql"
+      "auto_configure": false,
+      "description": "Configuración manual requerida - Ver docs/DEPLOYMENT.md para instrucciones",
+      "required_manual_config": [
+        "URLs de QA reales",
+        "Credenciales de base de datos QA",
+        "JWT secrets específicos de QA",
+        "API keys de servicios externos"
+      ],
+      "api_base_url": "https://api-qa.YOUR-DOMAIN.com",
+      "auth_api_url": "https://auth-qa.YOUR-DOMAIN.com",
+      "frontend_url": "https://staging-admin.YOUR-DOMAIN.com", 
+      "graphql_url": "https://api-qa.YOUR-DOMAIN.com/graphql",
+      "database": {
+        "postgresql": "postgresql://QA_USER:QA_PASSWORD@qa-db.YOUR-DOMAIN.com:5432/trivance_qa",
+        "mongodb": "mongodb://QA_USER:QA_PASSWORD@qa-mongo.YOUR-DOMAIN.com:27017/trivance_auth_qa"
+      }
     },
     "production": {
-      "api_base_url": "https://api.trivance.com",
-      "auth_api_url": "https://auth.trivance.com",
-      "frontend_url": "https://admin.trivance.com",
-      "graphql_url": "https://api.trivance.com/graphql"
+      "auto_configure": false,
+      "description": "Configuración manual crítica - Requiere aprobación de seguridad",
+      "required_manual_config": [
+        "URLs de producción reales",
+        "Credenciales de base de datos producción",
+        "JWT secrets de producción (rotación obligatoria)",
+        "API keys de producción",
+        "Certificados SSL",
+        "Configuración de monitoreo"
+      ],
+      "api_base_url": "https://api.YOUR-DOMAIN.com",
+      "auth_api_url": "https://auth.YOUR-DOMAIN.com",
+      "frontend_url": "https://admin.YOUR-DOMAIN.com",
+      "graphql_url": "https://api.YOUR-DOMAIN.com/graphql",
+      "database": {
+        "postgresql": "postgresql://PROD_USER:PROD_PASSWORD@prod-db.YOUR-DOMAIN.com:5432/trivance_production",
+        "mongodb": "mongodb://PROD_USER:PROD_PASSWORD@prod-mongo.YOUR-DOMAIN.com:27017/trivance_auth_production"
+      }
     }
   },
   "required_tools": [

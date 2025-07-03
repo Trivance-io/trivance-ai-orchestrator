@@ -1,12 +1,14 @@
-# 🚀 Guía Completa de Onboarding - Trivance Platform
+# 🚀 Complete Onboarding Guide - Trivance Platform
 
-## 👋 Bienvenido al Equipo de Desarrollo
+## 👋 Welcome to the Development Team
 
-Esta guía te llevará paso a paso desde cero hasta tener un entorno de desarrollo completamente funcional para Trivance Platform.
+This guide will take you step by step from zero to having a fully functional development environment for Trivance Platform.
 
-## 📋 Prerequisitos
+**📚 For QA/Production deployment**: See [DEPLOYMENT.md](DEPLOYMENT.md)
 
-### Herramientas Requeridas
+## 📋 Prerequisites
+
+### Required Tools
 
 #### 1. Sistema Operativo
 - **macOS** 10.15+ (recomendado)
@@ -187,10 +189,10 @@ cp trivance-dev-config/.ai-config/context.md .github/copilot-instructions.md
 ```bash
 # Configurar Git con tus datos
 git config --global user.name "Tu Nombre"
-git config --global user.email "tu-email@trivance.com"
+git config --global user.email "tu-email@example.com"
 
 # Configurar SSH key (si no está configurada)
-ssh-keygen -t ed25519 -C "tu-email@trivance.com"
+ssh-keygen -t ed25519 -C "tu-email@example.com"
 cat ~/.ssh/id_ed25519.pub
 # Agregar la key a GitHub: Settings > SSH and GPG keys
 ```

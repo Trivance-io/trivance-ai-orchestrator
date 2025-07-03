@@ -239,9 +239,9 @@ Breve descripción de los cambios implementados.
 - **Trigger**: Merge a `main` branch (con aprobación)
 - **Propósito**: Ambiente de producción
 - **URLs**:
-  - Auth: https://auth.trivance.com
-  - API: https://api.trivance.com
-  - Frontend: https://admin.trivance.com
+  - Auth: https://auth.example.com
+  - API: https://api.example.com
+  - Frontend: https://admin.example.com
 
 ### Proceso de Release
 

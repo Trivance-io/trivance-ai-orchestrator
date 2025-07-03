@@ -4,6 +4,13 @@
 
 **Este archivo fue generado automáticamente por el script de setup de trivance-dev-config**
 
+## 🎯 CONFIGURACIÓN HÍBRIDA INTELIGENTE
+
+**✅ Desarrollo Local**: 100% automático - Todo funciona inmediatamente
+**⚠️ QA/Producción**: Configuración manual requerida por seguridad
+
+**Para deployment a QA/Producción ver**: `./trivance-dev-config/docs/DEPLOYMENT.md`
+
 Claude Code debe operar en español:
 - ✅ **Todas las respuestas en español**
 - ✅ **Documentación generada en español**
@@ -86,9 +93,9 @@ Claude Code debe entender que opera en un **workspace multi-repositorio** donde:
 - **Swagger Auth Docs**: http://localhost:3001/api-docs
 
 #### QA Environment
-- **Auth QA**: https://authqa.trivance.com
-- **API QA**: https://apiqa.trivance.com
-- **Frontend QA**: https://staging-admin.trivance.com
+- **Auth QA**: https://auth-qa.example.com
+- **API QA**: https://api-qa.example.com
+- **Frontend QA**: https://staging-admin.example.com
 
 ## 🚀 COMANDOS MAESTROS PARA CLAUDE CODE
 

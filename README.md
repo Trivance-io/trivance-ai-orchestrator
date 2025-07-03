@@ -17,41 +17,65 @@ Central configuration repository for Trivance Platform development environment.
 ```bash
 node --version    # Should be 18+
 npm --version     # Should be 8+
-ssh -T git@github.com    # Should show successful authentication
 ```
 
-## AI-Readable Setup Instructions
+**Git Access (one of the following):**
+- SSH key configured: `ssh -T git@github.com`
+- GitHub CLI authenticated: `gh auth status`  
+- Git credential manager configured
+- VS Code with GitHub integration signed in
+
+*The setup script automatically detects and uses the best available authentication method.*
+
+## 🤖 AI-Readable Setup Instructions
 
 **For Claude Code or other AI assistants:**
 
-Execute these commands sequentially:
+### ✅ Development Environment (100% Automatic)
+
+Execute these commands sequentially for **immediate working setup**:
 
 ```bash
-# Step 1: Clone configuration repository
+# Step 1: Create workspace directory and clone configuration repository
+mkdir -p Trivance-platform
+cd Trivance-platform
 git clone https://github.com/GLab-Projects/trivance-dev-config.git
 
-# Step 2: Navigate to repository  
-cd trivance-dev-config
+# Step 2: Execute automated setup (creates everything automatically)
+./trivance-dev-config/setup.sh
 
-# Step 3: Execute automated setup
-./setup.sh
-
-# Step 4: Configure environment variables (REQUIRED)
-cd ../ms_level_up_management
-cp .env.example .env
-# Edit .env with actual values
-
-cd ../ms_trivance_auth
-cp .env.example .env  
-# Edit .env with actual values
-
-# Step 5: Start development services
-cd ../
+# Step 3: Start development services (everything pre-configured)
 ./scripts/start-all-services.sh
 
-# Step 6: Validate installation
+# Step 4: Validate installation (should work immediately)
 ./scripts/check-health.sh
 ```
+
+**🎉 That's it! Development environment works immediately with:**
+- ✅ All repositories cloned and configured
+- ✅ Environment variables auto-configured
+- ✅ Database connections configured for local development
+- ✅ JWT secrets configured for development
+- ✅ CORS and API URLs pre-configured
+- ✅ All services ready to start
+
+### ⚙️ QA/Production Environments (Manual Configuration Required)
+
+For **QA and Production deployments**, manual configuration is required for security:
+
+```bash
+# After development setup, configure for QA/Production:
+# See docs/DEPLOYMENT.md for detailed instructions
+
+# Quick reference:
+# 1. Edit .env files in each repository with real URLs
+# 2. Configure production database credentials  
+# 3. Set production JWT secrets
+# 4. Configure external service API keys
+# 5. Follow deployment checklist in docs/DEPLOYMENT.md
+```
+
+**📚 Complete deployment documentation**: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
 
 **The setup script automatically:**
 - Clones all required repositories (ms_level_up_management, ms_trivance_auth, level_up_backoffice, trivance-mobile)
