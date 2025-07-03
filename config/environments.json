@@ -12,8 +12,9 @@
         "mongodb": "mongodb://localhost:27017/trivance_auth_development"
       },
       "jwt_config": {
-        "secret": "dev-jwt-secret-2024-local-only-not-for-production",
-        "expiration": "24h"
+        "secret": "DYNAMIC_GENERATION",
+        "expiration": "24h",
+        "note": "JWT secrets are now generated dynamically for each repository"
       },
       "defaults": {
         "log_level": "debug",

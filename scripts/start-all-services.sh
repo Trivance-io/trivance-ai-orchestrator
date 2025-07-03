@@ -6,29 +6,10 @@
 
 set -e
 
-# Colores para output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
-
-# Función para logging
-log() {
-    echo -e "${GREEN}[$(date +'%Y-%m-%d %H:%M:%S')]${NC} $1"
-}
-
-error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-}
-
-warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
-}
-
-info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
-}
+# Source common utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/utils/logging.sh"
+source "${SCRIPT_DIR}/utils/common.sh"
 
 # Verificar si estamos en el directorio correcto
 if [ ! -f "TrivancePlatform.code-workspace" ]; then
@@ -41,24 +22,15 @@ ENVIRONMENT=${1:-local}
 
 log "🚀 Iniciando servicios de Trivance Platform - Environment: $ENVIRONMENT"
 
-# Función para verificar si un puerto está en uso
+# Simplified port management using common utilities
 check_port() {
     local port=$1
-    if lsof -Pi :$port -sTCP:LISTEN -t >/dev/null ; then
-        return 0  # Puerto está en uso
-    else
-        return 1  # Puerto está libre
-    fi
+    ! check_port_available "$port"  # Invert logic: return 0 if in use
 }
 
-# Función para matar proceso en un puerto
 kill_port() {
     local port=$1
-    if check_port $port; then
-        warning "Puerto $port está en uso, terminando proceso..."
-        lsof -ti:$port | xargs kill -9 2>/dev/null || true
-        sleep 2
-    fi
+    kill_port_process "$port"
 }
 
 # Limpiar puertos si están en uso
@@ -76,9 +48,7 @@ check_dependencies() {
     local dir=$1
     if [ ! -d "$dir/node_modules" ]; then
         warning "Node modules no encontrados en $dir, instalando..."
-        cd $dir
-        npm install
-        cd ..
+        install_repo_dependencies_simple "$dir"
     fi
 }
 

@@ -5,34 +5,10 @@
 
 set -e
 
-# Colores para output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-PURPLE='\033[0;35m'
-NC='\033[0m' # No Color
-
-# Funciones de logging
-log() {
-    echo -e "${GREEN}[$(date +'%Y-%m-%d %H:%M:%S')]${NC} $1"
-}
-
-error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-}
-
-warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
-}
-
-info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
-}
-
-success() {
-    echo -e "${PURPLE}[SUCCESS]${NC} $1"
-}
+# Source common utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/utils/logging.sh"
+source "${SCRIPT_DIR}/utils/common.sh"
 
 # Banner
 echo -e "${BLUE}"
@@ -230,12 +206,7 @@ check_git_config() {
 
 check_port() {
     local port=$1
-    if command -v lsof &> /dev/null; then
-        lsof -Pi :$port -sTCP:LISTEN -t >/dev/null 2>&1
-    else
-        # Fallback usando netstat
-        netstat -ln | grep ":$port " >/dev/null 2>&1
-    fi
+    ! check_port_available "$port"  # Invert logic: return 0 if in use
 }
 
 check_services_running() {
