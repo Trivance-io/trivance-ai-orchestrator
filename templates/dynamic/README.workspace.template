@@ -1,0 +1,47 @@
+# Trivance Platform - Development Workspace
+
+Multi-repository workspace for Trivance Platform development.
+
+## Repository Structure
+
+{{REPOSITORY_LIST}}
+
+## Quick Start
+
+```bash
+# Start all services
+./scripts/start-all-services.sh
+
+# Check system health  
+./scripts/check-health.sh
+
+# Stop all services
+./scripts/stop-all-services.sh
+```
+
+## Development URLs
+
+{{DEVELOPMENT_URLS}}
+
+## Environment Configuration
+
+Each repository requires environment configuration:
+
+{{ENV_INSTRUCTIONS}}
+
+## Documentation
+
+- [AI Configuration](CLAUDE.md) - Claude Code setup and patterns
+- [Onboarding Guide](trivance-dev-config/docs/ONBOARDING.md) - Complete setup guide
+- [Development Workflows](trivance-dev-config/docs/WORKFLOWS.md) - Development processes
+- [Troubleshooting](trivance-dev-config/docs/TROUBLESHOOTING.md) - Common issues and solutions
+
+## Architecture
+
+{{ARCHITECTURE_OVERVIEW}}
+
+## Support
+
+- Slack: #dev-support
+- Email: dev-team@trivance.com
+- Issues: GitHub Issues in trivance-dev-config repository

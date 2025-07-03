@@ -1,0 +1,735 @@
+# 🤖 CLAUDE.md - Configuración Maestra Claude Code para Trivance Platform
+
+## 🌟 WORKSPACE AUTO-CONFIGURADO DESDE TRIVANCE-DEV-CONFIG
+
+**Este archivo fue generado automáticamente por el script de setup de trivance-dev-config**
+
+
+Claude Code debe operar en español:
+- ✅ **Todas las respuestas en español**
+- ✅ **Documentación generada en español**
+- ✅ **Comentarios de código en español**
+- ✅ **Mensajes de error en español**
+- ✅ **Commits sugeridos en español**
+- ✅ **Explicaciones técnicas en español**
+- ⚠️ **Código en inglés** (variables, funciones - estándar internacional)
+
+## 🏗️ WORKSPACE MULTI-REPO COMPLETO
+
+Este workspace fue configurado automáticamente desde el repositorio `trivance-dev-config`. 
+Estructura completa creada:
+
+```
+Trivance-platform/                    # 📁 Workspace principal auto-creado
+├── CLAUDE.md                         # ← ESTE ARCHIVO (auto-generado)
+├── README.md                         # Documentación principal (auto-generado)
+├── TrivancePlatform.code-workspace   # VS Code multi-repo (auto-configurado)
+├── .gitignore                        # Git ignore maestro (auto-creado)
+├── scripts/                          # Scripts de automatización (copiados)
+├── trivance-dev-config/              # 🔧 REPO DE CONFIGURACIONES (clonado)
+│   ├── .claude/                      # ⚙️ Configuración Claude Code
+│   │   ├── settings.json             # Settings principales Claude
+│   │   ├── context.md                # Contexto técnico detallado
+│   │   ├── commands.md               # Comandos personalizados
+│   │   ├── prompts.md                # Prompts predefinidos
+│   │   └── hooks.json                # Hooks de automatización
+│   ├── .ai-config/                   # 🤖 Configuración universal AI
+│   │   ├── settings.json             # Settings agnósticos
+│   │   ├── context.md                # Contexto para otras herramientas
+│   │   └── patterns.md               # Patrones de código
+│   ├── scripts/                      # 🚀 Scripts maestros
+│   │   ├── setup-workspace.sh        # Script de configuración completa
+│   │   ├── start-all-services.sh     # Iniciar todos los servicios
+│   │   ├── check-health.sh           # Verificar estado completo
+│   │   └── [otros scripts...]
+│   ├── templates/                    # 📄 Templates para auto-generación
+│   │   ├── CLAUDE.md.template        # Template de este archivo
+│   │   ├── README.md.template        # Template README principal
+│   │   └── [otros templates...]
+│   └── docs/                         # 📚 Documentación completa
+├── level_up_backoffice/              # 🌐 Frontend (React + Vite) - AUTO-CLONADO
+├── ms_level_up_management/           # 🚀 API Backend (NestJS + GraphQL) - AUTO-CLONADO
+├── ms_trivance_auth/                 # 🔐 Auth Service (NestJS) - AUTO-CLONADO
+└── trivance-mobile/                  # 📱 Mobile App (React Native) - AUTO-CLONADO
+```
+
+## 🎯 CONFIGURACIÓN CLAUDE CODE OPTIMIZADA
+
+### Archivos de Configuración Activos
+- **Settings Claude**: `./trivance-dev-config/.claude/settings.json`
+- **Contexto Técnico**: `./trivance-dev-config/.claude/context.md`
+- **Comandos Custom**: `./trivance-dev-config/.claude/commands.md`
+- **Prompts Predefinidos**: `./trivance-dev-config/.claude/prompts.md`
+- **Hooks Automatización**: `./trivance-dev-config/.claude/hooks.json`
+
+### Configuración Multi-Repo para Claude
+Claude Code debe entender que opera en un **workspace multi-repositorio** donde:
+
+1. **5 repositorios integrados** con dependencias entre ellos
+2. **Cada repo tiene tecnologías específicas** y propósitos únicos
+3. **Los cambios pueden ser cross-repo** y requieren coordinación
+4. **Patrones de código unificados** definidos en `.ai-config/patterns.md`
+5. **Flujo AI-FIRST** con español como idioma principal
+
+### URLs de Servicios Auto-Configurados
+
+#### Desarrollo Local (Auto-configurado)
+- **Auth Service**: http://localhost:3001
+- **Management API**: http://localhost:3000
+- **GraphQL Playground**: http://localhost:3000/graphql
+- **Frontend Admin**: http://localhost:5173
+- **Swagger Auth Docs**: http://localhost:3001/api-docs
+
+#### QA Environment
+- **Auth QA**: https://authqa.trivance.com
+- **API QA**: https://apiqa.trivance.com
+- **Frontend QA**: https://staging-admin.trivance.com
+
+## 🚀 COMANDOS MAESTROS PARA CLAUDE CODE
+
+### Comandos de Gestión del Workspace
+```bash
+# INICIAR TODO EL WORKSPACE (un comando para todo)
+./trivance-dev-config/scripts/start-all-services.sh
+
+# VERIFICAR ESTADO COMPLETO (health check integral)
+./trivance-dev-config/scripts/check-health.sh
+
+# DETENER TODOS LOS SERVICIOS
+./trivance-dev-config/scripts/stop-all-services.sh
+
+# ACTUALIZAR CONFIGURACIONES (sync desde repo config)
+./trivance-dev-config/scripts/sync-configs.sh
+
+# LINTING COMPLETO (todos los repos)
+./trivance-dev-config/scripts/lint-all.sh
+
+# TESTING COMPLETO (todos los repos)
+./trivance-dev-config/scripts/test-all.sh
+
+# BUILD COMPLETO (todos los repos)
+./trivance-dev-config/scripts/build-all.sh
+```
+
+### Comandos por Environment
+```bash
+# Desarrollo local
+./trivance-dev-config/scripts/start-all-services.sh local
+
+# Testing QA
+./trivance-dev-config/scripts/start-all-services.sh qa
+
+# QA con mobile
+./trivance-dev-config/scripts/start-all-services.sh qa mobile
+
+# Producción (validación)
+./trivance-dev-config/scripts/start-all-services.sh prod
+```
+
+### Comandos de Mantenimiento
+```bash
+# Actualizar todos los repositorios
+./trivance-dev-config/scripts/update-all-repos.sh
+
+# Limpiar todos los caches y builds
+./trivance-dev-config/scripts/clean-all.sh
+
+# Reinstalar todas las dependencias
+./trivance-dev-config/scripts/reinstall-all.sh
+
+# Backup de configuraciones locales
+./trivance-dev-config/scripts/backup-configs.sh
+```
+
+## 🏗️ ARQUITECTURA TÉCNICA COMPLETA
+
+### level_up_backoffice (Frontend Administrativo)
+```typescript
+// 🌐 Panel de administración web
+// Puerto: 5173 (development)
+// Tecnologías:
+- React 18+ con TypeScript 5.3+
+- Vite (bundler + dev server)
+- Redux Toolkit + RTK Query (estado global)
+- Apollo Client (GraphQL)
+- Tailwind CSS + Material-UI (diseño)
+- Vitest (testing)
+
+// Patrón de componentes estándar
+interface ComponentProps {
+  // Props siempre tipadas
+}
+
+export const ComponentName: React.FC<ComponentProps> = ({ prop1, prop2 }) => {
+  // 1. Hooks de React primero
+  // 2. Hooks de Redux/Apollo
+  // 3. Lógica del componente
+  // 4. Efectos y callbacks
+  // 5. Return JSX estructurado
+}
+
+// Separación de lógica: Component.tsx + ComponentLogic.ts
+```
+
+### ms_level_up_management (API Backend Principal)
+```typescript
+// 🚀 API principal del sistema
+// Puerto: 3000 (development)
+// Tecnologías:
+- NestJS con TypeScript
+- PostgreSQL + Prisma ORM
+- GraphQL con Apollo Server
+- REST endpoints complementarios
+- JWT para autenticación
+- Sentry para monitoreo
+
+// Patrón de módulos NestJS
+@Module({
+  imports: [TypeOrmModule.forFeature([Entity])],
+  controllers: [EntityController],
+  providers: [EntityService],
+  exports: [EntityService]
+})
+export class EntityModule {}
+
+// Implementaciones:
+- Patrón CQRS
+- Validación con class-validator
+- Transformación con class-transformer
+- Guards para autenticación/autorización
+```
+
+### ms_trivance_auth (Servicio de Autenticación)
+```typescript
+// 🔐 Servicio de autenticación dedicado
+// Puerto: 3001 (development)
+// Tecnologías:
+- NestJS con TypeScript
+- MongoDB + Mongoose
+- JWT + Refresh Tokens
+- bcrypt para password hashing
+- Passport para estrategias de auth
+
+// Patrones de seguridad:
+- Rate limiting configurado
+- Validación de entrada estricta
+- Sanitización de datos
+- Logging de eventos de seguridad
+- Multi-factor authentication (MFA)
+```
+
+### trivance-mobile (Aplicación Móvil)
+```typescript
+// 📱 App móvil nativa
+// Tecnologías:
+- React Native con Expo 53
+- TypeScript para tipado completo
+- React Navigation v6
+- Redux Toolkit + Redux Persist
+- Firebase Crashlytics
+- AsyncStorage para persistencia
+
+// Patrón de pantallas móviles
+interface ScreenProps {
+  navigation: NavigationProp<any>
+  route: RouteProp<any>
+}
+
+export const ScreenName: React.FC<ScreenProps> = ({ navigation, route }) => {
+  // 1. Hooks de Redux para estado global
+  // 2. Hooks de navegación
+  // 3. Lógica específica de la pantalla
+  // 4. Manejo de estados de carga/error
+  // 5. Return JSX optimizado para móvil
+}
+```
+
+## 🎨 PATRONES DE CÓDIGO UNIFICADOS
+
+### Convenciones de Naming (Estándar del Equipo)
+```typescript
+// ✅ Variables y funciones en inglés (estándar internacional)
+const userList = users.map(user => user.name);
+const handleUserClick = (userId: string) => { ... };
+
+// ✅ Comentarios siempre en español
+/**
+ * Obtiene la lista de usuarios activos de la organización
+ * @param organizationId - ID de la organización  
+ * @returns Lista de usuarios activos con información completa
+ */
+const getActiveUsers = async (organizationId: string): Promise<User[]> => {
+  // Filtrar solo usuarios con estado activo y validar permisos
+  return await userService.findActiveByOrganization(organizationId);
+}
+
+// ✅ Interfaces y tipos en inglés con documentación en español
+interface UserCreateRequest {
+  /** Nombre completo del usuario */
+  fullName: string;
+  /** Email único del usuario */
+  email: string;
+  /** ID de la organización a la que pertenece */
+  organizationId: string;
+}
+```
+
+### Estructura de Commits (Conventional Commits en Español)
+```bash
+# ✅ Usar conventional commits en español
+feat: agregar autenticación de dos factores para usuarios admin
+fix: corregir error en cálculo de comisiones de eventos
+docs: actualizar documentación de endpoints GraphQL
+style: mejorar espaciado y diseño en componente de navegación
+refactor: simplificar lógica de validación de formularios
+test: agregar tests unitarios para módulo de notificaciones
+perf: optimizar consultas de base de datos en reportes
+chore: actualizar dependencias de seguridad
+```
+
+### Manejo de Errores Unificado
+```typescript
+// Frontend (React) - Patrón estándar
+try {
+  const response = await api.getUsers();
+  setUsers(response.data);
+  toast.success('Usuarios cargados correctamente');
+} catch (error) {
+  console.error('Error al obtener usuarios:', error);
+  toast.error('No se pudieron cargar los usuarios. Intenta nuevamente.');
+  // Log estructurado para debugging
+  logger.error('getUsersError', { error: error.message, timestamp: new Date() });
+}
+
+// Backend (NestJS) - Exception Filter estándar
+@Catch(HttpException)
+export class HttpExceptionFilter implements ExceptionFilter {
+  catch(exception: HttpException, host: ArgumentsHost) {
+    const ctx = host.switchToHttp();
+    const response = ctx.getResponse();
+    const status = exception.getStatus();
+    
+    // Log del error en español con contexto
+    this.logger.error(`Error HTTP ${status}: ${exception.message}`, {
+      stack: exception.stack,
+      timestamp: new Date().toISOString(),
+      path: ctx.getRequest().url
+    });
+    
+    response.status(status).json({
+      statusCode: status,
+      timestamp: new Date().toISOString(),
+      message: exception.message || 'Error interno del servidor',
+      path: ctx.getRequest().url
+    });
+  }
+}
+```
+
+## 🔐 CONFIGURACIÓN DE VARIABLES DE ENTORNO
+
+### ms_level_up_management (.env) - AUTO-GENERADO
+```bash
+# Configuración de la aplicación
+NODE_ENV=development
+PORT=3000
+APP_NAME=Trivance Management API
+APP_VERSION=1.0.0
+
+# Base de datos PostgreSQL
+DATABASE_URL=postgresql://trivance_user:trivance_password@localhost:5432/trivance_management
+
+# Autenticación y seguridad
+JWT_SECRET=REEMPLAZAR_CON_SECRET_SUPER_SEGURO
+JWT_EXPIRATION_TIME=3600
+REFRESH_TOKEN_EXPIRATION_TIME=604800
+
+# AWS S3 para almacenamiento de archivos
+AWS_ACCESS_KEY_ID=REEMPLAZAR_CON_AWS_KEY
+AWS_SECRET_ACCESS_KEY=REEMPLAZAR_CON_AWS_SECRET
+AWS_REGION=us-east-1
+AWS_S3_BUCKET=trivance-uploads-dev
+
+# Monitoreo y logging
+SENTRY_DSN=REEMPLAZAR_CON_SENTRY_DSN
+LOG_LEVEL=debug
+
+# GraphQL configuración
+GRAPHQL_PLAYGROUND=true
+GRAPHQL_DEBUG=true
+GRAPHQL_INTROSPECTION=true
+
+# Rate limiting
+RATE_LIMIT_TTL=60
+RATE_LIMIT_LIMIT=100
+
+# CORS
+CORS_ORIGIN=http://localhost:5173,http://localhost:3000
+```
+
+### ms_trivance_auth (.env) - AUTO-GENERADO
+```bash
+# Configuración de la aplicación
+NODE_ENV=development
+PORT=3001
+APP_NAME=Trivance Auth Service
+APP_VERSION=1.0.0
+
+# Base de datos MongoDB
+DATABASE_URL=mongodb://localhost:27017/trivance_auth
+
+# Autenticación y tokens
+JWT_SECRET=REEMPLAZAR_CON_SECRET_SUPER_SEGURO
+JWT_EXPIRATION_TIME=3600
+REFRESH_TOKEN_EXPIRATION_TIME=604800
+
+# Encriptación de passwords
+BCRYPT_ROUNDS=12
+
+# Rate limiting específico para auth
+RATE_LIMIT_TTL=60
+RATE_LIMIT_LIMIT=50
+
+# Configuración de sesiones
+SESSION_SECRET=REEMPLAZAR_CON_SESSION_SECRET
+SESSION_EXPIRATION=86400
+
+# OAuth providers (opcional)
+GOOGLE_CLIENT_ID=REEMPLAZAR_SI_SE_USA_GOOGLE_AUTH
+GOOGLE_CLIENT_SECRET=REEMPLAZAR_SI_SE_USA_GOOGLE_AUTH
+
+# Monitoring
+SENTRY_DSN=REEMPLAZAR_CON_SENTRY_DSN
+```
+
+### level_up_backoffice (.env.local) - AUTO-GENERADO
+```bash
+# URLs de APIs backend
+VITE_API_URL=http://localhost:3000
+VITE_AUTH_API_URL=http://localhost:3001
+VITE_GRAPHQL_URL=http://localhost:3000/graphql
+
+# Configuración de la aplicación
+VITE_APP_NAME=Trivance Admin Panel
+VITE_APP_VERSION=1.0.0
+VITE_APP_DESCRIPTION=Panel administrativo de Trivance Platform
+
+# Monitoreo frontend
+VITE_SENTRY_DSN=REEMPLAZAR_CON_SENTRY_FRONTEND_DSN
+
+# APIs externas
+VITE_GOOGLE_MAPS_API_KEY=REEMPLAZAR_SI_SE_USA_GOOGLE_MAPS
+
+# Configuración de desarrollo
+VITE_DEBUG_MODE=true
+VITE_MOCK_API=false
+```
+
+### trivance-mobile (.env) - AUTO-GENERADO
+```bash
+# URLs de APIs backend
+EXPO_PUBLIC_API_URL=http://localhost:3000
+EXPO_PUBLIC_AUTH_API_URL=http://localhost:3001
+EXPO_PUBLIC_GRAPHQL_URL=http://localhost:3000/graphql
+
+# Configuración del environment
+EXPO_PUBLIC_ENVIRONMENT=development
+EXPO_PUBLIC_APP_VERSION=1.0.0
+
+# Firebase para notificaciones push
+EXPO_PUBLIC_FIREBASE_CONFIG=REEMPLAZAR_CON_FIREBASE_CONFIG_JSON
+
+# Configuración específica de desarrollo
+EXPO_PUBLIC_DEBUG_MODE=true
+EXPO_PUBLIC_ENABLE_CRASHLYTICS=true
+
+# APIs externas para mobile
+EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=REEMPLAZAR_SI_SE_USA_GOOGLE_MAPS
+```
+
+## 🧪 TESTING Y CALIDAD AUTOMATIZADA
+
+### Comandos de Testing Integrados
+```bash
+# Testing completo de todo el workspace
+./trivance-dev-config/scripts/test-all.sh
+
+# Testing por repositorio específico
+./trivance-dev-config/scripts/test-repo.sh level_up_backoffice
+./trivance-dev-config/scripts/test-repo.sh ms_level_up_management
+./trivance-dev-config/scripts/test-repo.sh ms_trivance_auth
+./trivance-dev-config/scripts/test-repo.sh trivance-mobile
+
+# Testing con cobertura completa
+./trivance-dev-config/scripts/test-coverage-all.sh
+
+# Testing end-to-end completo
+./trivance-dev-config/scripts/test-e2e-all.sh
+```
+
+### Estándares de Calidad Configurados Automáticamente
+```typescript
+// Configuración automática aplicada a todos los repos:
+// ✅ TypeScript strict mode activado
+// ✅ ESLint + Prettier configurados uniformemente
+// ✅ Pre-commit hooks instalados automáticamente
+// ✅ Husky configurado para validaciones
+// ✅ Jest configurado con cobertura mínima 80%
+// ✅ SonarQube rules aplicadas
+
+// Ejemplo de test estándar (comentarios en español)
+describe('UserService - Gestión de Usuarios', () => {
+  describe('createUser - Creación de Usuario', () => {
+    it('debería crear un usuario correctamente con datos válidos', async () => {
+      // Preparar: datos de prueba válidos
+      const userData: CreateUserDto = {
+        fullName: 'Juan Pérez González',
+        email: 'juan.perez@trivance.com',
+        organizationId: 'org-123',
+        role: 'admin'
+      };
+
+      // Ejecutar: llamar al servicio
+      const result = await userService.createUser(userData);
+
+      // Verificar: validar resultado esperado
+      expect(result).toBeDefined();
+      expect(result.id).toBeTruthy();
+      expect(result.fullName).toBe(userData.fullName);
+      expect(result.email).toBe(userData.email);
+      expect(result.isActive).toBe(true);
+      expect(result.createdAt).toBeInstanceOf(Date);
+    });
+
+    it('debería fallar al crear usuario con email duplicado', async () => {
+      // Preparar: usuario que ya existe
+      const existingUser = await userService.createUser({
+        fullName: 'Usuario Existente',
+        email: 'existente@trivance.com',
+        organizationId: 'org-123'
+      });
+
+      // Ejecutar y Verificar: debe lanzar excepción
+      await expect(
+        userService.createUser({
+          fullName: 'Otro Usuario',
+          email: 'existente@trivance.com', // Email duplicado
+          organizationId: 'org-123'
+        })
+      ).rejects.toThrow('El email ya está registrado en el sistema');
+    });
+  });
+});
+```
+
+## 🔄 WORKFLOWS DE DESARROLLO AUTOMATIZADOS
+
+### Flujo de Nueva Feature (Guiado por IA)
+```typescript
+// 1. ANÁLISIS: Claude Code ayuda a definir requisitos
+// Comando sugerido: "Claude, analiza los requisitos para [feature]"
+
+// 2. DISEÑO: Generar interfaces y esquemas automáticamente
+// Claude genera interfaces TypeScript basadas en patrones existentes
+
+// 3. BACKEND: Crear endpoints siguiendo patrones establecidos
+// Claude sugiere estructura de módulos NestJS completa
+
+// 4. FRONTEND: Implementar UI con componentes reutilizables
+// Claude genera componentes React siguiendo design system
+
+// 5. MOBILE: Adaptar funcionalidad para app móvil
+// Claude adapta componentes para React Native
+
+// 6. TESTING: Generar tests automáticamente
+// Claude crea tests unitarios y de integración
+
+// 7. DOCUMENTACIÓN: Actualizar docs automáticamente
+// Claude actualiza documentación técnica
+```
+
+### Flujo de Bug Fix (Asistido por IA)
+```typescript
+// 1. ANÁLISIS: Claude identifica causa raíz cross-repo
+// 2. REPRODUCCIÓN: Claude genera test que reproduce el bug
+// 3. FIX: Claude implementa solución siguiendo patrones
+// 4. VALIDACIÓN: Claude verifica no rompe funcionalidad existente
+// 5. DEPLOY: Claude coordina deploy cross-repo si necesario
+```
+
+## 🚨 TROUBLESHOOTING AUTOMATIZADO
+
+### Comandos de Diagnóstico Integrados
+```bash
+# Diagnóstico completo del workspace
+./trivance-dev-config/scripts/diagnose-workspace.sh
+
+# Fix automático de problemas comunes
+./trivance-dev-config/scripts/fix-common-issues.sh
+
+# Reset completo del workspace (emergencia)
+./trivance-dev-config/scripts/reset-workspace.sh
+
+# Verificar y reparar dependencias
+./trivance-dev-config/scripts/fix-dependencies.sh
+```
+
+### Soluciones a Problemas Comunes
+```bash
+# 🔴 MongoDB no conecta
+./trivance-dev-config/scripts/fix-mongodb.sh
+
+# 🔴 PostgreSQL no conecta  
+./trivance-dev-config/scripts/fix-postgresql.sh
+
+# 🔴 Puertos ocupados
+./trivance-dev-config/scripts/fix-ports.sh
+
+# 🔴 Node modules corruptos
+./trivance-dev-config/scripts/fix-node-modules.sh
+
+# 🔴 Git issues
+./trivance-dev-config/scripts/fix-git-issues.sh
+
+# 🔴 Permisos incorrectos
+./trivance-dev-config/scripts/fix-permissions.sh
+```
+
+## 🔧 INTEGRACIONES EXTERNAS CONFIGURADAS
+
+### APIs de Terceros Pre-configuradas
+```typescript
+// ✅ AWS S3 - Almacenamiento configurado automáticamente
+// ✅ Firebase - Push notifications y crashlytics
+// ✅ Brevo - Email marketing y transaccional
+// ✅ ePayco - Gateway de pagos Colombia
+// ✅ Wompi - Gateway de pagos alternativo
+// ✅ Google Maps - Geolocalización y mapas
+// ✅ Sentry - Monitoreo de errores y performance
+// ✅ MongoDB Atlas - Base de datos cloud (opcional)
+// ✅ PostgreSQL Cloud - Base de datos cloud (opcional)
+
+// Configuración de webhooks automática
+@Post('webhooks/:provider')
+async handleWebhook(
+  @Param('provider') provider: string,
+  @Body() payload: any,
+  @Headers('signature') signature: string
+) {
+  // Verificación automática de signatures
+  const isValid = this.webhookService.verifySignature(provider, payload, signature);
+  
+  if (!isValid) {
+    this.logger.warn(`Webhook inválido recibido de ${provider}`, { payload });
+    throw new UnauthorizedException('Firma de webhook inválida');
+  }
+
+  // Procesamiento automático por proveedor
+  await this.webhookService.processWebhook(provider, payload);
+  
+  return { 
+    status: 'success', 
+    message: `Webhook de ${provider} procesado correctamente`,
+    timestamp: new Date().toISOString()
+  };
+}
+```
+
+## 📊 MÉTRICAS Y MONITOREO AUTOMÁTICO
+
+### KPIs Configurados Automáticamente
+```typescript
+// 🎯 Performance targets configurados:
+// - API Response Time: < 200ms promedio
+// - Frontend Bundle Size: < 1MB gzipped  
+// - Mobile App Size: < 50MB
+// - Test Coverage: > 80% en módulos críticos
+// - Error Rate: < 0.1% en producción
+// - Uptime: > 99.9% SLA
+
+// Métricas automáticas con Sentry
+import * as Sentry from '@sentry/node';
+
+// Auto-configurado en todos los repos
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  environment: process.env.NODE_ENV,
+  tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+  integrations: [
+    new Sentry.Integrations.Http({ tracing: true }),
+    new Sentry.Integrations.Express({ app }),
+  ]
+});
+
+// Logging estructurado automático
+this.logger.log({
+  level: 'info',
+  message: 'Operación completada exitosamente',
+  service: 'ms_level_up_management',
+  operation: 'createUser',
+  userId: user.id,
+  organizationId: user.organizationId,
+  duration: performance.now() - startTime,
+  timestamp: new Date().toISOString()
+});
+```
+
+## 🆘 SOPORTE Y DOCUMENTACIÓN INTEGRADA
+
+### Documentación Auto-Actualizada
+```bash
+# Toda la documentación se mantiene sincronizada automáticamente:
+# ✅ trivance-dev-config/docs/ONBOARDING.md - Guía completa nuevos devs
+# ✅ trivance-dev-config/docs/WORKFLOWS.md - Procesos y metodologías  
+# ✅ trivance-dev-config/docs/TROUBLESHOOTING.md - Solución problemas
+# ✅ trivance-dev-config/docs/ARCHITECTURE.md - Arquitectura detallada
+# ✅ Cada repo/docs/ - Documentación específica por repositorio
+
+# Comandos para acceder a documentación
+./trivance-dev-config/scripts/open-docs.sh           # Abrir docs en navegador
+./trivance-dev-config/scripts/generate-docs.sh      # Regenerar documentación
+./trivance-dev-config/scripts/validate-docs.sh      # Validar links y contenido
+```
+
+### Contactos y Escalación Automática
+```typescript
+// Sistema de soporte integrado:
+// 📞 Nivel 1: Documentación en trivance-dev-config/docs/
+// 📞 Nivel 2: Slack #dev-support (auto-notificación)
+// 📞 Nivel 3: GitHub Issues automático con contexto
+// 📞 Nivel 4: Escalación a tech lead con métricas
+
+// Auto-reporte de errores críticos
+process.on('uncaughtException', (error) => {
+  logger.error('Error crítico no capturado', {
+    error: error.message,
+    stack: error.stack,
+    timestamp: new Date().toISOString(),
+    service: process.env.APP_NAME,
+    environment: process.env.NODE_ENV
+  });
+  
+  // Auto-notificación a Slack si es crítico
+  if (process.env.NODE_ENV === 'production') {
+    slackService.sendCriticalAlert({
+      message: `🚨 Error crítico en ${process.env.APP_NAME}`,
+      error: error.message,
+      environment: process.env.NODE_ENV
+    });
+  }
+});
+```
+
+---
+
+## 🎯 CONFIGURACIÓN AUTO-SINCRONIZADA
+
+**Este archivo CLAUDE.md se auto-actualiza desde `trivance-dev-config`**
+
+- 🔄 **Auto-sincronización**: Cada pull del repo config actualiza este archivo
+- 🤖 **Generado automáticamente**: Por script `setup.sh`
+- 📅 **Última actualización**: {{TIMESTAMP_PLACEHOLDER}}
+- 🌟 **Optimizado para**: Claude Code en español con workspace multi-repo
+- 🔧 **Fuente de verdad**: `trivance-dev-config/templates/CLAUDE.md.template`
+
+**Para actualizar este archivo, edita el template en `trivance-dev-config/templates/CLAUDE.md.template` y ejecuta `./trivance-dev-config/scripts/sync-configs.sh`**

@@ -1,0 +1,43 @@
+{
+  "organization": "GLab-Projects",
+  "workspace_name": "Trivance-platform",
+  "repositories": [
+    {
+      "name": "ms_level_up_management",
+      "url": "git@github.com:GLab-Projects/ms_level_up_management.git",
+      "type": "backend",
+      "technology": "nestjs",
+      "port": 3000,
+      "database": "postgresql",
+      "has_env": true,
+      "startup_command": "npm run start:dev"
+    },
+    {
+      "name": "ms_trivance_auth",
+      "url": "git@github.com:GLab-Projects/ms_trivance_auth.git", 
+      "type": "backend",
+      "technology": "nestjs",
+      "port": 3001,
+      "database": "mongodb",
+      "has_env": true,
+      "startup_command": "npm run start:dev"
+    },
+    {
+      "name": "level_up_backoffice",
+      "url": "git@github.com:GLab-Projects/level_up_backoffice.git",
+      "type": "frontend", 
+      "technology": "react-vite",
+      "port": 5173,
+      "has_env": true,
+      "startup_command": "npm run dev"
+    },
+    {
+      "name": "trivance-mobile",
+      "url": "git@github.com:GLab-Projects/trivance-mobile.git",
+      "type": "mobile",
+      "technology": "react-native-expo",
+      "has_env": true,
+      "startup_command": "npm run start"
+    }
+  ]
+}

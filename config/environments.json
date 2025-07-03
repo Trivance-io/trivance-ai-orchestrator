@@ -1,0 +1,53 @@
+{
+  "environments": {
+    "development": {
+      "api_base_url": "http://localhost:3000",
+      "auth_api_url": "http://localhost:3001", 
+      "frontend_url": "http://localhost:5173",
+      "graphql_url": "http://localhost:3000/graphql",
+      "database": {
+        "postgresql": "postgresql://trivance_user:trivance_password@localhost:5432/trivance_management",
+        "mongodb": "mongodb://localhost:27017/trivance_auth"
+      }
+    },
+    "qa": {
+      "api_base_url": "https://apiqa.trivance.com",
+      "auth_api_url": "https://authqa.trivance.com",
+      "frontend_url": "https://staging-admin.trivance.com", 
+      "graphql_url": "https://apiqa.trivance.com/graphql"
+    },
+    "production": {
+      "api_base_url": "https://api.trivance.com",
+      "auth_api_url": "https://auth.trivance.com",
+      "frontend_url": "https://admin.trivance.com",
+      "graphql_url": "https://api.trivance.com/graphql"
+    }
+  },
+  "required_tools": [
+    {
+      "name": "node",
+      "min_version": "18.0.0",
+      "check_command": "node --version"
+    },
+    {
+      "name": "npm", 
+      "min_version": "8.0.0",
+      "check_command": "npm --version"
+    },
+    {
+      "name": "git",
+      "min_version": "2.0.0", 
+      "check_command": "git --version"
+    }
+  ],
+  "optional_tools": [
+    {
+      "name": "postgresql",
+      "check_command": "psql --version"
+    },
+    {
+      "name": "mongodb",
+      "check_command": "mongod --version"
+    }
+  ]
+}
