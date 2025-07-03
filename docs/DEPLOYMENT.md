@@ -144,7 +144,7 @@ VITE_GRAPHQL_URL=https://api-qa.trivance.com/graphql
 
 ```bash
 # 1. Build para QA
-npm run build:qa
+npm run build
 
 # 2. Deploy (según estrategia de la empresa)
 # Opción A: Docker
@@ -273,7 +273,7 @@ kubectl patch service trivance-api -p '{"spec":{"selector":{"version":"green"}}}
 
 # 3. Post-deployment validation
 npm run test:prod:full
-./scripts/validate-production.sh
+# Validate production endpoints manually or implement custom validation
 
 # 4. Monitoring
 # Verificar métricas por 2 horas mínimo
