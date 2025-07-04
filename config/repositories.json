@@ -1,10 +1,12 @@
 {
-  "organization": "GLab-Projects",
+  "organization": "gracialab",
   "workspace_name": "Trivance-platform",
+  "default_branch": "experiments",
   "repositories": [
     {
       "name": "ms_level_up_management",
-      "url": "git@github.com:GLab-Projects/ms_level_up_management.git",
+      "url": "git@github.com:gracialab/ms_level_up_management.git",
+      "branch": "experiments",
       "type": "backend",
       "technology": "nestjs",
       "port": 3000,
@@ -14,7 +16,8 @@
     },
     {
       "name": "ms_trivance_auth",
-      "url": "git@github.com:GLab-Projects/ms_trivance_auth.git", 
+      "url": "git@github.com:gracialab/ms_trivance_auth.git",
+      "branch": "experiments", 
       "type": "backend",
       "technology": "nestjs",
       "port": 3001,
@@ -24,7 +27,8 @@
     },
     {
       "name": "level_up_backoffice",
-      "url": "git@github.com:GLab-Projects/level_up_backoffice.git",
+      "url": "git@github.com:gracialab/level_up_backoffice.git",
+      "branch": "experiments",
       "type": "frontend", 
       "technology": "react-vite",
       "port": 5173,
@@ -33,7 +37,8 @@
     },
     {
       "name": "trivance-mobile",
-      "url": "git@github.com:GLab-Projects/trivance-mobile.git",
+      "url": "git@github.com:gracialab/trivance-mobile.git",
+      "branch": "experiments",
       "type": "mobile",
       "technology": "react-native-expo",
       "has_env": true,

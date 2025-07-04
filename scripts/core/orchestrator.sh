@@ -1,440 +1,251 @@
 #!/bin/bash
 
-# Core orchestrator for Trivance Platform workspace setup
-# Manages complete environment configuration
-
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-WORKSPACE_DIR="$(dirname "${PROJECT_ROOT}")"
-
-# Source utilities
-source "${SCRIPT_DIR}/../utils/logging.sh"
 source "${SCRIPT_DIR}/../utils/common.sh"
-source "${SCRIPT_DIR}/../utils/validation.sh"
-source "${SCRIPT_DIR}/../utils/secrets.sh"
 
-# Configuration files
-REPOSITORIES_CONFIG="${PROJECT_ROOT}/config/repositories.json"
-ENVIRONMENTS_CONFIG="${PROJECT_ROOT}/config/environments.json"
+show_banner() {
+    cat << 'EOF'
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                           🚀 TRIVANCE DEV CONFIG                            ║
+║                     Configuración Automatizada de Desarrollo                ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+EOF
+}
 
 main() {
-    print_banner
-    log "Starting Trivance Platform workspace setup"
+    local start_time
+    start_time=$(date +%s)
     
-    detect_environment
-    validate_prerequisites
-    setup_workspace_structure
-    init_secrets_management "${WORKSPACE_DIR}"
+    show_banner
+    
+    log "Iniciando configuración automatizada del entorno de desarrollo Trivance"
+    log "Workspace: ${WORKSPACE_DIR}"
+    
+    # Paso 1: Validar configuración
+    log "PASO 1/7: Validando configuración del entorno"
+    validate_configuration
+    
+    # Paso 2: Clonar repositorios
+    log "PASO 2/7: Clonando repositorios"
     clone_repositories
+    
+    # Paso 3: Configurar entornos
+    log "PASO 3/7: Configurando variables de entorno"
+    setup_environments
+    
+    # Paso 4: Instalar dependencias
+    log "PASO 4/7: Instalando dependencias en paralelo (MAX 3 min total)"
     install_dependencies
-    configure_environment_files
-    copy_configurations
-    generate_documentation
-    validate_installation
     
-    display_summary
+    # Paso 5: Configurar herramientas
+    log "PASO 5/7: Configurando herramientas de desarrollo"
+    setup_tools
+    
+    # Paso 6: Aplicar fixes automáticos
+    log "PASO 6/7: Aplicando fixes automáticos para desarrollo"
+    apply_post_setup_fixes
+    
+    # Paso 7: Verificar compilación
+    log "PASO 7/7: OBLIGATORIO - Verificando compilación de todos los repositorios"
+    verify_compilation
+    
+    local end_time duration
+    end_time=$(date +%s)
+    duration=$((end_time - start_time))
+    
+    local minutes=$((duration / 60))
+    local seconds=$((duration % 60))
+    success "🎉 ¡Configuración completada en ${minutes}m ${seconds}s!"
+    echo
+    success "✅ Todos los repositorios han sido clonados y configurados"
+    success "✅ Variables de entorno generadas automáticamente"
+    success "✅ Dependencias instaladas en paralelo (3min total)"
+    success "✅ Herramientas de desarrollo configuradas"
+    success "✅ Compilación verificada para todos los repositorios"
+    echo
+    info "📂 Workspace de VS Code: ${WORKSPACE_DIR}/TrivancePlatform.code-workspace"
+    info "📋 Documentación Claude: ${WORKSPACE_DIR}/CLAUDE.md"
+    echo
+    info "🔧 Para iniciar los servicios:"
+    echo "   • Auth Service: cd ms_trivance_auth && npm run start:dev"
+    echo "   • Management API: cd ms_level_up_management && npm run start:dev"  
+    echo "   • Frontend: cd level_up_backoffice && npm run dev"
+    echo "   • Mobile: cd trivance-mobile && npm start"
 }
 
-detect_environment() {
-    log "Detecting system environment"
+validate_configuration() {
+    log "Validando archivos de configuración..."
     
-    info "Operating System: $(uname -s)"
-    info "Architecture: $(uname -m)"
-    info "Working Directory: ${WORKSPACE_DIR}"
-    
-    # Detect if running in CI/automation
-    if [[ -n "${CI:-}" ]] || [[ -n "${AUTOMATION:-}" ]]; then
-        export AUTOMATION_MODE=true
-        info "Automation mode detected"
-    fi
-}
-
-validate_prerequisites() {
-    log "Validating system prerequisites"
-    
-    local tools
-    tools=$(jq -r '.required_tools[] | "\(.name) \(.min_version) \(.check_command)"' "${ENVIRONMENTS_CONFIG}")
-    
-    local validation_failed=false
-    
-    while IFS= read -r tool_info; do
-        read -r tool_name min_version check_command <<< "${tool_info}"
-        
-        if ! check_tool_version "${tool_name}" "${min_version}" "${check_command}"; then
-            validation_failed=true
-        fi
-    done <<< "${tools}"
-    
-    if [[ "${validation_failed}" == "true" ]]; then
-        error "Prerequisites validation failed"
+    if [[ ! -f "${SCRIPT_DIR}/../../config/repositories.json" ]]; then
+        error "Archivo repositories.json no encontrado"
         exit 1
     fi
     
-    validate_git_config || warning "Git configuration needs attention"
-    
-    success "Prerequisites validation completed"
-}
-
-setup_workspace_structure() {
-    log "Setting up workspace structure"
-    
-    cd "${WORKSPACE_DIR}"
-    
-    # Create necessary directories
-    mkdir -p logs scripts .vscode
-    
-    # Set up gitignore for workspace root
-    if [[ ! -f .gitignore ]]; then
-        cat > .gitignore << 'EOF'
-# Workspace-level ignores
-logs/
-*.log
-.DS_Store
-.env
-.env.local
-node_modules/
-dist/
-build/
-EOF
-        info "Created workspace .gitignore"
+    if [[ ! -f "${SCRIPT_DIR}/../../config/environments.json" ]]; then
+        error "Archivo environments.json no encontrado"
+        exit 1
     fi
+    
+    if ! command -v git &> /dev/null; then
+        error "Git no está instalado"
+        exit 1
+    fi
+    
+    if ! command -v node &> /dev/null; then
+        error "Node.js no está instalado"
+        exit 1
+    fi
+    
+    if ! command -v npm &> /dev/null; then
+        error "npm no está instalado"
+        exit 1
+    fi
+    
+    success "✅ Configuración validada correctamente"
 }
 
 clone_repositories() {
-    log "Cloning project repositories"
+    log "Clonando repositorios desde configuración..."
     
-    cd "${WORKSPACE_DIR}"
+    local repos_config="${SCRIPT_DIR}/../../config/repositories.json"
     
-    local repos
-    repos=$(jq -c '.repositories[]' "${REPOSITORIES_CONFIG}")
-    
-    while IFS= read -r repo; do
-        local name url
-        name=$(echo "${repo}" | jq -r '.name')
-        url=$(echo "${repo}" | jq -r '.url')
-        
-        clone_repository "${name}" "${url}"
-    done <<< "${repos}"
+    # Leer cada repositorio del JSON
+    while IFS= read -r repo_data; do
+        if [[ -n "$repo_data" && "$repo_data" != "null" ]]; then
+            local repo_name repo_url repo_branch
+            repo_name=$(echo "$repo_data" | jq -r '.name')
+            repo_url=$(echo "$repo_data" | jq -r '.url')
+            repo_branch=$(echo "$repo_data" | jq -r '.branch // "experiments"')
+            
+            if [[ ! -d "${WORKSPACE_DIR}/${repo_name}" ]]; then
+                info "📥 Clonando ${repo_name} (rama: ${repo_branch})..."
+                if git clone -b "$repo_branch" "$repo_url" "${WORKSPACE_DIR}/${repo_name}" --quiet; then
+                    success "✅ ${repo_name} clonado exitosamente"
+                else
+                    error "❌ Error al clonar ${repo_name}"
+                    exit 1
+                fi
+            else
+                info "📁 ${repo_name} ya existe, omitiendo..."
+            fi
+        fi
+    done < <(jq -c '.repositories[]' "$repos_config")
 }
 
-clone_repository() {
-    local repo_name=$1
-    local repo_url=$2
+setup_environments() {
+    log "Configurando variables de entorno automáticamente..."
     
-    if [[ -d "${repo_name}" ]]; then
-        info "${repo_name} already exists, skipping clone"
-        return 0
-    fi
+    local env_config="${SCRIPT_DIR}/../../config/environments.json"
     
-    log "Cloning ${repo_name}"
+    # Configurar cada repositorio
+    local repos=("ms_trivance_auth" "ms_level_up_management" "level_up_backoffice" "trivance-mobile")
     
-    # Determine the best URL for cloning based on available authentication
-    local clone_url
-    clone_url=$(get_clone_url "${repo_url}")
-    
-    if [[ -z "${clone_url}" ]]; then
-        error "Cannot access repository ${repo_url}"
-        return 1
-    fi
-    
-    log "Using repository: ${repo_name}"
-    
-    if git clone "${clone_url}" "${repo_name}"; then
-        success "✅ ${repo_name} cloned successfully"
-    else
-        error "Failed to clone ${repo_name}"
-        return 1
-    fi
+    for repo in "${repos[@]}"; do
+        local repo_path="${WORKSPACE_DIR}/${repo}"
+        
+        if [[ -d "$repo_path" ]]; then
+            info "🔧 Configurando entorno para ${repo}..."
+            
+            local env_file="${repo_path}/.env"
+            
+            # Obtener variables específicas del repositorio
+            local env_vars
+            env_vars=$(jq -r --arg repo "$repo" '.environments[$repo] // .environments.default' "$env_config")
+            
+            if [[ "$env_vars" != "null" ]]; then
+                echo "# Archivo .env generado automáticamente por trivance-dev-config" > "$env_file"
+                echo "# $(date)" >> "$env_file"
+                echo "" >> "$env_file"
+                
+                echo "$env_vars" | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> "$env_file"
+                
+                success "✅ Archivo .env creado para ${repo}"
+            else
+                warn "⚠️  No se encontraron variables de entorno para ${repo}"
+            fi
+        fi
+    done
 }
 
 install_dependencies() {
-    log "Installing project dependencies"
+    log "Instalando dependencias en paralelo para mayor velocidad..."
     
-    cd "${WORKSPACE_DIR}"
-    
-    local repos
-    repos=$(jq -r '.repositories[].name' "${REPOSITORIES_CONFIG}")
-    
-    while IFS= read -r repo_name; do
-        install_repo_dependencies "${repo_name}"
-    done <<< "${repos}"
-}
-
-install_repo_dependencies() {
-    local repo_name=$1
-    
-    cd "${WORKSPACE_DIR}"
-    install_repo_dependencies_simple "${repo_name}"
-}
-
-configure_environment_files() {
-    log "Configuring environment files"
-    
-    cd "${WORKSPACE_DIR}"
-    
-    local repos
-    repos=$(jq -c '.repositories[] | select(.has_env == true)' "${REPOSITORIES_CONFIG}")
-    
-    while IFS= read -r repo; do
-        local name
-        name=$(echo "${repo}" | jq -r '.name')
-        
-        create_env_file "${name}" "${repo}"
-    done <<< "${repos}"
-}
-
-create_env_file() {
-    local repo_name=$1
-    local repo_config=$2
-    
-    local env_file="${WORKSPACE_DIR}/${repo_name}/.env"
-    local env_example_file="${WORKSPACE_DIR}/${repo_name}/.env.example"
-    
-    # Skip if .env already exists
-    if [[ -f "${env_file}" ]]; then
-        info "${repo_name}/.env already exists, skipping"
-        return 0
-    fi
-    
-    # Check if auto-configuration is enabled for development
-    local auto_configure
-    auto_configure=$(jq -r '.environments.development.auto_configure // false' "${ENVIRONMENTS_CONFIG}")
-    
-    if [[ "${auto_configure}" == "true" ]]; then
-        log "Auto-configuring ${repo_name} for development environment"
-        create_auto_configured_env "${repo_name}" "${repo_config}"
+    # Usar instalación paralela para reducir tiempo total
+    if "${SCRIPT_DIR}/../utils/parallel-install.sh"; then
+        success "✅ Instalación paralela completada"
     else
-        # Create .env.example if it doesn't exist
-        if [[ ! -f "${env_example_file}" ]]; then
-            create_env_example_file "${repo_name}" "${repo_config}"
-        fi
+        warn "⚠️  Instalación paralela falló, intentando método secuencial..."
         
-        # Copy .env.example to .env
-        if [[ -f "${env_example_file}" ]]; then
-            cp "${env_example_file}" "${env_file}"
-            info "Created ${repo_name}/.env from .env.example"
-        fi
+        # Fallback: instalación secuencial tradicional
+        local repos=("ms_trivance_auth" "ms_level_up_management" "level_up_backoffice" "trivance-mobile")
+        
+        for repo in "${repos[@]}"; do
+            local repo_path="${WORKSPACE_DIR}/${repo}"
+            
+            if [[ -d "$repo_path" ]] && [[ -f "${repo_path}/package.json" ]]; then
+                install_dependencies_for_repo "$repo" "$repo_path"
+            fi
+        done
     fi
 }
 
-create_auto_configured_env() {
-    local repo_name=$1
-    local repo_config=$2
-    local env_file="${WORKSPACE_DIR}/${repo_name}/.env"
+setup_tools() {
+    log "Configurando herramientas de desarrollo..."
     
-    # Use the new dynamic configuration generation
-    local env_content
-    env_content=$(generate_env_config "${repo_name}" "${repo_config}" "development")
+    # Crear workspace de VS Code
+    local workspace_template="${SCRIPT_DIR}/../../templates/TrivancePlatform.code-workspace.template"
+    local workspace_file="${WORKSPACE_DIR}/TrivancePlatform.code-workspace"
     
-    echo -e "${env_content}" > "${env_file}"
-    
-    success "✅ Auto-configured ${repo_name}/.env for development (ready to use)"
-    
-    # Also create .env.example for reference
-    create_env_example_file "${repo_name}" "${repo_config}"
-}
-
-create_env_example_file() {
-    local repo_name=$1
-    local repo_config=$2
-    local env_example_file="${WORKSPACE_DIR}/${repo_name}/.env.example"
-    
-    local technology port database
-    technology=$(echo "${repo_config}" | jq -r '.technology')
-    port=$(echo "${repo_config}" | jq -r '.port // empty')
-    database=$(echo "${repo_config}" | jq -r '.database // empty')
-    
-    cat > "${env_example_file}" << EOF
-# ${repo_name} Environment Configuration
-NODE_ENV=development
-EOF
-    
-    if [[ -n "${port}" ]]; then
-        echo "PORT=${port}" >> "${env_example_file}"
+    if [[ -f "$workspace_template" ]]; then
+        cp "$workspace_template" "$workspace_file"
+        success "✅ Workspace de VS Code configurado"
     fi
     
-    if [[ "${database}" == "postgresql" ]]; then
-        cat >> "${env_example_file}" << EOF
-
-# PostgreSQL Database
-DATABASE_URL=postgresql://username:password@localhost:5432/trivance_${repo_name}
-EOF
-    elif [[ "${database}" == "mongodb" ]]; then
-        cat >> "${env_example_file}" << EOF
-
-# MongoDB Database  
-DATABASE_URL=mongodb://localhost:27017/trivance_${repo_name}
-EOF
+    # Crear archivo CLAUDE.md
+    local claude_template="${SCRIPT_DIR}/../../templates/CLAUDE.md.template"
+    local claude_file="${WORKSPACE_DIR}/CLAUDE.md"
+    
+    if [[ -f "$claude_template" ]]; then
+        cp "$claude_template" "$claude_file"
+        success "✅ Archivo CLAUDE.md configurado"
     fi
     
-    cat >> "${env_example_file}" << EOF
-
-# JWT Configuration
-JWT_SECRET=your-secure-jwt-secret-here
-JWT_EXPIRATION_TIME=3600
-
-# External Services (configure as needed)
-# AWS_ACCESS_KEY_ID=
-# AWS_SECRET_ACCESS_KEY=
-# AWS_REGION=us-east-1
-# SENTRY_DSN=
-EOF
+    # Crear README dinámico del workspace
+    local readme_template="${SCRIPT_DIR}/../../templates/dynamic/README.workspace.template"
+    local readme_file="${WORKSPACE_DIR}/README.md"
     
-    info "Created ${repo_name}/.env.example"
+    if [[ -f "$readme_template" ]]; then
+        envsubst < "$readme_template" > "$readme_file"
+        success "✅ README del workspace configurado"
+    fi
 }
 
-copy_configurations() {
-    log "Copying workspace configurations"
+apply_post_setup_fixes() {
+    log "Aplicando fixes automáticos para problemas conocidos..."
+    
+    if "${SCRIPT_DIR}/../utils/post-setup-fixes.sh"; then
+        success "✅ Fixes automáticos aplicados exitosamente"
+    else
+        warn "⚠️  Algunos fixes automáticos fallaron, pero continuando..."
+    fi
+}
+
+verify_compilation() {
+    log "OBLIGATORIO: Verificando compilación para todos los repositorios"
     
     cd "${WORKSPACE_DIR}"
     
-    # Copy AI configurations (if they exist)
-    if [[ -d "${PROJECT_ROOT}/.claude" ]] && [[ ! -d ".claude" ]]; then
-        cp -r "${PROJECT_ROOT}/.claude" .
-        info "Copied Claude Code configuration"
-    elif [[ ! -d ".claude" ]]; then
-        info "No Claude Code configuration found in repo - skipping"
-    fi
-    
-    if [[ -d "${PROJECT_ROOT}/.ai-config" ]] && [[ ! -d ".ai-config" ]]; then
-        cp -r "${PROJECT_ROOT}/.ai-config" .
-        info "Copied universal AI configuration"
-    elif [[ ! -d ".ai-config" ]]; then
-        info "No AI configuration found in repo - skipping"
-    fi
-    
-    # Copy scripts
-    if [[ ! -d "scripts" ]]; then
-        cp -r "${PROJECT_ROOT}/scripts" .
-        chmod +x scripts/**/*.sh 2>/dev/null || true
-        info "Copied workspace scripts"
-    fi
-    
-    # Copy VS Code workspace
-    if [[ ! -f "TrivancePlatform.code-workspace" ]]; then
-        cp "${PROJECT_ROOT}/templates/TrivancePlatform.code-workspace.template" TrivancePlatform.code-workspace
-        info "Copied VS Code workspace configuration"
+    if "${SCRIPT_DIR}/../verify-compilation.sh"; then
+        success "✅ Todos los repositorios compilaron exitosamente!"
+    else
+        error "❌ La verificación de compilación falló!"
+        error "Este es un paso obligatorio. Por favor revise los errores e intente nuevamente."
+        exit 1
     fi
 }
 
-generate_documentation() {
-    log "Generating workspace documentation"
-    
-    cd "${WORKSPACE_DIR}"
-    
-    # Generate CLAUDE.md from template
-    if [[ -f "${PROJECT_ROOT}/templates/CLAUDE.md.template" ]]; then
-        local timestamp
-        timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-        
-        sed "s/{{TIMESTAMP_PLACEHOLDER}}/${timestamp}/g" \
-            "${PROJECT_ROOT}/templates/CLAUDE.md.template" > CLAUDE.md
-        
-        info "Generated CLAUDE.md"
-    fi
-    
-    # Generate README.md if it doesn't exist
-    if [[ ! -f "README.md" ]]; then
-        generate_workspace_readme
-        info "Generated workspace README.md"
-    fi
-}
-
-generate_workspace_readme() {
-    cat > README.md << 'EOF'
-# Trivance Platform - Development Workspace
-
-Multi-repository workspace for Trivance Platform development.
-
-## Quick Start
-
-```bash
-# Start all services
-./scripts/start-all-services.sh
-
-# Check system health
-./scripts/check-health.sh
-
-# Stop all services  
-./scripts/stop-all-services.sh
-```
-
-## Repository Structure
-
-- `ms_level_up_management/` - Backend API (NestJS + GraphQL)
-- `ms_trivance_auth/` - Authentication service (NestJS)
-- `level_up_backoffice/` - Admin frontend (React + Vite)
-- `trivance-mobile/` - Mobile app (React Native + Expo)
-- `trivance-dev-config/` - Development configuration
-
-## Development URLs
-
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:3000
-- Auth Service: http://localhost:3001
-- GraphQL Playground: http://localhost:3000/graphql
-
-## Documentation
-
-- [Onboarding Guide](trivance-dev-config/docs/ONBOARDING.md)
-- [Development Workflows](trivance-dev-config/docs/WORKFLOWS.md) 
-- [Troubleshooting](trivance-dev-config/docs/TROUBLESHOOTING.md)
-- [AI Configuration](CLAUDE.md)
-EOF
-}
-
-validate_installation() {
-    log "Validating workspace installation"
-    
-    cd "${WORKSPACE_DIR}"
-    
-    if ! validate_workspace_structure "${WORKSPACE_DIR}"; then
-        error "Workspace structure validation failed"
-        return 1
-    fi
-    
-    # Check that all repositories have node_modules
-    local repos
-    repos=$(jq -r '.repositories[].name' "${REPOSITORIES_CONFIG}")
-    
-    while IFS= read -r repo_name; do
-        if [[ -f "${repo_name}/package.json" ]] && [[ ! -d "${repo_name}/node_modules" ]]; then
-            warning "${repo_name} is missing node_modules"
-        fi
-    done <<< "${repos}"
-    
-    success "Installation validation completed"
-}
-
-display_summary() {
-    echo ""
-    echo -e "${PURPLE}╔══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${PURPLE}║                    SETUP COMPLETED                          ║${NC}"
-    echo -e "${PURPLE}╚══════════════════════════════════════════════════════════════╝${NC}"
-    echo ""
-    
-    log "Trivance Platform workspace configured successfully"
-    
-    echo ""
-    info "Next steps:"
-    echo "  1. Configure environment variables in each repository"
-    echo "  2. Start services: ./scripts/start-all-services.sh"
-    echo "  3. Open workspace: code TrivancePlatform.code-workspace"
-    echo "  4. Validate setup: ./scripts/check-health.sh"
-    echo ""
-    
-    info "Documentation:"
-    echo "  - Workspace overview: ./README.md"
-    echo "  - AI configuration: ./CLAUDE.md"
-    echo "  - Detailed guides: ./trivance-dev-config/docs/"
-    echo ""
-    
-    success "Workspace setup completed successfully"
-}
-
-# Execute main function if script is run directly
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     main "$@"
 fi

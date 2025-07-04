@@ -2,6 +2,65 @@
 
 ## 🎯 Problemas Comunes y Soluciones
 
+### ⚙️ NUEVO: Verificación de Compilación
+
+#### Fallos de Compilación
+
+**Problema**: verify-compilation.sh falla
+```bash
+❌ COMPILATION VERIFICATION FAILED
+❌ 2/4 repositories failed compilation
+```
+**Solución**:
+```bash
+# 1. Verificar logs de compilación
+ls -la logs/compilation/
+
+# 2. Ver detalles del error de cada repo
+cat logs/compilation/ms_level_up_management_build.log
+cat logs/compilation/level_up_backoffice_build.log
+
+# 3. Solución común: regenerar variables de entorno
+cd ms_level_up_management
+rm .env
+cd ../ms_trivance_auth  
+rm .env
+cd ..
+
+# 4. Re-ejecutar configuración
+./trivance-dev-config/scripts/core/orchestrator.sh
+
+# 5. Intentar compilación nuevamente
+./scripts/verify-compilation.sh
+```
+
+**Problema**: React Native TypeScript errores
+```bash
+TypeScript has warnings/errors (common in development)
+```
+**Solución**: ✅ **NORMAL** - React Native con Expo tolera errores de TypeScript en desarrollo. El proyecto sigue siendo funcional para builds EAS.
+
+**Problema**: Firebase credenciales faltantes
+```bash
+Service account object must contain a string "project_id" property
+```
+**Solución**: ✅ **YA RESUELTO** - Firebase ahora es opcional en desarrollo. El servicio inicia con configuración por defecto.
+
+**Problema**: Error de Sentry Sourcemaps
+```bash
+error: Auth token is required for this request. Please run `sentry-cli login`
+```
+**Solución**: ✅ **AUTO-CORREGIDO** - El sistema aplica automáticamente un fix en el **Paso 6/7** que:
+- Agrega script `build:dev` sin Sentry para desarrollo
+- El verificador de compilación usa `build:dev` automáticamente  
+- Mantiene `build` original para producción
+
+**📋 Fixes Automáticos:** Todos aplicados en Paso 6/7:
+1. **Sentry Build Fix** para ms_level_up_management
+2. **Verificación de Variables** de entorno
+3. **Detección de Conflictos** de puerto
+4. **Configuración TypeScript** para React Native
+
 ### 🚀 Problemas de Setup Inicial
 
 #### Node.js y NPM
@@ -67,6 +126,25 @@ git config --global user.email "tu-email@trivance.com"
 ```
 
 ### 📦 Problemas de Dependencias
+
+#### Variables de Entorno Auto-Generadas
+
+**Problema**: Variables de entorno faltantes o incorrectas
+```bash
+Error: JWT_SECRET is not defined
+```
+**Solución**: ✅ **YA NO OCURRE** - El sistema ahora auto-genera todas las variables:
+```bash
+# Si por alguna razón necesitas regenerar:
+cd ms_level_up_management
+rm .env
+cd ../ms_trivance_auth
+rm .env
+cd ..
+
+# Re-ejecutar setup para regenerar
+./trivance-dev-config/setup.sh
+```
 
 #### Node Modules
 

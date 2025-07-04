@@ -1,309 +1,263 @@
 #!/bin/bash
 
-# Common utilities for Trivance Platform setup scripts
-# Consolidates shared functionality to reduce duplication
+# Colores para output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
 
-# Source logging utilities (check if already loaded)
-if ! command -v log &> /dev/null; then
-    source "$(dirname "${BASH_SOURCE[0]}")/logging.sh"
-fi
-
-# ============= SHARED FUNCTIONS =============
-
-# Git URL validation and conversion utilities
-validate_git_url() {
-    local url=$1
-    
-    # Security check: Ensure URL matches expected Git patterns
-    if [[ "${url}" =~ ^git@github\.com:[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+\.git$ ]] || \
-       [[ "${url}" =~ ^https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+\.git$ ]] || \
-       [[ "${url}" =~ ^git@[A-Za-z0-9.-]+:[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+\.git$ ]] || \
-       [[ "${url}" =~ ^https://[A-Za-z0-9.-]+/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+\.git$ ]]; then
-        return 0
-    fi
-    
-    return 1
+# Función para logging general
+log() {
+    echo -e "${BLUE}[INFO]${NC} $1"
 }
 
-convert_to_https_url() {
-    local repo_url=$1
-    
-    if [[ "${repo_url}" == git@github.com:* ]]; then
-        echo "${repo_url}" | sed 's|git@github.com:\(.*\)|https://github.com/\1|'
-    elif [[ "${repo_url}" == git@* ]]; then
-        # Generic SSH to HTTPS conversion
-        echo "${repo_url}" | sed 's|git@\([^:]*\):\(.*\)|https://\1/\2|'
-    else
-        echo "${repo_url}"
+# Función para éxito
+success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
+
+# Función para errores
+error() {
+    echo -e "${RED}[ERROR]${NC} $1" >&2
+}
+
+# Función para advertencias
+warn() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
+
+# Función para información
+info() {
+    echo -e "${CYAN}[INFO]${NC} $1"
+}
+
+# Función para depuración
+debug() {
+    if [[ "${DEBUG:-false}" == "true" ]]; then
+        echo -e "${PURPLE}[DEBUG]${NC} $1"
     fi
 }
 
-# Simplified Git access testing (2 methods only: SSH + HTTPS)
-test_git_access() {
-    local repo_url=$1
+# Función para mostrar progreso
+show_progress() {
+    local message="$1"
+    local current="$2"
+    local total="$3"
     
-    # Method 1: SSH (if original URL is SSH)
-    if [[ "${repo_url}" == git@* ]]; then
-        if test_ssh_access_simple "${repo_url}"; then
-            info "✅ SSH access confirmed"
-            echo "${repo_url}"
-            return 0
-        fi
+    local percentage=$((current * 100 / total))
+    
+    echo -ne "\r${CYAN}[PROGRESO]${NC} ${message} [${current}/${total}] ${percentage}%"
+    
+    if [[ $current -eq $total ]]; then
+        echo
     fi
-    
-    # Method 2: HTTPS with credential helper
-    local https_url
-    https_url=$(convert_to_https_url "${repo_url}")
-    if test_https_access_simple "${https_url}"; then
-        info "✅ HTTPS access confirmed"
-        echo "${https_url}"
-        return 0
-    fi
-    
-    # Both methods failed
-    error "Cannot access repository: ${repo_url}"
-    display_simple_auth_help
-    return 1
 }
 
-test_ssh_access_simple() {
-    local repo_url=$1
-    local host
+# Función para instalar dependencias con timeout y progreso
+install_dependencies_for_repo() {
+    local repo_name="$1"
+    local repo_path="$2"
     
-    # Extract host from SSH URL
-    host=$(echo "${repo_url}" | sed -n 's/.*@\([^:]*\):.*/\1/p')
+    info "📦 Instalando dependencias para ${repo_name}..."
+    info "📍 Ruta: ${repo_path}"
     
-    if [[ -z "${host}" ]]; then
+    # Cambiar al directorio del repositorio
+    local original_dir
+    original_dir=$(pwd)
+    
+    if ! cd "$repo_path"; then
+        error "No se puede acceder al directorio ${repo_path}"
         return 1
     fi
     
-    # Test SSH connection with timeout
-    if timeout 10 ssh -T "git@${host}" 2>&1 | grep -q "successfully authenticated\|Hi.*You've successfully authenticated"; then
+    # Verificar que existe package.json
+    if [[ ! -f "package.json" ]]; then
+        warn "⚠️  No se encontró package.json en ${repo_name}"
+        cd "$original_dir"
         return 0
     fi
     
-    return 1
-}
-
-test_https_access_simple() {
-    local https_url=$1
+    # Crear directorio de logs si no existe
+    local log_dir="${WORKSPACE_DIR}/logs"
+    mkdir -p "$log_dir"
     
-    # Test HTTPS access with git ls-remote
-    if timeout 10 git ls-remote "${https_url}" &> /dev/null; then
-        return 0
-    fi
+    # Instalar con timeout reducido y progreso visible
+    info "⏱️  Tiempo máximo: 3 minutos por repo"
+    info "🔄 Instalando dependencias con progreso visible..."
     
-    return 1
-}
-
-display_simple_auth_help() {
-    echo ""
-    error "🔐 Git Authentication Required"
-    echo ""
-    info "Configure one of the following:"
-    echo ""
-    info "Option 1 - SSH Key (Recommended):"
-    echo "  1. Generate: ssh-keygen -t ed25519 -C \"your-email@example.com\""
-    echo "  2. Add to GitHub: https://github.com/settings/keys"
-    echo ""
-    info "Option 2 - HTTPS Credential Helper:"
-    echo "  1. Configure: git config --global credential.helper manager"
-    echo "  2. Enter credentials when prompted"
-}
-
-# Port management utilities
-check_port_available() {
-    local port=$1
-    
-    if command -v lsof &> /dev/null; then
-        if lsof -Pi ":${port}" -sTCP:LISTEN -t >/dev/null 2>&1; then
-            return 1  # Port in use
-        fi
-    elif command -v netstat &> /dev/null; then
-        if netstat -ln 2>/dev/null | grep -q ":${port} "; then
-            return 1  # Port in use
-        fi
-    fi
-    
-    return 0  # Port available
-}
-
-kill_port_process() {
-    local port=$1
-    
-    if ! check_port_available "${port}"; then
-        warning "Port ${port} is in use, terminating process..."
-        if command -v lsof &> /dev/null; then
-            lsof -ti:"${port}" | xargs kill -9 2>/dev/null || true
-        fi
-        sleep 2
-    fi
-}
-
-# Tool version validation
-check_tool_version_simple() {
-    local tool=$1
-    local min_version=$2
-    local check_command=$3
-    
-    if ! command -v "${tool}" &> /dev/null; then
-        error "${tool} is not installed"
-        return 1
-    fi
-    
-    local current_version
-    current_version=$(${check_command} 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
-    
-    if [[ -z "${current_version}" ]]; then
-        warning "Could not determine ${tool} version, continuing..."
-        return 0
-    fi
-    
-    if version_compare_simple "${current_version}" "${min_version}"; then
-        info "✅ ${tool} ${current_version} (>= ${min_version})"
-        return 0
-    else
-        error "${tool} ${current_version} is below minimum ${min_version}"
-        return 1
-    fi
-}
-
-version_compare_simple() {
-    local version1=$1
-    local version2=$2
-    
-    # Simple version comparison using sort
-    local result
-    result=$(printf '%s\n%s\n' "${version1}" "${version2}" | sort -V | head -n1)
-    
-    if [[ "${result}" == "${version2}" ]]; then
-        return 0  # version1 >= version2
-    else
-        return 1  # version1 < version2
-    fi
-}
-
-# Environment file utilities
-create_env_from_template() {
-    local repo_name=$1
-    local template_content=$2
-    local target_file="${WORKSPACE_DIR}/${repo_name}/.env"
-    
-    if [[ -f "${target_file}" ]]; then
-        info "${repo_name}/.env already exists, skipping"
-        return 0
-    fi
-    
-    echo "${template_content}" > "${target_file}"
-    success "✅ Created ${repo_name}/.env"
-}
-
-# Workspace validation
-validate_workspace_structure_simple() {
-    local workspace_dir=$1
-    local required_dirs=("ms_level_up_management" "ms_trivance_auth" "level_up_backoffice" "trivance-mobile")
-    local missing_dirs=()
-    
-    for dir in "${required_dirs[@]}"; do
-        if [[ ! -d "${workspace_dir}/${dir}" ]]; then
-            missing_dirs+=("${dir}")
-        fi
-    done
-    
-    if [[ ${#missing_dirs[@]} -eq 0 ]]; then
-        return 0
-    else
-        error "Missing directories: ${missing_dirs[*]}"
-        return 1
-    fi
-}
-
-# Dependencies installation
-install_repo_dependencies_simple() {
-    local repo_name=$1
-    
-    if [[ ! -d "${repo_name}" ]]; then
-        warning "Repository ${repo_name} not found, skipping"
-        return 0
-    fi
-    
-    if [[ ! -f "${repo_name}/package.json" ]]; then
-        info "${repo_name} has no package.json, skipping"
-        return 0
-    fi
-    
-    log "Installing dependencies for ${repo_name}"
-    
-    cd "${repo_name}"
-    
-    if npm install; then
-        success "✅ Dependencies installed for ${repo_name}"
-        cd ..
-        return 0
-    else
-        error "Failed to install dependencies for ${repo_name}"
-        cd ..
-        return 1
-    fi
-}
-
-# Service health check utilities
-check_service_health() {
-    local port=$1
-    local health_endpoint=$2
-    local service_name=$3
-    local max_attempts=${4:-15}
-    
-    local attempts=0
-    
-    while [[ ${attempts} -lt ${max_attempts} ]]; do
-        if check_port_available "${port}"; then
-            sleep 2
-            attempts=$((attempts + 1))
-            continue
-        fi
+    # Función de timeout con progreso visible
+    run_with_timeout_and_progress() {
+        local timeout_duration=$1
+        shift
+        local command=("$@")
         
-        # Port is in use, check health endpoint if provided
-        if [[ -n "${health_endpoint}" ]]; then
-            if command -v curl &> /dev/null; then
-                if curl -s -f "${health_endpoint}" >/dev/null 2>&1; then
-                    success "✅ ${service_name} is healthy"
-                    return 0
-                fi
+        # Ejecutar comando en background
+        "${command[@]}" > "${log_dir}/${repo_name}_install.log" 2>&1 &
+        local cmd_pid=$!
+        
+        # Monitor con progreso cada 10 segundos
+        local elapsed=0
+        local dot_count=0
+        
+        while kill -0 "$cmd_pid" 2>/dev/null; do
+            if [[ $elapsed -ge $timeout_duration ]]; then
+                kill "$cmd_pid" 2>/dev/null
+                echo
+                error "❌ TIMEOUT: Instalación cancelada después de ${timeout_duration}s"
+                return 124
             fi
-        else
-            # No health endpoint, just check if port responds
-            success "✅ ${service_name} is running on port ${port}"
-            return 0
-        fi
+            
+            # Mostrar progreso cada 10 segundos
+            if [[ $((elapsed % 10)) -eq 0 ]]; then
+                local dots=$(printf "%*s" $((dot_count % 4)) "" | tr ' ' '.')
+                printf "\r${CYAN}⏳ Instalando${dots}${NC} [${elapsed}s/${timeout_duration}s]    "
+                ((dot_count++))
+            fi
+            
+            sleep 1
+            ((elapsed++))
+        done
         
-        sleep 2
-        attempts=$((attempts + 1))
-    done
+        # Obtener código de salida
+        wait "$cmd_pid"
+        local exit_code=$?
+        
+        printf "\r${NC}"  # Limpiar línea de progreso
+        return $exit_code
+    }
     
-    warning "⚠️ ${service_name} health check timeout"
-    return 1
-}
-
-# Error handling and cleanup
-cleanup_on_error() {
-    local script_name=$1
-    error "Error occurred in ${script_name}"
-    info "Check logs for details"
-    
-    # Cleanup any temporary files or processes if needed
-    # This function can be extended as needed
-}
-
-# Git configuration validation
-validate_git_config_simple() {
-    if [[ -z "$(git config --global user.name)" ]] || [[ -z "$(git config --global user.email)" ]]; then
-        warning "Git user configuration incomplete"
-        info "Configure with:"
-        info "  git config --global user.name \"Your Name\""
-        info "  git config --global user.email \"your-email@example.com\""
+    if run_with_timeout_and_progress 180 npm install --silent --no-audit --no-fund; then
+        success "✅ Dependencias instaladas para ${repo_name}"
+        cd "$original_dir"
+        return 0
+    else
+        local exit_code=$?
+        if [[ $exit_code -eq 124 ]]; then
+            error "❌ TIMEOUT: ${repo_name} tardó más de 3 minutos - CANCELADO"
+            error "   📈 Log: ${log_dir}/${repo_name}_install.log"
+            error "   💡 Solución: npm cache clean --force && rm -rf node_modules"
+        else
+            error "❌ ERROR: Instalación fallida para ${repo_name}"
+            error "   📈 Log: ${log_dir}/${repo_name}_install.log"
+        fi
+        cd "$original_dir"
         return 1
     fi
-    
-    return 0
 }
+
+# Función para verificar si un comando existe
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Función para validar directorio workspace
+validate_workspace() {
+    if [[ -z "${WORKSPACE_DIR:-}" ]]; then
+        error "Variable WORKSPACE_DIR no está definida"
+        exit 1
+    fi
+    
+    if [[ ! -d "$WORKSPACE_DIR" ]]; then
+        error "El directorio workspace no existe: $WORKSPACE_DIR"
+        exit 1
+    fi
+    
+    if [[ ! -w "$WORKSPACE_DIR" ]]; then
+        error "No tienes permisos de escritura en: $WORKSPACE_DIR"
+        exit 1
+    fi
+}
+
+# Función para limpiar workspace (usar con cuidado)
+clean_workspace() {
+    local workspace="${WORKSPACE_DIR}"
+    
+    warn "⚠️  LIMPIANDO WORKSPACE: ${workspace}"
+    
+    local repos=("ms_trivance_auth" "ms_level_up_management" "level_up_backoffice" "trivance-mobile")
+    
+    for repo in "${repos[@]}"; do
+        local repo_path="${workspace}/${repo}"
+        if [[ -d "$repo_path" ]]; then
+            info "🗑️  Eliminando ${repo}..."
+            rm -rf "$repo_path"
+        fi
+    done
+    
+    # Limpiar otros archivos generados
+    local files_to_clean=(
+        "${workspace}/logs"
+        "${workspace}/CLAUDE.md"
+        "${workspace}/TrivancePlatform.code-workspace"
+        "${workspace}/README.md"
+    )
+    
+    for file in "${files_to_clean[@]}"; do
+        if [[ -e "$file" ]]; then
+            info "🗑️  Eliminando $(basename "$file")..."
+            rm -rf "$file"
+        fi
+    done
+    
+    success "✅ Workspace limpiado"
+}
+
+# Función para verificar estado de git
+check_git_status() {
+    local repo_path="$1"
+    local repo_name="$2"
+    
+    if [[ -d "${repo_path}/.git" ]]; then
+        cd "$repo_path"
+        local status
+        status=$(git status --porcelain)
+        
+        if [[ -n "$status" ]]; then
+            warn "⚠️  ${repo_name} tiene cambios sin confirmar"
+        else
+            success "✅ ${repo_name} está limpio"
+        fi
+    fi
+}
+
+# Función para verificar servicios de salud
+health_check() {
+    log "Verificando servicios de salud..."
+    
+    # URLs de health check
+    local auth_health="http://localhost:3001/health"
+    local mgmt_health="http://localhost:3000/health"
+    
+    # Verificar Auth Service
+    if curl -s "$auth_health" >/dev/null 2>&1; then
+        success "✅ Auth Service (3001) - Saludable"
+    else
+        warn "⚠️  Auth Service (3001) - No responde"
+    fi
+    
+    # Verificar Management API
+    if curl -s "$mgmt_health" >/dev/null 2>&1; then
+        success "✅ Management API (3000) - Saludable"
+    else
+        warn "⚠️  Management API (3000) - No responde"
+    fi
+}
+
+# Configurar variables globales
+setup_globals() {
+    # Detectar workspace si no está definido
+    if [[ -z "${WORKSPACE_DIR:-}" ]]; then
+        WORKSPACE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+        # Ir un nivel más arriba para llegar al workspace real
+        WORKSPACE_DIR="$(dirname "$WORKSPACE_DIR")"
+    fi
+    
+    export WORKSPACE_DIR
+    validate_workspace
+}
+
+# Inicializar automáticamente cuando se carga el script
+setup_globals

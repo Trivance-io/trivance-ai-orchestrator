@@ -51,67 +51,116 @@ git --version     # Debe estar instalado
 ssh -T git@github.com
 ```
 
-## 🚀 Setup Automático (Recomendado)
+## 🚀 Setup Automático (100% Listo en Minutos)
 
-### Paso 1: Clonar Repositorio de Configuraciones
+### 🏁 Proceso de 6 Pasos - TODO AUTOMATIZADO
+
+#### Paso 1: Crear Workspace y Clonar Configuración
 
 ```bash
 # Crear directorio de trabajo
-mkdir -p ~/Desarrollo/Trivance
-cd ~/Desarrollo/Trivance
+mkdir -p ~/Desarrollo/Trivance-Platform
+cd ~/Desarrollo/Trivance-Platform
 
 # Clonar repositorio de configuraciones
-git clone git@github.com:trivance/trivance-dev-config.git
-cd trivance-dev-config
+git clone https://github.com/GLab-Projects/trivance-dev-config.git
 ```
 
-### Paso 2: Ejecutar Setup Automático
+#### Paso 2: OBLIGATORIO - Validación Pre-Setup
 
 ```bash
-# Hacer el script ejecutable
-chmod +x scripts/setup-workspace.sh
-
-# Ejecutar setup completo
-./scripts/setup-workspace.sh
+# Validar configuración (interactivo - verifica organización, ramas, accesos)
+./trivance-dev-config/scripts/core/pre-setup-validation.sh
 ```
 
-El script automáticamente:
-- ✅ Clona todos los repositorios
-- ✅ Instala dependencias de Node.js
-- ✅ Configura workspace VS Code/Cursor
-- ✅ Copia configuraciones AI
-- ✅ Configura scripts de automatización
-
-### Paso 3: Configurar Variables de Entorno
+#### Paso 3: Ejecutar Setup Completo (Automatizado)
 
 ```bash
-# Ir al directorio padre del workspace
-cd ..
-
-# Configurar cada repositorio
-cd ms_level_up_management
-cp .env.example .env
-# Editar .env con tus configuraciones
-
-cd ../ms_trivance_auth  
-cp .env.example .env
-# Editar .env con tus configuraciones
-
-cd ../level_up_backoffice
-# Verificar si necesita .env
-
-cd ../trivance-mobile
-# Verificar configuración de environments
+# Setup completamente automatizado
+./trivance-dev-config/setup.sh
 ```
 
-### Paso 4: Verificar Instalación
+#### Paso 4: Iniciar Servicios
 
 ```bash
-# Volver al directorio workspace
-cd ..
+# Todo pre-configurado, listo para ejecutar
+./scripts/start-all-services.sh
+```
 
-# Ejecutar health check
+#### Paso 5: Validar Instalación
+
+```bash
+# Verificación de salud completa
 ./scripts/check-health.sh
+```
+
+#### Paso 6: NUEVO - Verificación de Compilación (Obligatorio)
+
+```bash
+# MANDATORY: Verificar que todos los repositorios compilen
+./scripts/verify-compilation.sh
+```
+
+### 🎉 ¡Listo! El setup automáticamente:
+
+- ✅ **Clona todos los repositorios** (4 repos)
+- ✅ **Instala todas las dependencias** automáticamente
+- ✅ **Genera variables de entorno** con secretos seguros
+- ✅ **Configura workspace** VS Code/Cursor
+- ✅ **Copia configuraciones AI** robustas
+- ✅ **Configura Firebase** en modo desarrollo opcional
+- ✅ **Verifica que TODO compila** exitosamente
+- ✅ **Scripts de automatización** listos
+
+### ⚡ ZERO CONFIGURACIÓN MANUAL REQUERIDA
+
+🎯 **Variables de entorno auto-generadas:**
+- Secretos JWT seguros (Base64)
+- URLs de desarrollo pre-configuradas
+- Bases de datos locales configuradas
+- CORS y APIs pre-configurados
+- Firebase en modo desarrollo
+
+## 🎯 Flujo de Desarrollo Post-Setup
+
+### Uso Diario (Después del setup)
+
+```bash
+# Iniciar desarrollo (30 segundos)
+cd ~/Desarrollo/Trivance-Platform
+./scripts/start-all-services.sh
+
+# URLs de desarrollo disponibles:
+# • Frontend: http://localhost:5173
+# • Backend API: http://localhost:3000
+# • Auth Service: http://localhost:3001
+# • GraphQL: http://localhost:3000/graphql
+
+# Verificar estado de servicios
+./scripts/check-health.sh
+
+# Verificar compilación (si se hicieron cambios)
+./scripts/verify-compilation.sh
+
+# Finalizar día de desarrollo
+./scripts/stop-all-services.sh
+```
+
+### Comandos de Desarrollo Frecuentes
+
+```bash
+# Verificar estado completo del workspace
+./scripts/check-health.sh
+
+# Re-verificar que todo compila (obligatorio antes de commits)
+./scripts/verify-compilation.sh
+
+# Reiniciar servicios si hay problemas
+./scripts/stop-all-services.sh
+./scripts/start-all-services.sh
+
+# Abrir workspace en VS Code
+code TrivancePlatform.code-workspace
 ```
 
 ## 🔧 Setup Manual (Si el automático falla)

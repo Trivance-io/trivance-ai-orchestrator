@@ -30,21 +30,35 @@ Trivance Platform utiliza una metodología **AI-First** combinada con **Agile/Sc
 
 ## 🚀 Workflow de Desarrollo
 
-### 1. Flujo de Trabajo Estándar
+### 1. Flujo de Trabajo Estándar (Con Verificación de Compilación)
 
 ```mermaid
 graph LR
     A[Tarea Asignada] --> B[Crear Branch]
     B --> C[Desarrollo Local]
-    C --> D[Tests + Lint]
-    D --> E[Commit + Push]
-    E --> F[Pull Request]
-    F --> G[Code Review]
-    G --> H[Merge a Develop]
-    H --> I[Deploy QA]
-    I --> J[Testing QA]
-    J --> K[Merge a Main]
-    K --> L[Deploy Producción]
+    C --> D[Verificar Compilación]
+    D --> E[Tests + Lint]
+    E --> F[Commit + Push]
+    F --> G[Pull Request]
+    G --> H[Code Review + CI]
+    H --> I[Merge a Develop]
+    I --> J[Deploy QA]
+    J --> K[Testing QA]
+    K --> L[Merge a Main]
+    L --> M[Deploy Producción]
+```
+
+### 📝 NUEVO: Paso Obligatorio de Verificación
+
+**Antes de cualquier commit**, SIEMPRE ejecutar:
+
+```bash
+# OBLIGATORIO: Verificar que todos los repos compilen
+./scripts/verify-compilation.sh
+
+# Solo si pasa la verificación, proceder con commit
+git add .
+git commit -m "feat: descripción del cambio"
 ```
 
 ### 2. Convenciones de Branches
@@ -83,7 +97,10 @@ git checkout -b feat/TKT123-nueva-funcionalidad
 # Frontend changes en level_up_backoffice
 # Mobile changes en trivance-mobile (si aplica)
 
-# 3. Hacer commits atómicos
+# 3. OBLIGATORIO: Verificar compilación antes de commit
+./scripts/verify-compilation.sh
+
+# 4. Solo si compila correctamente, hacer commits atómicos
 git add .
 git commit -m "feat(backend): agregar endpoint de analytics
 
@@ -91,10 +108,11 @@ git commit -m "feat(backend): agregar endpoint de analytics
 - Agregar service con queries MongoDB
 - Agregar DTOs de request/response
 - Agregar tests unitarios
+- ✅ Verificado: todos los repos compilan correctamente
 
 Refs: TKT123"
 
-# 4. Push y crear PR en cada repo afectado
+# 5. Push y crear PR en cada repo afectado
 git push origin feat/TKT123-nueva-funcionalidad
 ```
 
