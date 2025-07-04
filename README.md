@@ -109,9 +109,10 @@ El sistema ejecuta automáticamente estos pasos:
 - Claude Code configuration file
 - Development utilities setup
 
-### **Paso 6: Fixes Automáticos** 🔧 **NUEVO**
+### **Paso 6: Fixes Automáticos** 🔧 **CRÍTICO**
 - **Sentry Fix**: Agrega `build:dev` sin Sentry para desarrollo
-- **Variables de Entorno**: Verifica configuración Firebase
+- **Firebase Fix**: Genera claves privadas válidas automáticamente
+- **Variables de Entorno**: Verifica configuración completa
 - **Conflictos de Puerto**: Detecta puertos ocupados
 - **TypeScript RN**: Configuración optimizada
 

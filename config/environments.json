@@ -47,9 +47,9 @@
       "WOMPIINTEGRITYKEY": "development_wompi_integrity_key",
       "WOMPIWEBHOOKURL": "http://localhost:3000/webhook/wompi",
       "COMPENSATION_CHARGE_PERCENTAGE": "3.5",
-      "FIREBASE_PROJECT_ID": "development-project",
-      "FIREBASE_PRIVATE_KEY": "development-private-key",
-      "FIREBASE_CLIENT_EMAIL": "development@trivance-dev.iam.gserviceaccount.com"
+      "FIREBASE_PROJECT_ID": "trivance-dev-local",
+      "FIREBASE_PRIVATE_KEY": "PLACEHOLDER_WILL_BE_REPLACED_BY_POST_SETUP_FIX",
+      "FIREBASE_CLIENT_EMAIL": "firebase-dev@trivance-dev.iam.gserviceaccount.com"
     },
     "level_up_backoffice": {
       "VITE_API_URL": "http://localhost:3000",

@@ -58,6 +58,71 @@ fix_sentry_build_command() {
     fi
 }
 
+# Fix para Firebase: Generar claves válidas para desarrollo
+fix_firebase_credentials() {
+    local repo_path="${WORKSPACE_DIR}/ms_level_up_management"
+    
+    if [[ ! -d "$repo_path" ]]; then
+        warn "⚠️  ms_level_up_management no encontrado, omitiendo fix de Firebase"
+        return 0
+    fi
+    
+    local env_file="${repo_path}/.env"
+    
+    if [[ ! -f "$env_file" ]]; then
+        warn "⚠️  .env no encontrado en ms_level_up_management"
+        return 0
+    fi
+    
+    info "🔧 Aplicando fix de Firebase para ms_level_up_management..."
+    
+    # Verificar si ya tiene credenciales Firebase válidas
+    if grep -q "FIREBASE_PRIVATE_KEY.*BEGIN PRIVATE KEY" "$env_file"; then
+        success "✅ Firebase ya tiene clave privada válida"
+        return 0
+    fi
+    
+    # Verificar si tiene el placeholder que necesita ser reemplazado
+    if ! grep -q "PLACEHOLDER_WILL_BE_REPLACED_BY_POST_SETUP_FIX" "$env_file"; then
+        success "✅ Firebase parece estar configurado (no es placeholder)"
+        return 0
+    fi
+    
+    # Generar clave privada temporal para desarrollo
+    local temp_key_file="${repo_path}/temp_firebase_key.pem"
+    
+    if openssl genrsa -out "$temp_key_file" 2048 >/dev/null 2>&1; then
+        local private_key
+        private_key=$(cat "$temp_key_file" | tr '\n' '#')
+        private_key=${private_key//#/\\n}
+        
+        # Actualizar variables Firebase en .env
+        if sed -i '' "s|FIREBASE_PROJECT_ID=.*|FIREBASE_PROJECT_ID=trivance-dev-local|g" "$env_file" && \
+           sed -i '' "s|FIREBASE_PRIVATE_KEY=.*|FIREBASE_PRIVATE_KEY=\"${private_key}\"|g" "$env_file" && \
+           sed -i '' "s|FIREBASE_CLIENT_EMAIL=.*|FIREBASE_CLIENT_EMAIL=firebase-dev@trivance-dev.iam.gserviceaccount.com|g" "$env_file"; then
+            
+            success "✅ Fix de Firebase aplicado a ms_level_up_management"
+            info "   • Generada clave privada válida para desarrollo"
+            info "   • Configuradas credenciales Firebase locales"
+        else
+            error "❌ Error aplicando fix de Firebase"
+            rm -f "$temp_key_file"
+            return 1
+        fi
+        
+        # Limpiar archivo temporal
+        rm -f "$temp_key_file"
+    else
+        warn "⚠️  No se pudo generar clave privada (openssl no disponible)"
+        # Fallback: usar clave estática válida
+        local static_key="-----BEGIN PRIVATE KEY-----\\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC6bxYj1gavQJc2\\nlRpGq8rW9onj6B+cXPsc3h+tesy/a19Vdw+7KEcqcI3rqBcP2RFO3gc5PWzdPxek\\nyyUScrjSQQWzIHtatMB5C5aAC6gvnpHx2dIKC1vap29PiX/fBbvIPTEeT61emh+d\\nfuRfwlmmezZ8QTZ0s394ygGKMLXQPRcFekAqj6XcOAymXKIgWPkwhCtGol7XHVKZ\\nBmDb7ZP+wUxZcDEs0EaCeN4wef4mKfHnvMJBDm+rhzPzD5Ksd2a829RTPbfZ4Ppq\\n3B1b8R9f0uqM8Wkop7z0GOszaNsX9rZJHQqz2B9FSOBVbZTM6Bp8K+313ppeL1NT\\nB73iyB9nAgMBAAECggEAA/cnc6rM1eSQyWiSiy6vnSPI5mhrsoekl9VVFgqEAquZ\\nq4pwgfRlKTv18NMb5ne35AcOqnP80Ey9kvmNqM+0wTY8ydP5qOPPwFvVpsHCISLQ\\nkwA0VuIPYTElhgzlKVv5iZDVSHqt6I7WByN6m6aztlgTdN9PwNQ8sLml02JD6WRG\\nlfc6lW7y6muDf4GkieGpAudrhFQp0KmNryNbOYRCIqrSMyVSAStYmwwydEw+O4HN\\nzwtGlPFhC2F5LYpziJgJ83LBxkPVgvaoF11Vl6rOVLqxcsL9p9mD7pyTwobYifaM\\nC3f8XjO6QAyHYFY06scxHEgO8Qok7t+KyUgvbvbMlQKBgQD5XjevoxuSB+4g4Qz0\\nLFvezmZStxBnP3KUFWleR9oMeyklB86Ph/FiYeVzXUvDdKur6yWvxSXD4zTM9P/m\\nhtqbKKr69eY9vZxOX7hLS15dSkpGUumSzEObhJLuA89C6ciwIBC6C76w7LE36VaE\\n6fGrB3s5FBbucZkby3qYWCIZswKBgQC/ZGRj0wCeF3qmwNGEDMQqMpdjCi/eBZJz\\nJ/4VHMXiE7ZJFXNV1ktEwwhXYXobsR/q4cc4CaeQkNBNzDF4vSACSWhqbSXeRKla\\n6nFPzdBysWzH48PX5EwPDCml/7PSjP3ADA75vYqnR7tiwgRIiLOCvmed7JVO86rM\\nptCHDCihfQKBgA9jLPR9kBn2u070FCSNCC47djzsZuq4E43ntFTJAj966hMK5Egf\\nD1oOyGXR//bToDQ/klfCRo5L2to60/+ZmquwWryZp9dvd9GuPmUHBY+kIeks/JS+\\nXf2etKJTQdrTKjsT/3Q7fUzVjinxEBGrjeoL0CK5hqC4CcaZS7tS1OfZAoGATC8D\\nAvVPrp479TqVa5HFV+KxffvlF+Rx6iLGMdM1NYuRKMBAG6/kYCeeH2Iuv+0eflmG\\n+lhledcbA4y/OIdXwXFE/fAafcIpA4aEujZ7vdvAKEUShNJcMDUwMuJ4ytvSeeqS\\n33hCQ9n6zhHasKCxi96M0kEFIds+Zp4ULV16ouUCgYB4bndd6bJi/zNUdNz0jtyT\\nO2j51wp5lODJr2peLqxFG8R5dbr9gwddc8OY8o7Sgr5U5K3kefKLDgQ9XPsk86h8\\nXwDXZv73Lxj8KsWBw5J/oOz4cwT6hpmwkyriiMjjRsfpB5qOkHzi4RV5FsQasDHJ\\n/FvAEcZUzjBWdfzAFnzuSA==\\n-----END PRIVATE KEY-----"
+        
+        if sed -i '' "s|FIREBASE_PRIVATE_KEY=.*|FIREBASE_PRIVATE_KEY=\"${static_key}\"|g" "$env_file"; then
+            success "✅ Firebase configurado con clave estática para desarrollo"
+        fi
+    fi
+}
+
 # Fix para variables de entorno con valores de desarrollo robustos
 fix_development_env_values() {
     info "🔧 Verificando valores de variables de entorno para desarrollo..."
@@ -133,6 +198,9 @@ apply_all_fixes() {
     
     # Fix crítico: Sentry en ms_level_up_management
     fix_sentry_build_command
+    
+    # Fix crítico: Firebase en ms_level_up_management
+    fix_firebase_credentials
     
     # Verificaciones adicionales
     fix_development_env_values
