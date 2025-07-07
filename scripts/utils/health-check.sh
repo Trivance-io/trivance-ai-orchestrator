@@ -80,33 +80,70 @@ check_service_health() {
     
     # Verificar si el puerto está en uso
     local port_status
+    local port_process=""
     if check_port_availability "$port" "$name"; then
         port_status="OCUPADO"
+        # Obtener información del proceso que usa el puerto
+        if command -v lsof >/dev/null 2>&1; then
+            port_process=$(lsof -ti:"$port" 2>/dev/null | head -1)
+        fi
     else
         port_status="LIBRE"
     fi
     
-    # Verificar respuesta HTTP
+    # Verificar respuesta HTTP con múltiples intentos
     local http_status="N/A"
     local response_time="N/A"
+    local connection_error=""
     
     if command -v curl >/dev/null 2>&1; then
         local start_time end_time
-        start_time=$(date +%s%3N)
+        local max_attempts=3
+        local attempt=1
         
-        if curl -s -f -m 10 "$url" >/dev/null 2>&1; then
-            end_time=$(date +%s%3N)
-            response_time=$((end_time - start_time))
-            http_status="OK"
-        else
-            http_status="ERROR"
-        fi
+        while [[ $attempt -le $max_attempts ]]; do
+            start_time=$(date +%s%3N)
+            
+            # Capturar el error específico de curl
+            local curl_output
+            curl_output=$(curl -s -f -m 5 "$url" 2>&1)
+            local curl_exit_code=$?
+            
+            if [[ $curl_exit_code -eq 0 ]]; then
+                end_time=$(date +%s%3N)
+                response_time=$((end_time - start_time))
+                http_status="OK"
+                break
+            else
+                # Analizar el tipo de error
+                if echo "$curl_output" | grep -q "Connection refused"; then
+                    connection_error="PUERTO_RECHAZA_CONEXIONES"
+                elif echo "$curl_output" | grep -q "Failed to connect"; then
+                    connection_error="NO_SE_PUEDE_CONECTAR"
+                elif echo "$curl_output" | grep -q "Empty reply"; then
+                    connection_error="RESPUESTA_VACIA"
+                else
+                    connection_error="ERROR_HTTP"
+                fi
+                
+                if [[ $attempt -eq $max_attempts ]]; then
+                    http_status="ERROR"
+                else
+                    # Esperar un poco antes del siguiente intento
+                    sleep 1
+                fi
+            fi
+            
+            ((attempt++))
+        done
     fi
     
-    # Generar reporte del servicio
+    # Generar reporte del servicio con diagnóstico automático
     local status_symbol=""
     local status_color=""
     local overall_status=""
+    local diagnostic_info=""
+    local auto_fix_suggestion=""
     
     case "$service_key" in
         "frontend")
@@ -119,6 +156,7 @@ check_service_health() {
                 status_symbol="❌"
                 status_color="$RED"
                 overall_status="NO DISPONIBLE"
+                auto_fix_suggestion="cd level_up_backoffice && npm run dev"
             fi
             ;;
         *)
@@ -131,21 +169,64 @@ check_service_health() {
                 status_symbol="⚠️"
                 status_color="$YELLOW"
                 overall_status="PUERTO OCUPADO - HEALTH CHECK FALLÓ"
+                
+                # Diagnóstico específico del problema
+                case "$connection_error" in
+                    "PUERTO_RECHAZA_CONEXIONES")
+                        diagnostic_info="🔍 El puerto está ocupado pero rechaza conexiones HTTP"
+                        auto_fix_suggestion="Proceso zombie detectado. Ejecutar: lsof -ti:$port | xargs kill -9"
+                        ;;
+                    "NO_SE_PUEDE_CONECTAR")
+                        diagnostic_info="🔍 El proceso en el puerto no responde a HTTP"
+                        if [[ -n "$port_process" ]]; then
+                            diagnostic_info="$diagnostic_info (PID: $port_process)"
+                            auto_fix_suggestion="kill -9 $port_process && cd ${service_key/management/ms_level_up_management} && npm run start:dev"
+                        fi
+                        ;;
+                    "RESPUESTA_VACIA")
+                        diagnostic_info="🔍 El servicio responde pero con respuesta vacía (posible inicialización)"
+                        auto_fix_suggestion="Esperar 10 segundos - el servicio puede estar iniciando"
+                        ;;
+                    *)
+                        diagnostic_info="🔍 Error HTTP no específico"
+                        auto_fix_suggestion="Verificar logs del servicio"
+                        ;;
+                esac
             else
                 status_symbol="❌"
                 status_color="$RED"
                 overall_status="NO DISPONIBLE"
+                if [[ "$service_key" == "management" ]]; then
+                    auto_fix_suggestion="cd ms_level_up_management && npm run start:dev"
+                elif [[ "$service_key" == "auth" ]]; then
+                    auto_fix_suggestion="cd ms_trivance_auth && npm run start:dev"
+                fi
             fi
             ;;
     esac
     
-    # Mostrar resultado
+    # Mostrar resultado con diagnóstico mejorado
     echo -e "   ${status_symbol} ${status_color}${name}${NC}: ${overall_status}"
     echo -e "      📍 URL: ${url}"
     echo -e "      🔌 Puerto ${port}: ${port_status}"
     
     if [[ "$response_time" != "N/A" ]]; then
         echo -e "      ⏱️  Tiempo respuesta: ${response_time}ms"
+    fi
+    
+    # Mostrar información de diagnóstico si existe
+    if [[ -n "$diagnostic_info" ]]; then
+        echo -e "      ${diagnostic_info}"
+    fi
+    
+    # Mostrar sugerencia de corrección automática si existe
+    if [[ -n "$auto_fix_suggestion" ]]; then
+        echo -e "      💡 ${BLUE}Solución sugerida:${NC} ${auto_fix_suggestion}"
+    fi
+    
+    # Mostrar información del proceso si está disponible
+    if [[ -n "$port_process" && "$port_status" == "OCUPADO" ]]; then
+        echo -e "      🔧 Proceso activo: PID ${port_process}"
     fi
     
     echo
@@ -361,20 +442,149 @@ quick_check() {
     echo "📊 Servicios activos: ${healthy}/${total}"
 }
 
+# Función para corrección automática de problemas comunes
+auto_fix_services() {
+    echo "🔧 Iniciando corrección automática de servicios..."
+    echo
+    
+    local fixed_services=0
+    local total_issues=0
+    
+    for service_key in $SERVICES_LIST; do
+        local port=$(get_service_port "$service_key")
+        local name=$(get_service_name "$service_key")
+        
+        echo "🔍 Verificando ${name}..."
+        
+        # Verificar si el puerto está ocupado pero no responde
+        if check_port_availability "$port" "$name"; then
+            # Puerto ocupado, verificar si responde
+            local url=$(get_service_url "$service_key")
+            
+            if ! curl -s -f -m 3 "$url" >/dev/null 2>&1; then
+                ((total_issues++))
+                warn "⚠️  ${name}: Puerto ocupado pero no responde"
+                
+                # Obtener PID del proceso
+                local pid
+                if command -v lsof >/dev/null 2>&1; then
+                    pid=$(lsof -ti:"$port" 2>/dev/null | head -1)
+                    
+                    if [[ -n "$pid" ]]; then
+                        info "🔧 Terminando proceso zombie (PID: ${pid})..."
+                        if kill -9 "$pid" 2>/dev/null; then
+                            success "✅ Proceso zombie terminado"
+                            
+                            # Reiniciar el servicio
+                            info "🚀 Reiniciando ${name}..."
+                            case "$service_key" in
+                                "management")
+                                    (cd ms_level_up_management && npm run start:dev > /dev/null 2>&1 &)
+                                    ;;
+                                "auth")
+                                    (cd ms_trivance_auth && npm run start:dev > /dev/null 2>&1 &)
+                                    ;;
+                                "frontend")
+                                    (cd level_up_backoffice && npm run dev > /dev/null 2>&1 &)
+                                    ;;
+                            esac
+                            
+                            # Esperar un momento y verificar
+                            sleep 3
+                            if check_port_availability "$port" "$name"; then
+                                success "✅ ${name} reiniciado exitosamente"
+                                ((fixed_services++))
+                            else
+                                error "❌ Falló el reinicio de ${name}"
+                            fi
+                        else
+                            error "❌ No se pudo terminar el proceso (permisos?)"
+                        fi
+                    fi
+                fi
+            fi
+        else
+            # Puerto libre, servicio no está corriendo
+            ((total_issues++))
+            info "🚀 Iniciando ${name}..."
+            
+            case "$service_key" in
+                "management")
+                    (cd ms_level_up_management && npm run start:dev > /dev/null 2>&1 &)
+                    ;;
+                "auth")
+                    (cd ms_trivance_auth && npm run start:dev > /dev/null 2>&1 &)
+                    ;;
+                "frontend")
+                    (cd level_up_backoffice && npm run dev > /dev/null 2>&1 &)
+                    ;;
+            esac
+            
+            # Esperar y verificar
+            sleep 5
+            if check_port_availability "$port" "$name"; then
+                success "✅ ${name} iniciado exitosamente"
+                ((fixed_services++))
+            else
+                error "❌ Falló el inicio de ${name}"
+            fi
+        fi
+        
+        echo
+    done
+    
+    # Reporte final
+    echo "═══════════════════════════════════════════════════════════════════"
+    echo -e "${PURPLE}📊 REPORTE DE CORRECCIÓN AUTOMÁTICA${NC}"
+    echo "═══════════════════════════════════════════════════════════════════"
+    echo -e "🔧 Problemas detectados: ${total_issues}"
+    echo -e "✅ Servicios corregidos: ${fixed_services}"
+    
+    if [[ $fixed_services -eq $total_issues && $total_issues -gt 0 ]]; then
+        echo -e "🎉 ${GREEN}¡Todos los problemas fueron corregidos automáticamente!${NC}"
+    elif [[ $fixed_services -gt 0 ]]; then
+        echo -e "⚠️  ${YELLOW}Algunos problemas fueron corregidos${NC}"
+    elif [[ $total_issues -eq 0 ]]; then
+        echo -e "✅ ${GREEN}No se detectaron problemas${NC}"
+    else
+        echo -e "❌ ${RED}No se pudieron corregir los problemas automáticamente${NC}"
+    fi
+    
+    echo
+    echo "💡 Ejecuta './health-check.sh' para verificar el estado final"
+}
+
 # Manejar argumentos
 case "${1:-full}" in
     "quick"|"--quick"|"-q")
         quick_check
         ;;
+    "fix"|"--fix"|"-f"|"autofix")
+        auto_fix_services
+        ;;
+    "fix-and-check"|"--fix-and-check")
+        auto_fix_services
+        echo
+        echo "🔍 Ejecutando health check final..."
+        echo
+        main
+        ;;
     "help"|"--help"|"-h")
-        echo "Health check para servicios de Trivance"
+        echo "Health check y corrección automática para servicios de Trivance"
         echo ""
         echo "Uso: $0 [OPCIÓN]"
         echo ""
         echo "Opciones:"
-        echo "  (sin argumentos)  Health check completo"
-        echo "  quick, -q         Health check rápido (solo servicios)"
-        echo "  help, -h          Mostrar esta ayuda"
+        echo "  (sin argumentos)     Health check completo con diagnóstico"
+        echo "  quick, -q           Health check rápido (solo servicios)"
+        echo "  fix, -f, autofix    Corrección automática de problemas comunes"
+        echo "  fix-and-check       Corrección automática + health check final"
+        echo "  help, -h            Mostrar esta ayuda"
+        echo ""
+        echo "Ejemplos:"
+        echo "  ./health-check.sh           # Health check completo"
+        echo "  ./health-check.sh quick     # Verificación rápida"
+        echo "  ./health-check.sh fix       # Corregir problemas automáticamente"
         echo ""
         ;;
     *)

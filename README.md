@@ -30,7 +30,8 @@ cd trivance-dev-config
 - Configuración **100% automatizada** sin intervención manual
 - Compatible con **Claude Code**, **Cursor**, **GitHub Copilot**
 - Variables de entorno **auto-generadas** para desarrollo
-- Detección automática de errores y **auto-corrección**
+- **Diagnóstico automático** y corrección de problemas comunes
+- **Validación post-inicio** automática - nunca más problemas no detectados
 
 ### 🛡️ **Desarrollo Robusto**
 - **Protección de timeout** para instalaciones largas
@@ -130,14 +131,23 @@ El sistema ejecuta automáticamente estos pasos:
 # Configuración completa desde cero
 ./setup.sh
 
+# 🧠 Inicio inteligente con validación automática
+./scripts/utils/smart-start.sh
+
+# 🏥 Health check con diagnóstico automático
+./scripts/utils/health-check.sh
+
+# 🔧 Corrección automática de problemas
+./scripts/utils/health-check.sh fix
+
+# ⚡ Verificación rápida de servicios
+./scripts/utils/health-check.sh quick
+
 # Solo verificar compilación
 ./scripts/verify-compilation.sh
 
 # Limpiar workspace y empezar de nuevo
 ./scripts/utils/clean-workspace.sh
-
-# Health check de servicios
-./scripts/utils/health-check.sh
 ```
 
 ## 🚦 **Después de la Configuración**
@@ -228,7 +238,8 @@ tail -f logs/compilation/*.log
 ### ❌ Puerto Ocupado
 ```bash
 # Error: listen EADDRINUSE: address already in use :::3000
-# 💡 Solución: killall node && ./setup.sh
+# 💡 Solución automática: ./scripts/utils/health-check.sh fix
+# 🔧 Solución manual: killall node && ./setup.sh
 ```
 
 ## 📚 **Documentación Avanzada**
