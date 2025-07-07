@@ -8,6 +8,61 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/common.sh"
 
+# Función universal de timeout que funciona en Windows, Mac y Linux
+run_with_timeout() {
+    local timeout_duration=$1
+    shift
+    local cmd=("$@")
+    
+    # Detectar sistema operativo y usar comando apropiado
+    if command -v timeout >/dev/null 2>&1; then
+        # Linux/GNU coreutils (incluye WSL en Windows)
+        timeout "$timeout_duration" "${cmd[@]}"
+        return $?
+    elif command -v gtimeout >/dev/null 2>&1; then
+        # macOS con coreutils instalado (brew install coreutils)
+        gtimeout "$timeout_duration" "${cmd[@]}"
+        return $?
+    else
+        # Implementación nativa bash para macOS sin coreutils o sistemas sin timeout
+        info "🔧 Usando timeout nativo (sistema sin GNU timeout)"
+        
+        # Ejecutar comando en background
+        "${cmd[@]}" &
+        local cmd_pid=$!
+        
+        # Crear proceso de timeout en background
+        ( 
+            sleep "$timeout_duration" 
+            if kill -0 $cmd_pid 2>/dev/null; then
+                warn "⏰ Timeout alcanzado (${timeout_duration}s), terminando proceso..."
+                kill -TERM $cmd_pid 2>/dev/null
+                sleep 2
+                # Si aún está corriendo, forzar terminación
+                if kill -0 $cmd_pid 2>/dev/null; then
+                    kill -KILL $cmd_pid 2>/dev/null
+                fi
+            fi
+        ) &
+        local timeout_pid=$!
+        
+        # Esperar a que termine el comando
+        wait $cmd_pid 2>/dev/null
+        local exit_code=$?
+        
+        # Limpiar proceso de timeout
+        kill -TERM $timeout_pid 2>/dev/null || true
+        wait $timeout_pid 2>/dev/null || true
+        
+        # Si el comando fue terminado por timeout, retornar código 124 (estándar timeout)
+        if [[ $exit_code -eq 143 ]] || [[ $exit_code -eq 137 ]]; then
+            return 124
+        fi
+        
+        return $exit_code
+    fi
+}
+
 # Función para instalar dependencias de un repo específico
 install_repo_dependencies() {
     local repo_name="$1"
@@ -26,8 +81,8 @@ install_repo_dependencies() {
     # Cambiar al directorio del repo
     cd "$repo_path"
     
-    # Instalación con timeout de 180 segundos (3 minutos)
-    if timeout 180 npm install --silent --no-audit --no-fund > "$log_file" 2>&1; then
+    # Instalación con timeout de 180 segundos (3 minutos) - Universal para todos los SO
+    if run_with_timeout 180 npm install --silent --no-audit --no-fund > "$log_file" 2>&1; then
         local end_time=$(date +%s)
         local duration=$((end_time - start_time))
         success "✅ ${repo_name}: Completado en ${duration}s"

@@ -101,6 +101,7 @@ El sistema ejecuta automáticamente estos pasos:
 
 ### **Paso 4: Instalación de Dependencias** 📦
 - Instala `npm` dependencies con **timeout protection (10 min)**
+- **Cross-platform timeout**: Funciona en Windows, Mac y Linux automáticamente
 - Progress indicators en tiempo real
 - Logs detallados para debugging
 
@@ -164,8 +165,16 @@ cd trivance-mobile && npm start                 # Mobile
 
 ```bash
 # Verificar estado de servicios
-curl http://localhost:3001/health  # Auth Service
-curl http://localhost:3000/health  # Management API
+curl http://localhost:3001/health           # Auth Service
+curl http://localhost:3000/graphql          # Management API (GraphQL Playground)
+
+# IMPORTANTE: La raíz / retorna 404 - ES NORMAL en APIs REST/GraphQL
+# {"message":"Cannot GET /","error":"Not Found","statusCode":404}
+# Esto NO es un error, es diseño estándar de APIs profesionales
+
+# Endpoints funcionales confirmados:
+# - GraphQL Playground: http://localhost:3000/graphql
+# - API REST: /api/auth, /api/users, /api/organizations, /api/donations, etc.
 
 # Ver logs en tiempo real
 tail -f logs/setup.log
@@ -194,7 +203,14 @@ tail -f logs/compilation/*.log
 ### ❌ Error de Timeout en Instalación
 ```bash
 # Las dependencias tardan más de 10 minutos
-# 💡 Solución: Ya incluye timeout protection automático
+# 💡 Solución: Ya incluye timeout protection automático cross-platform
+```
+
+### ❌ Error "timeout: command not found" en macOS
+```bash
+# timeout: command not found
+# 💡 Solución: Sistema implementa timeout universal automáticamente
+# Funciona en Windows, Mac y Linux sin configuración adicional
 ```
 
 ### ❌ Firebase Configuration Error  

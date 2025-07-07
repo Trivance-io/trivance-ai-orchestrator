@@ -34,6 +34,32 @@ cd ..
 ./scripts/verify-compilation.sh
 ```
 
+#### ⚠️ CRÍTICO: Error de Timeout en macOS
+
+**Problema**: timeout command not found en macOS
+```bash
+timeout: command not found
+parallel-install.sh: line 30: timeout: command not found
+```
+**Solución**: ✅ **YA RESUELTO AUTOMÁTICAMENTE** - Sistema implementa timeout universal:
+```bash
+# Detección automática de timeout en parallel-install.sh
+if command -v timeout >/dev/null 2>&1; then
+    timeout "$timeout_duration" "${cmd[@]}"
+elif command -v gtimeout >/dev/null 2>&1; then
+    gtimeout "$timeout_duration" "${cmd[@]}"
+else
+    # Implementación nativa bash para macOS
+    "${cmd[@]}" &
+    local cmd_pid=$!
+    ( sleep "$timeout_duration" && kill -TERM $cmd_pid 2>/dev/null ) &
+    local timeout_pid=$!
+    wait $cmd_pid
+    kill $timeout_pid 2>/dev/null
+fi
+```
+**Nota**: Este fix es **cross-platform** y funciona en Windows, Mac y Linux automáticamente.
+
 **Problema**: React Native TypeScript errores
 ```bash
 TypeScript has warnings/errors (common in development)
@@ -463,8 +489,12 @@ Network Error: Connection refused
 **Solución**:
 ```bash
 # Verificar que backend está corriendo
-curl http://localhost:3000/health
+curl http://localhost:3000/graphql  # GraphQL endpoint funcional
 curl http://localhost:3001/health
+
+# IMPORTANTE: La raíz / retorna 404 - ES NORMAL
+# {"message":"Cannot GET /","error":"Not Found","statusCode":404}
+# Esto NO es un error, es diseño estándar de APIs REST/GraphQL
 
 # Verificar configuración de URLs en frontend
 # level_up_backoffice/.env
@@ -473,6 +503,37 @@ VITE_AUTH_URL=http://localhost:3001
 
 # Verificar CORS en backend
 # Debe permitir origen del frontend
+```
+
+#### ✅ Endpoints Funcionales Confirmados
+
+**Backend Management API (Puerto 3000)**:
+```bash
+# GraphQL Playground - FUNCIONAL
+http://localhost:3000/graphql
+
+# Endpoints API REST disponibles:
+/api/auth          # Autenticación
+/api/users         # Gestión de usuarios  
+/api/organizations # Organizaciones
+/api/donations     # Donaciones
+/api/initiatives   # Iniciativas
+# Y 25+ endpoints más
+
+# Verificar tipos GraphQL disponibles
+curl -s -H "Content-Type: application/json" \
+  -X POST \
+  -d '{"query":"{ __schema { types { name } } }"}' \
+  http://localhost:3000/graphql
+```
+
+**Backend Auth Service (Puerto 3001)**:
+```bash
+# Auth endpoints disponibles
+/api/auth/login
+/api/auth/register
+/api/auth/refresh
+/api/auth/profile
 ```
 
 #### GraphQL Issues
