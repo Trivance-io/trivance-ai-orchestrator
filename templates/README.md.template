@@ -1,0 +1,84 @@
+# 🚀 Trivance Platform - Workspace Multi-Repo
+
+**Workspace completo** para desarrollo de Trivance Platform con **gestión automática de environments**.
+
+## 🏗️ Estructura del Workspace
+
+```
+📁 Trivance Platform/
+├── 🌐 level_up_backoffice/          # Frontend Admin (React + Vite)
+├── 🚀 ms_level_up_management/       # API Backend (NestJS + GraphQL)  
+├── 🔐 ms_trivance_auth/             # Auth Service (NestJS)
+├── 📱 trivance-mobile/              # Mobile App (React Native)
+├── 🔧 trivance-dev-config/          # Configuraciones y scripts
+└── 📄 envs/                         # Configuraciones por environment
+```
+
+## ⚡ QUICK START (5 minutos)
+
+### 1️⃣ **Setup Inicial (Solo una vez)**
+```bash
+# Configurar sistema de environments
+./trivance-dev-config/scripts/envs.sh setup
+
+# Cambiar a development local
+./trivance-dev-config/scripts/envs.sh switch local
+```
+
+### 2️⃣ **Iniciar Servicios**
+```bash
+# Iniciar todos los servicios
+./trivance-dev-config/scripts/start-all-services.sh
+
+# Verificar que todo funciona
+./trivance-dev-config/scripts/health-check.sh
+```
+
+### 3️⃣ **¡Listo! URLs de Desarrollo**
+- **🌐 Frontend Admin**: http://localhost:5173
+- **🚀 Management API**: http://localhost:3000
+- **🔐 Auth Service**: http://localhost:3001
+- **📊 GraphQL Playground**: http://localhost:3000/graphql
+- **📱 Mobile App**: Expo QR desde terminal
+
+## 🎛️ GESTIÓN DE ENVIRONMENTS
+
+### Cambiar Environment en UN Comando
+```bash
+# Desarrollo local (99% del tiempo)
+./trivance-dev-config/scripts/envs.sh switch local
+
+# Testing en QA
+./trivance-dev-config/scripts/envs.sh switch qa
+
+# Production (con confirmación)
+./trivance-dev-config/scripts/envs.sh switch production
+```
+
+### Ver Estado del Sistema
+```bash
+# Status completo
+./trivance-dev-config/scripts/envs.sh status
+
+# Ayuda
+./trivance-dev-config/scripts/envs.sh help
+```
+
+## 📚 DOCUMENTACIÓN
+
+- **📖 [ENVIRONMENTS.md](ENVIRONMENTS.md)** - Guía completa de environments
+- **🔧 [CLAUDE.md](CLAUDE.md)** - Configuración para Claude Code
+- **📁 [envs/README.md](envs/README.md)** - Configuraciones específicas
+
+## 🆘 COMANDOS DE EMERGENCIA
+
+```bash
+# Parar todos los servicios
+./trivance-dev-config/scripts/stop-all-services.sh
+
+# Reset completo a local
+./trivance-dev-config/scripts/envs.sh switch local
+
+# Verificar health
+./trivance-dev-config/scripts/health-check.sh quick
+```

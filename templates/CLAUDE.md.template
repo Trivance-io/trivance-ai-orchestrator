@@ -31,27 +31,27 @@ Trivance-platform/                    # 📁 Workspace principal auto-creado
 ├── README.md                         # Documentación principal (auto-generado)
 ├── TrivancePlatform.code-workspace   # VS Code multi-repo (auto-configurado)
 ├── .gitignore                        # Git ignore maestro (auto-creado)
-├── scripts/                          # Scripts de automatización (copiados)
+├── COMMANDS.md                       # 📖 Referencia rápida de comandos
+├── start-services.sh                 # 🚀 Iniciar servicios (enlace simbólico)
+├── check-health.sh                   # 🏥 Verificar estado (enlace simbólico)
+├── change-env.sh                     # 🎛️ Cambiar environment (enlace simbólico)
+├── setup.sh                          # 🔧 Setup completo (enlace simbólico)
+├── envs/                             # 🔐 Configuraciones de environments (no en git)
 ├── trivance-dev-config/              # 🔧 REPO DE CONFIGURACIONES (clonado)
 │   ├── .claude/                      # ⚙️ Configuración Claude Code
 │   │   ├── settings.json             # Settings principales Claude
-│   │   ├── context.md                # Contexto técnico detallado
-│   │   ├── commands.md               # Comandos personalizados
-│   │   ├── prompts.md                # Prompts predefinidos
-│   │   └── hooks.json                # Hooks de automatización
-│   ├── .ai-config/                   # 🤖 Configuración universal AI
-│   │   ├── settings.json             # Settings agnósticos
-│   │   ├── context.md                # Contexto para otras herramientas
-│   │   └── patterns.md               # Patrones de código
+│   │   └── context.md                # Contexto técnico del proyecto
 │   ├── scripts/                      # 🚀 Scripts maestros
 │   │   ├── core/
 │   │   │   └── orchestrator.sh       # Script de configuración completa
 │   │   ├── utils/
-│   │   │   ├── logging.sh            # Utilidades de logging
-│   │   │   └── validation.sh         # Utilidades de validación
-│   │   ├── start-all-services.sh     # Iniciar todos los servicios
-│   │   ├── stop-all-services.sh      # Detener todos los servicios
-│   │   └── check-health.sh           # Verificar estado completo
+│   │   │   ├── smart-start.sh        # Inicio inteligente con validación
+│   │   │   ├── health-check.sh       # Verificación y auto-fix
+│   │   │   ├── clean-workspace.sh    # Limpieza del workspace
+│   │   │   ├── parallel-install.sh   # Instalación paralela rápida
+│   │   │   └── post-setup-fixes.sh   # Fixes automáticos post-setup
+│   │   ├── envs.sh                   # Gestión de environments
+│   │   └── verify-compilation.sh     # Verificar compilación
 │   ├── templates/                    # 📄 Templates para auto-generación
 │   │   ├── CLAUDE.md.template        # Template de este archivo
 │   │   └── TrivancePlatform.code-workspace.template
@@ -80,7 +80,7 @@ Claude Code debe entender que opera en un **workspace multi-repositorio** donde:
 1. **4 repositorios integrados** con dependencias entre ellos
 2. **Cada repo tiene tecnologías específicas** y propósitos únicos
 3. **Los cambios pueden ser cross-repo** y requieren coordinación
-4. **Patrones de código unificados** definidos en `.ai-config/patterns.md`
+4. **Configuración centralizada** en `trivance-dev-config`
 5. **Flujo AI-FIRST** con español como idioma principal
 
 ### URLs de Servicios Auto-Configurados
@@ -99,31 +99,39 @@ Claude Code debe entender que opera en un **workspace multi-repositorio** donde:
 
 ## 🚀 COMANDOS MAESTROS PARA CLAUDE CODE
 
-### Comandos de Gestión del Workspace (SCRIPTS REALES)
+### ⚡ Comandos Simplificados (Enlaces Simbólicos)
 ```bash
-# INICIAR TODO EL WORKSPACE
-./scripts/start-all-services.sh
+# INICIAR SERVICIOS CON VALIDACIÓN
+./start-services.sh
 
-# VERIFICAR ESTADO COMPLETO
-./scripts/check-health.sh
+# VERIFICAR ESTADO DE SERVICIOS
+./check-health.sh
+./check-health.sh fix              # Con auto-corrección
 
-# DETENER TODOS LOS SERVICIOS
-./scripts/stop-all-services.sh
+# CAMBIAR ENVIRONMENT
+./change-env.sh switch local       # Desarrollo
+./change-env.sh switch qa          # Testing
+./change-env.sh switch production  # Producción
+./change-env.sh status             # Ver estado actual
 
-# CONFIGURAR WORKSPACE INICIAL
-./setup.sh
+# SETUP COMPLETO
+./setup.sh                         # Reconfigurar todo
 ```
 
-### Comandos por Environment
+### 📁 Comandos con Rutas Completas
 ```bash
-# Desarrollo local
-./scripts/start-all-services.sh local
+# Inicio inteligente con validación
+./trivance-dev-config/scripts/utils/smart-start.sh
 
-# Testing QA  
-./scripts/start-all-services.sh qa
+# Health check con diagnóstico
+./trivance-dev-config/scripts/utils/health-check.sh
 
-# QA con mobile
-./scripts/start-all-services.sh qa mobile
+# Gestión de environments
+./trivance-dev-config/scripts/envs.sh switch [local|qa|production]
+./trivance-dev-config/scripts/envs.sh status
+
+# Ver referencia completa
+cat COMMANDS.md
 ```
 
 ## 🏗️ ARQUITECTURA TÉCNICA COMPLETA

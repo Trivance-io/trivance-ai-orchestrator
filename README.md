@@ -24,14 +24,47 @@ cd trivance-dev-config
 
 **🎉 ¡Listo! En 5-10 minutos tendrás todo configurado automáticamente.**
 
+## 🚀 **Comandos Rápidos (Enlaces Simbólicos)**
+
+Después del setup, usa estos comandos simplificados desde el workspace principal:
+
+```bash
+# 🚀 Iniciar servicios
+./start-services.sh
+
+# 🏥 Verificar estado
+./check-health.sh
+
+# 🎛️ Cambiar environment
+./change-env.sh switch local    # Desarrollo
+./change-env.sh switch qa       # Testing
+./change-env.sh switch production # Producción
+
+# 📊 Ver estado actual
+./change-env.sh status
+
+# 🔄 Sincronizar con environments.json
+./change-env.sh sync
+
+# 📋 Ver todos los comandos
+cat COMMANDS.md
+```
+
 ## ✨ **Características Principales**
 
 ### 🤖 **AI-First Design**
 - Configuración **100% automatizada** sin intervención manual
 - Compatible con **Claude Code**, **Cursor**, **GitHub Copilot**
-- Variables de entorno **auto-generadas** para desarrollo
+- Variables de entorno **auto-generadas** desde environments.json
 - **Diagnóstico automático** y corrección de problemas comunes
 - **Validación post-inicio** automática - nunca más problemas no detectados
+
+### 🎛️ **Sistema de Environments Mejorado** 🆕
+- **Sincronización automática** con environments.json
+- **Validación completa** de variables críticas
+- **Comparación visual** entre environments (`diff`)
+- **Cambio instantáneo** entre local/qa/production
+- **Seguridad garantizada** - imposible commitear secrets
 
 ### 🛡️ **Desarrollo Robusto**
 - **Protección de timeout** para instalaciones largas
@@ -40,7 +73,7 @@ cd trivance-dev-config
 - **Rollback automático** en caso de fallos
 
 ### 🔧 **Zero Configuration**
-- **Firebase** opcional para desarrollo
+- **Enlaces simbólicos** para comandos simplificados
 - **Base de datos** en modo desarrollo por defecto
 - **CORS** preconfigurado para desarrollo local
 - **Hot reload** habilitado en todos los servicios
@@ -125,20 +158,32 @@ El sistema ejecuta automáticamente estos pasos:
 - React Native: TypeScript verification
 - **FALLA TODO** si algún repo no compila
 
-## 🎮 **Comandos Principales**
+## 🎮 **Comandos Principales (Después del Setup)**
 
+### Comandos Simplificados (Enlaces Simbólicos)
 ```bash
-# Configuración completa desde cero
-./setup.sh
+# 🚀 Iniciar servicios inteligentemente
+./start-services.sh
 
-# 🧠 Inicio inteligente con validación automática
-./scripts/utils/smart-start.sh
+# 🏥 Health check con diagnóstico
+./check-health.sh
+./check-health.sh fix          # Con auto-corrección
 
-# 🏥 Health check con diagnóstico automático
-./scripts/utils/health-check.sh
+# 🎛️ Gestión de environments
+./change-env.sh switch local   # Cambiar a local
+./change-env.sh status         # Ver estado
+./change-env.sh validate       # Validar configuración
+./change-env.sh diff local qa  # Comparar environments
+./change-env.sh sync          # Sincronizar con JSON
+```
 
-# 🔧 Corrección automática de problemas
-./scripts/utils/health-check.sh fix
+### Comandos con Rutas Completas
+```bash
+# Inicio inteligente con validación
+./trivance-dev-config/scripts/utils/smart-start.sh
+
+# Health check con diagnóstico
+./trivance-dev-config/scripts/utils/health-check.sh
 
 # ⚡ Verificación rápida de servicios
 ./scripts/utils/health-check.sh quick

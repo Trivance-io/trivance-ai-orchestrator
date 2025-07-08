@@ -1,0 +1,23 @@
+{
+  "language": "es",
+  "workspace": "multi-repo",
+  "autoApprove": [
+    "npm run",
+    "npm install",
+    "git status",
+    "git diff",
+    "cd",
+    "ls",
+    "pwd",
+    "node --version",
+    "npm --version"
+  ],
+  "repositories": [
+    "ms_level_up_management",
+    "ms_trivance_auth", 
+    "level_up_backoffice",
+    "trivance-mobile"
+  ],
+  "developmentMode": true,
+  "aiFirst": true
+}

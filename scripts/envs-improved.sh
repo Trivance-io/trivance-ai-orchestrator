@@ -1,0 +1,710 @@
+#!/bin/bash
+
+# 🎛️ TRIVANCE ENVIRONMENTS - VERSIÓN MEJORADA CON SINCRONIZACIÓN
+# Script maestro que sincroniza automáticamente con environments.json
+# 
+# Mejoras implementadas:
+#   - Sincronización automática con environments.json
+#   - Validación completa de variables requeridas
+#   - Comando diff para comparar environments
+#   - Comando sync para actualizar templates
+#   - Mejor documentación de variables
+
+set -euo pipefail
+
+# 🎨 Colores
+readonly RED='\033[0;31m'
+readonly GREEN='\033[0;32m'
+readonly YELLOW='\033[1;33m'
+readonly BLUE='\033[0;34m'
+readonly PURPLE='\033[0;35m'
+readonly NC='\033[0m'
+
+# 📁 Directorios
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly CONFIG_DIR="$(dirname "$SCRIPT_DIR")"
+readonly WORKSPACE_DIR="$(dirname "$CONFIG_DIR")"
+readonly ENVS_DIR="$WORKSPACE_DIR/envs"
+readonly ENV_CONFIG="$CONFIG_DIR/config/environments.json"
+
+# 📝 Logging
+log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
+log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
+log_warning() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
+log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+log_header() { echo -e "\n${PURPLE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"; echo -e "${PURPLE}$1${NC}"; echo -e "${PURPLE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"; }
+
+# 🔍 Verificar dependencias
+check_dependencies() {
+    if ! command -v jq &> /dev/null; then
+        log_error "jq no está instalado. Instalando..."
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            brew install jq
+        else
+            sudo apt-get install -y jq
+        fi
+    fi
+    
+    if [[ ! -f "$ENV_CONFIG" ]]; then
+        log_error "Archivo environments.json no encontrado: $ENV_CONFIG"
+        exit 1
+    fi
+}
+
+# 🏗️ Setup inicial del sistema
+setup_environment_system() {
+    log_header "🏗️ Configurando sistema de environments mejorado..."
+    
+    check_dependencies
+    
+    # Crear directorio envs si no existe
+    mkdir -p "$ENVS_DIR"
+    
+    # Crear archivo README en envs/
+    cat > "$ENVS_DIR/README.md" << 'EOF'
+# 📁 ENVS - Configuraciones de Environment (VERSIÓN MEJORADA)
+
+Este directorio contiene las configuraciones reales para cada environment.
+**SINCRONIZADO AUTOMÁTICAMENTE** con `config/environments.json`
+
+## 📋 Archivos por Environment
+
+### 🖥️ LOCAL (Desarrollo)
+- `local.management.env` - ms_level_up_management
+- `local.auth.env` - ms_trivance_auth  
+- `local.backoffice.env` - level_up_backoffice
+- `local.mobile.env` - trivance-mobile
+
+### 🧪 QA (Testing)
+- `qa.management.env` - ms_level_up_management (QA)
+- `qa.auth.env` - ms_trivance_auth (QA)
+- `qa.backoffice.env` - level_up_backoffice (QA)  
+- `qa.mobile.env` - trivance-mobile (QA)
+
+### 🚀 PRODUCTION (Producción)
+- `production.management.env` - ms_level_up_management (PROD)
+- `production.auth.env` - ms_trivance_auth (PROD)
+- `production.backoffice.env` - level_up_backoffice (PROD)
+- `production.mobile.env` - trivance-mobile (PROD)
+
+## 🔐 Seguridad
+
+⚠️ **IMPORTANTE**: Este directorio contiene secrets reales
+- ✅ Está en .gitignore (no se commitea)
+- ✅ Los templates locales se generan desde environments.json
+- ✅ QA/Prod deben configurarse manualmente con secrets reales
+
+## 🚀 Comandos Disponibles
+
+```bash
+# Cambiar environment
+./change-env.sh switch local
+./change-env.sh switch qa
+./change-env.sh switch production
+
+# Validar configuración
+./change-env.sh validate [env]
+
+# Comparar environments
+./change-env.sh diff local qa
+
+# Sincronizar con environments.json
+./change-env.sh sync
+
+# Ver estado
+./change-env.sh status
+```
+
+## 📊 Variables Críticas por Servicio
+
+### ms_level_up_management
+- PORT, DATABASE_URL, JWTSECRET (obligatorias)
+- AWS S3, Email, Pagos (según features)
+
+### ms_trivance_auth  
+- PORT, DB_MONGO, JWTSECRET (obligatorias)
+- OAuth, Twilio (según features)
+
+### level_up_backoffice
+- VITE_API_URL, VITE_AUTH_API_URL (obligatorias)
+
+### trivance-mobile
+- EXPO_PUBLIC_API_URL, EXPO_PUBLIC_AUTH_API_URL (obligatorias)
+EOF
+
+    # Generar templates desde environments.json
+    generate_templates_from_json
+    
+    log_success "✅ Sistema de environments configurado"
+    log_info "📁 Directorio: $ENVS_DIR"
+    log_info "📖 Documentación: $ENVS_DIR/README.md"
+    log_info "🔄 Templates sincronizados con environments.json"
+}
+
+# 📝 Generar templates desde environments.json
+generate_templates_from_json() {
+    log_info "📝 Generando templates desde environments.json..."
+    
+    # ms_level_up_management
+    log_info "  - Generando local.management.env"
+    {
+        echo "# 🖥️ LOCAL - ms_level_up_management"
+        echo "# Generado automáticamente desde environments.json"
+        echo "# $(date)"
+        echo "# ⚠️ Para QA/Prod: copiar este archivo y actualizar valores"
+        echo ""
+        
+        # Agregar todas las variables de environments.json
+        jq -r '.environments.ms_level_up_management | to_entries[] | "# \(.key | gsub("_"; " ") | ascii_downcase)\n\(.key)=\(.value)\n"' "$ENV_CONFIG"
+        
+        # Agregar NODE_ENV
+        echo "# Environment mode"
+        echo "NODE_ENV=development"
+    } > "$ENVS_DIR/local.management.env"
+    
+    # ms_trivance_auth
+    log_info "  - Generando local.auth.env"
+    {
+        echo "# 🖥️ LOCAL - ms_trivance_auth"
+        echo "# Generado automáticamente desde environments.json"
+        echo "# $(date)"
+        echo "# ⚠️ Para QA/Prod: copiar este archivo y actualizar valores"
+        echo ""
+        
+        jq -r '.environments.ms_trivance_auth | to_entries[] | "# \(.key | gsub("_"; " ") | ascii_downcase)\n\(.key)=\(.value)\n"' "$ENV_CONFIG"
+        
+        echo "# Environment mode"
+        echo "NODE_ENV=development"
+    } > "$ENVS_DIR/local.auth.env"
+    
+    # level_up_backoffice
+    log_info "  - Generando local.backoffice.env"
+    {
+        echo "# 🖥️ LOCAL - level_up_backoffice"
+        echo "# Generado automáticamente"
+        echo "# $(date)"
+        echo "# ⚠️ Para QA/Prod: copiar este archivo y actualizar valores"
+        echo ""
+        
+        # Si hay configuración específica en JSON, usarla
+        if jq -e '.environments.level_up_backoffice' "$ENV_CONFIG" > /dev/null 2>&1; then
+            jq -r '.environments.level_up_backoffice | to_entries[] | "# \(.key | gsub("_"; " ") | ascii_downcase)\n\(.key)=\(.value)\n"' "$ENV_CONFIG"
+        else
+            # Valores por defecto para frontend
+            cat << 'EOF'
+# API endpoints
+VITE_API_URL=http://localhost:3000
+VITE_AUTH_API_URL=http://localhost:3001
+VITE_GRAPHQL_URL=http://localhost:3000/graphql
+
+# App configuration
+VITE_APP_NAME=Trivance Admin Panel
+VITE_APP_VERSION=1.0.0
+VITE_APP_ENV=development
+
+# Features
+VITE_DEBUG_MODE=true
+VITE_MOCK_API=false
+
+# Optional services
+# VITE_SENTRY_DSN=
+# VITE_GOOGLE_MAPS_API_KEY=
+EOF
+        fi
+    } > "$ENVS_DIR/local.backoffice.env"
+    
+    # trivance-mobile
+    log_info "  - Generando local.mobile.env"
+    {
+        echo "# 🖥️ LOCAL - trivance-mobile"
+        echo "# Generado automáticamente"
+        echo "# $(date)"
+        echo "# ⚠️ Para QA/Prod: copiar este archivo y actualizar valores"
+        echo ""
+        
+        if jq -e '.environments["trivance-mobile"]' "$ENV_CONFIG" > /dev/null 2>&1; then
+            jq -r '.environments["trivance-mobile"] | to_entries[] | "# \(.key | gsub("_"; " ") | ascii_downcase)\n\(.key)=\(.value)\n"' "$ENV_CONFIG"
+        else
+            cat << 'EOF'
+# API endpoints
+EXPO_PUBLIC_API_URL=http://localhost:3000
+EXPO_PUBLIC_AUTH_API_URL=http://localhost:3001
+
+# App configuration
+EXPO_PUBLIC_ENVIRONMENT=development
+EXPO_PUBLIC_APP_NAME=Trivance Mobile
+EXPO_PUBLIC_APP_VERSION=1.0.0
+
+# Features
+EXPO_PUBLIC_DEBUG_MODE=true
+EXPO_PUBLIC_MOCK_API=false
+
+# Optional services
+# EXPO_PUBLIC_SENTRY_DSN=
+# EXPO_PUBLIC_FIREBASE_CONFIG=
+EOF
+        fi
+    } > "$ENVS_DIR/local.mobile.env"
+    
+    # Crear templates vacíos para QA y Production como guía
+    create_environment_templates "qa"
+    create_environment_templates "production"
+}
+
+# 📋 Crear templates de environment como guía
+create_environment_templates() {
+    local env="$1"
+    
+    if [[ ! -f "$ENVS_DIR/$env.management.env" ]]; then
+        log_info "  - Creando template $env.management.env"
+        sed "s/LOCAL/$env/g; s/localhost/\$${env^^}_HOST/g; s/development/$env/g" \
+            "$ENVS_DIR/local.management.env" > "$ENVS_DIR/$env.management.env.template"
+    fi
+}
+
+# 🔄 Cambiar environment
+switch_environment() {
+    local env="$1"
+    
+    if [[ -z "$env" ]]; then
+        log_error "Especifica un environment: local, qa, production"
+        exit 1
+    fi
+    
+    if [[ ! "$env" =~ ^(local|qa|production)$ ]]; then
+        log_error "Environment inválido: $env"
+        exit 1
+    fi
+    
+    log_header "🔄 Cambiando a environment: $env"
+    
+    # Verificar archivos necesarios
+    local missing_files=()
+    for service in "management" "auth" "backoffice" "mobile"; do
+        if [[ ! -f "$ENVS_DIR/$env.$service.env" ]]; then
+            missing_files+=("$env.$service.env")
+        fi
+    done
+    
+    if [[ ${#missing_files[@]} -gt 0 ]]; then
+        log_error "Faltan archivos de configuración para $env:"
+        for file in "${missing_files[@]}"; do
+            echo "  ❌ $file"
+        done
+        
+        if [[ "$env" != "local" ]]; then
+            log_info ""
+            log_info "Para crear configuraciones de $env:"
+            log_info "   1. Copiar archivos locales como base:"
+            for file in "${missing_files[@]}"; do
+                local local_file="${file/$env/local}"
+                log_info "      cp envs/$local_file envs/$file"
+            done
+            log_info "   2. Editar archivos con configuraciones reales de $env"
+            log_info "   3. Ejecutar nuevamente: ./change-env.sh switch $env"
+        fi
+        exit 1
+    fi
+    
+    # Confirmar production
+    if [[ "$env" = "production" ]]; then
+        log_warning "⚠️  ADVERTENCIA: Cambiando a PRODUCTION environment"
+        log_warning "⚠️  Esto configurará todos los servicios para PRODUCCIÓN REAL"
+        read -p "¿Estás seguro? Escribe 'yes' para confirmar: " -r
+        if [[ ! $REPLY =~ ^[Yy][Ee][Ss]$ ]]; then
+            log_info "Operación cancelada"
+            exit 0
+        fi
+    fi
+    
+    # Copiar archivos .env
+    log_info "📄 Copiando configuraciones de $env..."
+    
+    cp "$ENVS_DIR/$env.management.env" "$WORKSPACE_DIR/ms_level_up_management/.env"
+    cp "$ENVS_DIR/$env.auth.env" "$WORKSPACE_DIR/ms_trivance_auth/.env"
+    cp "$ENVS_DIR/$env.backoffice.env" "$WORKSPACE_DIR/level_up_backoffice/.env"
+    cp "$ENVS_DIR/$env.mobile.env" "$WORKSPACE_DIR/trivance-mobile/.env"
+    
+    # Guardar environment actual
+    echo "$env" > "$CONFIG_DIR/.current_environment"
+    
+    # Validación completa
+    validate_environment_config "$env"
+    
+    log_success "✅ Environment cambiado exitosamente a: $env"
+    log_info "🚀 Para iniciar servicios: ./start-services.sh"
+}
+
+# 🔍 Validación completa de configuración
+validate_environment_config() {
+    local env="$1"
+    
+    log_info "🔍 Validando configuración completa..."
+    
+    # Variables críticas por servicio
+    declare -A critical_vars
+    critical_vars["ms_level_up_management"]="PORT DATABASE_URL JWTSECRET PASSWORDSECRET ENCRYPTSECRET"
+    critical_vars["ms_trivance_auth"]="PORT DB_MONGO JWTSECRET PASSWORDSECRET ENCRYPTSECRET"
+    critical_vars["level_up_backoffice"]="VITE_API_URL VITE_AUTH_API_URL"
+    critical_vars["trivance-mobile"]="EXPO_PUBLIC_API_URL EXPO_PUBLIC_AUTH_API_URL"
+    
+    local has_warnings=false
+    
+    # Validar cada servicio
+    for service in "${!critical_vars[@]}"; do
+        local env_file="$WORKSPACE_DIR/$service/.env"
+        
+        if [[ ! -f "$env_file" ]]; then
+            log_error "❌ Archivo .env no encontrado: $env_file"
+            exit 1
+        fi
+        
+        # Verificar variables críticas
+        for var in ${critical_vars[$service]}; do
+            if ! grep -q "^$var=" "$env_file"; then
+                log_warning "  ⚠️  Variable crítica faltante en $service: $var"
+                has_warnings=true
+            elif grep -q "^$var=$" "$env_file"; then
+                log_warning "  ⚠️  Variable crítica vacía en $service: $var"
+                has_warnings=true
+            fi
+        done
+    done
+    
+    # Validaciones específicas por environment
+    case "$env" in
+        "local")
+            if ! grep -q "localhost" "$WORKSPACE_DIR/ms_level_up_management/.env"; then
+                log_warning "  ⚠️  Local environment no está usando localhost"
+                has_warnings=true
+            fi
+            ;;
+        "production")
+            if grep -q "localhost" "$WORKSPACE_DIR/ms_level_up_management/.env"; then
+                log_error "🚨 Production environment no puede usar localhost"
+                exit 1
+            fi
+            if grep -q "dev_" "$WORKSPACE_DIR/ms_level_up_management/.env"; then
+                log_warning "  ⚠️  Production parece tener valores de desarrollo"
+                has_warnings=true
+            fi
+            ;;
+    esac
+    
+    if [[ "$has_warnings" = false ]]; then
+        log_success "✅ Validación completa exitosa - sin problemas"
+    else
+        log_warning "⚠️  Validación completa con advertencias"
+    fi
+}
+
+# 📊 Mostrar status detallado
+show_status() {
+    log_header "📊 Trivance Environments - Status Detallado"
+    
+    # Environment actual
+    local current_env="unknown"
+    if [[ -f "$CONFIG_DIR/.current_environment" ]]; then
+        current_env=$(cat "$CONFIG_DIR/.current_environment")
+    fi
+    
+    echo -e "🎛️  Environment Actual: ${GREEN}$current_env${NC}"
+    echo ""
+    
+    # Estado de archivos .env
+    echo "📄 Estado de archivos .env:"
+    local services=("ms_level_up_management" "ms_trivance_auth" "level_up_backoffice" "trivance-mobile")
+    for service in "${services[@]}"; do
+        local env_file="$WORKSPACE_DIR/$service/.env"
+        if [[ -f "$env_file" ]]; then
+            local size=$(wc -c < "$env_file" | tr -d ' ')
+            local lines=$(wc -l < "$env_file" | tr -d ' ')
+            local modified=$(stat -f "%Sm" "$env_file" 2>/dev/null || stat -c "%y" "$env_file" 2>/dev/null | cut -d' ' -f1 || echo "unknown")
+            echo -e "  ${GREEN}✅${NC} $service"
+            echo -e "     Tamaño: ${size} bytes | Líneas: ${lines} | Modificado: $modified"
+        else
+            echo -e "  ${RED}❌${NC} $service (sin .env)"
+        fi
+    done
+    echo ""
+    
+    # Servicios corriendo
+    echo "🚀 Servicios corriendo:"
+    local ports=("3000:Management API" "3001:Auth Service" "5173:Frontend" "8081:Metro Bundler")
+    
+    for port_info in "${ports[@]}"; do
+        local port="${port_info%%:*}"
+        local name="${port_info#*:}"
+        local pid=$(lsof -ti:$port 2>/dev/null || true)
+        
+        if [[ -n "$pid" ]]; then
+            echo -e "  ${GREEN}✅${NC} Puerto $port ($name) - PID: $pid"
+        else
+            echo -e "  ${RED}❌${NC} Puerto $port ($name)"
+        fi
+    done
+    echo ""
+    
+    # Configuraciones disponibles
+    echo "📁 Configuraciones disponibles en envs/:"
+    if [[ -d "$ENVS_DIR" ]]; then
+        local envs=("local" "qa" "production")
+        for env in "${envs[@]}"; do
+            echo -e "\n  ${BLUE}Environment: $env${NC}"
+            local all_exist=true
+            for service in "management" "auth" "backoffice" "mobile"; do
+                local env_file="$ENVS_DIR/$env.$service.env"
+                if [[ -f "$env_file" ]]; then
+                    echo -e "    ${GREEN}✅${NC} $env.$service.env"
+                else
+                    echo -e "    ${RED}❌${NC} $env.$service.env (no existe)"
+                    all_exist=false
+                fi
+            done
+            if [[ "$all_exist" = true ]]; then
+                echo -e "    ${GREEN}Estado: Completo${NC}"
+            else
+                echo -e "    ${YELLOW}Estado: Incompleto${NC}"
+            fi
+        done
+    else
+        echo -e "  ${RED}❌${NC} Directorio envs/ no encontrado"
+    fi
+    
+    # Información de sincronización
+    echo ""
+    echo "🔄 Sincronización con environments.json:"
+    if [[ -f "$ENV_CONFIG" ]]; then
+        local json_modified=$(stat -f "%Sm" "$ENV_CONFIG" 2>/dev/null || stat -c "%y" "$ENV_CONFIG" 2>/dev/null | cut -d' ' -f1)
+        echo -e "  ${GREEN}✅${NC} environments.json encontrado"
+        echo -e "     Modificado: $json_modified"
+        
+        # Verificar si templates están actualizados
+        if [[ -f "$ENVS_DIR/local.management.env" ]]; then
+            local template_modified=$(stat -f "%Sm" "$ENVS_DIR/local.management.env" 2>/dev/null || stat -c "%y" "$ENVS_DIR/local.management.env" 2>/dev/null | cut -d' ' -f1)
+            echo -e "     Templates locales: $template_modified"
+            
+            # Comparar fechas (simplificado)
+            if [[ "$json_modified" > "$template_modified" ]]; then
+                echo -e "     ${YELLOW}⚠️  environments.json es más reciente - ejecutar: ./change-env.sh sync${NC}"
+            fi
+        fi
+    else
+        echo -e "  ${RED}❌${NC} environments.json no encontrado"
+    fi
+}
+
+# 📋 Validar environment específico
+validate_specific_environment() {
+    local env="${1:-$current_env}"
+    
+    if [[ -z "$env" || "$env" = "unknown" ]]; then
+        log_error "Especifica un environment para validar"
+        exit 1
+    fi
+    
+    log_header "🔍 Validando environment: $env"
+    
+    # Cambiar temporalmente
+    local original_env=""
+    if [[ -f "$CONFIG_DIR/.current_environment" ]]; then
+        original_env=$(cat "$CONFIG_DIR/.current_environment")
+    fi
+    
+    switch_environment "$env"
+    
+    # Restaurar environment original si es diferente
+    if [[ -n "$original_env" && "$original_env" != "$env" ]]; then
+        echo "$original_env" > "$CONFIG_DIR/.current_environment"
+    fi
+}
+
+# 📊 Comparar dos environments
+compare_environments() {
+    local env1="$1"
+    local env2="$2"
+    
+    if [[ -z "$env1" ]] || [[ -z "$env2" ]]; then
+        log_error "Uso: $0 diff <env1> <env2>"
+        exit 1
+    fi
+    
+    log_header "📊 Comparando $env1 vs $env2"
+    
+    local services=("management" "auth" "backoffice" "mobile")
+    
+    for service in "${services[@]}"; do
+        local file1="$ENVS_DIR/$env1.$service.env"
+        local file2="$ENVS_DIR/$env2.$service.env"
+        
+        if [[ ! -f "$file1" ]]; then
+            log_warning "⚠️  No existe: $file1"
+            continue
+        fi
+        
+        if [[ ! -f "$file2" ]]; then
+            log_warning "⚠️  No existe: $file2"
+            continue
+        fi
+        
+        echo ""
+        log_info "🔍 Diferencias en $service:"
+        echo ""
+        
+        # Extraer todas las variables únicas
+        local all_vars=$(cat "$file1" "$file2" | grep -E "^[A-Z_]+=" | cut -d'=' -f1 | sort -u)
+        
+        local has_diff=false
+        while IFS= read -r var; do
+            if [[ -z "$var" ]]; then continue; fi
+            
+            local val1=$(grep "^$var=" "$file1" 2>/dev/null | cut -d'=' -f2- || echo "[NO EXISTE]")
+            local val2=$(grep "^$var=" "$file2" 2>/dev/null | cut -d'=' -f2- || echo "[NO EXISTE]")
+            
+            if [[ "$val1" != "$val2" ]]; then
+                has_diff=true
+                echo -e "  ${YELLOW}$var:${NC}"
+                
+                # Ocultar valores sensibles en producción
+                if [[ "$env1" = "production" || "$env2" = "production" ]] && [[ "$var" =~ (SECRET|KEY|PASSWORD|TOKEN) ]]; then
+                    if [[ "$val1" != "[NO EXISTE]" ]]; then val1="[OCULTO]"; fi
+                    if [[ "$val2" != "[NO EXISTE]" ]]; then val2="[OCULTO]"; fi
+                fi
+                
+                echo -e "    $env1: ${GREEN}$val1${NC}"
+                echo -e "    $env2: ${BLUE}$val2${NC}"
+                echo ""
+            fi
+        done <<< "$all_vars"
+        
+        if [[ "$has_diff" = false ]]; then
+            echo -e "  ${GREEN}✅ Sin diferencias${NC}"
+        fi
+    done
+}
+
+# 🔄 Sincronizar templates con environments.json
+sync_templates() {
+    log_header "🔄 Sincronizando templates con environments.json"
+    
+    check_dependencies
+    
+    # Respaldar configuraciones actuales
+    local backup_dir="$ENVS_DIR/backup_$(date +%Y%m%d_%H%M%S)"
+    mkdir -p "$backup_dir"
+    
+    log_info "📦 Respaldando configuraciones actuales..."
+    local backed_up=false
+    for file in "$ENVS_DIR"/*.env; do
+        if [[ -f "$file" ]]; then
+            cp "$file" "$backup_dir/"
+            backed_up=true
+        fi
+    done
+    
+    if [[ "$backed_up" = true ]]; then
+        log_success "✅ Respaldo creado en: $backup_dir"
+    fi
+    
+    # Regenerar templates
+    generate_templates_from_json
+    
+    log_success "✅ Templates sincronizados exitosamente"
+    log_info ""
+    log_info "📋 Próximos pasos:"
+    log_info "   1. Revisar cambios en templates locales"
+    log_info "   2. Ejecutar: ./change-env.sh switch local"
+    log_info "   3. Para restaurar respaldo: cp $backup_dir/* $ENVS_DIR/"
+}
+
+# 📋 Mostrar ayuda mejorada
+show_help() {
+    cat << EOF
+${PURPLE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}
+${PURPLE}🎛️  Trivance Environments - Sistema Mejorado${NC}
+${PURPLE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}
+
+${BLUE}COMANDOS DISPONIBLES:${NC}
+  ${GREEN}setup${NC}               Configurar sistema por primera vez
+  ${GREEN}switch <env>${NC}        Cambiar a environment específico  
+  ${GREEN}status${NC}              Mostrar estado detallado del sistema
+  ${GREEN}validate [env]${NC}      Validar configuración de environment
+  ${GREEN}diff <env1> <env2>${NC}  Comparar dos environments
+  ${GREEN}sync${NC}                Sincronizar templates con environments.json
+  ${GREEN}help${NC}                Mostrar esta ayuda
+
+${BLUE}ENVIRONMENTS:${NC}
+  ${GREEN}local${NC}               Desarrollo local (localhost)
+  ${GREEN}qa${NC}                  Testing y validación
+  ${GREEN}production${NC}          Producción (requiere confirmación)
+
+${BLUE}EJEMPLOS DE USO:${NC}
+  $0 setup                    # Primera configuración
+  $0 switch local             # Cambiar a desarrollo
+  $0 switch qa                # Cambiar a QA
+  $0 status                   # Ver estado completo
+  $0 validate production      # Validar config de producción
+  $0 diff local qa            # Comparar local vs QA
+  $0 sync                     # Actualizar desde environments.json
+
+${BLUE}ARCHIVOS DE CONFIGURACIÓN:${NC}
+  ${YELLOW}envs/local.*.env${NC}           Auto-generados desde JSON
+  ${YELLOW}envs/qa.*.env${NC}              Crear manualmente con secrets
+  ${YELLOW}envs/production.*.env${NC}      Crear manualmente con secrets
+  
+${BLUE}FUENTE DE VERDAD:${NC}
+  ${YELLOW}config/environments.json${NC}   Configuraciones para desarrollo
+
+${BLUE}CARACTERÍSTICAS MEJORADAS:${NC}
+  ✅ Sincronización automática con environments.json
+  ✅ Validación completa de variables críticas
+  ✅ Comparación visual entre environments
+  ✅ Respaldo automático antes de cambios
+  ✅ Documentación integrada de variables
+  ✅ Detección de configuraciones desactualizadas
+
+${BLUE}SEGURIDAD:${NC}
+  🔒 El directorio envs/ está en .gitignore
+  🔒 Nunca commitear archivos .env
+  🔒 Valores sensibles ocultos en comparaciones
+  🔒 Confirmación requerida para producción
+
+${PURPLE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}
+EOF
+}
+
+# 🚀 Lógica principal
+main() {
+    case "${1:-}" in
+        "setup")
+            setup_environment_system
+            ;;
+        "switch")
+            switch_environment "${2:-}"
+            ;;
+        "status")
+            show_status
+            ;;
+        "validate")
+            validate_specific_environment "${2:-}"
+            ;;
+        "diff")
+            compare_environments "${2:-}" "${3:-}"
+            ;;
+        "sync")
+            sync_templates
+            ;;
+        "help"|"--help"|"-h"|"")
+            show_help
+            ;;
+        *)
+            log_error "Comando no reconocido: ${1:-}"
+            echo ""
+            show_help
+            exit 1
+            ;;
+    esac
+}
+
+# Ejecutar función principal
+main "$@"

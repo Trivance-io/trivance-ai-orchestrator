@@ -135,11 +135,31 @@ clone_repositories() {
 }
 
 setup_environments() {
-    log "Configurando variables de entorno automáticamente..."
+    log "Configurando sistema de environments automáticamente..."
     
+    # 1. Configurar sistema de environments (nuevo)
+    info "🎛️ Configurando sistema de gestión de environments..."
+    if "${SCRIPT_DIR}/../envs.sh" setup; then
+        success "✅ Sistema de environments configurado"
+    else
+        warn "⚠️ Error configurando sistema de environments"
+    fi
+    
+    # 2. Cambiar a environment local por defecto
+    info "🔧 Configurando environment local por defecto..."
+    if "${SCRIPT_DIR}/../envs.sh" switch local; then
+        success "✅ Environment local configurado"
+    else
+        # Fallback al método anterior si hay problemas
+        warn "⚠️ Usando método de configuración legacy..."
+        setup_environments_legacy
+    fi
+}
+
+setup_environments_legacy() {
     local env_config="${SCRIPT_DIR}/../../config/environments.json"
     
-    # Configurar cada repositorio
+    # Configurar cada repositorio (método anterior)
     local repos=("ms_trivance_auth" "ms_level_up_management" "level_up_backoffice" "trivance-mobile")
     
     for repo in "${repos[@]}"; do
@@ -212,14 +232,206 @@ setup_tools() {
         success "✅ Archivo CLAUDE.md configurado"
     fi
     
-    # Crear README dinámico del workspace
-    local readme_template="${SCRIPT_DIR}/../../templates/dynamic/README.workspace.template"
+    # Crear README.md principal desde template
+    local readme_template="${SCRIPT_DIR}/../../templates/README.md.template"
     local readme_file="${WORKSPACE_DIR}/README.md"
     
     if [[ -f "$readme_template" ]]; then
-        envsubst < "$readme_template" > "$readme_file"
-        success "✅ README del workspace configurado"
+        cp "$readme_template" "$readme_file"
+        success "✅ Archivo README.md configurado"
+    else
+        # Fallback al README dinámico si existe
+        local readme_dynamic="${SCRIPT_DIR}/../../templates/dynamic/README.workspace.template"
+        if [[ -f "$readme_dynamic" ]]; then
+            envsubst < "$readme_dynamic" > "$readme_file"
+            success "✅ README del workspace configurado (dinámico)"
+        fi
     fi
+    
+    # Crear link a documentación de environments
+    local envs_doc_source="${SCRIPT_DIR}/../../docs/ENVIRONMENTS.md"
+    local envs_doc_target="${WORKSPACE_DIR}/ENVIRONMENTS.md"
+    
+    if [[ -f "$envs_doc_source" ]]; then
+        cp "$envs_doc_source" "$envs_doc_target"
+        success "✅ Documentación ENVIRONMENTS.md configurada"
+    fi
+    
+    # Crear enlaces simbólicos para comandos principales
+    info "🔗 Creando enlaces simbólicos para comandos rápidos..."
+    
+    # Enlaces en el workspace principal
+    ln -sf "trivance-dev-config/scripts/utils/smart-start.sh" "${WORKSPACE_DIR}/start-services.sh"
+    ln -sf "trivance-dev-config/scripts/utils/health-check.sh" "${WORKSPACE_DIR}/check-health.sh"
+    ln -sf "trivance-dev-config/scripts/envs.sh" "${WORKSPACE_DIR}/change-env.sh"
+    ln -sf "trivance-dev-config/setup.sh" "${WORKSPACE_DIR}/setup.sh"
+    
+    # Hacer ejecutables los enlaces
+    chmod +x "${WORKSPACE_DIR}/start-services.sh" 2>/dev/null || true
+    chmod +x "${WORKSPACE_DIR}/check-health.sh" 2>/dev/null || true
+    chmod +x "${WORKSPACE_DIR}/change-env.sh" 2>/dev/null || true
+    chmod +x "${WORKSPACE_DIR}/setup.sh" 2>/dev/null || true
+    
+    success "✅ Enlaces simbólicos creados para comandos rápidos"
+    
+    # Crear estructura .claude mínima para Claude Code
+    info "🤖 Configurando Claude Code..."
+    local claude_dir="${SCRIPT_DIR}/../../.claude"
+    mkdir -p "$claude_dir"
+    
+    # Crear settings.json para Claude
+    cat > "${claude_dir}/settings.json" << 'EOF'
+{
+  "language": "es",
+  "workspace": "multi-repo",
+  "autoApprove": [
+    "npm run",
+    "npm install",
+    "git status",
+    "git diff",
+    "cd",
+    "ls",
+    "pwd",
+    "node --version",
+    "npm --version"
+  ],
+  "repositories": [
+    "ms_level_up_management",
+    "ms_trivance_auth", 
+    "level_up_backoffice",
+    "trivance-mobile"
+  ],
+  "developmentMode": true,
+  "aiFirst": true
+}
+EOF
+    
+    # Crear context.md básico
+    cat > "${claude_dir}/context.md" << 'EOF'
+# Contexto del Proyecto Trivance Platform
+
+## Arquitectura Multi-Repositorio
+- **ms_level_up_management**: Backend principal (NestJS + GraphQL)
+- **ms_trivance_auth**: Servicio de autenticación (NestJS + MongoDB)
+- **level_up_backoffice**: Frontend administrativo (React + Vite)
+- **trivance-mobile**: Aplicación móvil (React Native + Expo)
+
+## Tecnologías Principales
+- Backend: NestJS, TypeScript, PostgreSQL, MongoDB
+- Frontend: React, Vite, Redux Toolkit, Material-UI
+- Mobile: React Native, Expo, TypeScript
+- Herramientas: Docker, Jest, ESLint, Prettier
+
+## Convenciones
+- Código en inglés, comentarios y documentación en español
+- Conventional Commits en español
+- Pruebas unitarias obligatorias para nuevas features
+EOF
+    
+    success "✅ Configuración de Claude Code creada"
+    
+    # Crear COMMANDS.md para referencia rápida
+    cat > "${WORKSPACE_DIR}/COMMANDS.md" << 'EOF'
+# 🚀 COMANDOS RÁPIDOS TRIVANCE
+
+## ⚡ Comandos Simplificados
+
+```bash
+# Iniciar todos los servicios con validación
+./start-services.sh
+
+# Verificar estado de todos los servicios
+./check-health.sh
+
+# Cambiar de environment
+./change-env.sh switch local
+./change-env.sh switch qa
+./change-env.sh switch production
+
+# Ver estado actual del environment
+./change-env.sh status
+
+# Ejecutar setup completo
+./setup.sh
+```
+
+## 📁 Comandos Originales (Rutas Completas)
+
+```bash
+# Smart Start con diagnóstico
+./trivance-dev-config/scripts/utils/smart-start.sh
+
+# Health Check con auto-fix
+./trivance-dev-config/scripts/utils/health-check.sh
+./trivance-dev-config/scripts/utils/health-check.sh fix
+
+# Gestión de Environments
+./trivance-dev-config/scripts/envs.sh setup
+./trivance-dev-config/scripts/envs.sh switch [local|qa|production]
+./trivance-dev-config/scripts/envs.sh status
+
+# Limpieza del workspace
+./trivance-dev-config/scripts/utils/clean-workspace.sh
+
+# Verificar compilación
+./trivance-dev-config/scripts/verify-compilation.sh
+```
+
+## 🔧 Comandos por Servicio
+
+### Backend Management API
+```bash
+cd ms_level_up_management
+npm run start:dev      # Desarrollo con hot-reload
+npm run build          # Compilar para producción
+npm run test           # Ejecutar tests
+npm run lint           # Verificar código
+```
+
+### Auth Service
+```bash
+cd ms_trivance_auth
+npm run start:dev      # Desarrollo con hot-reload
+npm run build          # Compilar para producción
+npm run test           # Ejecutar tests
+```
+
+### Frontend Admin
+```bash
+cd level_up_backoffice
+npm run dev            # Desarrollo con Vite
+npm run build          # Build para producción
+npm run preview        # Preview del build
+npm run lint           # Verificar código
+```
+
+### Mobile App
+```bash
+cd trivance-mobile
+npm start              # Iniciar Expo
+npm run android        # Ejecutar en Android
+npm run ios            # Ejecutar en iOS
+npm run build          # Build con EAS
+```
+
+## 🌐 URLs de Desarrollo
+
+- **Management API**: http://localhost:3000
+- **GraphQL Playground**: http://localhost:3000/graphql
+- **Auth Service**: http://localhost:3001
+- **Auth Swagger**: http://localhost:3001/api-docs
+- **Frontend Admin**: http://localhost:5173
+- **Mobile Metro**: http://localhost:8081
+
+## 💡 Tips
+
+- Usa `./check-health.sh fix` para resolver problemas automáticamente
+- Cambia environments con `./change-env.sh switch [env]` antes de iniciar
+- Los logs se guardan en `./logs/` para debugging
+- Ejecuta `./setup.sh` si necesitas reconfigurar todo desde cero
+EOF
+    
+    success "✅ Archivo COMMANDS.md creado con referencia de comandos"
 }
 
 apply_post_setup_fixes() {
