@@ -552,17 +552,6 @@ apply_post_setup_fixes() {
         warn "⚠️  Algunos fixes automáticos fallaron, pero continuando..."
     fi
     
-    # Copiar guía de environments a cada repositorio
-    local env_guide="${SCRIPT_DIR}/../../templates/REPO_ENV_GUIDE.md"
-    if [[ -f "$env_guide" ]]; then
-        log "📖 Distribuyendo guía de environments a los repositorios..."
-        for repo in ms_level_up_management ms_trivance_auth level_up_backoffice trivance-mobile; do
-            if [[ -d "${WORKSPACE_DIR}/${repo}" ]]; then
-                cp "$env_guide" "${WORKSPACE_DIR}/${repo}/ENVIRONMENTS.md"
-            fi
-        done
-        success "✅ Guía de environments distribuida"
-    fi
 }
 
 verify_compilation() {
