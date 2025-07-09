@@ -68,9 +68,11 @@ main() {
     echo
     info "📂 Workspace de VS Code: ${WORKSPACE_DIR}/TrivancePlatform.code-workspace"
     info "📋 Documentación Claude: ${WORKSPACE_DIR}/CLAUDE.md"
+    info "📖 Documentación Environments: ${WORKSPACE_DIR}/envs/ENVIRONMENTS.md"
+    info "🚀 Referencia de comandos: ${WORKSPACE_DIR}/trivance-dev-config/docs/COMMANDS.md"
     echo
-    info "🔧 Para iniciar los servicios:"
-    echo "   ./start-all.sh"
+    info "🔧 Para comenzar:"
+    echo "   ./start.sh"
     echo
     
     # Run validation tests
@@ -323,6 +325,15 @@ setup_tools() {
         success "✅ Workspace de VS Code configurado"
     fi
     
+    # Crear .gitignore del workspace
+    local gitignore_template="${SCRIPT_DIR}/../../templates/.gitignore.workspace"
+    local gitignore_file="${WORKSPACE_DIR}/.gitignore"
+    
+    if [[ -f "$gitignore_template" ]] && [[ ! -f "$gitignore_file" ]]; then
+        cp "$gitignore_template" "$gitignore_file"
+        success "✅ .gitignore del workspace configurado"
+    fi
+    
     # Crear archivo CLAUDE.md
     local claude_template="${SCRIPT_DIR}/../../templates/CLAUDE.md.template"
     local claude_file="${WORKSPACE_DIR}/CLAUDE.md"
@@ -348,31 +359,29 @@ setup_tools() {
         fi
     fi
     
-    # Crear link a documentación de environments
+    # Copiar documentación de environments a la carpeta envs/
     local envs_doc_source="${SCRIPT_DIR}/../../docs/ENVIRONMENTS.md"
-    local envs_doc_target="${WORKSPACE_DIR}/ENVIRONMENTS.md"
+    local envs_doc_target="${WORKSPACE_DIR}/envs/ENVIRONMENTS.md"
     
     if [[ -f "$envs_doc_source" ]]; then
+        # Asegurar que existe el directorio envs/
+        mkdir -p "${WORKSPACE_DIR}/envs"
         cp "$envs_doc_source" "$envs_doc_target"
-        success "✅ Documentación ENVIRONMENTS.md configurada"
+        success "✅ Documentación ENVIRONMENTS.md copiada a envs/"
     fi
     
-    # Crear enlaces simbólicos para comandos principales
-    info "🔗 Creando enlaces simbólicos para comandos rápidos..."
+    # Crear UN SOLO comando en la raíz
+    info "🔗 Creando comando principal..."
     
-    # Enlaces en el workspace principal
-    ln -sf "trivance-dev-config/scripts/utils/smart-start.sh" "${WORKSPACE_DIR}/start-services.sh"
-    ln -sf "trivance-dev-config/scripts/utils/health-check.sh" "${WORKSPACE_DIR}/check-health.sh"
-    ln -sf "trivance-dev-config/scripts/envs.sh" "${WORKSPACE_DIR}/change-env.sh"
-    ln -sf "trivance-dev-config/setup.sh" "${WORKSPACE_DIR}/setup.sh"
+    # Solo UN comando: start.sh
+    ln -sf "trivance-dev-config/scripts/start.sh" "${WORKSPACE_DIR}/start.sh"
     
-    # Hacer ejecutables los enlaces
-    chmod +x "${WORKSPACE_DIR}/start-services.sh" 2>/dev/null || true
-    chmod +x "${WORKSPACE_DIR}/check-health.sh" 2>/dev/null || true
-    chmod +x "${WORKSPACE_DIR}/change-env.sh" 2>/dev/null || true
-    chmod +x "${WORKSPACE_DIR}/setup.sh" 2>/dev/null || true
+    # Hacer ejecutable
+    chmod +x "${WORKSPACE_DIR}/start.sh" 2>/dev/null || true
     
-    success "✅ Enlaces simbólicos creados para comandos rápidos"
+    success "✅ Comando principal disponible"
+    info "   - ./start.sh : Sistema de gestión unificado"
+    info "   - Ejecuta ./start.sh para ver todas las opciones"
     
     # Crear estructura .claude mínima para Claude Code
     info "🤖 Configurando Claude Code..."
@@ -430,8 +439,8 @@ EOF
     
     success "✅ Configuración de Claude Code creada"
     
-    # Crear COMMANDS.md para referencia rápida
-    cat > "${WORKSPACE_DIR}/COMMANDS.md" << 'EOF'
+    # Crear COMMANDS.md en la carpeta de documentación de trivance-dev-config
+    cat > "${SCRIPT_DIR}/../../docs/COMMANDS.md" << 'EOF'
 # 🚀 COMANDOS RÁPIDOS TRIVANCE
 
 ## ⚡ Comandos Simplificados
@@ -531,7 +540,7 @@ npm run build          # Build con EAS
 - Ejecuta `./setup.sh` si necesitas reconfigurar todo desde cero
 EOF
     
-    success "✅ Archivo COMMANDS.md creado con referencia de comandos"
+    success "✅ Archivo COMMANDS.md creado en docs/"
 }
 
 apply_post_setup_fixes() {
@@ -541,6 +550,18 @@ apply_post_setup_fixes() {
         success "✅ Fixes automáticos aplicados exitosamente"
     else
         warn "⚠️  Algunos fixes automáticos fallaron, pero continuando..."
+    fi
+    
+    # Copiar guía de environments a cada repositorio
+    local env_guide="${SCRIPT_DIR}/../../templates/REPO_ENV_GUIDE.md"
+    if [[ -f "$env_guide" ]]; then
+        log "📖 Distribuyendo guía de environments a los repositorios..."
+        for repo in ms_level_up_management ms_trivance_auth level_up_backoffice trivance-mobile; do
+            if [[ -d "${WORKSPACE_DIR}/${repo}" ]]; then
+                cp "$env_guide" "${WORKSPACE_DIR}/${repo}/ENVIRONMENTS.md"
+            fi
+        done
+        success "✅ Guía de environments distribuida"
     fi
 }
 
