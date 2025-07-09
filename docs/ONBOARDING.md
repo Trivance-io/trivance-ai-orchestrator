@@ -84,21 +84,21 @@ git clone https://github.com/GLab-Projects/trivance-dev-config.git
 
 ```bash
 # Todo pre-configurado, listo para ejecutar
-./scripts/start-all-services.sh
+./start-all.sh
 ```
 
 #### Paso 5: Validar Instalación
 
 ```bash
 # Verificación de salud completa
-./scripts/check-health.sh
+./status.sh
 ```
 
 #### Paso 6: NUEVO - Verificación de Compilación (Obligatorio)
 
 ```bash
 # MANDATORY: Verificar que todos los repositorios compilen
-./scripts/verify-compilation.sh
+./scripts/utils/verify-compilation.sh
 ```
 
 ### 🎉 ¡Listo! El setup automáticamente:
@@ -128,7 +128,7 @@ git clone https://github.com/GLab-Projects/trivance-dev-config.git
 ```bash
 # Iniciar desarrollo (30 segundos)
 cd ~/Desarrollo/Trivance-Platform
-./scripts/start-all-services.sh
+./start-all.sh
 
 # URLs de desarrollo disponibles:
 # • Frontend: http://localhost:5173
@@ -137,27 +137,27 @@ cd ~/Desarrollo/Trivance-Platform
 # • GraphQL: http://localhost:3000/graphql
 
 # Verificar estado de servicios
-./scripts/check-health.sh
+./status.sh
 
 # Verificar compilación (si se hicieron cambios)
-./scripts/verify-compilation.sh
+./scripts/utils/verify-compilation.sh
 
 # Finalizar día de desarrollo
-./scripts/stop-all-services.sh
+pm2 stop all
 ```
 
 ### Comandos de Desarrollo Frecuentes
 
 ```bash
 # Verificar estado completo del workspace
-./scripts/check-health.sh
+./status.sh
 
 # Re-verificar que todo compila (obligatorio antes de commits)
-./scripts/verify-compilation.sh
+./scripts/utils/verify-compilation.sh
 
 # Reiniciar servicios si hay problemas
-./scripts/stop-all-services.sh
-./scripts/start-all-services.sh
+pm2 stop all
+./start-all.sh
 
 # Abrir workspace en VS Code
 code TrivancePlatform.code-workspace
@@ -274,7 +274,7 @@ BCRYPT_ROUNDS=12
 
 ```bash
 # Opción A: Iniciar todos los servicios automáticamente
-./scripts/start-all-services.sh
+./start-all.sh
 
 # Opción B: Iniciar manualmente (para debugging)
 cd ms_trivance_auth && npm run start:dev &
@@ -441,7 +441,7 @@ lsof -ti:3000 | xargs kill -9
 brew services start mongodb/brew/mongodb-community  # macOS
 
 # Servicios no inician
-./scripts/check-health.sh
+./status.sh
 # Revisar logs en logs/
 ```
 

@@ -3,7 +3,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/utils/common.sh"
+source "${SCRIPT_DIR}/common.sh"
 
 # Variables globales
 COMPILATION_ERRORS=0

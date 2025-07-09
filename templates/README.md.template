@@ -28,10 +28,10 @@
 ### 2️⃣ **Iniciar Servicios**
 ```bash
 # Iniciar todos los servicios
-./trivance-dev-config/scripts/start-all-services.sh
+./start-all.sh
 
 # Verificar que todo funciona
-./trivance-dev-config/scripts/health-check.sh
+./status.sh
 ```
 
 ### 3️⃣ **¡Listo! URLs de Desarrollo**
@@ -74,11 +74,11 @@
 
 ```bash
 # Parar todos los servicios
-./trivance-dev-config/scripts/stop-all-services.sh
+pm2 stop all
 
 # Reset completo a local
 ./trivance-dev-config/scripts/envs.sh switch local
 
 # Verificar health
-./trivance-dev-config/scripts/health-check.sh quick
+./status.sh
 ```

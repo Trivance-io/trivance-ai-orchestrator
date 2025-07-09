@@ -474,7 +474,7 @@ EOF
 ./trivance-dev-config/scripts/utils/clean-workspace.sh
 
 # Verificar compilación
-./trivance-dev-config/scripts/verify-compilation.sh
+./trivance-dev-config/scripts/utils/verify-compilation.sh
 ```
 
 ## 🔧 Comandos por Servicio
@@ -549,7 +549,7 @@ verify_compilation() {
     
     cd "${WORKSPACE_DIR}"
     
-    if "${SCRIPT_DIR}/../verify-compilation.sh"; then
+    if "${SCRIPT_DIR}/../utils/verify-compilation.sh"; then
         success "✅ Todos los repositorios compilaron exitosamente!"
     else
         error "❌ La verificación de compilación falló!"

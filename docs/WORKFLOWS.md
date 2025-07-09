@@ -54,7 +54,7 @@ graph LR
 
 ```bash
 # OBLIGATORIO: Verificar que todos los repos compilen
-./scripts/verify-compilation.sh
+./scripts/utils/verify-compilation.sh
 
 # Solo si pasa la verificación, proceder con commit
 git add .
@@ -98,7 +98,7 @@ git checkout -b feat/TKT123-nueva-funcionalidad
 # Mobile changes en trivance-mobile (si aplica)
 
 # 3. OBLIGATORIO: Verificar compilación antes de commit
-./scripts/verify-compilation.sh
+./scripts/utils/verify-compilation.sh
 
 # 4. Solo si compila correctamente, hacer commits atómicos
 git add .
@@ -276,8 +276,8 @@ git checkout -b release/v1.2.0
 # Actualizar documentación
 
 # 3. Testing final
-./scripts/test-all.sh
-./scripts/lint-all.sh
+./scripts/utils/validate-setup.sh
+./scripts/utils/run-lint.sh
 
 # 4. Crear PR de release a main
 ```
@@ -381,17 +381,17 @@ npm run test:e2e:full
 
 #### Desarrollo Diario
 ```bash
-./scripts/start-all-services.sh      # Iniciar workspace
+./start-all.sh      # Iniciar workspace
 ./scripts/check-health.sh            # Verificar estado
-./scripts/sync-configs.sh            # Actualizar configuraciones
-./scripts/stop-all-services.sh       # Detener workspace
+./change-env.sh sync            # Actualizar configuraciones
+pm2 stop all       # Detener workspace
 ```
 
 #### Testing y Quality
 ```bash
-./scripts/test-all.sh                # Tests en todos los repos
-./scripts/lint-all.sh                # Linting en todos los repos
-./scripts/build-all.sh               # Build de todos los repos
+./scripts/utils/validate-setup.sh                # Tests en todos los repos
+./scripts/utils/run-lint.sh                # Linting en todos los repos
+./scripts/utils/verify-compilation.sh               # Build de todos los repos
 ```
 
 ### Monitoring y Debugging

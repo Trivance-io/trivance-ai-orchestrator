@@ -10,13 +10,13 @@ Multi-repository workspace for Trivance Platform development.
 
 ```bash
 # Start all services
-./scripts/start-all-services.sh
+./start-all.sh
 
 # Check system health  
-./scripts/check-health.sh
+./status.sh
 
 # Stop all services
-./scripts/stop-all-services.sh
+pm2 stop all
 ```
 
 ## Development URLs
