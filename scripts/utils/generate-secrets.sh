@@ -27,6 +27,22 @@ generate_api_key() {
     echo "${prefix}_$(generate_secret 24)_dev"
 }
 
+# Generate safe development values
+generate_dev_safe_value() {
+    local type="$1"
+    case "$type" in
+        "firebase")
+            echo "AIzaSyDEV-$(generate_secret 16)-SAFE"
+            ;;
+        "recaptcha")
+            echo "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"  # Google's test key
+            ;;
+        *)
+            echo "dev_safe_$(generate_secret 16)"
+            ;;
+    esac
+}
+
 # Main function to generate all secrets
 generate_all_secrets() {
     local output_file="${1:-secrets.env}"
@@ -34,40 +50,53 @@ generate_all_secrets() {
     cat > "$output_file" << EOF
 # Generated Development Secrets - $(date)
 # DO NOT COMMIT THIS FILE TO GIT
+# These are secure values for LOCAL DEVELOPMENT ONLY
 
-# JWT Secrets
+# JWT Secrets (Auto-generated secure)
 AUTH_JWT_SECRET=$(generate_jwt_secret)
 MGMT_JWT_SECRET=$(generate_jwt_secret)
 
-# Password Secrets
+# Password Secrets (Auto-generated secure)
 AUTH_PASSWORD_SECRET=$(generate_password_secret)
 MGMT_PASSWORD_SECRET=$(generate_password_secret)
 
-# Encryption Keys
+# Encryption Keys (Auto-generated secure)
 AUTH_ENCRYPT_SECRET=$(generate_secret 32)
 MGMT_ENCRYPT_SECRET=$(generate_secret 32)
 CARD_ENCRYPT_KEY=$(generate_secret 32)
 BACKOFFICE_ENCRYPT_SECRET=$(generate_secret 32)
+FRONTEND_APP_SECRET=$(generate_secret 32)
 
-# API Keys (Development)
-EMAIL_API_KEY=$(generate_api_key "email")
-TWILIO_AUTH_TOKEN=$(generate_api_key "twilio")
-AWS_ACCESS_KEY=$(generate_api_key "aws")
-AWS_SECRET_KEY=$(generate_secret 40)
-EPAYCO_API_KEY=$(generate_api_key "epayco")
-EPAYCO_SECRET_KEY=$(generate_secret 32)
-WOMPI_ACCESS_KEY=$(generate_api_key "wompi")
-WOMPI_SECRET_KEY=$(generate_secret 32)
-WOMPI_INTEGRITY_KEY=$(generate_secret 32)
+# Email Secrets (Auto-generated secure)
+AUTH_SECRET_EMAIL=$(generate_secret 24)
+MGMT_SECRET_EMAIL=$(generate_secret 24)
 
-# OAuth Secrets
-GOOGLE_OAUTH_SECRET=$(generate_api_key "google")
+# API Keys (Optional - Empty for local dev)
+EMAIL_API_KEY=
+TWILIO_ACCOUNT_SID=
+TWILIO_AUTH_TOKEN=
+VERIFY_SERVICE_SID=
+AWS_ACCESS_KEY=
+AWS_SECRET_KEY=
+EPAYCO_API_KEY=
+EPAYCO_SECRET_KEY=
+WOMPI_ACCESS_KEY=
+WOMPI_SECRET_KEY=
+WOMPI_INTEGRITY_KEY=
+GOOGLE_OAUTH_SECRET=
+GOOGLE_MAPS_KEY=
 
-# Firebase (Generated)
+# Safe Development Values (Non-sensitive)
+DEV_FIREBASE_API_KEY=$(generate_dev_safe_value "firebase")
+DEV_RECAPTCHA_KEY=$(generate_dev_safe_value "recaptcha")
+
+# Firebase (Generated safe key for dev)
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n$(generate_secret 64)\n-----END PRIVATE KEY-----"
 EOF
 
-    echo "Secrets generated in: $output_file"
+    echo "✅ Secrets generated in: $output_file"
+    echo "🔐 All sensitive values are unique and secure"
+    echo "📋 Optional API keys are empty (configure if needed)"
 }
 
 # Export functions for use in other scripts

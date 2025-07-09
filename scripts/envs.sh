@@ -60,90 +60,73 @@ setup_environment_system() {
     # Crear directorio envs si no existe
     mkdir -p "$ENVS_DIR"
     
-    # Crear archivo README en envs/
-    cat > "$ENVS_DIR/README.md" << 'EOF'
-# 📁 ENVS - Configuraciones de Environment (VERSIÓN MEJORADA)
-
-Este directorio contiene las configuraciones reales para cada environment.
-**SINCRONIZADO AUTOMÁTICAMENTE** con `config/environments.json`
-
-## 📋 Archivos por Environment
-
-### 🖥️ LOCAL (Desarrollo)
-- `local.management.env` - ms_level_up_management
-- `local.auth.env` - ms_trivance_auth  
-- `local.backoffice.env` - level_up_backoffice
-- `local.mobile.env` - trivance-mobile
-
-### 🧪 QA (Testing)
-- `qa.management.env` - ms_level_up_management (QA)
-- `qa.auth.env` - ms_trivance_auth (QA)
-- `qa.backoffice.env` - level_up_backoffice (QA)  
-- `qa.mobile.env` - trivance-mobile (QA)
-
-### 🚀 PRODUCTION (Producción)
-- `production.management.env` - ms_level_up_management (PROD)
-- `production.auth.env` - ms_trivance_auth (PROD)
-- `production.backoffice.env` - level_up_backoffice (PROD)
-- `production.mobile.env` - trivance-mobile (PROD)
-
-## 🔐 Seguridad
-
-⚠️ **IMPORTANTE**: Este directorio contiene secrets reales
-- ✅ Está en .gitignore (no se commitea)
-- ✅ Los templates locales se generan desde environments.json
-- ✅ QA/Prod deben configurarse manualmente con secrets reales
-
-## 🚀 Comandos Disponibles
-
-```bash
-# Cambiar environment
-./change-env.sh switch local
-./change-env.sh switch qa
-./change-env.sh switch production
-
-# Validar configuración
-./change-env.sh validate [env]
-
-# Comparar environments
-./change-env.sh diff local qa
-
-# Sincronizar con environments.json
-./change-env.sh sync
-
-# Ver estado
-./change-env.sh status
-```
-
-## 📊 Variables Críticas por Servicio
-
-### ms_level_up_management
-- PORT, DATABASE_URL, JWTSECRET (obligatorias)
-- AWS S3, Email, Pagos (según features)
-
-### ms_trivance_auth  
-- PORT, DB_MONGO, JWTSECRET (obligatorias)
-- OAuth, Twilio (según features)
-
-### level_up_backoffice
-- VITE_API_URL, VITE_AUTH_API_URL (obligatorias)
-
-### trivance-mobile
-- EXPO_PUBLIC_API_URL, EXPO_PUBLIC_AUTH_API_URL (obligatorias)
-EOF
+    # Copiar ENVIRONMENTS.md desde docs/ a envs/
+    local env_docs="${CONFIG_DIR}/docs/ENVIRONMENTS.md"
+    if [[ -f "$env_docs" ]]; then
+        cp "$env_docs" "$ENVS_DIR/ENVIRONMENTS.md"
+        log_info "📖 Documentación ENVIRONMENTS.md copiada a envs/"
+    else
+        log_warning "⚠️  No se encontró docs/ENVIRONMENTS.md"
+    fi
 
     # Generar templates desde environments.json
     generate_templates_from_json
     
     log_success "✅ Sistema de environments configurado"
     log_info "📁 Directorio: $ENVS_DIR"
-    log_info "📖 Documentación: $ENVS_DIR/README.md"
+    log_info "📖 Documentación: $ENVS_DIR/ENVIRONMENTS.md"
     log_info "🔄 Templates sincronizados con environments.json"
 }
 
 # 📝 Generar templates desde environments.json
 generate_templates_from_json() {
     log_info "📝 Generando templates desde environments.json..."
+    
+    # Cargar o generar secrets si no existen
+    local secrets_file="$WORKSPACE_DIR/.trivance-secrets"
+    if [[ ! -f "$secrets_file" ]]; then
+        log_info "🔑 Generando secrets seguros..."
+        "$SCRIPT_DIR/utils/generate-secrets.sh" "$secrets_file"
+    fi
+    
+    # Cargar secrets en el entorno
+    set -a
+    source "$secrets_file"
+    set +a
+    
+    # Función helper para procesar valores
+    process_env_value() {
+        local key="$1"
+        local value="$2"
+        
+        case "$value" in
+            "__GENERATE_SECURE__")
+                # Mapear a la variable de secrets correspondiente
+                case "$key" in
+                    "JWTSECRET") echo "${MGMT_JWT_SECRET:-$(openssl rand -hex 32)}" ;;
+                    "PASSWORDSECRET") echo "${MGMT_PASSWORD_SECRET:-$(openssl rand -hex 32)}" ;;
+                    "ENCRYPTSECRET") echo "${MGMT_ENCRYPT_SECRET:-$(openssl rand -hex 32)}" ;;
+                    "ENCRYPTSECRETBACKOFFICE") echo "${BACKOFFICE_ENCRYPT_SECRET:-$(openssl rand -hex 32)}" ;;
+                    "ENCRYPTCARD") echo "${CARD_ENCRYPT_KEY:-$(openssl rand -hex 32)}" ;;
+                    "SECRETEMAIL") echo "${MGMT_SECRET_EMAIL:-$(openssl rand -hex 24)}" ;;
+                    "EMAILAPIKEY") echo "${EMAIL_API_KEY:-$(openssl rand -hex 24)}" ;;
+                    *) echo "$(openssl rand -hex 32)" ;;
+                esac
+                ;;
+            "__OPTIONAL__")
+                echo ""
+                ;;
+            "__DEV_SAFE_FIREBASE__")
+                echo "${DEV_FIREBASE_API_KEY:-AIzaSyDEV-safe-key}"
+                ;;
+            "__DEV_SAFE_RECAPTCHA__")
+                echo "${DEV_RECAPTCHA_KEY:-6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI}"
+                ;;
+            *)
+                echo "$value"
+                ;;
+        esac
+    }
     
     # ms_level_up_management
     log_info "  - Generando local.management.env"
@@ -154,8 +137,13 @@ generate_templates_from_json() {
         echo "# ⚠️ Para QA/Prod: copiar este archivo y actualizar valores"
         echo ""
         
-        # Agregar todas las variables de environments.json
-        jq -r '.environments.ms_level_up_management | to_entries[] | "# \(.key | gsub("_"; " ") | ascii_downcase)\n\(.key)=\(.value)\n"' "$ENV_CONFIG"
+        # Procesar cada variable
+        jq -r '.environments.ms_level_up_management | to_entries[] | "\(.key)|\(.value)"' "$ENV_CONFIG" | while IFS='|' read -r key value; do
+            processed_value=$(process_env_value "$key" "$value")
+            echo "# $(echo "$key" | tr '_' ' ' | tr '[:upper:]' '[:lower:]')"
+            echo "$key=$processed_value"
+            echo ""
+        done
         
         # Agregar NODE_ENV
         echo "# Environment mode"
@@ -171,7 +159,27 @@ generate_templates_from_json() {
         echo "# ⚠️ Para QA/Prod: copiar este archivo y actualizar valores"
         echo ""
         
-        jq -r '.environments.ms_trivance_auth | to_entries[] | "# \(.key | gsub("_"; " ") | ascii_downcase)\n\(.key)=\(.value)\n"' "$ENV_CONFIG"
+        # Procesar cada variable para auth
+        jq -r '.environments.ms_trivance_auth | to_entries[] | "\(.key)|\(.value)"' "$ENV_CONFIG" | while IFS='|' read -r key value; do
+            # Mapeo especial para auth service
+            case "$value" in
+                "__GENERATE_SECURE__")
+                    case "$key" in
+                        "JWTSECRET") processed_value="${AUTH_JWT_SECRET:-$(openssl rand -hex 32)}" ;;
+                        "PASSWORDSECRET") processed_value="${AUTH_PASSWORD_SECRET:-$(openssl rand -hex 32)}" ;;
+                        "ENCRYPTSECRET") processed_value="${AUTH_ENCRYPT_SECRET:-$(openssl rand -hex 32)}" ;;
+                        "SECRETEMAIL") processed_value="${AUTH_SECRET_EMAIL:-$(openssl rand -hex 24)}" ;;
+                        *) processed_value=$(process_env_value "$key" "$value") ;;
+                    esac
+                    ;;
+                *)
+                    processed_value=$(process_env_value "$key" "$value")
+                    ;;
+            esac
+            echo "# $(echo "$key" | tr '_' ' ' | tr '[:upper:]' '[:lower:]')"
+            echo "$key=$processed_value"
+            echo ""
+        done
         
         echo "# Environment mode"
         echo "NODE_ENV=development"
@@ -188,7 +196,24 @@ generate_templates_from_json() {
         
         # Si hay configuración específica en JSON, usarla
         if jq -e '.environments.level_up_backoffice' "$ENV_CONFIG" > /dev/null 2>&1; then
-            jq -r '.environments.level_up_backoffice | to_entries[] | "# \(.key | gsub("_"; " ") | ascii_downcase)\n\(.key)=\(.value)\n"' "$ENV_CONFIG"
+            # Procesar cada variable para frontend
+            jq -r '.environments.level_up_backoffice | to_entries[] | "\(.key)|\(.value)"' "$ENV_CONFIG" | while IFS='|' read -r key value; do
+                # Mapeo especial para frontend
+                case "$value" in
+                    "__GENERATE_SECURE__")
+                        case "$key" in
+                            "VITE_APP_SECRET_KEY") processed_value="${FRONTEND_APP_SECRET:-$(openssl rand -hex 32)}" ;;
+                            *) processed_value=$(process_env_value "$key" "$value") ;;
+                        esac
+                        ;;
+                    *)
+                        processed_value=$(process_env_value "$key" "$value")
+                        ;;
+                esac
+                echo "# $(echo "$key" | tr '_' ' ' | tr '[:upper:]' '[:lower:]')"
+                echo "$key=$processed_value"
+                echo ""
+            done
         else
             # Valores por defecto para frontend
             cat << 'EOF'
@@ -223,7 +248,13 @@ EOF
         echo ""
         
         if jq -e '.environments["trivance-mobile"]' "$ENV_CONFIG" > /dev/null 2>&1; then
-            jq -r '.environments["trivance-mobile"] | to_entries[] | "# \(.key | gsub("_"; " ") | ascii_downcase)\n\(.key)=\(.value)\n"' "$ENV_CONFIG"
+            # Procesar cada variable para mobile
+            jq -r '.environments["trivance-mobile"] | to_entries[] | "\(.key)|\(.value)"' "$ENV_CONFIG" | while IFS='|' read -r key value; do
+                processed_value=$(process_env_value "$key" "$value")
+                echo "# $(echo "$key" | tr '_' ' ' | tr '[:upper:]' '[:lower:]')"
+                echo "$key=$processed_value"
+                echo ""
+            done
         else
             cat << 'EOF'
 # API endpoints
@@ -327,7 +358,7 @@ switch_environment() {
     cp "$ENVS_DIR/$env.mobile.env" "$WORKSPACE_DIR/trivance-mobile/.env"
     
     # Guardar environment actual
-    echo "$env" > "$CONFIG_DIR/.current_environment"
+    echo "$env" > "$ENVS_DIR/.current_environment"
     
     # Validación completa
     validate_environment_config "$env"
@@ -423,8 +454,8 @@ show_status() {
     
     # Environment actual
     local current_env="unknown"
-    if [[ -f "$CONFIG_DIR/.current_environment" ]]; then
-        current_env=$(cat "$CONFIG_DIR/.current_environment")
+    if [[ -f "$ENVS_DIR/.current_environment" ]]; then
+        current_env=$(cat "$ENVS_DIR/.current_environment")
     fi
     
     echo -e "🎛️  Environment Actual: ${GREEN}$current_env${NC}"
@@ -526,15 +557,15 @@ validate_specific_environment() {
     
     # Cambiar temporalmente
     local original_env=""
-    if [[ -f "$CONFIG_DIR/.current_environment" ]]; then
-        original_env=$(cat "$CONFIG_DIR/.current_environment")
+    if [[ -f "$ENVS_DIR/.current_environment" ]]; then
+        original_env=$(cat "$ENVS_DIR/.current_environment")
     fi
     
     switch_environment "$env"
     
     # Restaurar environment original si es diferente
     if [[ -n "$original_env" && "$original_env" != "$env" ]]; then
-        echo "$original_env" > "$CONFIG_DIR/.current_environment"
+        echo "$original_env" > "$ENVS_DIR/.current_environment"
     fi
 }
 
