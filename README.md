@@ -1,204 +1,283 @@
-# Trivance Dev Config
+# 🚀 Trivance Dev Config
 
-Professional automated development environment configuration for the Trivance platform.
+Configuración **automática, completa y segura** del entorno de desarrollo para la plataforma Trivance.
 
-## Overview
+## 🎯 ¿Qué es esto?
 
-This repository provides enterprise-grade automated setup for the complete Trivance development environment:
+Este repositorio configura **AUTOMÁTICAMENTE** todo tu entorno de desarrollo con un solo comando:
 
-- **ms_trivance_auth** - Authentication service (NestJS, Port 3001)
-- **ms_level_up_management** - Management API with GraphQL (NestJS, Port 3000)
-- **level_up_backoffice** - Admin frontend (React/Vite, Port 5173)
-- **trivance-mobile** - Mobile application (React Native/Expo, Port 8081)
+- ✅ **4 repositorios** clonados y configurados
+- ✅ **Variables de entorno** generadas de forma segura
+- ✅ **Dependencias** instaladas en paralelo
+- ✅ **Servicios** ejecutándose con PM2
+- ✅ **Todo listo** en menos de 10 minutos
 
-## Key Features
+## 📋 Requisitos Previos
 
-- ✅ **Zero Manual Configuration** - Fully automated setup
-- ✅ **Secure by Default** - Dynamic secret generation, no hardcoded credentials
-- ✅ **Production-Ready** - PM2 process management with auto-restart
-- ✅ **AI-First Design** - Optimized for AI-assisted development workflows
-- ✅ **Cross-Platform** - Compatible with macOS and Linux
-- ✅ **Validated Setup** - Automated tests ensure everything works
+Antes de empezar, necesitas tener instalado:
 
-## Quick Start
+- **Node.js 18+** → [Descargar](https://nodejs.org/)
+- **Git** → [Descargar](https://git-scm.com/)
+- **PostgreSQL** → Para el backend principal
+- **MongoDB** → Para el servicio de autenticación
 
+### Verificar requisitos:
 ```bash
-# 1. Clone this repository
-git clone https://github.com/GLab-Projects/trivance-dev-config
-cd trivance-dev-config
+node --version   # Debe ser v18 o superior
+npm --version    # Debe estar instalado
+git --version    # Debe estar instalado
+psql --version   # PostgreSQL (opcional pero recomendado)
+mongod --version # MongoDB (opcional pero recomendado)
+```
 
-# 2. Run automated setup (takes ~5-10 minutes)
+## 🚀 Instalación Completa (3 pasos)
+
+### Paso 1: Clonar este repositorio
+```bash
+git clone https://github.com/GLab-Projects/trivance-dev-config.git
+cd trivance-dev-config
+```
+
+### Paso 2: Ejecutar setup automático
+```bash
 ./setup.sh
-
-# 3. Start all services
-./start-all.sh
 ```
 
-That's it! All services are now running with PM2 process management.
+Este comando hace TODO por ti:
+- Clona los 4 repositorios del proyecto
+- Genera secrets únicos y seguros
+- Crea todos los archivos .env
+- Instala todas las dependencias
+- Verifica que todo compile correctamente
 
-## Prerequisites
-
-The setup script automatically validates these requirements:
-
-- **Node.js 18+** (required)
-- **npm 8+** (required)
-- **Git 2+** (required)
-- **PostgreSQL** (recommended - Management API will fail without it)
-- **MongoDB** (recommended - Auth Service will fail without it)
-
-Missing prerequisites will be clearly reported during setup.
-
-## Available Commands
-
-### Core Commands
-- `./setup.sh` - Complete automated setup with validation
-- `./start-all.sh` - Start all services with PM2
-- `./status.sh` - Check service health and status
-
-### Environment Management
-- `./change-env.sh status` - Show current environment
-- `./change-env.sh switch [env]` - Switch environment (local/qa/production)
-- `./change-env.sh validate` - Validate environment configuration
-- `./change-env.sh sync` - Sync with environments.json
-
-### PM2 Process Management
-- `pm2 status` - View service status
-- `pm2 logs` - View real-time logs
-- `pm2 restart all` - Restart all services
-- `pm2 stop all` - Stop all services
-- `pm2 monit` - Interactive monitoring dashboard
-
-## Service URLs
-
-Once running, services are available at:
-
-- **Auth API**: http://localhost:3001
-- **Management API**: http://localhost:3000
-- **GraphQL Playground**: http://localhost:3000/graphql
-- **Admin Frontend**: http://localhost:5173
-- **Mobile Metro**: http://localhost:8081 (optional)
-
-## Security
-
-### Automatic Secret Generation
-- Unique development secrets generated per installation
-- Stored in `.trivance-secrets` (gitignored)
-- No hardcoded credentials in the repository
-
-### Environment Isolation
-- Separate configurations for local/qa/production
-- Production credentials must be manually configured
-- All sensitive files properly gitignored
-
-## What Gets Configured
-
-### During Setup
-1. **Repository Cloning** - All 4 repositories with correct branches
-2. **Secret Generation** - Unique JWT secrets, API keys, encryption keys
-3. **Environment Files** - `.env` files for each service with secure values
-4. **Dependencies** - Parallel installation with 3-minute timeout protection
-5. **Compilation Check** - Ensures all services build successfully
-6. **Validation Tests** - 9 automated tests verify setup completeness
-
-### Process Management
-- PM2 configuration with automatic restart on failure
-- Centralized logging in `logs/pm2/`
-- Memory limits and resource monitoring
-- Zero-downtime reload capability
-
-## Project Structure
-
-```
-workspace/
-├── trivance-dev-config/    # This configuration repository
-├── ms_trivance_auth/       # Auth service
-├── ms_level_up_management/ # Management API  
-├── level_up_backoffice/    # Admin frontend
-├── trivance-mobile/        # Mobile app
-├── logs/                   # Centralized PM2 logs
-├── envs/                   # Environment configurations
-└── .trivance-secrets       # Generated secrets (gitignored)
-```
-
-## Troubleshooting
-
-### Quick Fixes
+### Paso 3: Iniciar servicios
 ```bash
-# Run automated validation
-./scripts/utils/validate-setup.sh
-
-# Check detailed logs
-pm2 logs --lines 100
-
-# Restart specific service
-pm2 restart [service-name]
+cd ..  # Volver al workspace
+./start.sh
 ```
 
-### Common Issues
+¡Listo! 🎉 Todos los servicios están corriendo.
 
-**PostgreSQL/MongoDB not found**
-- Services will fail to start without databases
-- Install with: `brew install postgresql mongodb-community` (macOS)
+## 🖥️ URLs de los Servicios
 
-**Port already in use**
-- The setup handles this automatically
-- Manual fix: `lsof -i:[port]` then `kill -9 [PID]`
+Una vez iniciados, accede a:
 
-**Service won't start**
-- Check logs: `pm2 logs [service-name]`
-- Validate environment: `./change-env.sh validate`
+| Servicio | URL | Descripción |
+|----------|-----|-------------|
+| Frontend Admin | http://localhost:5173 | Panel de administración |
+| API Principal | http://localhost:3000 | Backend con GraphQL |
+| API Auth | http://localhost:3001 | Servicio de autenticación |
+| GraphQL Playground | http://localhost:3000/graphql | Explorador GraphQL |
+| Mobile Metro | http://localhost:8081 | Servidor Expo (si aplica) |
 
-See [Troubleshooting Guide](docs/TROUBLESHOOTING.md) for detailed solutions.
+## 📁 Estructura del Proyecto
 
-## For AI-Assisted Development
+Después del setup, tu workspace se verá así:
 
-This repository is optimized for AI-first workflows:
+```
+tu-workspace/
+├── start.sh                      # 🎮 Comando principal (menú interactivo)
+├── trivance-dev-config/          # 📦 Este repositorio (configuración)
+├── ms_level_up_management/       # 🚀 API Backend principal
+├── ms_trivance_auth/             # 🔐 Servicio de autenticación  
+├── level_up_backoffice/          # 🌐 Frontend administrativo
+├── trivance-mobile/              # 📱 App móvil
+├── envs/                         # 🔧 Configuraciones de ambiente
+│   ├── ENVIRONMENTS.md           # 📖 Guía de environments
+│   ├── .current_environment      # 📍 Environment actual
+│   └── *.env                     # 🔒 Archivos de configuración
+├── logs/                         # 📊 Logs de PM2
+└── .trivance-secrets             # 🔑 Secrets generados (NO SUBIR A GIT)
+```
 
-1. **Clear Command Structure** - All commands are simple and unambiguous
-2. **Predictable File Locations** - Consistent structure across all services
-3. **Comprehensive Validation** - AI can verify setup success
-4. **No Manual Steps** - Everything is automated
-5. **Professional Error Handling** - Clear error messages for debugging
+## 🎮 Comando Principal: start.sh
 
-### AI Usage Example
+Un solo comando para todo:
+
 ```bash
-# AI can simply run these 3 commands:
-git clone https://github.com/GLab-Projects/trivance-dev-config
-cd trivance-dev-config
-./setup.sh && ./start-all.sh
+./start.sh
 ```
 
-## Documentation
+Te mostrará un menú interactivo:
+```
+1) 🚀 Iniciar servicios
+2) 📊 Ver estado de servicios  
+3) 🔄 Cambiar environment
+4) 🛑 Detener servicios
+5) 🔍 Verificar salud del sistema
+6) 📚 Ver documentación
+7) 🗑️  Limpiar y reconfigurar
+0) 🚪 Salir
+```
 
-- [Architecture Overview](docs/ARCHITECTURE.md) - Technical architecture details
-- [Environment Management](docs/ENVIRONMENTS.md) - Managing multiple environments
-- [Deployment Guide](docs/DEPLOYMENT.md) - Deployment procedures
-- [Troubleshooting Guide](docs/TROUBLESHOOTING.md) - Common issues and solutions
+También puedes usar comandos directos:
+```bash
+./start.sh start    # Iniciar servicios
+./start.sh stop     # Detener servicios
+./start.sh status   # Ver estado
+./start.sh setup    # Reconfigurar todo
+```
 
-## Requirements
+## 🔄 Gestión de Environments
 
-### Minimum Versions
-- Node.js 18.0.0+
-- npm 8.0.0+
-- Git 2.0.0+
+### Cambiar entre ambientes:
+```bash
+# Ver environment actual
+./trivance-dev-config/scripts/envs.sh status
 
-### Database Requirements
-- PostgreSQL (for Management API)
-- MongoDB (for Auth Service)
+# Cambiar a desarrollo local (por defecto)
+./trivance-dev-config/scripts/envs.sh switch local
 
-## Contributing
+# Cambiar a QA
+./trivance-dev-config/scripts/envs.sh switch qa
 
-1. Fork the repository
-2. Create your feature branch
-3. Run validation tests: `./scripts/utils/validate-setup.sh`
-4. Commit your changes
-5. Push to the branch
-6. Create a Pull Request
+# Cambiar a producción (requiere confirmación)
+./trivance-dev-config/scripts/envs.sh switch production
+```
 
-## License
+### ⚠️ Importante sobre QA/Producción:
+- Los archivos de QA y producción NO vienen incluidos por seguridad
+- Debes crearlos manualmente copiando los archivos locales
+- Nunca subas credenciales reales a Git
 
-This project is proprietary and confidential.
+## 🛠️ Comandos PM2 Útiles
+
+```bash
+pm2 status          # Ver estado de todos los servicios
+pm2 logs            # Ver logs en tiempo real
+pm2 logs [servicio] # Ver logs de un servicio específico
+pm2 restart all     # Reiniciar todos los servicios
+pm2 stop all        # Detener todos los servicios
+pm2 monit           # Monitor interactivo
+```
+
+## 🔐 Seguridad
+
+### Secrets Automáticos
+- Cada instalación genera secrets ÚNICOS
+- Se guardan en `.trivance-secrets` (ignorado por Git)
+- NO hay credenciales hardcodeadas
+
+### Archivos Sensibles
+Estos archivos NUNCA deben subirse a Git:
+- `.trivance-secrets`
+- `.env` (todos)
+- `envs/*.env`
+- `.current_environment`
+
+## 🆘 Solución de Problemas
+
+### Problema: "Puerto ya está en uso"
+```bash
+# Ver qué usa el puerto
+lsof -i:3000
+
+# Matar el proceso
+kill -9 [PID]
+```
+
+### Problema: "PostgreSQL/MongoDB connection failed"
+```bash
+# macOS
+brew install postgresql
+brew install mongodb-community
+brew services start postgresql
+brew services start mongodb-community
+
+# Linux
+sudo apt install postgresql mongodb
+sudo systemctl start postgresql
+sudo systemctl start mongodb
+```
+
+### Problema: "Service crashed"
+```bash
+# Ver logs del servicio
+pm2 logs [nombre-servicio]
+
+# Reiniciar servicio
+pm2 restart [nombre-servicio]
+
+# Validar configuración
+./trivance-dev-config/scripts/envs.sh validate
+```
+
+### Verificación completa:
+```bash
+./trivance-dev-config/scripts/utils/validate-setup.sh
+```
+
+## 🤖 Para Desarrollo con IA
+
+Este repositorio está optimizado para Claude Code y otras IAs:
+
+### Setup completo en 3 comandos:
+```bash
+git clone https://github.com/GLab-Projects/trivance-dev-config.git
+cd trivance-dev-config && ./setup.sh
+cd .. && ./start.sh
+```
+
+### Características IA-friendly:
+- ✅ Sin pasos manuales
+- ✅ Errores claros y descriptivos
+- ✅ Estructura predecible
+- ✅ Validación automática
+- ✅ Documentación en español
+
+## 📚 Documentación Adicional
+
+| Documento | Descripción |
+|-----------|-------------|
+| [ENVIRONMENTS.md](envs/ENVIRONMENTS.md) | Guía completa de environments |
+| [COMMANDS.md](trivance-dev-config/docs/COMMANDS.md) | Todos los comandos disponibles |
+| [TROUBLESHOOTING.md](trivance-dev-config/docs/TROUBLESHOOTING.md) | Solución de problemas detallada |
+| [ONBOARDING.md](trivance-dev-config/docs/ONBOARDING.md) | Guía para nuevos desarrolladores |
+
+## ✅ Checklist Post-Instalación
+
+Después del setup, verifica:
+
+- [ ] Todos los servicios están `online` en `pm2 status`
+- [ ] Puedes acceder a http://localhost:5173 (Frontend)
+- [ ] Puedes acceder a http://localhost:3000/graphql (GraphQL)
+- [ ] No hay errores en `pm2 logs`
+- [ ] El archivo `.trivance-secrets` fue creado
+- [ ] La carpeta `envs/` contiene archivos `.env`
+
+## 🚨 Errores Comunes y Soluciones
+
+### "Cannot find module"
+```bash
+# Reinstalar dependencias
+cd [repositorio-con-error]
+rm -rf node_modules package-lock.json
+npm install
+```
+
+### "EADDRINUSE: address already in use"
+```bash
+# El setup maneja esto automáticamente
+# Si persiste, ejecuta:
+pm2 kill
+./start.sh
+```
+
+### "Database connection error"
+```bash
+# Verificar que las bases de datos estén corriendo
+# PostgreSQL: puerto 5432
+# MongoDB: puerto 27017
+```
+
+## 🎯 Resumen
+
+1. **Clona** → `git clone https://github.com/GLab-Projects/trivance-dev-config.git`
+2. **Setup** → `cd trivance-dev-config && ./setup.sh`
+3. **Inicia** → `cd .. && ./start.sh`
+
+¡Eso es todo! En menos de 10 minutos tendrás todo funcionando.
 
 ---
 
-**Note**: This is a development configuration tool. For production deployment, see the [Deployment Guide](docs/DEPLOYMENT.md).
+**¿Problemas?** Revisa [TROUBLESHOOTING.md](trivance-dev-config/docs/TROUBLESHOOTING.md) o contacta al equipo en Slack #dev-support

@@ -381,10 +381,10 @@ npm run test:e2e:full
 
 #### Desarrollo Diario
 ```bash
-./start-all.sh      # Iniciar workspace
-./scripts/check-health.sh            # Verificar estado
-./change-env.sh sync            # Actualizar configuraciones
-pm2 stop all       # Detener workspace
+./start.sh          # Menú principal interactivo
+./start.sh start    # Iniciar workspace
+./start.sh status   # Verificar estado
+./start.sh stop     # Detener workspace
 ```
 
 #### Testing y Quality

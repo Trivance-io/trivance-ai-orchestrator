@@ -1,178 +1,207 @@
-# Environment Management Guide
+# 🎛️ Sistema de Environments - Guía Completa
 
-## Overview
+## 🤔 ¿Qué es esto?
 
-The Trivance platform uses a centralized environment management system that allows easy switching between different environments (local, qa, production) while maintaining consistency across all services.
+El sistema de environments de Trivance te permite cambiar entre diferentes configuraciones (local, QA, producción) con **UN SOLO COMANDO**. Es como tener diferentes "modos" para tu aplicación:
 
-## Environment Structure
+- **🏠 Local**: Tu computadora, para desarrollo
+- **🧪 QA**: Servidor de pruebas
+- **🚀 Producción**: Servidor real con usuarios
 
-Each environment consists of separate `.env` files for each service:
-- `[env].ms_trivance_auth.env`
-- `[env].ms_level_up_management.env`
-- `[env].level_up_backoffice.env`
-- `[env].trivance-mobile.env`
+## 🎯 ¿Cómo funciona?
 
-## Available Commands
+### La magia en 3 pasos:
 
-### Check Current Environment
+1. **Configuración centralizada**: Todo está en `trivance-dev-config/config/environments.json`
+2. **Generación automática**: El sistema crea archivos `.env` para cada servicio
+3. **Un comando para cambiar**: Cambias TODOS los servicios de golpe
+
+### Ejemplo visual:
+```
+Tu comando: ./change-env.sh switch qa
+
+Lo que pasa:
+├── ms_trivance_auth/.env      → Cambia a config de QA
+├── ms_level_up_management/.env → Cambia a config de QA
+├── level_up_backoffice/.env    → Cambia a config de QA
+└── trivance-mobile/.env        → Cambia a config de QA
+
+¡TODO sincronizado! 🎉
+```
+
+## 📋 Guía Rápida - Lo que necesitas saber
+
+### 1️⃣ Ver en qué environment estás
 ```bash
-./change-env.sh status
+./trivance-dev-config/scripts/envs.sh status
 ```
 
-Shows the currently active environment and lists all available environments.
+Te dirá algo como:
+```
+✅ Environment actual: local
+📁 Archivos de configuración en: /tu-proyecto/envs
+```
 
-### Switch Environment
+### 2️⃣ Cambiar de environment
+
+**Para desarrollo local** (tu computadora):
 ```bash
-./change-env.sh switch local
-./change-env.sh switch qa
-./change-env.sh switch production
+./trivance-dev-config/scripts/envs.sh switch local
 ```
 
-Switches all services to the specified environment by copying the appropriate `.env` files.
-
-### Validate Environment
+**Para servidor de pruebas** (QA):
 ```bash
-./change-env.sh validate
+./trivance-dev-config/scripts/envs.sh switch qa
 ```
 
-Validates that all required environment variables are present for each service.
-
-### Sync with Configuration
+**Para producción** (¡CUIDADO! 🚨):
 ```bash
-./change-env.sh sync
+./trivance-dev-config/scripts/envs.sh switch production
+# Te pedirá confirmación porque es PRODUCCIÓN REAL
 ```
 
-Synchronizes environment files with the master configuration in `config/environments.json`.
+### 3️⃣ Después de cambiar
 
-## Environment Files Location
-
-All environment files are stored in:
-```
-workspace/
-└── envs/
-    ├── local.ms_trivance_auth.env
-    ├── local.ms_level_up_management.env
-    ├── local.level_up_backoffice.env
-    ├── local.trivance-mobile.env
-    ├── qa.ms_trivance_auth.env
-    ├── qa.ms_level_up_management.env
-    └── ... (other environments)
+Reinicia los servicios:
+```bash
+./start-all.sh
 ```
 
-## Configuration File
+## 🔐 Seguridad - MUY IMPORTANTE
 
-The master configuration is stored in `config/environments.json`:
+### Para Local (tu computadora)
+- ✅ **TODO ES AUTOMÁTICO**: Los secrets se generan solos
+- ✅ **Es seguro**: Cada instalación tiene secrets únicos
+- ✅ **No necesitas hacer nada**: Just works™
 
-```json
-{
-  "environments": {
-    "ms_trivance_auth": {
-      "PORT": "3001",
-      "DB_MONGO": "mongodb://localhost:27017/trivance_auth_development",
-      // ... other variables
-    },
-    "ms_level_up_management": {
-      "PORT": "3000",
-      "DATABASE_URL": "postgresql://...",
-      // ... other variables
-    }
-    // ... other services
-  }
-}
+### Para QA/Producción
+- ⚠️ **CONFIGURACIÓN MANUAL REQUERIDA**
+- 📝 Pasos:
+  1. Copia el archivo local como plantilla:
+     ```bash
+     cp envs/local.management.env envs/qa.management.env
+     ```
+  2. Edita con valores REALES de QA:
+     - URLs reales del servidor QA
+     - Credenciales de base de datos QA
+     - API keys de servicios externos
+  3. **NUNCA** subas estos archivos a Git
+
+## 🗂️ ¿Dónde están los archivos?
+
+```
+tu-proyecto/
+├── envs/                          # 📁 Aquí están TODAS las configuraciones
+│   ├── local.management.env       # Config local del backend
+│   ├── local.auth.env            # Config local de auth
+│   ├── local.backoffice.env      # Config local del frontend
+│   ├── local.mobile.env          # Config local de la app
+│   ├── qa.*.env                  # Configs de QA (crearlas manualmente)
+│   └── production.*.env          # Configs de producción (crearlas manualmente)
+└── .trivance-secrets             # 🔐 Secrets autogenerados (NO SUBIR A GIT)
 ```
 
-## Adding New Environment Variables
+## 🛠️ Comandos Completos
 
-1. Update `config/environments.json` with the new variable
-2. Run sync to update environment files:
-   ```bash
-   ./change-env.sh sync
-   ```
-3. Restart the affected service:
-   ```bash
-   pm2 restart [service-name]
-   ```
+### Básicos
+```bash
+# Ver estado actual
+./trivance-dev-config/scripts/envs.sh status
 
-## Creating a New Environment
+# Cambiar environment
+./trivance-dev-config/scripts/envs.sh switch [local|qa|production]
 
-1. Add the new environment configuration to `config/environments.json`
-2. Run setup to create the environment files:
-   ```bash
-   ./change-env.sh setup
-   ```
-3. Switch to the new environment:
-   ```bash
-   ./change-env.sh switch [new-env]
-   ```
+# Ver ayuda
+./trivance-dev-config/scripts/envs.sh help
+```
 
-## Security Considerations
+### Avanzados
+```bash
+# Validar que todo esté bien configurado
+./trivance-dev-config/scripts/envs.sh validate
 
-### Local Development
-- Uses generated development secrets
-- Safe defaults for local testing
-- No production credentials
+# Comparar dos environments
+./trivance-dev-config/scripts/envs.sh diff local qa
 
-### QA Environment
-- Requires manual configuration
-- Use dedicated QA credentials
-- Never use production data
+# Sincronizar con environments.json
+./trivance-dev-config/scripts/envs.sh sync
+```
 
-### Production Environment
-- Highly restricted access
-- Separate credential management
-- Regular secret rotation
-- Never commit production values
+## ❓ Preguntas Frecuentes
 
-## Best Practices
+### "¿Por qué no puedo editar el .env directamente?"
+Los `.env` se generan automáticamente desde `environments.json`. Si los editas manualmente, se perderán los cambios al cambiar de environment.
 
-1. **Never commit `.env` files** - They are gitignored for security
-2. **Use descriptive variable names** - Follow the existing naming convention
-3. **Document new variables** - Add comments in `environments.json`
-4. **Validate after changes** - Always run validation after modifications
-5. **Keep environments isolated** - Don't mix credentials between environments
+### "¿Cómo agrego una nueva variable?"
+1. Agrégala en `trivance-dev-config/config/environments.json`
+2. Ejecuta: `./trivance-dev-config/scripts/envs.sh sync`
+3. ¡Listo! Ya está en todos los servicios
 
-## Common Issues
+### "¿Qué pasa si cambio a producción por error?"
+- El sistema te pide confirmación (debes escribir "yes")
+- Si ya lo hiciste, simplemente cambia de vuelta: `switch local`
 
-### Environment not switching
-- Ensure all services are stopped before switching
-- Check file permissions in the envs directory
-- Verify the environment exists
+### "No encuentro el archivo de QA"
+Es normal. Los archivos de QA y producción NO vienen incluidos por seguridad. Debes crearlos copiando los locales y editándolos.
 
-### Missing variables after sync
-- Check `config/environments.json` for syntax errors
-- Ensure all required services are defined
-- Run validation to identify missing variables
+## 🚀 Workflow Típico de Desarrollo
 
-### Service using wrong environment
-- Restart the service after switching: `pm2 restart [service-name]`
-- Verify `.env` file exists in service directory
-- Check PM2 logs for environment loading errors
+### Mañana - Empezar a trabajar:
+```bash
+cd ~/tu-proyecto
+./start-all.sh          # Inicia todo en local automáticamente
+```
 
-## Environment Variables Reference
+### Necesitas probar en QA:
+```bash
+./trivance-dev-config/scripts/envs.sh switch qa
+./start-all.sh          # Ahora apunta a servidores QA
+```
 
-### Authentication Service (ms_trivance_auth)
-- `PORT` - Service port (default: 3001)
-- `DB_MONGO` - MongoDB connection string
-- `JWTSECRET` - JWT signing secret
-- `PASSWORDSECRET` - Password encryption secret
-- Additional OAuth and Twilio variables
+### Volver a desarrollo local:
+```bash
+./trivance-dev-config/scripts/envs.sh switch local
+./start-all.sh          # De vuelta a tu máquina
+```
 
-### Management API (ms_level_up_management)
-- `PORT` - Service port (default: 3000)
-- `DATABASE_URL` - PostgreSQL connection string
-- `JWTSECRET` - JWT signing secret
-- GraphQL configuration
-- Payment gateway credentials
-- AWS S3 configuration
+## 🆘 Solución de Problemas
 
-### Frontend (level_up_backoffice)
-- `VITE_API_URL` - Management API URL
-- `VITE_AUTH_API_URL` - Auth API URL
-- `VITE_GRAPHQL_URL` - GraphQL endpoint
-- `VITE_ENVIRONMENT` - Current environment name
+### "Me dice que faltan archivos de QA"
+```bash
+# Crear los archivos QA copiando los locales
+cp envs/local.management.env envs/qa.management.env
+cp envs/local.auth.env envs/qa.auth.env
+cp envs/local.backoffice.env envs/qa.backoffice.env
+cp envs/local.mobile.env envs/qa.mobile.env
 
-### Mobile (trivance-mobile)
-- `EXPO_PUBLIC_API_URL` - Management API URL
-- `EXPO_PUBLIC_AUTH_API_URL` - Auth API URL
-- `EXPO_PUBLIC_GRAPHQL_URL` - GraphQL endpoint
-- `EXPO_PUBLIC_ENVIRONMENT` - Current environment name
+# Ahora edita cada uno con valores de QA
+```
+
+### "Los servicios no se conectan después de cambiar"
+```bash
+# Asegúrate de reiniciar después de cambiar environment
+pm2 stop all
+./start-all.sh
+```
+
+### "No sé en qué environment estoy"
+```bash
+./trivance-dev-config/scripts/envs.sh status
+# O mira el archivo:
+cat envs/.current_environment
+```
+
+## 📚 Para Aprender Más
+
+- **Archivo maestro**: `trivance-dev-config/config/environments.json`
+- **Script principal**: `trivance-dev-config/scripts/envs.sh`
+- **Documentación técnica**: `trivance-dev-config/README.md`
+
+---
+
+💡 **Tip Final**: El 90% del tiempo usarás solo estos comandos:
+- `status` - Ver dónde estás
+- `switch local` - Volver a desarrollo
+- `switch qa` - Ir a pruebas
+
+¡Eso es todo! 🎉

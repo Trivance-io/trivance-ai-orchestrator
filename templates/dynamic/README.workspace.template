@@ -9,14 +9,13 @@ Multi-repository workspace for Trivance Platform development.
 ## Quick Start
 
 ```bash
-# Start all services
-./start-all.sh
+# Main command interface
+./start.sh
 
-# Check system health  
-./status.sh
-
-# Stop all services
-pm2 stop all
+# Or use direct commands
+./start.sh start   # Start all services
+./start.sh status  # Check system health
+./start.sh stop    # Stop all services
 ```
 
 ## Development URLs

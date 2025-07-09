@@ -27,11 +27,11 @@
 
 ### 2️⃣ **Iniciar Servicios**
 ```bash
-# Iniciar todos los servicios
-./start-all.sh
+# Comando principal - menú interactivo
+./start.sh
 
-# Verificar que todo funciona
-./status.sh
+# O directamente iniciar servicios
+./start.sh start
 ```
 
 ### 3️⃣ **¡Listo! URLs de Desarrollo**
@@ -80,5 +80,5 @@ pm2 stop all
 ./trivance-dev-config/scripts/envs.sh switch local
 
 # Verificar health
-./status.sh
+./start.sh status
 ```

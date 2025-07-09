@@ -84,14 +84,14 @@ git clone https://github.com/GLab-Projects/trivance-dev-config.git
 
 ```bash
 # Todo pre-configurado, listo para ejecutar
-./start-all.sh
+./start.sh
 ```
 
 #### Paso 5: Validar Instalación
 
 ```bash
 # Verificación de salud completa
-./status.sh
+./start.sh status
 ```
 
 #### Paso 6: NUEVO - Verificación de Compilación (Obligatorio)
@@ -128,7 +128,7 @@ git clone https://github.com/GLab-Projects/trivance-dev-config.git
 ```bash
 # Iniciar desarrollo (30 segundos)
 cd ~/Desarrollo/Trivance-Platform
-./start-all.sh
+./start.sh
 
 # URLs de desarrollo disponibles:
 # • Frontend: http://localhost:5173
@@ -137,7 +137,7 @@ cd ~/Desarrollo/Trivance-Platform
 # • GraphQL: http://localhost:3000/graphql
 
 # Verificar estado de servicios
-./status.sh
+./start.sh status
 
 # Verificar compilación (si se hicieron cambios)
 ./scripts/utils/verify-compilation.sh
@@ -150,14 +150,14 @@ pm2 stop all
 
 ```bash
 # Verificar estado completo del workspace
-./status.sh
+./start.sh status
 
 # Re-verificar que todo compila (obligatorio antes de commits)
 ./scripts/utils/verify-compilation.sh
 
 # Reiniciar servicios si hay problemas
 pm2 stop all
-./start-all.sh
+./start.sh
 
 # Abrir workspace en VS Code
 code TrivancePlatform.code-workspace
@@ -274,7 +274,7 @@ BCRYPT_ROUNDS=12
 
 ```bash
 # Opción A: Iniciar todos los servicios automáticamente
-./start-all.sh
+./start.sh
 
 # Opción B: Iniciar manualmente (para debugging)
 cd ms_trivance_auth && npm run start:dev &
@@ -441,7 +441,7 @@ lsof -ti:3000 | xargs kill -9
 brew services start mongodb/brew/mongodb-community  # macOS
 
 # Servicios no inician
-./status.sh
+./start.sh status
 # Revisar logs en logs/
 ```
 

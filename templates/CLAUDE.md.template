@@ -31,11 +31,7 @@ Trivance-platform/                    # 📁 Workspace principal auto-creado
 ├── README.md                         # Documentación principal (auto-generado)
 ├── TrivancePlatform.code-workspace   # VS Code multi-repo (auto-configurado)
 ├── .gitignore                        # Git ignore maestro (auto-creado)
-├── COMMANDS.md                       # 📖 Referencia rápida de comandos
-├── start-services.sh                 # 🚀 Iniciar servicios (enlace simbólico)
-├── check-health.sh                   # 🏥 Verificar estado (enlace simbólico)
-├── change-env.sh                     # 🎛️ Cambiar environment (enlace simbólico)
-├── setup.sh                          # 🔧 Setup completo (enlace simbólico)
+├── start.sh                          # 🚀 Comando principal (menú interactivo)
 ├── envs/                             # 🔐 Configuraciones de environments (no en git)
 ├── trivance-dev-config/              # 🔧 REPO DE CONFIGURACIONES (clonado)
 │   ├── .claude/                      # ⚙️ Configuración Claude Code
@@ -97,41 +93,24 @@ Claude Code debe entender que opera en un **workspace multi-repositorio** donde:
 - **API QA**: https://api-qa.example.com
 - **Frontend QA**: https://staging-admin.example.com
 
-## 🚀 COMANDOS MAESTROS PARA CLAUDE CODE
+## 🚀 COMANDO PRINCIPAL PARA CLAUDE CODE
 
-### ⚡ Comandos Simplificados (Enlaces Simbólicos)
+### ⚡ UN SOLO COMANDO PARA TODO
 ```bash
-# INICIAR SERVICIOS CON VALIDACIÓN
-./start-services.sh
+# COMANDO PRINCIPAL - MENÚ INTERACTIVO
+./start.sh
 
-# VERIFICAR ESTADO DE SERVICIOS
-./check-health.sh
-./check-health.sh fix              # Con auto-corrección
-
-# CAMBIAR ENVIRONMENT
-./change-env.sh switch local       # Desarrollo
-./change-env.sh switch qa          # Testing
-./change-env.sh switch production  # Producción
-./change-env.sh status             # Ver estado actual
-
-# SETUP COMPLETO
-./setup.sh                         # Reconfigurar todo
+# O CON ARGUMENTOS DIRECTOS:
+./start.sh start    # Iniciar servicios
+./start.sh stop     # Detener servicios  
+./start.sh status   # Ver estado
+./start.sh setup    # Configurar desde cero
 ```
 
-### 📁 Comandos con Rutas Completas
+### 📁 Referencia Completa de Comandos
+Para ver todos los comandos disponibles y sus rutas completas:
 ```bash
-# Inicio inteligente con validación
-./trivance-dev-config/scripts/utils/smart-start.sh
-
-# Health check con diagnóstico
-./trivance-dev-config/scripts/utils/health-check.sh
-
-# Gestión de environments
-./trivance-dev-config/scripts/envs.sh switch [local|qa|production]
-./trivance-dev-config/scripts/envs.sh status
-
-# Ver referencia completa
-cat COMMANDS.md
+cat ./trivance-dev-config/docs/COMMANDS.md
 ```
 
 ## 🏗️ ARQUITECTURA TÉCNICA COMPLETA
