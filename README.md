@@ -1,315 +1,204 @@
-# 🚀 Trivance Dev Config
+# Trivance Dev Config
 
-**Configuración automatizada de desarrollo para la plataforma Trivance**
+Professional automated development environment configuration for the Trivance platform.
 
-Sistema de configuración automática diseñado para IA y desarrolladores que permite configurar todo el entorno de desarrollo de Trivance en segundos, sin intervención manual.
+## Overview
 
-## 🎯 **Objetivo Principal**
+This repository provides enterprise-grade automated setup for the complete Trivance development environment:
 
-Configurar automáticamente el entorno completo de desarrollo de Trivance con:
-- **4 repositorios** (2 backends NestJS, 1 frontend React, 1 mobile React Native)
-- **Variables de entorno** generadas automáticamente
-- **Dependencias** instaladas con protección de timeout
-- **Verificación de compilación** obligatoria para todos los repos
-- **Herramientas de desarrollo** configuradas (VS Code, Claude)
+- **ms_trivance_auth** - Authentication service (NestJS, Port 3001)
+- **ms_level_up_management** - Management API with GraphQL (NestJS, Port 3000)
+- **level_up_backoffice** - Admin frontend (React/Vite, Port 5173)
+- **trivance-mobile** - Mobile application (React Native/Expo, Port 8081)
 
-## ⚡ **Inicio Rápido - Un Solo Comando**
+## Key Features
+
+- ✅ **Zero Manual Configuration** - Fully automated setup
+- ✅ **Secure by Default** - Dynamic secret generation, no hardcoded credentials
+- ✅ **Production-Ready** - PM2 process management with auto-restart
+- ✅ **AI-First Design** - Optimized for AI-assisted development workflows
+- ✅ **Cross-Platform** - Compatible with macOS and Linux
+- ✅ **Validated Setup** - Automated tests ensure everything works
+
+## Quick Start
 
 ```bash
-# Clona este repo y ejecuta el setup automático
-git clone [REPO_URL] trivance-dev-config
+# 1. Clone this repository
+git clone https://github.com/GLab-Projects/trivance-dev-config
 cd trivance-dev-config
+
+# 2. Run automated setup (takes ~5-10 minutes)
 ./setup.sh
+
+# 3. Start all services
+./start-all.sh
 ```
 
-**🎉 ¡Listo! En 5-10 minutos tendrás todo configurado automáticamente.**
+That's it! All services are now running with PM2 process management.
 
-## 🚀 **Comandos Rápidos (Enlaces Simbólicos)**
+## Prerequisites
 
-Después del setup, usa estos comandos simplificados desde el workspace principal:
+The setup script automatically validates these requirements:
 
+- **Node.js 18+** (required)
+- **npm 8+** (required)
+- **Git 2+** (required)
+- **PostgreSQL** (recommended - Management API will fail without it)
+- **MongoDB** (recommended - Auth Service will fail without it)
+
+Missing prerequisites will be clearly reported during setup.
+
+## Available Commands
+
+### Core Commands
+- `./setup.sh` - Complete automated setup with validation
+- `./start-all.sh` - Start all services with PM2
+- `./status.sh` - Check service health and status
+
+### Environment Management
+- `./change-env.sh status` - Show current environment
+- `./change-env.sh switch [env]` - Switch environment (local/qa/production)
+- `./change-env.sh validate` - Validate environment configuration
+- `./change-env.sh sync` - Sync with environments.json
+
+### PM2 Process Management
+- `pm2 status` - View service status
+- `pm2 logs` - View real-time logs
+- `pm2 restart all` - Restart all services
+- `pm2 stop all` - Stop all services
+- `pm2 monit` - Interactive monitoring dashboard
+
+## Service URLs
+
+Once running, services are available at:
+
+- **Auth API**: http://localhost:3001
+- **Management API**: http://localhost:3000
+- **GraphQL Playground**: http://localhost:3000/graphql
+- **Admin Frontend**: http://localhost:5173
+- **Mobile Metro**: http://localhost:8081 (optional)
+
+## Security
+
+### Automatic Secret Generation
+- Unique development secrets generated per installation
+- Stored in `.trivance-secrets` (gitignored)
+- No hardcoded credentials in the repository
+
+### Environment Isolation
+- Separate configurations for local/qa/production
+- Production credentials must be manually configured
+- All sensitive files properly gitignored
+
+## What Gets Configured
+
+### During Setup
+1. **Repository Cloning** - All 4 repositories with correct branches
+2. **Secret Generation** - Unique JWT secrets, API keys, encryption keys
+3. **Environment Files** - `.env` files for each service with secure values
+4. **Dependencies** - Parallel installation with 3-minute timeout protection
+5. **Compilation Check** - Ensures all services build successfully
+6. **Validation Tests** - 9 automated tests verify setup completeness
+
+### Process Management
+- PM2 configuration with automatic restart on failure
+- Centralized logging in `logs/pm2/`
+- Memory limits and resource monitoring
+- Zero-downtime reload capability
+
+## Project Structure
+
+```
+workspace/
+├── trivance-dev-config/    # This configuration repository
+├── ms_trivance_auth/       # Auth service
+├── ms_level_up_management/ # Management API  
+├── level_up_backoffice/    # Admin frontend
+├── trivance-mobile/        # Mobile app
+├── logs/                   # Centralized PM2 logs
+├── envs/                   # Environment configurations
+└── .trivance-secrets       # Generated secrets (gitignored)
+```
+
+## Troubleshooting
+
+### Quick Fixes
 ```bash
-# 🚀 Iniciar servicios
-./start-services.sh
+# Run automated validation
+./scripts/utils/validate-setup.sh
 
-# 🏥 Verificar estado
-./check-health.sh
+# Check detailed logs
+pm2 logs --lines 100
 
-# 🎛️ Cambiar environment
-./change-env.sh switch local    # Desarrollo
-./change-env.sh switch qa       # Testing
-./change-env.sh switch production # Producción
-
-# 📊 Ver estado actual
-./change-env.sh status
-
-# 🔄 Sincronizar con environments.json
-./change-env.sh sync
-
-# 📋 Ver todos los comandos
-cat COMMANDS.md
+# Restart specific service
+pm2 restart [service-name]
 ```
 
-## ✨ **Características Principales**
+### Common Issues
 
-### 🤖 **AI-First Design**
-- Configuración **100% automatizada** sin intervención manual
-- Compatible con **Claude Code**, **Cursor**, **GitHub Copilot**
-- Variables de entorno **auto-generadas** desde environments.json
-- **Diagnóstico automático** y corrección de problemas comunes
-- **Validación post-inicio** automática - nunca más problemas no detectados
+**PostgreSQL/MongoDB not found**
+- Services will fail to start without databases
+- Install with: `brew install postgresql mongodb-community` (macOS)
 
-### 🎛️ **Sistema de Environments Mejorado** 🆕
-- **Sincronización automática** con environments.json
-- **Validación completa** de variables críticas
-- **Comparación visual** entre environments (`diff`)
-- **Cambio instantáneo** entre local/qa/production
-- **Seguridad garantizada** - imposible commitear secrets
+**Port already in use**
+- The setup handles this automatically
+- Manual fix: `lsof -i:[port]` then `kill -9 [PID]`
 
-### 🛡️ **Desarrollo Robusto**
-- **Protección de timeout** para instalaciones largas
-- **Verificación de compilación obligatoria** para todos los repos
-- Manejo inteligente de errores con **logs detallados**
-- **Rollback automático** en caso de fallos
+**Service won't start**
+- Check logs: `pm2 logs [service-name]`
+- Validate environment: `./change-env.sh validate`
 
-### 🔧 **Zero Configuration**
-- **Enlaces simbólicos** para comandos simplificados
-- **Base de datos** en modo desarrollo por defecto
-- **CORS** preconfigurado para desarrollo local
-- **Hot reload** habilitado en todos los servicios
+See [Troubleshooting Guide](docs/TROUBLESHOOTING.md) for detailed solutions.
 
-### 📊 **Monitoreo y Observabilidad**
-- Health checks automáticos para todos los servicios
-- Logs centralizados en `./logs/`
-- Progress indicators en tiempo real
-- Compilación tracking por repositorio
+## For AI-Assisted Development
 
-## 📁 **Estructura del Proyecto**
+This repository is optimized for AI-first workflows:
 
-```
-trivance-dev-config/
-├── README.md                 # 📖 Este archivo
-├── setup.sh                  # 🎯 Script principal de configuración
-├── config/
-│   ├── repositories.json     # 📦 Configuración de repos a clonar
-│   └── environments.json     # 🔐 Variables de entorno por ambiente
-├── scripts/
-│   ├── core/
-│   │   └── orchestrator.sh   # 🎼 Orquestador principal
-│   ├── utils/
-│   │   ├── common.sh         # 🛠️ Utilidades compartidas
-│   │   └── progress.sh       # 📊 Indicadores de progreso
-│   └── verify-compilation.sh # ✅ Verificación obligatoria de compilación
-├── templates/
-│   ├── CLAUDE.md.template    # 🤖 Configuración para Claude
-│   ├── TrivancePlatform.code-workspace.template # 💻 VS Code workspace
-│   └── dynamic/
-│       └── README.workspace.template # 📝 README dinámico del workspace
-├── docs/
-│   ├── ONBOARDING.md         # 👥 Guía de onboarding
-│   ├── WORKFLOWS.md          # 🔄 Flujos de trabajo
-│   ├── TROUBLESHOOTING.md    # 🔧 Solución de problemas
-│   └── DEPLOYMENT.md         # 🚀 Guía de despliegue
-└── tests/
-    └── README.md             # 🧪 Documentación de testing
-```
+1. **Clear Command Structure** - All commands are simple and unambiguous
+2. **Predictable File Locations** - Consistent structure across all services
+3. **Comprehensive Validation** - AI can verify setup success
+4. **No Manual Steps** - Everything is automated
+5. **Professional Error Handling** - Clear error messages for debugging
 
-## 🔄 **Proceso Automatizado (7 Pasos)**
-
-El sistema ejecuta automáticamente estos pasos:
-
-### **Paso 1: Validación de Configuración** ✅
-- Verifica archivos de configuración JSON
-- Valida herramientas requeridas (Node.js, Git, npm)
-- Checks de permisos y conectividad
-
-### **Paso 2: Clonado de Repositorios** 📥
-- Clona 4 repositorios desde `config/repositories.json`
-- Checkout automático a rama `experiments`
-- Verificación de integridad de cada repo
-
-### **Paso 3: Configuración de Entornos** 🔐
-- Genera variables de entorno automáticamente
-- Configura `.env` para cada repositorio
-- Manejo inteligente de secretos y credenciales
-
-### **Paso 4: Instalación de Dependencias** 📦
-- Instala `npm` dependencies con **timeout protection (10 min)**
-- **Cross-platform timeout**: Funciona en Windows, Mac y Linux automáticamente
-- Progress indicators en tiempo real
-- Logs detallados para debugging
-
-### **Paso 5: Configuración de Herramientas** 🛠️
-- VS Code workspace multi-repositorio
-- Claude Code configuration file
-- Development utilities setup
-
-### **Paso 6: Fixes Automáticos** 🔧 **CRÍTICO**
-- **Sentry Fix**: Agrega `build:dev` sin Sentry para desarrollo
-- **Firebase Fix**: Genera claves privadas válidas automáticamente
-- **Variables de Entorno**: Verifica configuración completa
-- **Conflictos de Puerto**: Detecta puertos ocupados
-- **TypeScript RN**: Configuración optimizada
-
-### **Paso 7: Verificación de Compilación** ✅ **OBLIGATORIO**
-- Compila **todos** los repositorios con fixes aplicados
-- NestJS: `npm run build:dev` (desarrollo) o `npm run build` (producción)
-- React: `npm run build`
-- React Native: TypeScript verification
-- **FALLA TODO** si algún repo no compila
-
-## 🎮 **Comandos Principales (Después del Setup)**
-
-### Comandos Simplificados (Enlaces Simbólicos)
+### AI Usage Example
 ```bash
-# 🚀 Iniciar servicios inteligentemente
-./start-services.sh
-
-# 🏥 Health check con diagnóstico
-./check-health.sh
-./check-health.sh fix          # Con auto-corrección
-
-# 🎛️ Gestión de environments
-./change-env.sh switch local   # Cambiar a local
-./change-env.sh status         # Ver estado
-./change-env.sh validate       # Validar configuración
-./change-env.sh diff local qa  # Comparar environments
-./change-env.sh sync          # Sincronizar con JSON
+# AI can simply run these 3 commands:
+git clone https://github.com/GLab-Projects/trivance-dev-config
+cd trivance-dev-config
+./setup.sh && ./start-all.sh
 ```
 
-### Comandos con Rutas Completas
-```bash
-# Inicio inteligente con validación
-./trivance-dev-config/scripts/utils/smart-start.sh
+## Documentation
 
-# Health check con diagnóstico
-./trivance-dev-config/scripts/utils/health-check.sh
+- [Architecture Overview](docs/ARCHITECTURE.md) - Technical architecture details
+- [Environment Management](docs/ENVIRONMENTS.md) - Managing multiple environments
+- [Deployment Guide](docs/DEPLOYMENT.md) - Deployment procedures
+- [Troubleshooting Guide](docs/TROUBLESHOOTING.md) - Common issues and solutions
 
-# ⚡ Verificación rápida de servicios
-./scripts/utils/health-check.sh quick
+## Requirements
 
-# Solo verificar compilación
-./scripts/verify-compilation.sh
+### Minimum Versions
+- Node.js 18.0.0+
+- npm 8.0.0+
+- Git 2.0.0+
 
-# Limpiar workspace y empezar de nuevo
-./scripts/utils/clean-workspace.sh
-```
+### Database Requirements
+- PostgreSQL (for Management API)
+- MongoDB (for Auth Service)
 
-## 🚦 **Después de la Configuración**
+## Contributing
 
-Una vez completado el setup, tendrás:
+1. Fork the repository
+2. Create your feature branch
+3. Run validation tests: `./scripts/utils/validate-setup.sh`
+4. Commit your changes
+5. Push to the branch
+6. Create a Pull Request
 
-```bash
-# 🗂️ Workspace organizado
-├── ms_trivance_auth/          # 🔐 Auth Service (Puerto 3001)
-├── ms_level_up_management/    # 📊 Management API (Puerto 3000)  
-├── level_up_backoffice/       # 💻 Frontend React (Puerto 5173)
-├── trivance-mobile/           # 📱 Mobile React Native
-├── TrivancePlatform.code-workspace # 💼 VS Code Workspace
-├── CLAUDE.md                  # 🤖 Claude Configuration
-└── logs/                      # 📋 Logs centralizados
+## License
 
-# 🎯 Comandos para iniciar servicios
-cd ms_trivance_auth && npm run start:dev         # Auth Service
-cd ms_level_up_management && npm run start:dev   # Management API  
-cd level_up_backoffice && npm run dev           # Frontend
-cd trivance-mobile && npm start                 # Mobile
-```
-
-## 🔍 **Monitoreo y Health Checks**
-
-```bash
-# Verificar estado de servicios
-curl http://localhost:3001/health           # Auth Service
-curl http://localhost:3000/graphql          # Management API (GraphQL Playground)
-
-# IMPORTANTE: La raíz / retorna 404 - ES NORMAL en APIs REST/GraphQL
-# {"message":"Cannot GET /","error":"Not Found","statusCode":404}
-# Esto NO es un error, es diseño estándar de APIs profesionales
-
-# Endpoints funcionales confirmados:
-# - GraphQL Playground: http://localhost:3000/graphql
-# - API REST: /api/auth, /api/users, /api/organizations, /api/donations, etc.
-
-# Ver logs en tiempo real
-tail -f logs/setup.log
-tail -f logs/compilation/*.log
-```
-
-## 🌟 **Características para IA**
-
-### Claude Code Integration
-- Archivo `CLAUDE.md` con contexto completo del proyecto
-- Variables de entorno y estructura explicada
-- Comandos más utilizados documentados
-
-### Cursor Integration  
-- Workspace configurado con settings optimizados
-- Rules file para mejor code completion
-- Multi-repo navigation configurada
-
-### Auto-Fix Capabilities
-- Detección automática de problemas comunes
-- Sugerencias de solución en logs
-- Recovery procedures documentadas
-
-## 🚨 **Solución de Problemas Comunes**
-
-### ❌ Error de Timeout en Instalación
-```bash
-# Las dependencias tardan más de 10 minutos
-# 💡 Solución: Ya incluye timeout protection automático cross-platform
-```
-
-### ❌ Error "timeout: command not found" en macOS
-```bash
-# timeout: command not found
-# 💡 Solución: Sistema implementa timeout universal automáticamente
-# Funciona en Windows, Mac y Linux sin configuración adicional
-```
-
-### ❌ Firebase Configuration Error  
-```bash
-# Service account object must contain 'project_id'
-# 💡 Solución: Firebase es opcional en desarrollo
-```
-
-### ❌ Compilación Falla
-```bash
-# TypeScript errors o missing dependencies
-# 💡 Solución: Ver logs en ./logs/compilation/
-```
-
-### ❌ Puerto Ocupado
-```bash
-# Error: listen EADDRINUSE: address already in use :::3000
-# 💡 Solución automática: ./scripts/utils/health-check.sh fix
-# 🔧 Solución manual: killall node && ./setup.sh
-```
-
-## 📚 **Documentación Avanzada**
-
-- 📖 **[Onboarding](docs/ONBOARDING.md)** - Guía paso a paso para nuevos desarrolladores
-- 🔄 **[Workflows](docs/WORKFLOWS.md)** - Flujos de desarrollo y buenas prácticas  
-- 🔧 **[Troubleshooting](docs/TROUBLESHOOTING.md)** - Solución de problemas detallada
-- 🚀 **[Deployment](docs/DEPLOYMENT.md)** - Guías de despliegue para QA/Prod
-
-## 🤝 **Contribución**
-
-Este repositorio es el **núcleo de la configuración automatizada**. Para contribuir:
-
-1. Fork el repositorio
-2. Haz cambios en rama feature
-3. Asegúrate que `./setup.sh` funciona completamente
-4. Ejecuta `./scripts/verify-compilation.sh` 
-5. Submit PR con descripción detallada
-
-## 📄 **Licencia**
-
-Propiedad de Gracia Lab - Uso interno y colaboradores autorizados únicamente.
+This project is proprietary and confidential.
 
 ---
 
-**⚡ ¡Configuración automática en segundos, desarrollo productivo en minutos!**
-
-*Diseñado para IA • Optimizado para desarrolladores • Probado en producción*
+**Note**: This is a development configuration tool. For production deployment, see the [Deployment Guide](docs/DEPLOYMENT.md).

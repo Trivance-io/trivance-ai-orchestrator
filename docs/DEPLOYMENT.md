@@ -1,403 +1,212 @@
-# 🚀 Guía de Deployment - Trivance Platform
+# Deployment Guide
 
-## 📋 Resumen Ejecutivo
+## Overview
 
-Trivance Platform utiliza un **sistema híbrido de configuración**:
+This guide covers deployment procedures for all Trivance platform environments.
 
-- **✅ Desarrollo Local**: 100% automático, sin configuración manual
-- **⚠️ QA Environment**: Configuración manual requerida por seguridad  
-- **🔒 Producción**: Configuración manual crítica con aprobación de seguridad
+## Environments
 
----
+### Local Development (Default)
+- Automatically configured during setup
+- Uses dynamically generated secrets
+- All services run on localhost
 
-## 🔄 Flujo de Environments
+### QA Environment
+- Requires manual configuration
+- Update `config/environments.json` with QA values
+- Switch using: `./change-env.sh switch qa`
 
-```mermaid
-graph LR
-    A[Development<br/>🤖 Auto] --> B[QA<br/>⚙️ Manual] --> C[Production<br/>🔒 Manual]
-    
-    A --> |"git push origin develop"| B
-    B --> |"Aprobación + git push origin main"| C
-```
+### Production Environment
+- Highly restricted, manual configuration only
+- Never commit production credentials
+- Use secure secret management (Vault, AWS Secrets Manager, etc.)
 
----
+## Local Development Setup
 
-## 🖥️ Development Environment (Automático)
-
-### ✅ Qué está Pre-configurado
-
-El script de setup configura automáticamente:
-
-- **URLs**: localhost con puertos estándar
-- **Base de datos**: Credenciales locales predefinidas
-- **JWT Secrets**: Secrets de desarrollo seguros
-- **CORS**: Configurado para desarrollo local
-- **Logging**: Debug mode habilitado
-- **GraphQL**: Playground e introspection habilitados
-
-### 🎯 Setup de Desarrollo
-
+### Initial Setup
 ```bash
-# 1. Clonar y configurar (100% automático)
-mkdir -p Trivance-platform
-cd Trivance-platform
-git clone https://github.com/GLab-Projects/trivance-dev-config.git
-./trivance-dev-config/setup.sh
+# Clone and setup
+git clone https://github.com/GLab-Projects/trivance-dev-config
+cd trivance-dev-config
+./setup.sh
 
-# 2. Iniciar servicios (todo configurado)
-./scripts/start-all-services.sh
-
-# 3. Verificar que todo funciona
-./scripts/check-health.sh
+# Start all services
+./start-all.sh
 ```
 
-**🎉 ¡Ya está! El desarrollo local funciona inmediatamente.**
+### Service Management with PM2
 
----
-
-## ⚙️ QA Environment (Manual)
-
-### 📋 Pre-requisitos para QA
-
-Antes de configurar QA, asegúrate de tener:
-
-- [ ] Infraestructura QA desplegada (servidores, bases de datos)
-- [ ] Certificados SSL configurados
-- [ ] Variables de entorno QA definidas por el equipo de infraestructura
-- [ ] Acceso a servicios externos (AWS, Sentry, etc.) para QA
-
-### 🔧 Configuración Manual de QA
-
-#### 1. Variables de Entorno por Repositorio
-
-Para cada repositorio (`ms_level_up_management`, `ms_trivance_auth`, `level_up_backoffice`):
-
+#### Start All Services
 ```bash
-# Editar archivo .env en cada repositorio
-cd ms_level_up_management
-cp .env .env.backup  # Backup de configuración dev
-
-# Configurar para QA
-cat > .env << EOF
-# QA Environment Configuration
-NODE_ENV=qa
-PORT=3000
-
-# URLs QA reales (proporcionadas por infraestructura)
-API_BASE_URL=https://api-qa.trivance.com
-AUTH_API_URL=https://auth-qa.trivance.com
-FRONTEND_URL=https://staging-admin.trivance.com
-GRAPHQL_URL=https://api-qa.trivance.com/graphql
-
-# Base de datos QA (credenciales proporcionadas por DBA)
-DATABASE_URL=postgresql://QA_USER:QA_SECURE_PASSWORD@qa-db.trivance.com:5432/trivance_qa
-
-# JWT para QA (generar nuevo secret)
-JWT_SECRET=$(openssl rand -base64 64)
-JWT_EXPIRATION_TIME=1h
-
-# AWS QA (credenciales proporcionadas por DevOps)
-AWS_ACCESS_KEY_ID=AKIA...QA_KEY
-AWS_SECRET_ACCESS_KEY=...QA_SECRET_KEY
-AWS_REGION=us-east-1
-AWS_S3_BUCKET=trivance-qa-uploads
-
-# Monitoreo QA
-SENTRY_DSN=https://...@sentry.io/project-qa
-LOG_LEVEL=info
-
-# Configuración QA
-CORS_ORIGIN=https://staging-admin.trivance.com
-GRAPHQL_PLAYGROUND=true
-GRAPHQL_DEBUG=false
-GRAPHQL_INTROSPECTION=true
-
-# Rate limiting para QA
-RATE_LIMIT_TTL=60
-RATE_LIMIT_LIMIT=100
-EOF
+./start-all.sh
 ```
 
-#### 2. Configuración por Tecnología
-
-**Backend Management (ms_level_up_management)**:
+#### Check Status
 ```bash
-# Configuración específica PostgreSQL + GraphQL
-DATABASE_URL=postgresql://qa_mgmt_user:SECURE_PASS@qa-postgres.trivance.com:5432/trivance_management_qa
+pm2 status
+./status.sh  # Enhanced status with health checks
 ```
 
-**Backend Auth (ms_trivance_auth)**:
+#### View Logs
 ```bash
-# Configuración específica MongoDB + Auth
-DATABASE_URL=mongodb://qa_auth_user:SECURE_PASS@qa-mongo.trivance.com:27017/trivance_auth_qa
+pm2 logs              # All services
+pm2 logs auth-service # Specific service
+pm2 logs --lines 100  # Last 100 lines
 ```
 
-**Frontend (level_up_backoffice)**:
+#### Restart Services
 ```bash
-# Variables específicas Vite/React
-VITE_API_URL=https://api-qa.trivance.com
-VITE_AUTH_API_URL=https://auth-qa.trivance.com
-VITE_GRAPHQL_URL=https://api-qa.trivance.com/graphql
+pm2 restart all
+pm2 restart management-api
 ```
 
-#### 3. Deployment a QA
-
+#### Stop Services
 ```bash
-# 1. Build para QA
-npm run build
-
-# 2. Deploy (según estrategia de la empresa)
-# Opción A: Docker
-docker build -t trivance-app:qa .
-docker push registry.trivance.com/trivance-app:qa
-
-# Opción B: PM2
-pm2 start ecosystem.qa.config.js
-
-# Opción C: Kubernetes
-kubectl apply -f k8s/qa/
+pm2 stop all
+pm2 kill  # Stop PM2 daemon
 ```
 
-#### 4. Validación QA
+## Database Setup
 
+### PostgreSQL (Management Service)
 ```bash
-# Verificar deployment
-curl -f https://api-qa.trivance.com/health
-curl -f https://auth-qa.trivance.com/health
-curl -f https://staging-admin.trivance.com
+# macOS
+brew services start postgresql
+createdb trivance_development
+createuser trivance_dev -P  # Password: trivance_dev_pass
 
-# Ejecutar tests de QA
-npm run test:qa
-npm run test:e2e:qa
+# Linux
+sudo systemctl start postgresql
+sudo -u postgres createdb trivance_development
+sudo -u postgres createuser trivance_dev -P
 ```
 
----
-
-## 🔒 Production Environment (Crítico)
-
-### 🚨 Proceso de Aprobación
-
-**OBLIGATORIO**: Todo deployment a producción requiere:
-
-1. **✅ Code Review** aprobado por 2+ senior developers
-2. **✅ QA Testing** completo con sign-off del QA team
-3. **✅ Security Review** por el security officer
-4. **✅ Performance Testing** con métricas aprobadas
-5. **✅ Backup Strategy** validada
-6. **✅ Rollback Plan** documentado y probado
-
-### 🔐 Configuración de Producción
-
-#### 1. Secrets Management
-
-**NUNCA** hardcodear secrets en archivos. Usar:
-
+### MongoDB (Auth Service)
 ```bash
-# Opción A: HashiCorp Vault
-vault kv get -field=jwt_secret secret/trivance/prod/auth
+# macOS
+brew services start mongodb-community
 
-# Opción B: AWS Secrets Manager  
-aws secretsmanager get-secret-value --secret-id trivance/prod/jwt-secret
-
-# Opción C: Kubernetes Secrets
-kubectl get secret trivance-secrets -o jsonpath='{.data.jwt-secret}' | base64 -d
+# Linux
+sudo systemctl start mongod
 ```
 
-#### 2. Variables de Entorno Producción
+## Environment Configuration
 
+### Switching Environments
 ```bash
-# Production Environment Configuration
-NODE_ENV=production
-PORT=3000
+# View current environment
+./change-env.sh status
 
-# URLs Producción (validadas por seguridad)
-API_BASE_URL=https://api.trivance.com
-AUTH_API_URL=https://auth.trivance.com  
-FRONTEND_URL=https://admin.trivance.com
-GRAPHQL_URL=https://api.trivance.com/graphql
+# Switch to QA
+./change-env.sh switch qa
 
-# Base de datos Producción (alta disponibilidad)
-DATABASE_URL=postgresql://prod_user:${PROD_DB_SECRET}@prod-db-cluster.trivance.com:5432/trivance_production
-
-# JWT Producción (rotación mensual obligatoria)
-JWT_SECRET=${PROD_JWT_SECRET}
-JWT_EXPIRATION_TIME=15m  # Más corto en producción
-
-# AWS Producción (IAM roles recomendado)
-AWS_ACCESS_KEY_ID=${PROD_AWS_KEY}
-AWS_SECRET_ACCESS_KEY=${PROD_AWS_SECRET}
-AWS_REGION=us-east-1
-AWS_S3_BUCKET=trivance-production-uploads
-
-# Monitoreo Producción (crítico)
-SENTRY_DSN=${PROD_SENTRY_DSN}
-LOG_LEVEL=warn
-DATADOG_API_KEY=${PROD_DATADOG_KEY}
-
-# Configuración Producción (restrictiva)
-CORS_ORIGIN=https://admin.trivance.com
-GRAPHQL_PLAYGROUND=false  # NUNCA en producción
-GRAPHQL_DEBUG=false
-GRAPHQL_INTROSPECTION=false  # Seguridad
-
-# Rate limiting Producción (más restrictivo)
-RATE_LIMIT_TTL=60
-RATE_LIMIT_LIMIT=50
-
-# SSL y Seguridad
-FORCE_HTTPS=true
-HELMET_CONFIG=strict
-CSP_CONFIG=strict
+# Validate configuration
+./change-env.sh validate
 ```
 
-#### 3. Deployment Producción
+### Adding New Environment Variables
+1. Update `config/environments.json`
+2. Sync environment files:
+   ```bash
+   ./change-env.sh sync
+   ```
+3. Restart affected services:
+   ```bash
+   pm2 restart [service-name]
+   ```
 
+## Security Best Practices
+
+### Development
+- Secrets are auto-generated in `.trivance-secrets`
+- Never commit `.trivance-secrets` or `.env` files
+- Use unique secrets per developer
+
+### QA/Staging
+- Use dedicated QA credentials
+- Rotate secrets regularly
+- Limit access to QA environment
+
+### Production
+- Use professional secret management
+- Enable audit logging
+- Implement least privilege access
+- Regular security audits
+
+## Monitoring
+
+### Health Checks
 ```bash
-# 1. Pre-deployment checklist
-□ Backup de base de datos completado
-□ Maintenance window comunicado
-□ Rollback plan activado
-□ Monitoring dashboards listos
-□ Equipo on-call notificado
+# Quick health check
+./status.sh
 
-# 2. Blue-Green Deployment (recomendado)
-# Deploy a entorno "green"
-kubectl apply -f k8s/prod/green/
-
-# Validación en green
-npm run test:prod:smoke
-npm run test:prod:health
-
-# Switch traffic green → blue
-kubectl patch service trivance-api -p '{"spec":{"selector":{"version":"green"}}}'
-
-# 3. Post-deployment validation
-npm run test:prod:full
-# Validate production endpoints manually or implement custom validation
-
-# 4. Monitoring
-# Verificar métricas por 2 horas mínimo
-# Alerts configurados
-# Performance baselines validados
+# Detailed PM2 monitoring
+pm2 monit
 ```
 
-#### 4. Secrets Rotation (Producción)
-
+### Performance Monitoring
 ```bash
-# Rotación mensual obligatoria
-# 1. Generar nuevos secrets
-NEW_JWT_SECRET=$(openssl rand -base64 128)
+# View resource usage
+pm2 describe [service-name]
 
-# 2. Actualizar en secrets manager
-aws secretsmanager update-secret --secret-id trivance/prod/jwt-secret --secret-string "$NEW_JWT_SECRET"
-
-# 3. Rolling restart de servicios
-kubectl rollout restart deployment/trivance-auth
-kubectl rollout restart deployment/trivance-api
-
-# 4. Validar funcionamiento
-kubectl rollout status deployment/trivance-auth
+# Real-time monitoring
+pm2 monit
 ```
 
----
+## Troubleshooting Deployment
 
-## 🔧 Troubleshooting por Environment
+### Service Won't Start
+1. Check logs: `pm2 logs [service-name]`
+2. Verify environment variables: `./change-env.sh validate`
+3. Check port availability: `lsof -i:[port]`
 
-### Development Issues
+### Database Connection Failed
+1. Verify database is running
+2. Check connection strings in `.env`
+3. Ensure database exists and user has permissions
 
-```bash
-# Problema: Puerto en uso
-sudo lsof -i :3000
-kill -9 <PID>
-
-# Problema: Base de datos no conecta
-brew services restart postgresql
-brew services restart mongodb-community
-
-# Problema: Node modules corruptos
-rm -rf node_modules package-lock.json
-npm install
+### Memory Issues
+Edit PM2 configuration in `start-all.sh`:
+```javascript
+max_memory_restart: '2G'  // Increase from 1G
 ```
 
-### QA Issues
+## Continuous Integration
 
-```bash
-# Problema: DNS no resuelve
-nslookup api-qa.trivance.com
-# Contactar: DevOps team
+### GitHub Actions Example
+```yaml
+name: Deploy
+on:
+  push:
+    branches: [main]
 
-# Problema: Certificado SSL inválido
-openssl s_client -connect api-qa.trivance.com:443
-# Contactar: Security team
-
-# Problema: Base de datos QA no accesible
-# Verificar VPN, firewall rules
-# Contactar: DBA team
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+      - name: Install PM2
+        run: npm install -g pm2
+      - name: Deploy
+        run: |
+          ./setup.sh
+          pm2 start ecosystem.config.js
+          pm2 save
 ```
 
-### Production Issues
+## Production Deployment Checklist
 
-```bash
-# 🚨 CRITICAL: Seguir runbook de incidentes
-# 1. Alertar en Slack #production-incidents
-# 2. Iniciar bridge call
-# 3. Ejecutar rollback si es necesario
-# 4. Documentar en post-mortem
-
-# Rollback de emergencia
-kubectl rollout undo deployment/trivance-api
-kubectl rollout undo deployment/trivance-auth
-```
-
----
-
-## 📊 Checklist de Deployment
-
-### ✅ Development → QA
-
-- [ ] Features completadas y probadas localmente
-- [ ] Tests unitarios pasando
-- [ ] Code review aprobado
-- [ ] Branch develop actualizado
-- [ ] Variables QA configuradas manualmente
-- [ ] Deploy a QA ejecutado
-- [ ] Tests de integración en QA pasando
-- [ ] QA team sign-off
-
-### ✅ QA → Production
-
-- [ ] Todas las features QA aprobadas
-- [ ] Tests E2E completos
-- [ ] Performance tests aprobados
-- [ ] Security scan completado
-- [ ] Backup de producción realizado
-- [ ] Maintenance window programado
-- [ ] Variables producción configuradas
-- [ ] Secrets rotados
-- [ ] Deploy plan aprobado
-- [ ] Rollback plan probado
-- [ ] Equipo on-call alertado
-- [ ] Post-deployment monitoring configurado
-
----
-
-## 🆘 Contacts & Escalation
-
-### Por Environment
-
-- **Development**: Slack #dev-support
-- **QA**: Slack #qa-team + DevOps on-call
-- **Production**: Slack #production-incidents + PagerDuty
-
-### Por Componente  
-
-- **Backend API**: Backend team lead
-- **Auth Service**: Security + Backend team
-- **Frontend**: Frontend team lead  
-- **Infrastructure**: DevOps team
-- **Database**: DBA team
-- **Security**: Security officer
-
----
-
-**⚠️ IMPORTANTE**: Esta guía asume que la infraestructura (servidores, bases de datos, DNS) ya está configurada por el equipo de DevOps/Infrastructure. Para setup de infraestructura, consultar documentación específica de infrastructure-as-code.
+- [ ] All tests passing
+- [ ] Security audit completed
+- [ ] Production secrets configured
+- [ ] Database migrations ready
+- [ ] Monitoring configured
+- [ ] Backup strategy in place
+- [ ] Rollback plan documented
+- [ ] Load testing completed
+- [ ] SSL certificates valid
+- [ ] CORS properly configured
