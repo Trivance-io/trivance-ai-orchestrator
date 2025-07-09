@@ -257,7 +257,8 @@ create_environment_templates() {
     
     if [[ ! -f "$ENVS_DIR/$env.management.env" ]]; then
         log_info "  - Creando template $env.management.env"
-        sed "s/LOCAL/$env/g; s/localhost/\$${env^^}_HOST/g; s/development/$env/g" \
+        local env_upper=$(echo "$env" | tr '[:lower:]' '[:upper:]')
+        sed "s/LOCAL/$env/g; s/localhost/\$${env_upper}_HOST/g; s/development/$env/g" \
             "$ENVS_DIR/local.management.env" > "$ENVS_DIR/$env.management.env.template"
     fi
 }
@@ -342,16 +343,17 @@ validate_environment_config() {
     log_info "🔍 Validando configuración completa..."
     
     # Variables críticas por servicio
-    declare -A critical_vars
-    critical_vars["ms_level_up_management"]="PORT DATABASE_URL JWTSECRET PASSWORDSECRET ENCRYPTSECRET"
-    critical_vars["ms_trivance_auth"]="PORT DB_MONGO JWTSECRET PASSWORDSECRET ENCRYPTSECRET"
-    critical_vars["level_up_backoffice"]="VITE_API_URL VITE_AUTH_API_URL"
-    critical_vars["trivance-mobile"]="EXPO_PUBLIC_API_URL EXPO_PUBLIC_AUTH_API_URL"
+    # Use regular variables for POSIX compatibility
+    local critical_vars_management="PORT DATABASE_URL JWTSECRET PASSWORDSECRET ENCRYPTSECRET"
+    local critical_vars_auth="PORT DB_MONGO JWTSECRET PASSWORDSECRET ENCRYPTSECRET"
+    local critical_vars_backoffice="VITE_API_URL VITE_AUTH_API_URL"
+    local critical_vars_mobile="EXPO_PUBLIC_API_URL EXPO_PUBLIC_AUTH_API_URL"
+    # Variable assignment removed - using direct variables above
     
     local has_warnings=false
     
     # Validar cada servicio
-    for service in "${!critical_vars[@]}"; do
+    for service in ms_level_up_management ms_trivance_auth level_up_backoffice trivance-mobile; do
         local env_file="$WORKSPACE_DIR/$service/.env"
         
         if [[ ! -f "$env_file" ]]; then
@@ -359,8 +361,25 @@ validate_environment_config() {
             exit 1
         fi
         
+        # Get critical vars for this service
+        local vars_to_check=""
+        case "$service" in
+            "ms_level_up_management")
+                vars_to_check="$critical_vars_management"
+                ;;
+            "ms_trivance_auth")
+                vars_to_check="$critical_vars_auth"
+                ;;
+            "level_up_backoffice")
+                vars_to_check="$critical_vars_backoffice"
+                ;;
+            "trivance-mobile")
+                vars_to_check="$critical_vars_mobile"
+                ;;
+        esac
+        
         # Verificar variables críticas
-        for var in ${critical_vars[$service]}; do
+        for var in $vars_to_check; do
             if ! grep -q "^$var=" "$env_file"; then
                 log_warning "  ⚠️  Variable crítica faltante en $service: $var"
                 has_warnings=true
