@@ -33,6 +33,7 @@ main() {
     
     # Paso 3: Configurar entornos
     log "PASO 3/7: Configurando variables de entorno"
+    generate_secure_secrets
     setup_environments
     
     # Paso 4: Instalar dependencias
@@ -69,15 +70,25 @@ main() {
     info "📋 Documentación Claude: ${WORKSPACE_DIR}/CLAUDE.md"
     echo
     info "🔧 Para iniciar los servicios:"
-    echo "   • Auth Service: cd ms_trivance_auth && npm run start:dev"
-    echo "   • Management API: cd ms_level_up_management && npm run start:dev"  
-    echo "   • Frontend: cd level_up_backoffice && npm run dev"
-    echo "   • Mobile: cd trivance-mobile && npm start"
+    echo "   ./start-all.sh"
+    echo
+    
+    # Run validation tests
+    if [[ -f "${SCRIPT_DIR}/../utils/validate-setup.sh" ]]; then
+        echo
+        log "Ejecutando validación del setup..."
+        if "${SCRIPT_DIR}/../utils/validate-setup.sh"; then
+            success "✅ Validación completa exitosa"
+        else
+            warn "⚠️  Algunas validaciones fallaron, revisa los logs"
+        fi
+    fi
 }
 
 validate_configuration() {
-    log "Validando archivos de configuración..."
+    log "Validando archivos de configuración y prerequisitos..."
     
+    # Check configuration files
     if [[ ! -f "${SCRIPT_DIR}/../../config/repositories.json" ]]; then
         error "Archivo repositories.json no encontrado"
         exit 1
@@ -88,14 +99,33 @@ validate_configuration() {
         exit 1
     fi
     
+    # Check Git
     if ! command -v git &> /dev/null; then
         error "Git no está instalado"
         exit 1
     fi
     
+    # Check Node.js version
     if ! command -v node &> /dev/null; then
         error "Node.js no está instalado"
         exit 1
+    fi
+    
+    local node_version=$(node --version | sed 's/v//')
+    local required_version="18.0.0"
+    if [ "$(printf '%s\n' "$required_version" "$node_version" | sort -V | head -n1)" != "$required_version" ]; then
+        error "Node.js version $node_version is below minimum required version $required_version"
+        exit 1
+    fi
+    
+    # Check PostgreSQL
+    if ! command -v psql &> /dev/null; then
+        warn "⚠️  PostgreSQL no encontrado - Management API requerirá configuración manual"
+    fi
+    
+    # Check MongoDB
+    if ! command -v mongod &> /dev/null && ! command -v mongosh &> /dev/null; then
+        warn "⚠️  MongoDB no encontrado - Auth Service requerirá configuración manual"
     fi
     
     if ! command -v npm &> /dev/null; then
@@ -179,7 +209,47 @@ setup_environments_legacy() {
                 echo "# $(date)" >> "$env_file"
                 echo "" >> "$env_file"
                 
-                echo "$env_vars" | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> "$env_file"
+                # Replace hardcoded secrets with generated ones
+                echo "$env_vars" | jq -r 'to_entries[] | "\(.key)=\(.value)"' | while IFS='=' read -r key value; do
+                    case "$key" in
+                        JWTSECRET)
+                            if [[ "$repo" == "ms_trivance_auth" ]]; then
+                                echo "$key=${AUTH_JWT_SECRET:-$value}" >> "$env_file"
+                            else
+                                echo "$key=${MGMT_JWT_SECRET:-$value}" >> "$env_file"
+                            fi
+                            ;;
+                        PASSWORDSECRET)
+                            if [[ "$repo" == "ms_trivance_auth" ]]; then
+                                echo "$key=${AUTH_PASSWORD_SECRET:-$value}" >> "$env_file"
+                            else
+                                echo "$key=${MGMT_PASSWORD_SECRET:-$value}" >> "$env_file"
+                            fi
+                            ;;
+                        ENCRYPTSECRET)
+                            if [[ "$repo" == "ms_trivance_auth" ]]; then
+                                echo "$key=${AUTH_ENCRYPT_SECRET:-$value}" >> "$env_file"
+                            else
+                                echo "$key=${MGMT_ENCRYPT_SECRET:-$value}" >> "$env_file"
+                            fi
+                            ;;
+                        EMAILAPIKEY)
+                            echo "$key=${EMAIL_API_KEY:-$value}" >> "$env_file"
+                            ;;
+                        S3AWSAPIKEY)
+                            echo "$key=${AWS_ACCESS_KEY:-$value}" >> "$env_file"
+                            ;;
+                        S3AWSSECRETKEY)
+                            echo "$key=${AWS_SECRET_KEY:-$value}" >> "$env_file"
+                            ;;
+                        FIREBASE_PRIVATE_KEY)
+                            echo "$key=\"${FIREBASE_PRIVATE_KEY:-$value}\"" >> "$env_file"
+                            ;;
+                        *)
+                            echo "$key=$value" >> "$env_file"
+                            ;;
+                    esac
+                done
                 
                 success "✅ Archivo .env creado para ${repo}"
             else
@@ -187,6 +257,36 @@ setup_environments_legacy() {
             fi
         fi
     done
+}
+
+generate_secure_secrets() {
+    log "Generando secrets seguros para desarrollo..."
+    
+    local secrets_file="${WORKSPACE_DIR}/.trivance-secrets"
+    
+    # Check if secrets already exist
+    if [[ -f "$secrets_file" ]]; then
+        info "Secrets ya existen, usando existentes..."
+        source "$secrets_file"
+        return 0
+    fi
+    
+    # Generate secrets using the utility script
+    if [[ -f "${SCRIPT_DIR}/../utils/generate-secrets.sh" ]]; then
+        source "${SCRIPT_DIR}/../utils/generate-secrets.sh"
+        generate_all_secrets "$secrets_file"
+        
+        # Load generated secrets
+        set -a
+        source "$secrets_file"
+        set +a
+        
+        success "✅ Secrets de desarrollo generados de forma segura"
+        info "📄 Secrets guardados en: $secrets_file"
+        warn "⚠️  NO comitas este archivo a git"
+    else
+        warn "⚠️  Script de generación de secrets no encontrado, usando valores por defecto"
+    fi
 }
 
 install_dependencies() {

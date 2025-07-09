@@ -88,6 +88,18 @@ Thumbs.db
 .ai-config/local.json
 .claude/local.json
 
+# Local state files
+.current_environment
+.trivance-secrets
+
+# Backup and temporary files  
+*.backup
+*.bak
+*-backup.*
+*-fixed.*
+*-temp.*
+*.orig
+
 # Backup directories
 backup/
 backups/
