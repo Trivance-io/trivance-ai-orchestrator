@@ -1,0 +1,153 @@
+version: '3.8'
+
+networks:
+  trivance_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  mongo_data:
+
+services:
+  # Database services
+  postgres:
+    image: postgres:15-alpine
+    container_name: trivance_postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=trivance_development
+      - POSTGRES_USER=trivance_dev
+      - POSTGRES_PASSWORD=trivance_dev_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - trivance_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U trivance_dev -d trivance_development"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongodb:
+    image: mongo:7-jammy
+    container_name: trivance_mongodb
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_DATABASE=trivance_auth_development
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - trivance_network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Application services
+  ms_level_up_management:
+    build:
+      context: ../../ms_level_up_management
+      dockerfile: ../trivance-dev-config/docker/Dockerfile.ms_level_up_management
+    container_name: trivance_management
+    restart: unless-stopped
+    ports:
+      - "${MANAGEMENT_PORT:-3000}:3000"
+    environment:
+      # Core configuration
+      - PORT=${MANAGEMENT_PORT:-3000}
+      - NODE_ENV=${NODE_ENV:-development}
+      
+      # Database
+      - DATABASE_URL=${DATABASE_URL:-postgresql://trivance_dev:trivance_dev_pass@postgres:5432/trivance_development}
+      
+      # Security & JWT
+      - JWTSECRET=${JWTSECRET:-jwt_default_secret}
+      - PASSWORDSECRET=${PASSWORDSECRET:-password_default_secret}
+      - ENCRYPTSECRET=${ENCRYPTSECRET:-encrypt_default_secret}
+      - ENCRYPTSECRETBACKOFFICE=${ENCRYPTSECRETBACKOFFICE:-backoffice_encrypt_secret}
+      
+      # Email service
+      - EMAILAPIKEY=${EMAILAPIKEY:-}
+      - SECRETEMAIL=${SECRETEMAIL:-}
+      
+      # AWS S3
+      - S3AWSBUCKETNAME=${S3AWSBUCKETNAME:-development-s3-bucket}
+      - S3AWSREGION=${S3AWSREGION:-us-east-1}
+      - S3AWSAPIKEY=${S3AWSAPIKEY:-}
+      - S3AWSSECRETKEY=${S3AWSSECRETKEY:-}
+      
+      # Payment gateways
+      - EPAYCOAPIURL=${EPAYCOAPIURL:-}
+      - EPAYCOAPIKEY=${EPAYCOAPIKEY:-}
+      - EPAYCOSECRETKEY=${EPAYCOSECRETKEY:-}
+      - EPAYCOWEBHOOKURL=${EPAYCOWEBHOOKURL:-}
+      - EPAYCOTEST=${EPAYCOTEST:-true}
+      - WOMPIAPIGATEWAYURL=${WOMPIAPIGATEWAYURL:-}
+      - WOMPIACCESSKEY=${WOMPIACCESSKEY:-}
+      - WOMPISECRETKEY=${WOMPISECRETKEY:-}
+      
+      # External services
+      - URLBACKOFFICE=${URLBACKOFFICE:-http://localhost:5173}
+      - URLBACKEND=${URLBACKEND:-http://localhost:3000}
+      - GOOGLESECRETKEY=${GOOGLESECRETKEY:-}
+      - GOOGLEVERIFYURL=${GOOGLEVERIFYURL:-}
+      
+      # MongoDB for events
+      - DB_MONGO=${DB_MONGO:-mongodb://mongodb:27017/trivance_management}
+      
+      # Twilio
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID:-}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN:-}
+      - VERIFY_SERVICE_SID=${VERIFY_SERVICE_SID:-}
+      
+    networks:
+      - trivance_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  ms_trivance_auth:
+    build:
+      context: ../../ms_trivance_auth
+      dockerfile: ../trivance-dev-config/docker/Dockerfile.ms_trivance_auth
+    container_name: trivance_auth
+    restart: unless-stopped
+    ports:
+      - "${AUTH_PORT:-3001}:3001"
+    environment:
+      # Core configuration
+      - PORT=${AUTH_PORT:-3001}
+      - NODE_ENV=${NODE_ENV:-development}
+      
+      # Database
+      - DB_MONGO=${AUTH_DB_MONGO:-mongodb://mongodb:27017/trivance_auth_development}
+      
+      # Security & JWT
+      - JWTSECRET=${AUTH_JWTSECRET:-jwt_default_auth_secret}
+      - PASSWORDSECRET=${AUTH_PASSWORDSECRET:-password_default_auth_secret}
+      - SECRETBACKOFFICE=${SECRETBACKOFFICE:-backoffice_secret}
+      
+    networks:
+      - trivance_network
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
