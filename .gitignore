@@ -15,6 +15,22 @@ build/
 .env.test.local
 .env.production.local
 
+# Docker environment files - ACTIVOS
+docker/.env.docker-local
+docker/.env.docker-auth-local
+
+# Docker environment files - PRODUCCIÓN  
+docker/.env.production
+docker/.env.auth.production
+docker/.env.staging
+docker/.env.auth.staging
+docker/.env.qa
+docker/.env.auth.qa
+
+# Docker backups y archivos temporales
+docker/.env.BACKUP_*
+docker/.env.defaults.BACKUP_*
+
 # Logs
 logs/
 *.log
