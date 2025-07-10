@@ -54,16 +54,48 @@ compile_nestjs_service() {
         info "📋 Usando build (modo producción)"
     fi
     
-    # Compilar con el comando apropiado
-    if npm run "$build_command" > "${COMPILATION_LOG_DIR}/${repo_name}_build.log" 2>&1; then
-        success "✅ ${repo_name}: Compilación NestJS exitosa"
-        cd "$original_dir"
-        return 0
+    # Compilar con el comando apropiado con timeout de 5 minutos
+    info "⏳ Compilando ${repo_name} (timeout: 5 minutos)..."
+    
+    # Función de timeout compatible con macOS
+    if command -v gtimeout > /dev/null 2>&1; then
+        timeout_cmd="gtimeout 300"
+    elif command -v timeout > /dev/null 2>&1; then
+        timeout_cmd="timeout 300"
     else
-        error "❌ ${repo_name}: Falló la compilación NestJS"
-        error "   Log: ${COMPILATION_LOG_DIR}/${repo_name}_build.log"
-        cd "$original_dir"
-        return 1
+        # Sin timeout disponible, usar normal
+        timeout_cmd=""
+    fi
+    
+    if [[ -n "$timeout_cmd" ]]; then
+        if $timeout_cmd npm run "$build_command" > "${COMPILATION_LOG_DIR}/${repo_name}_build.log" 2>&1; then
+            success "✅ ${repo_name}: Compilación NestJS exitosa"
+            cd "$original_dir"
+            return 0
+        else
+            local exit_code=$?
+            if [[ $exit_code -eq 124 ]]; then
+                error "❌ ${repo_name}: Timeout en compilación NestJS (>5 min)"
+            else
+                error "❌ ${repo_name}: Falló la compilación NestJS (código: ${exit_code})"
+            fi
+            error "   Log: ${COMPILATION_LOG_DIR}/${repo_name}_build.log"
+            cd "$original_dir"
+            return 1
+        fi
+    else
+        # Sin timeout, compilar normalmente
+        if npm run "$build_command" > "${COMPILATION_LOG_DIR}/${repo_name}_build.log" 2>&1; then
+            success "✅ ${repo_name}: Compilación NestJS exitosa"
+            cd "$original_dir"
+            return 0
+        else
+            local exit_code=$?
+            error "❌ ${repo_name}: Falló la compilación NestJS (código: ${exit_code})"
+            error "   Log: ${COMPILATION_LOG_DIR}/${repo_name}_build.log"
+            cd "$original_dir"
+            return 1
+        fi
     fi
 }
 
@@ -89,16 +121,48 @@ compile_react_frontend() {
         return 0
     fi
     
-    # Compilar con npm run build
-    if npm run build > "${COMPILATION_LOG_DIR}/${repo_name}_build.log" 2>&1; then
-        success "✅ ${repo_name}: Compilación React exitosa"
-        cd "$original_dir"
-        return 0
+    # Compilar con npm run build con timeout de 5 minutos
+    info "⏳ Compilando ${repo_name} (timeout: 5 minutos)..."
+    
+    # Función de timeout compatible con macOS
+    if command -v gtimeout > /dev/null 2>&1; then
+        timeout_cmd="gtimeout 300"
+    elif command -v timeout > /dev/null 2>&1; then
+        timeout_cmd="timeout 300"
     else
-        error "❌ ${repo_name}: Falló la compilación React"
-        error "   Log: ${COMPILATION_LOG_DIR}/${repo_name}_build.log"
-        cd "$original_dir"
-        return 1
+        # Sin timeout disponible, usar normal
+        timeout_cmd=""
+    fi
+    
+    if [[ -n "$timeout_cmd" ]]; then
+        if $timeout_cmd npm run build > "${COMPILATION_LOG_DIR}/${repo_name}_build.log" 2>&1; then
+            success "✅ ${repo_name}: Compilación React exitosa"
+            cd "$original_dir"
+            return 0
+        else
+            local exit_code=$?
+            if [[ $exit_code -eq 124 ]]; then
+                error "❌ ${repo_name}: Timeout en compilación React (>5 min)"
+            else
+                error "❌ ${repo_name}: Falló la compilación React (código: ${exit_code})"
+            fi
+            error "   Log: ${COMPILATION_LOG_DIR}/${repo_name}_build.log"
+            cd "$original_dir"
+            return 1
+        fi
+    else
+        # Sin timeout, compilar normalmente
+        if npm run build > "${COMPILATION_LOG_DIR}/${repo_name}_build.log" 2>&1; then
+            success "✅ ${repo_name}: Compilación React exitosa"
+            cd "$original_dir"
+            return 0
+        else
+            local exit_code=$?
+            error "❌ ${repo_name}: Falló la compilación React (código: ${exit_code})"
+            error "   Log: ${COMPILATION_LOG_DIR}/${repo_name}_build.log"
+            cd "$original_dir"
+            return 1
+        fi
     fi
 }
 
@@ -121,16 +185,46 @@ compile_react_native() {
     if [[ -f "tsconfig.json" ]]; then
         info "🔍 Verificando tipos TypeScript para React Native..."
         
-        if npx tsc --noEmit > "${COMPILATION_LOG_DIR}/${repo_name}_typecheck.log" 2>&1; then
-            success "✅ ${repo_name}: Verificación TypeScript exitosa"
-            cd "$original_dir"
-            return 0
+        # Función de timeout compatible con macOS
+        if command -v gtimeout > /dev/null 2>&1; then
+            timeout_cmd="gtimeout 180"
+        elif command -v timeout > /dev/null 2>&1; then
+            timeout_cmd="timeout 180"
         else
-            # React Native suele tener errores de tipos que no impiden el desarrollo
-            warn "⚠️  ${repo_name}: Advertencias en TypeScript (normal en RN)"
-            warn "   Log: ${COMPILATION_LOG_DIR}/${repo_name}_typecheck.log"
-            cd "$original_dir"
-            return 0  # No fallar por esto en RN
+            # Sin timeout disponible, usar normal
+            timeout_cmd=""
+        fi
+        
+        if [[ -n "$timeout_cmd" ]]; then
+            if $timeout_cmd npx tsc --noEmit > "${COMPILATION_LOG_DIR}/${repo_name}_typecheck.log" 2>&1; then
+                success "✅ ${repo_name}: Verificación TypeScript exitosa"
+                cd "$original_dir"
+                return 0
+            else
+                local exit_code=$?
+                if [[ $exit_code -eq 124 ]]; then
+                    warn "⚠️  ${repo_name}: Timeout en verificación TypeScript (>3 min)"
+                else
+                    # React Native suele tener errores de tipos que no impiden el desarrollo
+                    warn "⚠️  ${repo_name}: Advertencias en TypeScript (normal en RN)"
+                fi
+                warn "   Log: ${COMPILATION_LOG_DIR}/${repo_name}_typecheck.log"
+                cd "$original_dir"
+                return 0  # No fallar por esto en RN
+            fi
+        else
+            # Sin timeout, verificar normalmente
+            if npx tsc --noEmit > "${COMPILATION_LOG_DIR}/${repo_name}_typecheck.log" 2>&1; then
+                success "✅ ${repo_name}: Verificación TypeScript exitosa"
+                cd "$original_dir"
+                return 0
+            else
+                # React Native suele tener errores de tipos que no impiden el desarrollo
+                warn "⚠️  ${repo_name}: Advertencias en TypeScript (normal en RN)"
+                warn "   Log: ${COMPILATION_LOG_DIR}/${repo_name}_typecheck.log"
+                cd "$original_dir"
+                return 0  # No fallar por esto en RN
+            fi
         fi
     else
         warn "⚠️  No se encontró tsconfig.json en ${repo_name}"
