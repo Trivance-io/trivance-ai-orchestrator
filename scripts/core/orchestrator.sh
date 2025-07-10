@@ -421,7 +421,7 @@ verify_compilation() {
 }
 
 create_claude_md_final() {
-    info "🤖 Configuración completa exitosa - Generando documentación Claude Code..."
+    info "🤖 Configuración completa exitosa"
     
     # Verificar que todos los servicios estén funcionando
     cd "${WORKSPACE_DIR}"
@@ -432,26 +432,9 @@ create_claude_md_final() {
         warn "⚠️  No se pueden verificar servicios PM2, continuando..."
     fi
     
-    # Ejecutar /init para generar CLAUDE.md con el contexto completo
-    info "📋 Ejecutando /init para generar CLAUDE.md con el contexto del workspace..."
-    
-    # Crear un mensaje para /init
-    cat > "${WORKSPACE_DIR}/.init_trigger" << 'EOF'
-El workspace de Trivance Platform ha sido configurado exitosamente.
-
-✅ 4 repositorios clonados y configurados
-✅ Variables de entorno generadas automáticamente  
-✅ Dependencias instaladas en paralelo
-✅ Servicios PM2 funcionando correctamente
-✅ Compilación verificada para todos los repositorios
-
-Por favor ejecuta /init para generar la documentación CLAUDE.md optimizada.
-EOF
-    
-    success "✅ Configuración Claude Code preparada"
-    success "🎯 EJECUTA: /init para generar CLAUDE.md con el contexto completo"
+    success "✅ Configuración completa del workspace terminada"
+    info "💡 Para configurar Claude Code, ejecuta manualmente: /init"
     echo
-    info "📄 El archivo .init_trigger contiene las instrucciones para /init"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then

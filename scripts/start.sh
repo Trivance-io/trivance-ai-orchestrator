@@ -171,7 +171,7 @@ execute_option() {
             echo -e "${BLUE}📚 Documentación disponible:${NC}"
             echo
             echo "  📖 README principal: ${WORKSPACE_DIR}/README.md"
-            echo "  🤖 Claude Config: Ejecuta /init después del setup"
+            echo "  🤖 Claude Config: Ejecuta manualmente /init después del setup"
             echo "  🎛️  Environments: ${WORKSPACE_DIR}/envs/ENVIRONMENTS.md"
             echo "  🚀 Comandos: ${CONFIG_DIR}/docs/COMMANDS.md"
             echo
