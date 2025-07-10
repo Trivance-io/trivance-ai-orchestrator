@@ -121,7 +121,13 @@ execute_option() {
                 "${CONFIG_DIR}/setup.sh"
             else
                 echo -e "${BLUE}🚀 Iniciando servicios...${NC}"
-                "${CONFIG_DIR}/start-all.sh"
+                if ! command -v pm2 &> /dev/null; then
+                    echo -e "${YELLOW}Instalando PM2...${NC}"
+                    npm install -g pm2
+                fi
+                pm2 start "${CONFIG_DIR}/../ecosystem.config.js" 2>/dev/null || {
+                    "${CONFIG_DIR}/start-all.sh"
+                }
             fi
             ;;
         "2")
@@ -148,13 +154,24 @@ execute_option() {
             ;;
         "5")
             echo -e "${BLUE}🔍 Verificando salud del sistema...${NC}"
-            "${CONFIG_DIR}/scripts/utils/health-check.sh"
+            echo
+            echo "Estado de servicios PM2:"
+            pm2 status
+            echo
+            echo "Verificando endpoints:"
+            echo -n "• Auth Service (3001): "
+            curl -s http://localhost:3001/health >/dev/null 2>&1 && echo -e "${GREEN}✅ OK${NC}" || echo -e "${RED}❌ No responde${NC}"
+            echo -n "• Management API (3000): "
+            curl -s http://localhost:3000/health >/dev/null 2>&1 && echo -e "${GREEN}✅ OK${NC}" || echo -e "${RED}❌ No responde${NC}"
+            echo -n "• Frontend (5173): "
+            curl -s http://localhost:5173 >/dev/null 2>&1 && echo -e "${GREEN}✅ OK${NC}" || echo -e "${RED}❌ No responde${NC}"
+            echo
             ;;
         "6")
             echo -e "${BLUE}📚 Documentación disponible:${NC}"
             echo
             echo "  📖 README principal: ${WORKSPACE_DIR}/README.md"
-            echo "  🤖 Guía Claude: ${WORKSPACE_DIR}/CLAUDE.md"
+            echo "  🤖 Claude Config: Ejecuta /init después del setup"
             echo "  🎛️  Environments: ${WORKSPACE_DIR}/envs/ENVIRONMENTS.md"
             echo "  🚀 Comandos: ${CONFIG_DIR}/docs/COMMANDS.md"
             echo
@@ -198,7 +215,13 @@ main() {
 if [[ $# -gt 0 ]]; then
     case "$1" in
         "start")
-            "${CONFIG_DIR}/start-all.sh"
+            if ! command -v pm2 &> /dev/null; then
+                echo "Instalando PM2..."
+                npm install -g pm2
+            fi
+            pm2 start "${CONFIG_DIR}/../ecosystem.config.js" 2>/dev/null || {
+                "${CONFIG_DIR}/start-all.sh"
+            }
             ;;
         "stop")
             pm2 stop all
