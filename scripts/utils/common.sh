@@ -190,7 +190,7 @@ clean_workspace() {
     # Limpiar otros archivos generados
     local files_to_clean=(
         "${workspace}/logs"
-        "${workspace}/CLAUDE.md"
+        "${workspace}/.init_trigger"
         "${workspace}/TrivancePlatform.code-workspace"
         "${workspace}/README.md"
     )
