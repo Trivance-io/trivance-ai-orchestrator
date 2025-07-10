@@ -1,303 +1,236 @@
-# Troubleshooting Guide
+# 🆘 Guía de Solución de Problemas
 
-## Common Issues and Solutions
+## 🔧 Problemas de Setup
 
-### Setup Issues
-
-#### npm install hangs or times out
-**Problem**: Installation gets stuck during setup
-
-**Solutions**:
-1. Clear npm cache:
-   ```bash
-   npm cache clean --force
-   ```
-2. Use different npm registry:
-   ```bash
-   npm config set registry https://registry.npmjs.org/
-   ```
-3. Remove node_modules and package-lock.json:
-   ```bash
-   rm -rf node_modules package-lock.json
-   npm install
-   ```
-
-#### Git clone fails
-**Problem**: Cannot clone repositories during setup
-
-**Solutions**:
-1. Check GitHub access:
-   ```bash
-   ssh -T git@github.com
-   ```
-2. Use HTTPS instead of SSH:
-   ```bash
-   git config --global url."https://".insteadOf git://
-   ```
-3. Check network/firewall settings
-
-### Service Startup Issues
-
-#### Service won't start with PM2
-**Problem**: Service shows as "errored" in pm2 status
-
-**Solutions**:
-1. Check logs:
-   ```bash
-   pm2 logs [service-name]
-   ```
-2. Check if port is already in use:
-   ```bash
-   lsof -i :[port]
-   # Kill the process if needed
-   kill -9 [PID]
-   ```
-3. Restart the service:
-   ```bash
-   pm2 delete [service-name]
-   pm2 start ecosystem.config.js --only [service-name]
-   ```
-
-#### All services crash immediately
-**Problem**: Services start but crash within seconds
-
-**Solutions**:
-1. Check environment variables:
-   ```bash
-   ./change-env.sh validate
-   ```
-2. Ensure databases are running:
-   ```bash
-   # PostgreSQL
-   brew services start postgresql  # macOS
-   sudo systemctl start postgresql # Linux
-   
-   # MongoDB
-   brew services start mongodb-community  # macOS
-   sudo systemctl start mongod # Linux
-   ```
-3. Check Node.js version:
-   ```bash
-   node --version  # Should be 18+
-   ```
-
-### Database Connection Issues
-
-#### PostgreSQL connection refused
-**Problem**: Management API cannot connect to PostgreSQL
-
-**Solutions**:
-1. Verify PostgreSQL is running:
-   ```bash
-   pg_isready
-   ```
-2. Check connection string in `.env`:
-   ```
-   DATABASE_URL=postgresql://trivance_dev:trivance_dev_pass@localhost:5432/trivance_development
-   ```
-3. Create database and user:
-   ```bash
-   psql postgres
-   CREATE DATABASE trivance_development;
-   CREATE USER trivance_dev WITH PASSWORD 'trivance_dev_pass';
-   GRANT ALL PRIVILEGES ON DATABASE trivance_development TO trivance_dev;
-   ```
-
-#### MongoDB connection failed
-**Problem**: Auth service cannot connect to MongoDB
-
-**Solutions**:
-1. Verify MongoDB is running:
-   ```bash
-   mongosh --eval "db.adminCommand('ping')"
-   ```
-2. Check connection string:
-   ```
-   DB_MONGO=mongodb://localhost:27017/trivance_auth_development
-   ```
-3. Ensure MongoDB is accepting connections:
-   ```bash
-   mongosh
-   use trivance_auth_development
-   db.createCollection("test")
-   ```
-
-### PM2 Specific Issues
-
-#### PM2 command not found
-**Problem**: PM2 is not available after installation
-
-**Solutions**:
-1. Install PM2 globally:
-   ```bash
-   npm install -g pm2
-   ```
-2. Check npm global path:
-   ```bash
-   npm config get prefix
-   # Add to PATH if needed
-   export PATH=$PATH:$(npm config get prefix)/bin
-   ```
-
-#### PM2 logs are empty
-**Problem**: No logs showing in PM2
-
-**Solutions**:
-1. Check log file permissions:
-   ```bash
-   ls -la logs/pm2/
-   ```
-2. Flush PM2 logs:
-   ```bash
-   pm2 flush
-   pm2 restart all
-   ```
-3. Check ecosystem.config.js for correct log paths
-
-### Frontend Issues
-
-#### Vite dev server not accessible
-**Problem**: Cannot access http://localhost:5173
-
-**Solutions**:
-1. Check if Vite is using a different port:
-   ```bash
-   pm2 logs backoffice | grep "Local:"
-   ```
-2. Clear Vite cache:
-   ```bash
-   cd level_up_backoffice
-   rm -rf node_modules/.vite
-   pm2 restart backoffice
-   ```
-3. Check for port conflicts:
-   ```bash
-   lsof -i :5173
-   ```
-
-#### GraphQL Playground not loading
-**Problem**: http://localhost:3000/graphql shows error
-
-**Solutions**:
-1. Verify Management API is running:
-   ```bash
-   pm2 status management-api
-   ```
-2. Check GraphQL is enabled in development:
-   ```bash
-   # In .env file
-   NODE_ENV=development
-   ```
-3. Check browser console for CORS errors
-
-### Mobile Development Issues
-
-#### Metro bundler not starting
-**Problem**: React Native Metro bundler fails
-
-**Solutions**:
-1. Clear Metro cache:
-   ```bash
-   cd trivance-mobile
-   npx react-native start --reset-cache
-   ```
-2. Clear watchman:
-   ```bash
-   watchman watch-del-all
-   ```
-3. Reinstall pods (iOS):
-   ```bash
-   cd ios && pod install
-   ```
-
-### Environment Issues
-
-#### Wrong environment after switching
-**Problem**: Services still using old environment values
-
-**Solutions**:
-1. Restart all services:
-   ```bash
-   pm2 restart all
-   ```
-2. Verify .env files were copied:
-   ```bash
-   ls -la ms_*/. env level_*/.env trivance-*/.env
-   ```
-3. Force reload:
-   ```bash
-   pm2 delete all
-   ./start-all.sh
-   ```
-
-### Performance Issues
-
-#### Services running slowly
-**Problem**: APIs responding slowly or timing out
-
-**Solutions**:
-1. Check system resources:
-   ```bash
-   pm2 monit
-   ```
-2. Increase memory limits in ecosystem.config.js:
-   ```javascript
-   max_memory_restart: '2G'  // Increase from 1G
-   ```
-3. Check for memory leaks:
-   ```bash
-   pm2 describe [service-name]
-   ```
-
-### Quick Fixes Script
-
-For common issues, run the post-setup fixes:
+### npm install se cuelga o falla
 ```bash
-cd trivance-dev-config
-./scripts/utils/post-setup-fixes.sh
+# Limpiar cache de npm
+npm cache clean --force
+
+# Usar registro oficial
+npm config set registry https://registry.npmjs.org/
+
+# Reinstalar desde cero
+rm -rf node_modules package-lock.json
+npm install
 ```
 
-This script automatically:
-- Fixes Sentry configuration issues
-- Generates Firebase credentials
-- Validates environment variables
-- Checks port availability
-
-### Getting More Help
-
-1. **Check detailed logs**:
-   ```bash
-   pm2 logs --lines 100
-   ```
-
-2. **Enable debug mode**:
-   ```bash
-   DEBUG=* pm2 restart [service-name]
-   ```
-
-3. **System information**:
-   ```bash
-   pm2 report
-   ```
-
-4. **Clean restart**:
-   ```bash
-   pm2 kill
-   pm2 start ecosystem.config.js
-   ```
-
-### Emergency Reset
-
-If all else fails, perform a clean reset:
+### Git clone falla
 ```bash
-# Stop everything
+# Verificar acceso GitHub
+ssh -T git@github.com
+
+# Usar HTTPS si SSH falla
+git config --global url."https://".insteadOf git://
+```
+
+## 🚀 Problemas de Servicios
+
+### Servicio no inicia con PM2
+```bash
+# Ver logs del servicio
+pm2 logs [nombre-servicio]
+
+# Verificar puerto ocupado
+lsof -i :[puerto]
+kill -9 [PID]
+
+# Reiniciar servicio
+pm2 restart [nombre-servicio]
+```
+
+### Todos los servicios fallan
+```bash
+# Verificar Node.js version
+node --version  # Debe ser 18+
+
+# Validar configuración
+./trivance-dev-config/scripts/envs.sh validate
+
+# Verificar bases de datos
+brew services start postgresql  # macOS
+brew services start mongodb-community  # macOS
+```
+
+## 🗄️ Problemas de Base de Datos
+
+### PostgreSQL no conecta
+```bash
+# Verificar que esté corriendo
+pg_isready
+
+# Verificar string de conexión en .env
+DATABASE_URL=postgresql://user:pass@localhost:5432/db
+
+# Crear base de datos si no existe
+psql postgres
+CREATE DATABASE trivance_development;
+```
+
+### MongoDB no conecta
+```bash
+# Verificar MongoDB
+mongosh --eval "db.adminCommand('ping')"
+
+# Verificar string de conexión
+DB_MONGO=mongodb://localhost:27017/trivance_auth
+```
+
+## ⚙️ Problemas de PM2
+
+### PM2 no encontrado
+```bash
+# Instalar PM2 globalmente
+npm install -g pm2
+
+# Verificar PATH
+export PATH=$PATH:$(npm config get prefix)/bin
+```
+
+### Logs vacíos
+```bash
+# Reiniciar PM2 logs
+pm2 flush
+pm2 restart all
+
+# Verificar permisos de logs
+ls -la logs/pm2/
+```
+
+## 🌐 Problemas de Frontend
+
+### Frontend no accesible (puerto 5173)
+```bash
+# Verificar puerto en logs
+pm2 logs backoffice | grep "Local:"
+
+# Limpiar cache de Vite
+cd level_up_backoffice
+rm -rf node_modules/.vite
+pm2 restart backoffice
+```
+
+### GraphQL Playground no carga
+```bash
+# Verificar Management API
+pm2 status management-api
+
+# Verificar NODE_ENV
+echo $NODE_ENV  # Debe ser 'development'
+```
+
+## 📱 Problemas de Mobile
+
+### Metro bundler falla
+```bash
+cd trivance-mobile
+
+# Limpiar cache Metro
+npx react-native start --reset-cache
+
+# Limpiar watchman
+watchman watch-del-all
+```
+
+## 🔄 Problemas de Environment
+
+### Environment no cambia
+```bash
+# Reiniciar servicios después de cambio
+pm2 restart all
+
+# Verificar archivos .env copiados
+ls -la */. env
+
+# Forzar recarga
+pm2 delete all
+./start.sh start
+```
+
+## ⚡ Soluciones Rápidas
+
+### Script de Fixes Automáticos
+```bash
+# Ejecutar fixes post-setup
+./trivance-dev-config/scripts/utils/post-setup-fixes.sh
+```
+
+### Reset de Emergencia
+```bash
+# CUIDADO: Esto borra todo
 pm2 kill
-
-# Clean workspace (WARNING: This removes all repos!)
-cd trivance-dev-config
-./scripts/utils/clean-workspace.sh
-
-# Start fresh
-./setup.sh
-./start-all.sh
+./trivance-dev-config/scripts/utils/clean-workspace.sh
+./trivance-dev-config/setup.sh
 ```
+
+### Verificación Completa
+```bash
+# Validar todo el setup
+./trivance-dev-config/scripts/utils/validate-setup.sh
+
+# Verificar compilación
+./trivance-dev-config/scripts/utils/verify-compilation.sh
+```
+
+## 🚨 Errores Comunes Específicos
+
+### "Cannot find module"
+```bash
+cd [repositorio-afectado]
+rm -rf node_modules package-lock.json
+npm install
+pm2 restart [servicio]
+```
+
+### "EADDRINUSE: address already in use"
+```bash
+# El setup maneja esto automáticamente
+pm2 stop all
+pm2 start ecosystem.config.js
+```
+
+### "Database connection error"
+```bash
+# Verificar servicios de BD
+# PostgreSQL: puerto 5432
+# MongoDB: puerto 27017
+
+# macOS
+brew services list | grep -E "(postgresql|mongodb)"
+
+# Linux
+systemctl status postgresql
+systemctl status mongod
+```
+
+### Timeout en compilación
+```bash
+# Limpiar cache y recompilar
+rm -rf node_modules package-lock.json
+npm install
+npm run build
+```
+
+## 📞 Obtener Ayuda
+
+### Información del Sistema
+```bash
+# Report completo PM2
+pm2 report
+
+# Logs detallados
+pm2 logs --lines 100
+
+# Debug mode
+DEBUG=* pm2 restart [servicio]
+```
+
+### Soporte del Equipo
+- **Slack**: #dev-support
+- **Documentación**: `docs/` folder
+- **GitHub Issues**: Para bugs del sistema
+- **Team Lead**: Para problemas bloqueantes
+
+---
+
+**💡 Tip**: La mayoría de problemas se resuelven con `pm2 restart all` y verificar que las bases de datos estén corriendo.
