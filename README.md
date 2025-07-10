@@ -198,8 +198,8 @@ pm2 logs [nombre-servicio]
 # Reiniciar servicio
 pm2 restart [nombre-servicio]
 
-# Validar configuración
-./trivance-dev-config/scripts/envs.sh validate
+# Validar configuración actual
+./trivance-dev-config/scripts/envs.sh validate local
 ```
 
 ### Verificación completa:

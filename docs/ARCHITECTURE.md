@@ -24,11 +24,8 @@ trivance-dev-config/
 │   │   ├── clean-workspace.sh      # Workspace cleanup
 │   │   ├── common.sh               # Shared functions
 │   │   ├── generate-secrets.sh     # Dynamic secret generation
-│   │   ├── health-check.sh         # Service health verification
 │   │   ├── parallel-install.sh     # Parallel npm install
 │   │   ├── post-setup-fixes.sh     # Post-installation fixes
-│   │   ├── progress.sh             # Progress bar utilities
-│   │   ├── smart-start.sh          # Intelligent service startup
 │   │   └── verify-compilation.sh   # Build verification
 │   └── envs.sh         # Environment management
 ├── templates/          # Configuration templates

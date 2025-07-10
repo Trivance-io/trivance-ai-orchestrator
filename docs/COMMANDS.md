@@ -16,12 +16,7 @@
 ## 📁 Comandos Originales (Rutas Completas)
 
 ```bash
-# Smart Start con diagnóstico
-./trivance-dev-config/scripts/utils/smart-start.sh
-
-# Health Check con auto-fix
-./trivance-dev-config/scripts/utils/health-check.sh
-./trivance-dev-config/scripts/utils/health-check.sh fix
+# Verificación de sistema integrada en ./start.sh (opción 5)
 
 # Gestión de Environments
 ./trivance-dev-config/scripts/envs.sh setup
