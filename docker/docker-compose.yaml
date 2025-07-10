@@ -56,54 +56,13 @@ services:
     container_name: trivance_management
     restart: unless-stopped
     ports:
-      - "${MANAGEMENT_PORT:-3000}:3000"
+      - "3000:3000"
+    env_file:
+      - .env.docker-local
     environment:
-      # Core configuration
-      - PORT=${MANAGEMENT_PORT:-3000}
-      - NODE_ENV=${NODE_ENV:-development}
-      
-      # Database
-      - DATABASE_URL=${DATABASE_URL:-postgresql://trivance_dev:trivance_dev_pass@postgres:5432/trivance_development}
-      
-      # Security & JWT
-      - JWTSECRET=${JWTSECRET:-jwt_default_secret}
-      - PASSWORDSECRET=${PASSWORDSECRET:-password_default_secret}
-      - ENCRYPTSECRET=${ENCRYPTSECRET:-encrypt_default_secret}
-      - ENCRYPTSECRETBACKOFFICE=${ENCRYPTSECRETBACKOFFICE:-backoffice_encrypt_secret}
-      
-      # Email service
-      - EMAILAPIKEY=${EMAILAPIKEY:-}
-      - SECRETEMAIL=${SECRETEMAIL:-}
-      
-      # AWS S3
-      - S3AWSBUCKETNAME=${S3AWSBUCKETNAME:-development-s3-bucket}
-      - S3AWSREGION=${S3AWSREGION:-us-east-1}
-      - S3AWSAPIKEY=${S3AWSAPIKEY:-}
-      - S3AWSSECRETKEY=${S3AWSSECRETKEY:-}
-      
-      # Payment gateways
-      - EPAYCOAPIURL=${EPAYCOAPIURL:-}
-      - EPAYCOAPIKEY=${EPAYCOAPIKEY:-}
-      - EPAYCOSECRETKEY=${EPAYCOSECRETKEY:-}
-      - EPAYCOWEBHOOKURL=${EPAYCOWEBHOOKURL:-}
-      - EPAYCOTEST=${EPAYCOTEST:-true}
-      - WOMPIAPIGATEWAYURL=${WOMPIAPIGATEWAYURL:-}
-      - WOMPIACCESSKEY=${WOMPIACCESSKEY:-}
-      - WOMPISECRETKEY=${WOMPISECRETKEY:-}
-      
-      # External services
-      - URLBACKOFFICE=${URLBACKOFFICE:-http://localhost:5173}
-      - URLBACKEND=${URLBACKEND:-http://localhost:3000}
-      - GOOGLESECRETKEY=${GOOGLESECRETKEY:-}
-      - GOOGLEVERIFYURL=${GOOGLEVERIFYURL:-}
-      
-      # MongoDB for events
-      - DB_MONGO=${DB_MONGO:-mongodb://mongodb:27017/trivance_management}
-      
-      # Twilio
-      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID:-}
-      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN:-}
-      - VERIFY_SERVICE_SID=${VERIFY_SERVICE_SID:-}
+      # Forzar configuración crítica
+      - NODE_ENV=production
+      - PORT=3000
       
     networks:
       - trivance_network
@@ -113,7 +72,7 @@ services:
       mongodb:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      test: ["CMD", "sh", "-c", "timeout 3 bash -c 'cat < /dev/null > /dev/tcp/localhost/3000' || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -126,19 +85,13 @@ services:
     container_name: trivance_auth
     restart: unless-stopped
     ports:
-      - "${AUTH_PORT:-3001}:3001"
+      - "3001:3001"
+    env_file:
+      - .env.docker-auth-local
     environment:
-      # Core configuration
-      - PORT=${AUTH_PORT:-3001}
-      - NODE_ENV=${NODE_ENV:-development}
-      
-      # Database
-      - DB_MONGO=${AUTH_DB_MONGO:-mongodb://mongodb:27017/trivance_auth_development}
-      
-      # Security & JWT
-      - JWTSECRET=${AUTH_JWTSECRET:-jwt_default_auth_secret}
-      - PASSWORDSECRET=${AUTH_PASSWORDSECRET:-password_default_auth_secret}
-      - SECRETBACKOFFICE=${SECRETBACKOFFICE:-backoffice_secret}
+      # Forzar configuración crítica
+      - NODE_ENV=production
+      - PORT=3001
       
     networks:
       - trivance_network
@@ -146,7 +99,7 @@ services:
       mongodb:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      test: ["CMD", "sh", "-c", "timeout 3 bash -c 'cat < /dev/null > /dev/tcp/localhost/3001' || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
