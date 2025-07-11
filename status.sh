@@ -1,7 +1,7 @@
 #!/bin/bash
 # Trivance Platform - Service Status Monitor
 
-set -e
+set -euo pipefail
 
 # Colores
 RED='\033[0;31m'

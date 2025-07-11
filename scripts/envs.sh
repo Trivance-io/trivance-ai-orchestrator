@@ -41,7 +41,15 @@ check_dependencies() {
         if [[ "$OSTYPE" == "darwin"* ]]; then
             brew install jq
         else
-            sudo apt-get install -y jq
+            log_warning "Se requiere instalar jq. Se necesitarán permisos de administrador."
+            read -p "¿Deseas continuar con la instalación? (s/n): " -n 1 -r
+            echo
+            if [[ $REPLY =~ ^[Ss]$ ]]; then
+                sudo apt-get install -y jq
+            else
+                log_error "Instalación cancelada. jq es requerido para continuar."
+                exit 1
+            fi
         fi
     fi
     
@@ -357,8 +365,44 @@ switch_environment() {
     cp "$ENVS_DIR/$env.backoffice.env" "$WORKSPACE_DIR/level_up_backoffice/.env"
     cp "$ENVS_DIR/$env.mobile.env" "$WORKSPACE_DIR/trivance-mobile/.env"
     
+    # Generar archivos Docker adaptados
+    log_info "🐳 Generando configuraciones Docker para $env..."
+    
+    # Crear directorio docker si no existe
+    local docker_dir="$CONFIG_DIR/docker"
+    mkdir -p "$docker_dir"
+    
+    # Generar .env.docker-local para management
+    if [[ -f "$ENVS_DIR/$env.management.env" ]]; then
+        cp "$ENVS_DIR/$env.management.env" "$docker_dir/.env.docker-local"
+        # Ajustar DATABASE_URL para usar hostname de Docker
+        sed -i.bak 's|DATABASE_URL=postgresql://[^@]*@localhost:|DATABASE_URL=postgresql://trivance_dev:trivance_dev_pass@postgres:|g' "$docker_dir/.env.docker-local"
+        # Ajustar DB_MONGO para usar hostname de Docker
+        sed -i.bak 's|DB_MONGO=mongodb://localhost:|DB_MONGO=mongodb://mongodb:|g' "$docker_dir/.env.docker-local"
+        rm -f "$docker_dir/.env.docker-local.bak"
+        log_success "✅ Generado .env.docker-local"
+    fi
+    
+    # Generar .env.docker-auth-local para auth
+    if [[ -f "$ENVS_DIR/$env.auth.env" ]]; then
+        cp "$ENVS_DIR/$env.auth.env" "$docker_dir/.env.docker-auth-local"
+        # Ajustar DB_MONGO para usar hostname de Docker
+        sed -i.bak 's|DB_MONGO=mongodb://localhost:|DB_MONGO=mongodb://mongodb:|g' "$docker_dir/.env.docker-auth-local"
+        rm -f "$docker_dir/.env.docker-auth-local.bak"
+        log_success "✅ Generado .env.docker-auth-local"
+    fi
+    
     # Guardar environment actual
     echo "$env" > "$ENVS_DIR/.current_environment"
+    
+    # Aplicar permisos seguros a archivos .env
+    log_info "🔒 Aplicando permisos seguros a archivos .env..."
+    chmod 600 "$WORKSPACE_DIR/ms_level_up_management/.env" 2>/dev/null || true
+    chmod 600 "$WORKSPACE_DIR/ms_trivance_auth/.env" 2>/dev/null || true
+    chmod 600 "$WORKSPACE_DIR/level_up_backoffice/.env" 2>/dev/null || true
+    chmod 600 "$WORKSPACE_DIR/trivance-mobile/.env" 2>/dev/null || true
+    chmod 600 "$docker_dir/.env.docker-local" 2>/dev/null || true
+    chmod 600 "$docker_dir/.env.docker-auth-local" 2>/dev/null || true
     
     # Validación completa
     validate_environment_config "$env"

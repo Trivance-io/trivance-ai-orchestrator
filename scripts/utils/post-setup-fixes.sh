@@ -114,11 +114,12 @@ fix_firebase_credentials() {
         rm -f "$temp_key_file"
     else
         warn "⚠️  No se pudo generar clave privada (openssl no disponible)"
-        # Fallback: usar clave estática válida
-        local static_key="-----BEGIN PRIVATE KEY-----\\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC6bxYj1gavQJc2\\nlRpGq8rW9onj6B+cXPsc3h+tesy/a19Vdw+7KEcqcI3rqBcP2RFO3gc5PWzdPxek\\nyyUScrjSQQWzIHtatMB5C5aAC6gvnpHx2dIKC1vap29PiX/fBbvIPTEeT61emh+d\\nfuRfwlmmezZ8QTZ0s394ygGKMLXQPRcFekAqj6XcOAymXKIgWPkwhCtGol7XHVKZ\\nBmDb7ZP+wUxZcDEs0EaCeN4wef4mKfHnvMJBDm+rhzPzD5Ksd2a829RTPbfZ4Ppq\\n3B1b8R9f0uqM8Wkop7z0GOszaNsX9rZJHQqz2B9FSOBVbZTM6Bp8K+313ppeL1NT\\nB73iyB9nAgMBAAECggEAA/cnc6rM1eSQyWiSiy6vnSPI5mhrsoekl9VVFgqEAquZ\\nq4pwgfRlKTv18NMb5ne35AcOqnP80Ey9kvmNqM+0wTY8ydP5qOPPwFvVpsHCISLQ\\nkwA0VuIPYTElhgzlKVv5iZDVSHqt6I7WByN6m6aztlgTdN9PwNQ8sLml02JD6WRG\\nlfc6lW7y6muDf4GkieGpAudrhFQp0KmNryNbOYRCIqrSMyVSAStYmwwydEw+O4HN\\nzwtGlPFhC2F5LYpziJgJ83LBxkPVgvaoF11Vl6rOVLqxcsL9p9mD7pyTwobYifaM\\nC3f8XjO6QAyHYFY06scxHEgO8Qok7t+KyUgvbvbMlQKBgQD5XjevoxuSB+4g4Qz0\\nLFvezmZStxBnP3KUFWleR9oMeyklB86Ph/FiYeVzXUvDdKur6yWvxSXD4zTM9P/m\\nhtqbKKr69eY9vZxOX7hLS15dSkpGUumSzEObhJLuA89C6ciwIBC6C76w7LE36VaE\\n6fGrB3s5FBbucZkby3qYWCIZswKBgQC/ZGRj0wCeF3qmwNGEDMQqMpdjCi/eBZJz\\nJ/4VHMXiE7ZJFXNV1ktEwwhXYXobsR/q4cc4CaeQkNBNzDF4vSACSWhqbSXeRKla\\n6nFPzdBysWzH48PX5EwPDCml/7PSjP3ADA75vYqnR7tiwgRIiLOCvmed7JVO86rM\\nptCHDCihfQKBgA9jLPR9kBn2u070FCSNCC47djzsZuq4E43ntFTJAj966hMK5Egf\\nD1oOyGXR//bToDQ/klfCRo5L2to60/+ZmquwWryZp9dvd9GuPmUHBY+kIeks/JS+\\nXf2etKJTQdrTKjsT/3Q7fUzVjinxEBGrjeoL0CK5hqC4CcaZS7tS1OfZAoGATC8D\\nAvVPrp479TqVa5HFV+KxffvlF+Rx6iLGMdM1NYuRKMBAG6/kYCeeH2Iuv+0eflmG\\n+lhledcbA4y/OIdXwXFE/fAafcIpA4aEujZ7vdvAKEUShNJcMDUwMuJ4ytvSeeqS\\n33hCQ9n6zhHasKCxi96M0kEFIds+Zp4ULV16ouUCgYB4bndd6bJi/zNUdNz0jtyT\\nO2j51wp5lODJr2peLqxFG8R5dbr9gwddc8OY8o7Sgr5U5K3kefKLDgQ9XPsk86h8\\nXwDXZv73Lxj8KsWBw5J/oOz4cwT6hpmwkyriiMjjRsfpB5qOkHzi4RV5FsQasDHJ\\n/FvAEcZUzjBWdfzAFnzuSA==\\n-----END PRIVATE KEY-----"
+        # Para desarrollo local, usar un placeholder seguro
+        local dev_placeholder="-----BEGIN PRIVATE KEY-----\\nDEVELOPMENT_ONLY_PLACEHOLDER\\n-----END PRIVATE KEY-----"
         
-        if sed -i '' "s|FIREBASE_PRIVATE_KEY=.*|FIREBASE_PRIVATE_KEY=\"${static_key}\"|g" "$env_file"; then
-            success "✅ Firebase configurado con clave estática para desarrollo"
+        if sed -i '' "s|FIREBASE_PRIVATE_KEY=.*|FIREBASE_PRIVATE_KEY=\"${dev_placeholder}\"|g" "$env_file"; then
+            success "✅ Firebase configurado con placeholder de desarrollo"
+            info "   Para usar Firebase real, genera una clave en Firebase Console"
         fi
     fi
 }

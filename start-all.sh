@@ -2,7 +2,7 @@
 # Trivance Platform - Service Orchestration
 # Automated service management with PM2
 
-set -e
+set -euo pipefail
 
 # Colores
 RED='\033[0;31m'

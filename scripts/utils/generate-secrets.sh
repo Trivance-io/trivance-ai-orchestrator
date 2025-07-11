@@ -2,7 +2,7 @@
 # Trivance Platform - Dynamic Secret Generation
 # Generates unique development secrets for each installation
 
-set -e
+set -euo pipefail
 
 # Generate random secret
 generate_secret() {
@@ -94,8 +94,12 @@ DEV_RECAPTCHA_KEY=$(generate_dev_safe_value "recaptcha")
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n$(generate_secret 64)\n-----END PRIVATE KEY-----"
 EOF
 
+    # Aplicar permisos seguros
+    chmod 600 "$output_file"
+    
     echo "✅ Secrets generated in: $output_file"
     echo "🔐 All sensitive values are unique and secure"
+    echo "🔒 File permissions set to 600 (owner read/write only)"
     echo "📋 Optional API keys are empty (configure if needed)"
 }
 
