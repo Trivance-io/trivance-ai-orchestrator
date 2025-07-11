@@ -1,5 +1,32 @@
 # 🐳 Docker Configuration - Trivance Platform
 
+## 🎯 Estrategia Docker
+
+### Principios
+1. **Docker SOLO donde aporta valor**: Backends y bases de datos
+2. **Desarrollo nativo donde es óptimo**: Frontend (hot reload) y Mobile (Expo)
+3. **Integración transparente**: Todo funciona con `./start.sh`
+4. **Sin complejidad extra**: Detección automática Docker vs PM2
+
+### Arquitectura
+```
+┌─────────────────────────────────────────────────────┐
+│              TRIVANCE-DEV-CONFIG                     │
+│                 (Orquestador)                        │
+└──────────────────────┬──────────────────────────────┘
+                       │
+        ┌──────────────┴──────────────┐
+        │                             │
+┌───────▼────────┐           ┌────────▼────────┐
+│  DOCKER        │           │  PM2/LOCAL       │
+├────────────────┤           ├─────────────────┤
+│ • PostgreSQL   │           │ • Backoffice    │
+│ • MongoDB      │           │ • Mobile App    │
+│ • Management   │           │   (con Expo)    │
+│ • Auth Service │           │                 │
+└────────────────┘           └─────────────────┘
+```
+
 ## 🚨 IMPORTANTE: SEGURIDAD DE CREDENCIALES
 
 ### ⚠️ NUNCA COMMITEAR ARCHIVOS DE CONFIGURACIÓN CON CREDENCIALES REALES
@@ -85,6 +112,25 @@ git ls-files --cached | grep -E '\.env\.(docker-local|production|staging)'
 - **PostgreSQL**: localhost:5432
 - **MongoDB**: localhost:27017
 
+## 🚀 Integración con el Flujo Principal
+
+### Uso Automático
+El script `start.sh` detecta automáticamente si Docker está disponible:
+- **CON Docker**: Usa Docker para backends y PM2 para frontend
+- **SIN Docker**: Usa PM2 para todos los servicios
+
+### Flujo de Trabajo
+```bash
+# Primera vez
+./setup.sh  # Configura TODO automáticamente
+
+# Desarrollo diario
+./start.sh  # Detecta y usa Docker si está disponible
+
+# Para Mobile
+cd trivance-mobile && EXPO_ENV=local npm start
+```
+
 ## 🔧 Troubleshooting
 
 ### Problema: Application exits immediately
@@ -95,6 +141,14 @@ git ls-files --cached | grep -E '\.env\.(docker-local|production|staging)'
 
 ### Problema: Firebase initialization failed
 **Solución**: Usar credenciales de desarrollo en `.env.docker-local`
+
+### Problema: Puerto ya en uso
+```bash
+# Ver qué usa el puerto
+lsof -i:3000
+# Detener servicios Docker
+docker-compose down
+```
 
 ---
 

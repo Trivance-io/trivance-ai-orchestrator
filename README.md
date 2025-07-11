@@ -9,26 +9,37 @@ Este repositorio configura **AUTOMÁTICAMENTE** todo tu entorno de desarrollo co
 - ✅ **4 repositorios** clonados y configurados
 - ✅ **Variables de entorno** generadas de forma segura
 - ✅ **Dependencias** instaladas en paralelo
-- ✅ **Servicios** ejecutándose con PM2
+- ✅ **Arquitectura híbrida**: Docker (obligatorio) + PM2 (frontend)
 - ✅ **Todo listo** en menos de 10 minutos
+
+### 🐳 Arquitectura Docker Híbrida
+
+El sistema usa una arquitectura optimizada:
+- **Backends y DBs**: En contenedores Docker (aislamiento y consistencia)
+- **Frontend**: Con PM2 para hot-reload instantáneo
+- **Integración automática**: Todo se configura solo
 
 ## 📋 Requisitos Previos
 
 Antes de empezar, necesitas tener instalado:
 
+### Requisitos Obligatorios:
 - **Node.js 18+** → [Descargar](https://nodejs.org/)
 - **Git** → [Descargar](https://git-scm.com/)
-- **PostgreSQL** → Para el backend principal
-- **MongoDB** → Para el servicio de autenticación
+- **Docker Desktop** → [Descargar](https://www.docker.com/products/docker-desktop/)
+  - 🐳 REQUERIDO para backends y bases de datos
+  - Asegúrate de que Docker esté corriendo antes de continuar
 
 ### Verificar requisitos:
 ```bash
-node --version   # Debe ser v18 o superior
-npm --version    # Debe estar instalado
-git --version    # Debe estar instalado
-psql --version   # PostgreSQL (opcional pero recomendado)
-mongod --version # MongoDB (opcional pero recomendado)
+node --version    # Debe ser v18 o superior
+npm --version     # Debe estar instalado
+git --version     # Debe estar instalado
+docker --version  # OBLIGATORIO
+docker ps         # Verifica que Docker esté corriendo
 ```
+
+⚠️ **IMPORTANTE**: Docker es obligatorio. El sistema no funcionará sin Docker.
 
 ## 🚀 Instalación Completa (3 pasos)
 
@@ -98,15 +109,22 @@ Un solo comando para todo:
 ./start.sh
 ```
 
-Te mostrará un menú interactivo:
+Te mostrará un menú interactivo con detección automática de Docker:
 ```
+Estado del sistema:
+  ✅ Configurado
+  📍 Environment: local
+  🐳 Docker OK (obligatorio)
+
+Opciones disponibles:
 1) 🚀 Iniciar servicios
 2) 📊 Ver estado de servicios  
 3) 🔄 Cambiar environment
 4) 🛑 Detener servicios
 5) 🔍 Verificar salud del sistema
-6) 📚 Ver documentación
-7) 🗑️  Limpiar y reconfigurar
+6) 🐳 Gestión Docker        # Solo si Docker está disponible
+7) 📚 Ver documentación
+8) 🗑️  Limpiar y reconfigurar
 0) 🚪 Salir
 ```
 
@@ -230,6 +248,7 @@ cd .. && ./start.sh
 | Documento | Descripción |
 |-----------|-------------|
 | [ENVIRONMENTS.md](envs/ENVIRONMENTS.md) | Guía completa de environments |
+| [DOCKER.md](trivance-dev-config/docs/DOCKER.md) | 🐳 Integración Docker y modo híbrido |
 | [COMMANDS.md](trivance-dev-config/docs/COMMANDS.md) | Todos los comandos disponibles |
 | [TROUBLESHOOTING.md](trivance-dev-config/docs/TROUBLESHOOTING.md) | Solución de problemas detallada |
 | [ONBOARDING.md](trivance-dev-config/docs/ONBOARDING.md) | Guía para nuevos desarrolladores |

@@ -51,10 +51,15 @@ Trivance-platform/                    # 📁 Workspace principal auto-creado
 │   ├── templates/                    # 📄 Templates para auto-generación
 │   │   ├── CLAUDE.md.template        # Template de este archivo
 │   │   └── TrivancePlatform.code-workspace.template
+│   ├── docker/                       # 🐳 Configuración Docker
+│   │   ├── docker-compose.yaml       # Orquestación de servicios
+│   │   ├── Dockerfile.*              # Imágenes optimizadas
+│   │   └── Makefile                  # Comandos simplificados
 │   └── docs/                         # 📚 Documentación completa
 │       ├── ONBOARDING.md             # Guía completa de onboarding
 │       ├── WORKFLOWS.md              # Procesos y metodologías
-│       └── TROUBLESHOOTING.md        # Solución de problemas
+│       ├── TROUBLESHOOTING.md        # Solución de problemas
+│       └── DOCKER.md                 # Guía completa Docker
 ├── level_up_backoffice/              # 🌐 Frontend (React + Vite) - AUTO-CLONADO
 ├── ms_level_up_management/           # 🚀 API Backend (NestJS + GraphQL) - AUTO-CLONADO
 ├── ms_trivance_auth/                 # 🔐 Auth Service (NestJS) - AUTO-CLONADO
@@ -107,11 +112,35 @@ Claude Code debe entender que opera en un **workspace multi-repositorio** donde:
 ./start.sh setup    # Configurar desde cero
 ```
 
+### 🐳 MODO HÍBRIDO: DOCKER + PM2
+
+El sistema detecta automáticamente si Docker está disponible y usa el modo óptimo:
+
+- **CON Docker**: Backends y DBs en contenedores + Frontend con PM2 (hot-reload)
+- **SIN Docker**: Todo con PM2 (fallback automático)
+
+```bash
+# El sistema detecta y te informa:
+✅ Docker detectado - Usando modo híbrido Docker + PM2
+# o
+⚠️  Docker no disponible - Usando PM2 para todo
+```
+
 ### 📁 Referencia Completa de Comandos
 Para ver todos los comandos disponibles y sus rutas completas:
 ```bash
 cat ./trivance-dev-config/docs/COMMANDS.md
 ```
+
+### 🐳 Gestión Docker (cuando está disponible)
+Desde el menú principal, opción 6:
+- Ver logs de contenedores
+- Reconstruir imágenes
+- Resetear bases de datos
+- Acceder a shell de contenedores
+- Monitorear recursos
+
+Documentación completa: `./trivance-dev-config/docs/DOCKER.md`
 
 ## 🏗️ ARQUITECTURA TÉCNICA COMPLETA
 
@@ -364,6 +393,7 @@ VITE_MOCK_API=false
 - `trivance-dev-config/docs/ONBOARDING.md` - Guía completa de onboarding
 - `trivance-dev-config/docs/WORKFLOWS.md` - Procesos y metodologías  
 - `trivance-dev-config/docs/TROUBLESHOOTING.md` - Solución de problemas
+- `trivance-dev-config/docs/DOCKER.md` - Integración Docker y modo híbrido
 
 ### Por Repositorio
 Cada repositorio tiene su propia documentación en el directorio `docs/`:

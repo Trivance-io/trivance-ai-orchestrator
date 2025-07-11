@@ -47,9 +47,10 @@ node --version  # Debe ser 18+
 # Validar configuración
 ./trivance-dev-config/scripts/envs.sh validate
 
-# Verificar bases de datos
-brew services start postgresql  # macOS
-brew services start mongodb-community  # macOS
+# Verificar contenedores Docker
+docker ps
+docker logs trivance_postgres
+docker logs trivance_mongodb
 ```
 
 ## 🗄️ Problemas de Base de Datos
@@ -76,7 +77,49 @@ mongosh --eval "db.adminCommand('ping')"
 DB_MONGO=mongodb://localhost:27017/trivance_auth
 ```
 
-## ⚙️ Problemas de PM2
+## 🐳 Problemas de Docker
+
+### Docker no está instalado o no corre
+```bash
+# Verificar instalación
+docker --version
+
+# Si no está instalado, instalar Docker Desktop desde:
+# https://www.docker.com/products/docker-desktop/
+
+# Verificar que Docker esté corriendo
+docker ps
+```
+
+### Contenedores no inician
+```bash
+# Ver logs específicos
+docker logs trivance_management
+docker logs trivance_auth
+
+# Recrear contenedores
+cd trivance-dev-config/docker
+docker compose down
+docker compose up -d
+
+# Verificar archivos .env Docker
+ls -la trivance-dev-config/docker/.env.docker-*
+```
+
+### Error de conexión a base de datos
+```bash
+# Verificar que las URLs usen hostnames Docker
+grep "DATABASE_URL\|DB_MONGO" trivance-dev-config/docker/.env.docker-*
+
+# Debe mostrar:
+# DATABASE_URL=postgresql://...@postgres:5432/...
+# DB_MONGO=mongodb://mongodb:27017/...
+
+# Si no, regenerar:
+./trivance-dev-config/scripts/envs.sh switch local
+```
+
+## ⚙️ Problemas de PM2 (Solo Frontend)
 
 ### PM2 no encontrado
 ```bash

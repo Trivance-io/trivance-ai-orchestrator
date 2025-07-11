@@ -46,7 +46,7 @@ cd trivance-dev-config
 - ✅ Instala todas las dependencias
 - ✅ Configura variables de entorno
 - ✅ Verifica que todo compile
-- ✅ Configura servicios PM2
+- ✅ Configura arquitectura híbrida Docker + PM2
 
 ### Paso 3: Iniciar Servicios
 ```bash
@@ -86,15 +86,16 @@ cd ..  # Volver al workspace
 ./trivance-dev-config/scripts/utils/verify-compilation.sh
 
 # 5. Finalizar día
-pm2 stop all
+./start.sh stop
 ```
 
 ### Comandos Útiles
 ```bash
-# PM2 management
-pm2 status          # Estado de servicios
-pm2 logs            # Ver logs en tiempo real
-pm2 restart all     # Reiniciar servicios
+# Gestión de servicios
+./start.sh status   # Estado de servicios
+pm2 logs backoffice # Logs del frontend
+docker logs -f trivance_management  # Logs del backend
+./start.sh restart  # Reiniciar todos los servicios
 
 # Environment management
 ./trivance-dev-config/scripts/envs.sh status   # Ver environment actual
