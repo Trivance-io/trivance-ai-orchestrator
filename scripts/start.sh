@@ -13,10 +13,17 @@ readonly PURPLE='\033[0;35m'
 readonly CYAN='\033[0;36m'
 readonly NC='\033[0m'
 
-# Directorios
+# Directorios - Corregir para ejecución desde workspace
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CONFIG_DIR="$(cd "${SCRIPT_DIR}/../" && pwd)"
-WORKSPACE_DIR="$(cd "${CONFIG_DIR}/.." && pwd)"
+if [[ "$(basename "${SCRIPT_DIR}")" == "scripts" ]]; then
+    # Ejecutándose desde ubicación real
+    CONFIG_DIR="$(cd "${SCRIPT_DIR}/../" && pwd)"
+    WORKSPACE_DIR="$(cd "${CONFIG_DIR}/.." && pwd)"
+else
+    # Ejecutándose desde symlink en workspace
+    WORKSPACE_DIR="$(cd "${SCRIPT_DIR}" && pwd)"
+    CONFIG_DIR="${WORKSPACE_DIR}/trivance-dev-config"
+fi
 
 # Banner
 show_banner() {
@@ -35,17 +42,38 @@ EOF
 detect_system_state() {
     local state="not_setup"
     
+    # Debug: mostrar directorios calculados
+    # echo "DEBUG: WORKSPACE_DIR='${WORKSPACE_DIR}'" >&2
+    
     # Verificar si está configurado
     if [[ -d "${WORKSPACE_DIR}/ms_level_up_management" ]] && \
        [[ -d "${WORKSPACE_DIR}/ms_trivance_auth" ]] && \
        [[ -d "${WORKSPACE_DIR}/level_up_backoffice" ]] && \
        [[ -d "${WORKSPACE_DIR}/trivance-mobile" ]]; then
-        state="configured"
-    fi
-    
-    # Verificar si hay servicios corriendo
-    if command -v pm2 &> /dev/null && pm2 list 2>/dev/null | grep -q "online"; then
-        state="running"
+        
+        # Verificar configuración completa
+        if [[ -f "${WORKSPACE_DIR}/.trivance-secrets" ]] && \
+           [[ -f "${WORKSPACE_DIR}/envs/.current_environment" ]]; then
+            state="configured"
+            
+            # Verificar si hay servicios corriendo
+            # Verificar PM2
+            local pm2_running=false
+            if command -v pm2 &> /dev/null && pm2 list 2>/dev/null | grep -q "online"; then
+                pm2_running=true
+            fi
+            
+            # Verificar Docker
+            local docker_running=false
+            if command -v docker &> /dev/null && docker ps --format "table {{.Names}}" 2>/dev/null | grep -q "trivance_"; then
+                docker_running=true
+            fi
+            
+            # Si algún servicio está corriendo, cambiar estado
+            if [[ "$pm2_running" == true ]] || [[ "$docker_running" == true ]]; then
+                state="running"
+            fi
+        fi
     fi
     
     echo "$state"
