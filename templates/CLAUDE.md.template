@@ -87,11 +87,13 @@ Claude Code debe entender que opera en un **workspace multi-repositorio** donde:
 ### URLs de Servicios Auto-Configurados
 
 #### Desarrollo Local (Auto-configurado)
-- **Auth Service**: http://localhost:3001
-- **Management API**: http://localhost:3000
-- **GraphQL Playground**: http://localhost:3000/graphql
-- **Frontend Admin**: http://localhost:5173
-- **Swagger Auth Docs**: http://localhost:3001/api-docs
+- **Auth Service**: http://localhost:3001 (Docker)
+- **Management API**: http://localhost:3000 (Docker)
+- **GraphQL Playground**: http://localhost:3000/graphql (Docker)
+- **Frontend Admin**: http://localhost:5173 (PM2)
+- **Swagger Auth Docs**: http://localhost:3001/api-docs (Docker)
+- **PostgreSQL**: localhost:5432 (Docker)
+- **MongoDB**: localhost:27017 (Docker)
 
 #### QA Environment
 - **Auth QA**: https://auth-qa.example.com
