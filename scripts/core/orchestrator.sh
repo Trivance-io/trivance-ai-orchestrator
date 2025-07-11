@@ -522,7 +522,41 @@ create_claude_md_final() {
     fi
     
     success "✅ Configuración completa del workspace terminada"
-    info "💡 Para configurar Claude Code, ejecuta manualmente: /init"
+    echo
+    
+    # Recomendación para Claude Code
+    echo -e "${PURPLE}╔══════════════════════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${PURPLE}║                     🤖 CONFIGURACIÓN CLAUDE CODE                            ║${NC}"
+    echo -e "${PURPLE}╚══════════════════════════════════════════════════════════════════════════════╝${NC}"
+    echo
+    info "🎯 Para aprovechar al máximo Claude Code, recomendamos generar el archivo CLAUDE.md"
+    info "   Este archivo ayuda a Claude a entender mejor tu proyecto y ser más eficiente"
+    echo
+    echo -e "${CYAN}📋 Pasos recomendados:${NC}"
+    echo -e "${CYAN}   1. Abre Claude Code en este directorio${NC}"
+    echo -e "${CYAN}   2. Ejecuta el comando: ${YELLOW}/init${NC}"
+    echo -e "${CYAN}   3. Sigue las instrucciones para generar CLAUDE.md${NC}"
+    echo
+    echo -e "${CYAN}🔧 Alternativamente, podemos crear un CLAUDE.md básico ahora:${NC}"
+    echo -e "${CYAN}   • Copia el template: ${YELLOW}cp trivance-dev-config/templates/CLAUDE.md.template CLAUDE.md${NC}"
+    echo -e "${CYAN}   • Edita el archivo con información específica de tu proyecto${NC}"
+    echo
+    
+    # Crear CLAUDE.md básico automáticamente
+    if [[ ! -f "${WORKSPACE_DIR}/CLAUDE.md" ]]; then
+        info "📝 Creando CLAUDE.md básico automáticamente..."
+        cp "${SCRIPT_DIR}/../../templates/CLAUDE.md.template" "${WORKSPACE_DIR}/CLAUDE.md"
+        success "✅ CLAUDE.md creado desde template"
+        info "   Puedes personalizarlo más tarde con el comando /init de Claude Code"
+    else
+        info "📝 CLAUDE.md ya existe, no se sobrescribirá"
+    fi
+    echo
+    echo -e "${GREEN}💡 Beneficios del CLAUDE.md:${NC}"
+    echo -e "${GREEN}   ✅ Claude entiende mejor la arquitectura del proyecto${NC}"
+    echo -e "${GREEN}   ✅ Respuestas más precisas y contextuales${NC}"
+    echo -e "${GREEN}   ✅ Mejor manejo de comandos y workflows${NC}"
+    echo -e "${GREEN}   ✅ Integración optimizada con Docker + PM2${NC}"
     echo
 }
 
