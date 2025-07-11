@@ -1,27 +1,32 @@
 # 🚀 Trivance Platform - Workspace Multi-Repo
 
-**Workspace completo** para desarrollo de Trivance Platform con **gestión automática de environments**.
+**Workspace completo** para desarrollo de Trivance Platform con **gestión automática de environments** y **arquitectura híbrida Docker + PM2**.
 
 ## 🏗️ Estructura del Workspace
 
 ```
 📁 Trivance Platform/
-├── 🌐 level_up_backoffice/          # Frontend Admin (React + Vite)
-├── 🚀 ms_level_up_management/       # API Backend (NestJS + GraphQL)  
-├── 🔐 ms_trivance_auth/             # Auth Service (NestJS)
-├── 📱 trivance-mobile/              # Mobile App (React Native)
+├── 🌐 level_up_backoffice/          # Frontend Admin (React + Vite) - PM2
+├── 🚀 ms_level_up_management/       # API Backend (NestJS + GraphQL) - Docker  
+├── 🔐 ms_trivance_auth/             # Auth Service (NestJS) - Docker
+├── 📱 trivance-mobile/              # Mobile App (React Native + Expo)
 ├── 🔧 trivance-dev-config/          # Configuraciones y scripts
 └── 📄 envs/                         # Configuraciones por environment
 ```
+
+## 🐳 Arquitectura Híbrida Docker + PM2
+
+- **🗄️ Bases de Datos**: PostgreSQL y MongoDB en Docker
+- **🚀 APIs Backend**: NestJS en contenedores Docker
+- **🌐 Frontend**: React con PM2 para hot-reload instantáneo
+- **📱 Mobile**: Expo con conexión automática a APIs Docker
 
 ## ⚡ QUICK START (5 minutos)
 
 ### 1️⃣ **Setup Inicial (Solo una vez)**
 ```bash
-# Configurar sistema de environments
-./trivance-dev-config/scripts/envs.sh setup
-
-# Cambiar a development local
+# Ya hecho automáticamente durante la configuración inicial
+# Si necesitas reconfigurar:
 ./trivance-dev-config/scripts/envs.sh switch local
 ```
 
@@ -35,11 +40,13 @@
 ```
 
 ### 3️⃣ **¡Listo! URLs de Desarrollo**
-- **🌐 Frontend Admin**: http://localhost:5173
-- **🚀 Management API**: http://localhost:3000
-- **🔐 Auth Service**: http://localhost:3001
-- **📊 GraphQL Playground**: http://localhost:3000/graphql
-- **📱 Mobile App**: Expo QR desde terminal
+- **🌐 Frontend Admin**: http://localhost:5173 (PM2)
+- **🚀 Management API**: http://localhost:3000 (Docker)
+- **🔐 Auth Service**: http://localhost:3001 (Docker)
+- **📊 GraphQL Playground**: http://localhost:3000/graphql (Docker)
+- **🗄️ PostgreSQL**: localhost:5432 (Docker)
+- **🗄️ MongoDB**: localhost:27017 (Docker)
+- **📱 Mobile App**: `cd trivance-mobile && npm run start:docker`
 
 ## 🎛️ GESTIÓN DE ENVIRONMENTS
 
@@ -74,11 +81,16 @@
 
 ```bash
 # Parar todos los servicios
-pm2 stop all
+./start.sh stop
 
 # Reset completo a local
 ./trivance-dev-config/scripts/envs.sh switch local
 
 # Verificar health
 ./start.sh status
+
+# Comandos Docker específicos
+docker ps                    # Ver contenedores
+docker logs trivance_auth    # Ver logs específicos
+docker-compose -f trivance-dev-config/docker/docker-compose.yaml down
 ```
