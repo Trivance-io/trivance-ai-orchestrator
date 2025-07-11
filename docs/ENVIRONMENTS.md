@@ -13,20 +13,27 @@ El sistema de environments de Trivance te permite cambiar entre diferentes confi
 ### La magia en 3 pasos:
 
 1. **Configuración centralizada**: Todo está en `trivance-dev-config/config/environments.json`
-2. **Generación automática**: El sistema crea archivos `.env` para cada servicio
-3. **Un comando para cambiar**: Cambias TODOS los servicios de golpe
+2. **Generación automática**: El sistema crea archivos `.env` para cada servicio (incluidos Docker)
+3. **Un comando para cambiar**: Cambias TODOS los servicios de golpe (Docker + PM2)
+
+### 🐳 Arquitectura Híbrida Docker + PM2:
+- **Backends y DBs**: En contenedores Docker (PostgreSQL, MongoDB, APIs NestJS)
+- **Frontend**: Con PM2 para hot-reload instantáneo
+- **Integración automática**: Los environments manejan ambos sistemas
 
 ### Ejemplo visual:
 ```
-Tu comando: ./change-env.sh switch qa
+Tu comando: ./trivance-dev-config/scripts/envs.sh switch qa
 
 Lo que pasa:
-├── ms_trivance_auth/.env      → Cambia a config de QA
-├── ms_level_up_management/.env → Cambia a config de QA
-├── level_up_backoffice/.env    → Cambia a config de QA
-└── trivance-mobile/.env        → Cambia a config de QA
+├── ms_trivance_auth/.env           → Cambia a config de QA
+├── ms_level_up_management/.env      → Cambia a config de QA
+├── level_up_backoffice/.env         → Cambia a config de QA
+├── trivance-mobile/.env             → Cambia a config de QA
+├── docker/.env.docker-local         → Cambia a config de QA para Docker
+└── docker/.env.docker-auth-local    → Cambia a config de QA para Docker
 
-¡TODO sincronizado! 🎉
+¡TODO sincronizado! 🎉 (Docker + PM2)
 ```
 
 ## 📋 Guía Rápida - Lo que necesitas saber
@@ -149,19 +156,19 @@ Es normal. Los archivos de QA y producción NO vienen incluidos por seguridad. D
 ### Mañana - Empezar a trabajar:
 ```bash
 cd ~/tu-proyecto
-./start-all.sh          # Inicia todo en local automáticamente
+./start.sh              # Inicia todo en local automáticamente (Docker + PM2)
 ```
 
 ### Necesitas probar en QA:
 ```bash
 ./trivance-dev-config/scripts/envs.sh switch qa
-./start-all.sh          # Ahora apunta a servidores QA
+./start.sh              # Ahora apunta a servidores QA
 ```
 
 ### Volver a desarrollo local:
 ```bash
 ./trivance-dev-config/scripts/envs.sh switch local
-./start-all.sh          # De vuelta a tu máquina
+./start.sh              # De vuelta a tu máquina
 ```
 
 ## 🆘 Solución de Problemas
@@ -180,8 +187,10 @@ cp envs/local.mobile.env envs/qa.mobile.env
 ### "Los servicios no se conectan después de cambiar"
 ```bash
 # Asegúrate de reiniciar después de cambiar environment
-pm2 stop all
-./start-all.sh
+./start.sh              # El menú te permitirá detener y reiniciar servicios
+# O manualmente:
+# docker-compose down && docker-compose up -d  # Para servicios Docker
+# pm2 restart all                               # Para el frontend
 ```
 
 ### "No sé en qué environment estoy"
@@ -191,11 +200,52 @@ pm2 stop all
 cat envs/.current_environment
 ```
 
+## 🐳 Gestión de Docker con Environments
+
+### ¿Cómo se integra Docker?
+
+Cuando cambias de environment, el sistema también genera archivos `.env` específicos para Docker:
+
+```bash
+# Cambiar environment también configura Docker
+./trivance-dev-config/scripts/envs.sh switch qa
+
+# Esto genera automáticamente:
+# ├── docker/.env.docker-local      # Para Management API
+# └── docker/.env.docker-auth-local # Para Auth API
+```
+
+### Comandos específicos para Docker:
+
+```bash
+# Ver contenedores corriendo
+docker ps
+
+# Reiniciar servicios Docker después de cambiar environment
+docker-compose -f trivance-dev-config/docker/docker-compose.yaml down
+docker-compose -f trivance-dev-config/docker/docker-compose.yaml up -d
+
+# Ver logs de Docker
+docker logs trivance_management
+docker logs trivance_auth
+```
+
+### Servicios en Docker vs PM2:
+
+| Servicio | Tecnología | Puerto | Comando |
+|----------|------------|---------|----------|
+| PostgreSQL | Docker | 5432 | `docker logs trivance_postgres` |
+| MongoDB | Docker | 27017 | `docker logs trivance_mongodb` |
+| Auth API | Docker | 3001 | `docker logs trivance_auth` |
+| Management API | Docker | 3000 | `docker logs trivance_management` |
+| Frontend | PM2 | 5173 | `pm2 logs backoffice` |
+
 ## 📚 Para Aprender Más
 
 - **Archivo maestro**: `trivance-dev-config/config/environments.json`
 - **Script principal**: `trivance-dev-config/scripts/envs.sh`
 - **Documentación técnica**: `trivance-dev-config/README.md`
+- **Docker**: `trivance-dev-config/docs/DOCKER.md`
 
 ---
 
@@ -203,5 +253,6 @@ cat envs/.current_environment
 - `status` - Ver dónde estás
 - `switch local` - Volver a desarrollo
 - `switch qa` - Ir a pruebas
+- `./start.sh` - Iniciar todos los servicios (Docker + PM2)
 
 ¡Eso es todo! 🎉
