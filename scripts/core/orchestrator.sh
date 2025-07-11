@@ -123,19 +123,31 @@ validate_configuration() {
         exit 1
     fi
     
-    # Check PostgreSQL
-    if ! command -v psql &> /dev/null; then
-        warn "⚠️  PostgreSQL no encontrado - Management API requerirá configuración manual"
-    fi
-    
-    # Check MongoDB
-    if ! command -v mongod &> /dev/null && ! command -v mongosh &> /dev/null; then
-        warn "⚠️  MongoDB no encontrado - Auth Service requerirá configuración manual"
-    fi
-    
     if ! command -v npm &> /dev/null; then
         error "npm no está instalado"
         exit 1
+    fi
+    
+    # Check Docker - OBLIGATORIO
+    if ! command -v docker &> /dev/null; then
+        error "❌ Docker no está instalado - Docker es OBLIGATORIO"
+        error "Por favor instala Docker Desktop desde: https://www.docker.com/products/docker-desktop/"
+        exit 1
+    fi
+    
+    # Check if Docker daemon is running
+    if ! docker ps &> /dev/null; then
+        error "❌ Docker no está corriendo"
+        error "Por favor inicia Docker Desktop y vuelve a ejecutar este script"
+        exit 1
+    fi
+    
+    # Check Docker Compose
+    if ! command -v docker &>/dev/null || ! docker compose version &>/dev/null 2>&1; then
+        if ! command -v docker-compose &>/dev/null; then
+            error "❌ Docker Compose no está instalado"
+            exit 1
+        fi
     fi
     
     success "✅ Configuración validada correctamente"
@@ -366,6 +378,14 @@ setup_tools() {
         success "✅ Documentación ENVIRONMENTS.md copiada a envs/"
     fi
     
+    # Configurar Docker si está disponible
+    if command -v docker &>/dev/null; then
+        info "🐳 Configurando integración Docker..."
+        setup_docker_integration
+    else
+        warn "⚠️  Docker no detectado - La integración Docker estará disponible cuando instales Docker"
+    fi
+    
     # Crear UN SOLO comando en la raíz
     info "🔗 Creando comando principal..."
     
@@ -381,6 +401,75 @@ setup_tools() {
     
     # Claude Code se configurará automáticamente al final cuando todo esté funcionando
     
+}
+
+setup_docker_integration() {
+    log "Configurando archivos Docker para desarrollo..."
+    
+    # Verificar que existe la carpeta docker en trivance-dev-config
+    local docker_source="${SCRIPT_DIR}/../../docker"
+    
+    if [[ ! -d "$docker_source" ]]; then
+        warn "⚠️  Carpeta docker no encontrada en trivance-dev-config"
+        return 1
+    fi
+    
+    # Crear ecosystem.config.js si no existe
+    local ecosystem_file="${WORKSPACE_DIR}/ecosystem.config.js"
+    if [[ ! -f "$ecosystem_file" ]]; then
+        info "Creando ecosystem.config.js para PM2..."
+        cat > "$ecosystem_file" << 'EOF'
+module.exports = {
+  apps: [
+    {
+      name: 'auth-service',
+      cwd: './ms_trivance_auth',
+      script: 'npm',
+      args: 'run start:dev',
+      env: {
+        NODE_ENV: 'development',
+        PORT: 3001
+      }
+    },
+    {
+      name: 'management-api',
+      cwd: './ms_level_up_management',
+      script: 'npm',
+      args: 'run start:dev',
+      env: {
+        NODE_ENV: 'development',
+        PORT: 3000
+      }
+    },
+    {
+      name: 'backoffice',
+      cwd: './level_up_backoffice',
+      script: 'npm',
+      args: 'run dev',
+      env: {
+        NODE_ENV: 'development'
+      }
+    }
+  ]
+};
+EOF
+        success "✅ ecosystem.config.js creado"
+    fi
+    
+    # Verificar docker compose
+    if command -v docker &>/dev/null && docker compose version &>/dev/null 2>&1; then
+        success "✅ Docker Compose v2 detectado"
+    elif command -v docker-compose &>/dev/null; then
+        info "ℹ️  Docker Compose v1 detectado (considera actualizar a v2)"
+    fi
+    
+    # Informar sobre la configuración Docker
+    info "📁 Archivos Docker disponibles en: ${docker_source}"
+    info "   - docker-compose.yaml : Orquestación de servicios"
+    info "   - Dockerfile.* : Imágenes optimizadas para cada servicio"
+    info "   - Makefile : Comandos simplificados"
+    
+    success "✅ Integración Docker configurada"
 }
 
 apply_post_setup_fixes() {

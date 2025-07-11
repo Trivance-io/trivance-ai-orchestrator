@@ -60,24 +60,65 @@ get_current_env() {
     fi
 }
 
+# Verificar Docker (obligatorio)
+check_docker() {
+    if ! command -v docker &>/dev/null; then
+        echo -e "${RED}❌ Docker no está instalado${NC}"
+        echo -e "${YELLOW}Docker es OBLIGATORIO. Instálalo desde: https://www.docker.com/products/docker-desktop/${NC}"
+        return 1
+    fi
+    
+    if ! docker ps &>/dev/null 2>&1; then
+        echo -e "${RED}❌ Docker no está corriendo${NC}"
+        echo -e "${YELLOW}Por favor inicia Docker Desktop${NC}"
+        return 1
+    fi
+    
+    return 0
+}
+
+# Detectar si servicios están corriendo
+services_running() {
+    if docker ps --format "table {{.Names}}" | grep -q "trivance_"; then
+        return 0
+    fi
+    return 1
+}
+
 # Menú principal
 show_main_menu() {
     local state="$1"
     local current_env=$(get_current_env)
     
     echo -e "${CYAN}Estado del sistema:${NC} "
+    
+    # Verificar Docker primero
+    local docker_status=""
+    if check_docker; then
+        docker_status="${GREEN}🐳 Docker OK${NC}"
+    else
+        docker_status="${RED}🐳 Docker NO disponible${NC}"
+    fi
+    
     case "$state" in
         "not_setup")
             echo -e "  ${YELLOW}⚠️  No configurado${NC}"
-            echo -e "  ${YELLOW}   Ejecuta la opción 1 para configurar${NC}"
+            echo -e "  ${docker_status}"
+            if ! check_docker; then
+                echo -e "  ${RED}   ⚠️ Debes tener Docker corriendo antes de continuar${NC}"
+            else
+                echo -e "  ${YELLOW}   Ejecuta la opción 1 para configurar${NC}"
+            fi
             ;;
         "configured")
             echo -e "  ${GREEN}✅ Configurado${NC}"
             echo -e "  ${BLUE}📍 Environment: ${current_env}${NC}"
+            echo -e "  ${docker_status}"
             ;;
         "running")
             echo -e "  ${GREEN}✅ Servicios ejecutándose${NC}"
             echo -e "  ${BLUE}📍 Environment: ${current_env}${NC}"
+            echo -e "  ${GREEN}🐳 Docker + PM2 (arquitectura híbrida)${NC}"
             ;;
     esac
     
@@ -94,8 +135,9 @@ show_main_menu() {
         echo -e "  ${GREEN}3)${NC} 🔄 Cambiar environment (actual: ${current_env})"
         echo -e "  ${GREEN}4)${NC} 🛑 Detener servicios"
         echo -e "  ${GREEN}5)${NC} 🔍 Verificar salud del sistema"
-        echo -e "  ${GREEN}6)${NC} 📚 Ver documentación"
-        echo -e "  ${GREEN}7)${NC} 🗑️  Limpiar y reconfigurar"
+        echo -e "  ${GREEN}6)${NC} 🐳 Gestión Docker"
+        echo -e "  ${GREEN}7)${NC} 📚 Ver documentación"
+        echo -e "  ${GREEN}8)${NC} 🗑️  Limpiar y reconfigurar"
     fi
     
     echo -e "  ${GREEN}0)${NC} 🚪 Salir"
@@ -117,22 +159,32 @@ execute_option() {
     case "$option" in
         "1")
             if [[ "$state" == "not_setup" ]]; then
+                # Verificar Docker antes del setup
+                if ! check_docker; then
+                    echo -e "${RED}❌ No puedes continuar sin Docker${NC}"
+                    read -p "Presiona Enter para continuar..."
+                    return
+                fi
                 echo -e "${BLUE}🔧 Iniciando configuración completa...${NC}"
                 "${CONFIG_DIR}/setup.sh"
             else
-                echo -e "${BLUE}🚀 Iniciando servicios...${NC}"
-                if ! command -v pm2 &> /dev/null; then
-                    echo -e "${YELLOW}Instalando PM2...${NC}"
-                    npm install -g pm2
+                # Verificar Docker antes de iniciar
+                if ! check_docker; then
+                    echo -e "${RED}❌ No puedes iniciar servicios sin Docker${NC}"
+                    read -p "Presiona Enter para continuar..."
+                    return
                 fi
-                pm2 start "${CONFIG_DIR}/../ecosystem.config.js" 2>/dev/null || {
-                    "${CONFIG_DIR}/start-all.sh"
-                }
+                echo -e "${BLUE}🚀 Iniciando servicios...${NC}"
+                "${CONFIG_DIR}/scripts/utils/start-services-smart.sh" start
             fi
             ;;
         "2")
             echo -e "${BLUE}📊 Estado de servicios:${NC}"
-            pm2 status
+            if [[ -x "${CONFIG_DIR}/scripts/utils/start-services-smart.sh" ]]; then
+                "${CONFIG_DIR}/scripts/utils/start-services-smart.sh" status
+            else
+                pm2 status
+            fi
             ;;
         "3")
             echo -e "${BLUE}🔄 Cambiar environment:${NC}"
@@ -150,33 +202,123 @@ execute_option() {
             ;;
         "4")
             echo -e "${BLUE}🛑 Deteniendo servicios...${NC}"
-            pm2 stop all
+            if [[ -x "${CONFIG_DIR}/scripts/utils/start-services-smart.sh" ]]; then
+                "${CONFIG_DIR}/scripts/utils/start-services-smart.sh" stop
+            else
+                pm2 stop all
+            fi
             ;;
         "5")
             echo -e "${BLUE}🔍 Verificando salud del sistema...${NC}"
             echo
-            echo "Estado de servicios PM2:"
-            pm2 status
-            echo
-            echo "Verificando endpoints:"
-            echo -n "• Auth Service (3001): "
-            curl -s http://localhost:3001/health >/dev/null 2>&1 && echo -e "${GREEN}✅ OK${NC}" || echo -e "${RED}❌ No responde${NC}"
-            echo -n "• Management API (3000): "
-            curl -s http://localhost:3000/health >/dev/null 2>&1 && echo -e "${GREEN}✅ OK${NC}" || echo -e "${RED}❌ No responde${NC}"
-            echo -n "• Frontend (5173): "
-            curl -s http://localhost:5173 >/dev/null 2>&1 && echo -e "${GREEN}✅ OK${NC}" || echo -e "${RED}❌ No responde${NC}"
+            
+            # Usar el script smart para el estado si está disponible
+            if [[ -x "${CONFIG_DIR}/scripts/utils/start-services-smart.sh" ]]; then
+                "${CONFIG_DIR}/scripts/utils/start-services-smart.sh" status
+            else
+                echo "Estado de servicios PM2:"
+                pm2 status
+                echo
+                echo "Verificando endpoints:"
+                echo -n "• Auth Service (3001): "
+                curl -s http://localhost:3001/health >/dev/null 2>&1 && echo -e "${GREEN}✅ OK${NC}" || echo -e "${RED}❌ No responde${NC}"
+                echo -n "• Management API (3000): "
+                curl -s http://localhost:3000/health >/dev/null 2>&1 && echo -e "${GREEN}✅ OK${NC}" || echo -e "${RED}❌ No responde${NC}"
+                echo -n "• Frontend (5173): "
+                curl -s http://localhost:5173 >/dev/null 2>&1 && echo -e "${GREEN}✅ OK${NC}" || echo -e "${RED}❌ No responde${NC}"
+            fi
             echo
             ;;
         "6")
+            # Verificar Docker primero
+            if ! check_docker; then
+                echo -e "${RED}❌ Docker no está disponible${NC}"
+                echo -e "${YELLOW}Debes tener Docker corriendo para usar esta opción${NC}"
+                read -p "Presiona Enter para continuar..."
+                return
+            fi
+            
+            # Submenú Docker
+            echo -e "${BLUE}🐳 Gestión Docker:${NC}"
+                echo "  1) Ver logs de contenedores"
+                echo "  2) Reconstruir imágenes"
+                echo "  3) Resetear bases de datos (⚠️  DESTRUCTIVO)"
+                echo "  4) Acceder a shell de contenedor"
+                echo "  5) Ver uso de recursos"
+                echo "  0) Volver al menú principal"
+                echo
+                read -p "Selecciona opción: " docker_option
+                
+                case "$docker_option" in
+                    "1")
+                        echo -e "${CYAN}Selecciona servicio:${NC}"
+                        echo "  1) Management API"
+                        echo "  2) Auth Service"
+                        echo "  3) PostgreSQL"
+                        echo "  4) MongoDB"
+                        echo "  5) Todos"
+                        read -p "Servicio: " service_option
+                        
+                        cd "${CONFIG_DIR}/docker"
+                        case "$service_option" in
+                            "1") docker logs -f trivance_management ;;
+                            "2") docker logs -f trivance_auth ;;
+                            "3") docker logs -f trivance_postgres ;;
+                            "4") docker logs -f trivance_mongodb ;;
+                            "5") docker compose logs -f ;;
+                            *) echo -e "${RED}Opción inválida${NC}" ;;
+                        esac
+                        ;;
+                    "2")
+                        echo -e "${YELLOW}🔄 Reconstruyendo imágenes Docker...${NC}"
+                        cd "${CONFIG_DIR}/docker"
+                        docker compose build --no-cache
+                        echo -e "${GREEN}✅ Imágenes reconstruidas${NC}"
+                        ;;
+                    "3")
+                        echo -e "${RED}⚠️  ADVERTENCIA: Esto eliminará TODOS los datos${NC}"
+                        read -p "¿Estás seguro? (yes/no): " confirm
+                        if [[ "$confirm" == "yes" ]]; then
+                            cd "${CONFIG_DIR}/docker"
+                            docker compose down -v
+                            docker compose up -d postgres mongodb
+                            echo -e "${GREEN}✅ Bases de datos reseteadas${NC}"
+                        fi
+                        ;;
+                    "4")
+                        echo -e "${CYAN}Selecciona contenedor:${NC}"
+                        echo "  1) Management API"
+                        echo "  2) Auth Service"
+                        read -p "Contenedor: " container_option
+                        
+                        case "$container_option" in
+                            "1") docker exec -it trivance_management sh ;;
+                            "2") docker exec -it trivance_auth sh ;;
+                            *) echo -e "${RED}Opción inválida${NC}" ;;
+                        esac
+                        ;;
+                    "5")
+                        docker stats
+                        ;;
+                esac
+                
+                # No hacer return aquí para volver al menú principal
+                if [[ "$docker_option" != "0" ]]; then
+                    read -p "Presiona Enter para continuar..."
+                fi
+            ;;
+        "7")
+            # Documentación
             echo -e "${BLUE}📚 Documentación disponible:${NC}"
             echo
             echo "  📖 README principal: ${WORKSPACE_DIR}/README.md"
             echo "  🤖 Claude Config: Ejecuta manualmente /init después del setup"
             echo "  🎛️  Environments: ${WORKSPACE_DIR}/envs/ENVIRONMENTS.md"
             echo "  🚀 Comandos: ${CONFIG_DIR}/docs/COMMANDS.md"
+            echo "  🐳 Docker: ${CONFIG_DIR}/docs/DOCKER.md"
             echo
             ;;
-        "7")
+        "8")
             echo -e "${YELLOW}⚠️  Esto eliminará toda la configuración actual${NC}"
             read -p "¿Estás seguro? (yes/no): " confirm
             if [[ "$confirm" == "yes" ]]; then
