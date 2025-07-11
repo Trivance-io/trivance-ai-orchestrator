@@ -79,7 +79,14 @@ Una vez iniciados, accede a:
 | API Principal | http://localhost:3000 | Backend con GraphQL |
 | API Auth | http://localhost:3001 | Servicio de autenticación |
 | GraphQL Playground | http://localhost:3000/graphql | Explorador GraphQL |
-| Mobile Metro | http://localhost:8081 | Servidor Expo (si aplica) |
+| Mobile App | Ver instrucciones abajo | App móvil con Expo |
+
+### 📱 App Móvil con Docker
+```bash
+cd trivance-mobile
+npm run start:docker   # Conecta automáticamente a servicios Docker locales
+# Escanea el QR con Expo Go
+```
 
 ## 📁 Estructura del Proyecto
 
@@ -135,6 +142,12 @@ También puedes usar comandos directos:
 ./start.sh status   # Ver estado
 ./start.sh setup    # Reconfigurar todo
 ```
+
+### Verificar integración Mobile + Docker:
+```bash
+./trivance-dev-config/scripts/utils/verify-docker-mobile.sh
+```
+Este script verifica que Docker esté corriendo y la app móvil esté configurada correctamente.
 
 ## 🔄 Gestión de Environments
 

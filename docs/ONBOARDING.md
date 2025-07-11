@@ -13,13 +13,18 @@ node --version   # Debe ser v18 o superior
 npm --version    # Debe estar instalado
 git --version    # Debe estar instalado
 
+# Docker Desktop (OBLIGATORIO)
+docker --version  # Debe estar instalado
+docker ps         # Docker debe estar corriendo
+
 # Verificar acceso SSH a GitHub
 ssh -T git@github.com
 ```
 
-### Base de Datos (Opcional)
-- **PostgreSQL**: Para el backend principal
-- **MongoDB**: Para el servicio de autenticación
+### ⚠️ Docker es OBLIGATORIO
+- **Docker Desktop**: Descarga desde [docker.com](https://www.docker.com/products/docker-desktop/)
+- **Por qué**: Los backends y bases de datos corren en contenedores Docker
+- **Nota**: No necesitas instalar PostgreSQL o MongoDB por separado
 
 ## 🚀 Setup Automático (3 Pasos)
 
@@ -57,10 +62,22 @@ cd ..  # Volver al workspace
 ## 🎉 ¡Listo!
 
 ### URLs Disponibles
-- **Frontend**: http://localhost:5173
+- **Frontend Admin**: http://localhost:5173
 - **API Principal**: http://localhost:3000
 - **GraphQL**: http://localhost:3000/graphql
 - **Auth Service**: http://localhost:3001
+
+### 📱 App Móvil
+```bash
+# En nueva terminal
+cd trivance-mobile
+npm run start:docker   # Conecta automáticamente a servicios Docker
+
+# O si prefieres usar archivo .env.local:
+cp .env.example .env.local
+# Editar .env.local: ENV_LOCAL=true
+npm start
+```
 
 ### Comandos Diarios
 ```bash

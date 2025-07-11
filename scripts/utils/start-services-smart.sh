@@ -139,8 +139,10 @@ start_services() {
     echo -e "${BLUE}📱 Para Mobile App:${NC}"
     echo "  1. Abre una nueva terminal"
     echo "  2. cd ${WORKSPACE_DIR}/trivance-mobile"
-    echo "  3. EXPO_ENV=${current_env} npm start"
+    echo "  3. npm run start:docker  # O usa .env.local con ENV_LOCAL=true"
     echo "  4. Escanea el QR con Expo Go"
+    echo
+    echo -e "${YELLOW}💡 Nota:${NC} La app móvil ahora soporta Docker local automáticamente"
 }
 
 # Detener servicios
