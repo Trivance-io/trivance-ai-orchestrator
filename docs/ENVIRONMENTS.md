@@ -27,13 +27,14 @@ Tu comando: ./trivance-dev-config/scripts/envs.sh switch qa
 
 Lo que pasa:
 ├── ms_trivance_auth/.env           → Cambia a config de QA
-├── ms_level_up_management/.env      → Cambia a config de QA
+├── ms_level_up_management/.env      → Cambia a config de QA  
 ├── level_up_backoffice/.env         → Cambia a config de QA
 ├── trivance-mobile/.env             → Cambia a config de QA
+├── trivance-mobile/src/environments/env.local.ts → ✨ NUEVO: Generado automáticamente
 ├── docker/.env.docker-local         → Cambia a config de QA para Docker
 └── docker/.env.docker-auth-local    → Cambia a config de QA para Docker
 
-¡TODO sincronizado! 🎉 (Docker + PM2)
+¡TODO sincronizado! 🎉 (Docker + PM2 + TypeScript)
 ```
 
 ## 📋 Guía Rápida - Lo que necesitas saber
@@ -105,6 +106,8 @@ tu-proyecto/
 │   ├── local.mobile.env          # Config local de la app
 │   ├── qa.*.env                  # Configs de QA (crearlas manualmente)
 │   └── production.*.env          # Configs de producción (crearlas manualmente)
+├── trivance-mobile/src/environments/  # 📱 Configuración TypeScript auto-generada
+│   └── env.local.ts              # ✨ NUEVO: Generado automáticamente desde .env
 └── .trivance-secrets             # 🔐 Secrets autogenerados (NO SUBIR A GIT)
 ```
 
@@ -246,6 +249,49 @@ docker logs trivance_auth
 - **Script principal**: `trivance-dev-config/scripts/envs.sh`
 - **Documentación técnica**: `trivance-dev-config/README.md`
 - **Docker**: `trivance-dev-config/docs/DOCKER.md`
+
+---
+
+## 📱 Configuración Automática de Mobile
+
+### ✨ Nueva funcionalidad: env.local.ts
+
+El sistema ahora genera automáticamente un archivo TypeScript tipado para la aplicación móvil:
+
+```bash
+# Al cambiar environment, se genera automáticamente:
+./trivance-dev-config/scripts/envs.sh switch local
+
+# ✅ Genera automáticamente:
+# - trivance-mobile/.env (variables de entorno)
+# - trivance-mobile/src/environments/env.local.ts (configuración TypeScript)
+```
+
+### Ejemplo del archivo generado:
+```typescript
+export const environment = {
+  API_URL: 'http://localhost:3000',
+  API_URL_AUTH: 'http://localhost:3001',
+  TENANT_TRIVANCE: 'U2FsdGVkX1/mRzvnBo5dtb/ArZnjxiU2KdRzHb2s7kw=',
+  // Local development configuration
+  development: true,
+  local: true,
+  production: false,
+  // Additional local config
+  API_TIMEOUT: 30000,
+  ENABLE_API_LOGS: true,
+  ENABLE_REDUX_LOGS: true,
+  SHOW_DEV_BANNER: true,
+  ENABLE_CRASHLYTICS: false,
+  ENABLE_ANALYTICS: false
+};
+```
+
+### Beneficios:
+- ✅ **Tipado completo**: TypeScript detecta errores en tiempo de compilación
+- ✅ **Sincronización automática**: Se actualiza al cambiar environments
+- ✅ **Configuración centralizada**: Una sola fuente de verdad
+- ✅ **Desarrollo más rápido**: No necesitas crear archivos manualmente
 
 ---
 

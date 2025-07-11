@@ -86,6 +86,10 @@ Una vez iniciados, accede a:
 cd trivance-mobile
 npm run start:docker   # Conecta automáticamente a servicios Docker locales
 # Escanea el QR con Expo Go
+
+# 🔄 Configuración automática: env.local.ts
+# El sistema genera automáticamente el archivo TypeScript con las configuraciones
+# Ubicación: ./src/environments/env.local.ts
 ```
 
 ## 📁 Estructura del Proyecto

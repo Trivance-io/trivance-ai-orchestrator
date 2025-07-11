@@ -73,7 +73,12 @@ cd ..  # Volver al workspace
 cd trivance-mobile
 npm run start:docker   # Conecta automáticamente a servicios Docker
 
-# O si prefieres usar archivo .env.local:
+# ✅ Configuración automática: 
+# - .env se genera automáticamente
+# - env.local.ts se genera automáticamente en src/environments/
+# - No necesitas crear archivos manualmente
+
+# Alternativa manual (si necesitas configuración específica):
 cp .env.example .env.local
 # Editar .env.local: ENV_LOCAL=true
 npm start

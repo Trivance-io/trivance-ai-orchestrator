@@ -61,6 +61,23 @@ git add .
 git commit -m "feat: descripción del cambio"
 ```
 
+### 📱 Configuración Automática Mobile
+
+**IMPORTANTE**: El sistema genera automáticamente el archivo `env.local.ts` para la aplicación móvil:
+
+```bash
+# Al cambiar environments, se genera automáticamente:
+./trivance-dev-config/scripts/envs.sh switch local
+# ✅ Genera: trivance-mobile/src/environments/env.local.ts
+# ✅ Configura: Variables TypeScript con tipado completo
+# ✅ Sincroniza: Con ecosystem.config.js (solo frontend en PM2)
+```
+
+**Arquitectura Híbrida Confirmada**:
+- ✅ **Backends + DBs**: Docker containers (aislamiento)
+- ✅ **Frontend**: PM2 (hot-reload rápido)
+- ✅ **Mobile**: Expo + env.local.ts auto-generado
+
 ### 2. Convenciones de Branches
 
 #### Naming Convention
