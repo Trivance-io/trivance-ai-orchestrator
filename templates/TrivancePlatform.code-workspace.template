@@ -1,27 +1,36 @@
 {
   "folders": [
     { 
-      "name": "📁 Configuraciones", 
+      "name": "📁 Workspace Root", 
       "path": "." 
     },
     { 
-      "name": "🖥️ Backend - Management", 
+      "name": "🖥️ Backend - Management (Docker)", 
       "path": "./ms_level_up_management" 
     },
     { 
-      "name": "🔐 Backend - Auth", 
+      "name": "🔐 Backend - Auth (Docker)", 
       "path": "./ms_trivance_auth" 
     },
     { 
-      "name": "🌐 Frontend - Backoffice", 
+      "name": "🌐 Frontend - Backoffice (PM2)", 
       "path": "./level_up_backoffice" 
     },
     { 
-      "name": "📱 Mobile App", 
+      "name": "📱 Mobile App (Expo)", 
       "path": "./trivance-mobile" 
+    },
+    { 
+      "name": "🔧 Dev Config", 
+      "path": "./trivance-dev-config" 
+    },
+    { 
+      "name": "⚙️ Environments", 
+      "path": "./envs" 
     }
   ],
   "settings": {
+    // Archivos excluidos del explorador
     "files.exclude": {
       "**/node_modules": true,
       "**/dist": true,
@@ -30,8 +39,13 @@
       "**/coverage": true,
       "**/.git": true,
       "**/ios/build": true,
-      "**/android/build": true
+      "**/android/build": true,
+      "**/.next": true,
+      "**/package-lock.json": true,
+      "**/.trivance-secrets": true,
+      "**/logs": true
     },
+    // Archivos excluidos de la búsqueda
     "search.exclude": {
       "**/node_modules": true,
       "**/dist": true,
@@ -39,16 +53,207 @@
       "**/.expo": true,
       "**/coverage": true,
       "**/ios/build": true,
-      "**/android/build": true
+      "**/android/build": true,
+      "**/.next": true,
+      "**/package-lock.json": true,
+      "**/.trivance-secrets": true,
+      "**/logs": true
+    },
+    // Configuración de TypeScript
+    "typescript.preferences.importModuleSpecifier": "relative",
+    "typescript.suggest.autoImports": true,
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    // Configuración de ESLint
+    "eslint.workingDirectories": [
+      "./ms_level_up_management",
+      "./ms_trivance_auth", 
+      "./level_up_backoffice",
+      "./trivance-mobile"
+    ],
+    "eslint.validate": [
+      "javascript",
+      "javascriptreact",
+      "typescript",
+      "typescriptreact"
+    ],
+    // Configuración de formato
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit",
+      "source.organizeImports": "explicit"
+    },
+    // Configuración específica por tipo de archivo
+    "[typescript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[javascript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[json]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[jsonc]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    // Configuración de Git
+    "git.autofetch": true,
+    "git.confirmSync": false,
+    // Configuración de terminal
+    "terminal.integrated.defaultProfile.osx": "bash",
+    "terminal.integrated.cwd": "${workspaceFolder}",
+    // Configuración de Docker
+    "docker.showStartPage": false,
+    // Configuración de archivos
+    "files.associations": {
+      "*.env*": "dotenv",
+      "docker-compose*.yml": "yaml",
+      "docker-compose*.yaml": "yaml",
+      "Dockerfile*": "dockerfile"
+    },
+    // Configuración de Emmet
+    "emmet.includeLanguages": {
+      "javascript": "javascriptreact",
+      "typescript": "typescriptreact"
     }
   },
   "extensions": {
     "recommendations": [
+      // Esenciales para el desarrollo
       "ms-vscode.vscode-typescript-next",
-      "bradlc.vscode-tailwindcss",
+      "esbenp.prettier-vscode",
+      "dbaeumer.vscode-eslint",
+      // Específicos del stack
       "GraphQL.vscode-graphql",
       "expo.vscode-expo-tools",
-      "ms-vscode.vscode-eslint"
+      "bradlc.vscode-tailwindcss",
+      "ms-vscode.vscode-json",
+      // Docker y DevOps
+      "ms-azuretools.vscode-docker",
+      "mikestead.dotenv",
+      // React y componentes
+      "dsznajder.es7-react-js-snippets",
+      "formulahendry.auto-rename-tag",
+      "christian-kohler.path-intellisense",
+      // Git y colaboración
+      "eamodio.gitlens",
+      "GitHub.vscode-pull-request-github",
+      // Útiles generales
+      "ms-vscode.vscode-thunder-client",
+      "streetsidesoftware.code-spell-checker",
+      "usernamehw.errorlens",
+      "ms-vscode.vscode-yaml",
+      "redhat.vscode-xml"
+    ]
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "🚀 Iniciar Todos los Servicios",
+        "type": "shell",
+        "command": "./start.sh",
+        "args": ["start"],
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "showReuseMessage": false
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "🛑 Detener Todos los Servicios",
+        "type": "shell",
+        "command": "./start.sh",
+        "args": ["stop"],
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "showReuseMessage": false
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "📊 Estado de Servicios",
+        "type": "shell",
+        "command": "./start.sh",
+        "args": ["status"],
+        "group": "test",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "showReuseMessage": false
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "🔄 Cambiar a Environment Local",
+        "type": "shell",
+        "command": "./trivance-dev-config/scripts/envs.sh",
+        "args": ["switch", "local"],
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "showReuseMessage": false
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "🐳 Docker: Ver Contenedores",
+        "type": "shell",
+        "command": "docker",
+        "args": ["ps"],
+        "group": "test",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "showReuseMessage": false
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "🐳 Docker: Logs Management API",
+        "type": "shell",
+        "command": "docker",
+        "args": ["logs", "-f", "trivance_management"],
+        "group": "test",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "showReuseMessage": false
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "🐳 Docker: Logs Auth API",
+        "type": "shell",
+        "command": "docker",
+        "args": ["logs", "-f", "trivance_auth"],
+        "group": "test",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "showReuseMessage": false
+        },
+        "problemMatcher": []
+      }
     ]
   }
 }
