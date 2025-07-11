@@ -414,46 +414,47 @@ setup_docker_integration() {
         return 1
     fi
     
-    # Crear ecosystem.config.js si no existe
+    # Crear ecosystem.config.js desde template
     local ecosystem_file="${WORKSPACE_DIR}/ecosystem.config.js"
+    local ecosystem_template="${SCRIPT_DIR}/../../templates/ecosystem.config.js.template"
+    
     if [[ ! -f "$ecosystem_file" ]]; then
-        info "Creando ecosystem.config.js para PM2..."
-        cat > "$ecosystem_file" << 'EOF'
+        if [[ -f "$ecosystem_template" ]]; then
+            info "Creando ecosystem.config.js desde template..."
+            cp "$ecosystem_template" "$ecosystem_file"
+            success "✅ ecosystem.config.js creado desde template (arquitectura híbrida)"
+        else
+            info "Creando ecosystem.config.js para PM2..."
+            cat > "$ecosystem_file" << 'EOF'
+// Configuración PM2 para arquitectura híbrida
+// Solo contiene el frontend - Backends van en Docker
 module.exports = {
   apps: [
-    {
-      name: 'auth-service',
-      cwd: './ms_trivance_auth',
-      script: 'npm',
-      args: 'run start:dev',
-      env: {
-        NODE_ENV: 'development',
-        PORT: 3001
-      }
-    },
-    {
-      name: 'management-api',
-      cwd: './ms_level_up_management',
-      script: 'npm',
-      args: 'run start:dev',
-      env: {
-        NODE_ENV: 'development',
-        PORT: 3000
-      }
-    },
     {
       name: 'backoffice',
       cwd: './level_up_backoffice',
       script: 'npm',
       args: 'run dev',
       env: {
-        NODE_ENV: 'development'
-      }
+        NODE_ENV: 'development',
+        VITE_API_URL: 'http://localhost:3000',
+        VITE_AUTH_API_URL: 'http://localhost:3001'
+      },
+      // Configuración optimizada para frontend
+      instances: 1,
+      exec_mode: 'fork',
+      watch: false,  // Vite ya tiene hot-reload
+      max_memory_restart: '1G',
+      error_file: './logs/backoffice-error.log',
+      out_file: './logs/backoffice-out.log',
+      log_file: './logs/backoffice-combined.log',
+      time: true
     }
   ]
 };
 EOF
-        success "✅ ecosystem.config.js creado"
+            success "✅ ecosystem.config.js creado (arquitectura híbrida)"
+        fi
     fi
     
     # Verificar docker compose
