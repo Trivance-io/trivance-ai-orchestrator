@@ -90,8 +90,8 @@ GOOGLE_MAPS_KEY=
 DEV_FIREBASE_API_KEY=$(generate_dev_safe_value "firebase")
 DEV_RECAPTCHA_KEY=$(generate_dev_safe_value "recaptcha")
 
-# Firebase (Generated safe key for dev)
-FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n$(generate_secret 64)\n-----END PRIVATE KEY-----"
+# Firebase (Placeholder seguro para desarrollo)
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nDEVELOPMENT_ONLY_NOT_A_REAL_KEY\nTHIS_IS_A_PLACEHOLDER_FOR_LOCAL_DEV\n-----END PRIVATE KEY-----"
 EOF
 
     # Aplicar permisos seguros

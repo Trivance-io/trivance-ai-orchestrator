@@ -8,6 +8,13 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/common.sh"
 
+# Verificación de seguridad
+if [[ "${NODE_ENV:-}" == "production" ]] || [[ -f "${WORKSPACE_DIR}/.production" ]]; then
+    error "❌ SEGURIDAD: Este script es SOLO para desarrollo local"
+    error "   No debe ejecutarse en entornos de producción"
+    exit 1
+fi
+
 show_fixes_banner() {
     cat << 'EOF'
 ╔══════════════════════════════════════════════════════════════════════════════╗
@@ -88,39 +95,24 @@ fix_firebase_credentials() {
         return 0
     fi
     
-    # Generar clave privada temporal para desarrollo
-    local temp_key_file="${repo_path}/temp_firebase_key.pem"
+    # NO generar claves privadas reales - usar placeholder seguro
+    info "🔧 Configurando Firebase con placeholder de desarrollo..."
     
-    if openssl genrsa -out "$temp_key_file" 2048 >/dev/null 2>&1; then
-        local private_key
-        private_key=$(cat "$temp_key_file" | tr '\n' '#')
-        private_key=${private_key//#/\\n}
+    # Placeholder seguro que claramente NO es una clave real
+    local dev_placeholder="-----BEGIN PRIVATE KEY-----\\nDEVELOPMENT_ONLY_NOT_A_REAL_KEY_DO_NOT_USE_IN_PRODUCTION\\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC9W8bA\\nTHIS_IS_A_FAKE_KEY_FOR_LOCAL_DEVELOPMENT_ONLY\\n-----END PRIVATE KEY-----"
+    
+    # Actualizar variables Firebase con valores de desarrollo seguros
+    if sed -i '' "s|FIREBASE_PROJECT_ID=.*|FIREBASE_PROJECT_ID=trivance-dev-local|g" "$env_file" && \
+       sed -i '' "s|FIREBASE_PRIVATE_KEY=.*|FIREBASE_PRIVATE_KEY=\"${dev_placeholder}\"|g" "$env_file" && \
+       sed -i '' "s|FIREBASE_CLIENT_EMAIL=.*|FIREBASE_CLIENT_EMAIL=firebase-dev@trivance-dev-local.iam.gserviceaccount.com|g" "$env_file"; then
         
-        # Actualizar variables Firebase en .env
-        if sed -i '' "s|FIREBASE_PROJECT_ID=.*|FIREBASE_PROJECT_ID=trivance-dev-local|g" "$env_file" && \
-           sed -i '' "s|FIREBASE_PRIVATE_KEY=.*|FIREBASE_PRIVATE_KEY=\"${private_key}\"|g" "$env_file" && \
-           sed -i '' "s|FIREBASE_CLIENT_EMAIL=.*|FIREBASE_CLIENT_EMAIL=firebase-dev@trivance-dev.iam.gserviceaccount.com|g" "$env_file"; then
-            
-            success "✅ Fix de Firebase aplicado a ms_level_up_management"
-            info "   • Generada clave privada válida para desarrollo"
-            info "   • Configuradas credenciales Firebase locales"
-        else
-            error "❌ Error aplicando fix de Firebase"
-            rm -f "$temp_key_file"
-            return 1
-        fi
-        
-        # Limpiar archivo temporal
-        rm -f "$temp_key_file"
+        success "✅ Firebase configurado con placeholder de desarrollo"
+        info "   • Usando placeholder seguro (no es una clave real)"
+        info "   • Para Firebase real, configura manualmente las credenciales"
+        warn "   ⚠️  NUNCA uses esta configuración en producción"
     else
-        warn "⚠️  No se pudo generar clave privada (openssl no disponible)"
-        # Para desarrollo local, usar un placeholder seguro
-        local dev_placeholder="-----BEGIN PRIVATE KEY-----\\nDEVELOPMENT_ONLY_PLACEHOLDER\\n-----END PRIVATE KEY-----"
-        
-        if sed -i '' "s|FIREBASE_PRIVATE_KEY=.*|FIREBASE_PRIVATE_KEY=\"${dev_placeholder}\"|g" "$env_file"; then
-            success "✅ Firebase configurado con placeholder de desarrollo"
-            info "   Para usar Firebase real, genera una clave en Firebase Console"
-        fi
+        error "❌ Error configurando Firebase placeholder"
+        return 1
     fi
 }
 

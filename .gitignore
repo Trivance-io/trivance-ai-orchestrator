@@ -18,6 +18,7 @@ build/
 # Docker environment files - ACTIVOS
 docker/.env.docker-local
 docker/.env.docker-auth-local
+docker/.env.docker-compose
 
 # Docker environment files - PRODUCCIÓN  
 docker/.env.production
