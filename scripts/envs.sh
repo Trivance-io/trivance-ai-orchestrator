@@ -290,6 +290,61 @@ EOF
     create_environment_templates "production"
 }
 
+# 📱 Generar env.local.ts para aplicación mobile
+generate_mobile_env_local() {
+    local env="$1"
+    
+    # Obtener configuración del archivo .env de mobile
+    local mobile_env_file="$WORKSPACE_DIR/trivance-mobile/.env"
+    
+    if [[ ! -f "$mobile_env_file" ]]; then
+        log_warning "⚠️  No se encontró archivo .env de mobile app"
+        return 1
+    fi
+    
+    # Directorio de environments de mobile
+    local mobile_env_dir="$WORKSPACE_DIR/trivance-mobile/src/environments"
+    mkdir -p "$mobile_env_dir"
+    
+    # Generar env.local.ts
+    local env_local_file="$mobile_env_dir/env.local.ts"
+    
+    log_info "  - Generando env.local.ts desde configuración de $env"
+    
+    # Leer variables del archivo .env
+    local api_url=$(grep "^EXPO_PUBLIC_API_URL=" "$mobile_env_file" | cut -d'=' -f2-)
+    local auth_api_url=$(grep "^EXPO_PUBLIC_AUTH_API_URL=" "$mobile_env_file" | cut -d'=' -f2-)
+    local tenant=$(grep "^EXPO_PUBLIC_TENANT=" "$mobile_env_file" | cut -d'=' -f2-)
+    local environment=$(grep "^EXPO_PUBLIC_ENVIRONMENT=" "$mobile_env_file" | cut -d'=' -f2-)
+    local debug=$(grep "^EXPO_PUBLIC_DEBUG=" "$mobile_env_file" | cut -d'=' -f2-)
+    local env_local=$(grep "^ENV_LOCAL=" "$mobile_env_file" | cut -d'=' -f2-)
+    local env_qa=$(grep "^ENV_QA=" "$mobile_env_file" | cut -d'=' -f2-)
+    local env_production=$(grep "^ENV_PRODUCTION=" "$mobile_env_file" | cut -d'=' -f2-)
+    
+    # Generar el archivo TypeScript
+    {
+        echo "export const environment = {"
+        echo "  API_URL: '${api_url:-http://localhost:3000}',"
+        echo "  API_URL_AUTH: '${auth_api_url:-http://localhost:3001}',"
+        echo "  TENANT_TRIVANCE: '${tenant:-U2FsdGVkX1/mRzvnBo5dtb/ArZnjxiU2KdRzHb2s7kw=}',"
+        echo "  // Local development configuration"
+        echo "  development: ${debug:-true},"
+        echo "  local: ${env_local:-true},"
+        echo "  production: ${env_production:-false},"
+        echo "  // Additional local config"
+        echo "  API_TIMEOUT: 30000,"
+        echo "  ENABLE_API_LOGS: ${debug:-true},"
+        echo "  ENABLE_REDUX_LOGS: ${debug:-true},"
+        echo "  SHOW_DEV_BANNER: ${debug:-true},"
+        echo "  ENABLE_CRASHLYTICS: ${env_production:-false},"
+        echo "  ENABLE_ANALYTICS: ${env_production:-false}"
+        echo "};"
+    } > "$env_local_file"
+    
+    log_success "✅ env.local.ts generado exitosamente"
+    log_info "     📍 Ubicación: $env_local_file"
+}
+
 # 📋 Crear templates de environment como guía
 create_environment_templates() {
     local env="$1"
@@ -364,6 +419,10 @@ switch_environment() {
     cp "$ENVS_DIR/$env.auth.env" "$WORKSPACE_DIR/ms_trivance_auth/.env"
     cp "$ENVS_DIR/$env.backoffice.env" "$WORKSPACE_DIR/level_up_backoffice/.env"
     cp "$ENVS_DIR/$env.mobile.env" "$WORKSPACE_DIR/trivance-mobile/.env"
+    
+    # Generar env.local.ts para la aplicación mobile
+    log_info "📱 Generando env.local.ts para aplicación mobile..."
+    generate_mobile_env_local "$env"
     
     # Generar archivos Docker adaptados
     log_info "🐳 Generando configuraciones Docker para $env..."
