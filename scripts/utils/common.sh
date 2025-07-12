@@ -259,5 +259,44 @@ setup_globals() {
     validate_workspace
 }
 
+# 🔒 Verificaciones de seguridad
+verify_development_environment() {
+    # Verificar NODE_ENV
+    if [[ "${NODE_ENV:-}" == "production" ]]; then
+        error "❌ NODE_ENV está configurado como 'production'"
+        error "   Este script es SOLO para desarrollo local"
+        exit 1
+    fi
+    
+    # Verificar archivo marcador de producción
+    if [[ -f "${WORKSPACE_DIR}/.production" ]] || [[ -f "/etc/trivance/production" ]]; then
+        error "❌ Detectado marcador de entorno de producción"
+        error "   Este script es SOLO para desarrollo local"
+        exit 1
+    fi
+    
+    # Verificar que no estamos en servidor conocido de producción
+    local hostname=$(hostname)
+    if [[ "$hostname" =~ (prod|production|live) ]]; then
+        warn "⚠️  ADVERTENCIA: El hostname sugiere un entorno de producción: $hostname"
+        read -p "¿Estás SEGURO que esto es desarrollo local? (yes/no): " confirm
+        if [[ "$confirm" != "yes" ]]; then
+            error "❌ Abortando por seguridad"
+            exit 1
+        fi
+    fi
+    
+    # Verificar que Docker está en modo desarrollo
+    if command -v docker &>/dev/null; then
+        local docker_context=$(docker context show 2>/dev/null || echo "default")
+        if [[ "$docker_context" =~ (prod|production) ]]; then
+            error "❌ Docker context sugiere producción: $docker_context"
+            exit 1
+        fi
+    fi
+    
+    return 0
+}
+
 # Inicializar automáticamente cuando se carga el script
 setup_globals
