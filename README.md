@@ -114,7 +114,7 @@ tu-workspace/
 
 ## 🎮 Comando Principal: start.sh
 
-Un solo comando para todo:
+Un solo comando para todo con **inicio inteligente optimizado**:
 
 ```bash
 ./start.sh
@@ -141,17 +141,24 @@ Opciones disponibles:
 
 También puedes usar comandos directos:
 ```bash
-./start.sh start    # Iniciar servicios
+./start.sh start    # Iniciar servicios (Docker + PM2)
 ./start.sh stop     # Detener servicios
 ./start.sh status   # Ver estado
 ./start.sh setup    # Reconfigurar todo
 ```
 
-### Verificar integración Mobile + Docker:
+### 📱 Desarrollo Mobile con Docker:
 ```bash
-./trivance-dev-config/scripts/utils/verify-docker-mobile.sh
+cd trivance-mobile
+
+# Para desarrollo con Docker local (recomendado)
+npm run start:docker    # Se conecta automáticamente a APIs Docker
+
+# Para desarrollo con QA
+npm run start:qa        # Se conecta a servicios remotos de QA
 ```
-Este script verifica que Docker esté corriendo y la app móvil esté configurada correctamente.
+
+**✨ Configuración automática**: La app móvil genera automáticamente `src/environments/env.local.ts` con las configuraciones Docker locales.
 
 ## 🔄 Gestión de Environments
 
