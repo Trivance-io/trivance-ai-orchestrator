@@ -203,6 +203,7 @@ execute_option() {
                     return
                 fi
                 echo -e "${BLUE}🚀 Iniciando servicios...${NC}"
+                # Usar inicio inteligente con Docker
                 "${CONFIG_DIR}/scripts/utils/start-services-smart.sh" start
             fi
             ;;
@@ -385,13 +386,19 @@ main() {
 if [[ $# -gt 0 ]]; then
     case "$1" in
         "start")
-            if ! command -v pm2 &> /dev/null; then
-                echo "Instalando PM2..."
-                npm install -g pm2
+            # Usar inicio inteligente con Docker
+            if [[ -x "${CONFIG_DIR}/scripts/utils/start-services-smart.sh" ]]; then
+                "${CONFIG_DIR}/scripts/utils/start-services-smart.sh" start
+            else
+                # Fallback al método tradicional
+                if ! command -v pm2 &> /dev/null; then
+                    echo "Instalando PM2..."
+                    npm install -g pm2
+                fi
+                pm2 start "${CONFIG_DIR}/../ecosystem.config.js" 2>/dev/null || {
+                    "${CONFIG_DIR}/start-all.sh"
+                }
             fi
-            pm2 start "${CONFIG_DIR}/../ecosystem.config.js" 2>/dev/null || {
-                "${CONFIG_DIR}/start-all.sh"
-            }
             ;;
         "stop")
             pm2 stop all
