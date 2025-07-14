@@ -47,6 +47,7 @@ docker ps         # Verifica que Docker esté corriendo
 ```bash
 git clone https://github.com/GLab-Projects/trivance-dev-config.git
 cd trivance-dev-config
+Configura V.1 de Claude.md (IMPORTANTE ACTUALIZAR LUEGO DE FINALIZAR LA CONFIGURACION COMPLETA)
 ```
 
 ### Paso 2: Ejecutar setup automático
