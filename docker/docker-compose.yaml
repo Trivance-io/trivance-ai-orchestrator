@@ -53,15 +53,20 @@ services:
     build:
       context: ../../ms_level_up_management
       dockerfile: ../trivance-dev-config/docker/Dockerfile.ms_level_up_management
+      args:
+        - NODE_ENV=${NODE_ENV:-production}
+        - RUN_MODE=${RUN_MODE:-prod}
     container_name: trivance_management
     restart: unless-stopped
     ports:
       - "3000:3000"
     env_file:
-      - .env.docker-local
+      - ${DOCKER_ENV_FILE:-".env.docker-local"}
     environment:
-      # Forzar configuración crítica
-      - NODE_ENV=production
+      # Environment variables (configurable)
+      - NODE_ENV=${NODE_ENV:-production}
+      - RUN_MODE=${RUN_MODE:-prod}
+      - APP_ENV=${APP_ENV:-development}
       - PORT=3000
       
     networks:
@@ -82,15 +87,20 @@ services:
     build:
       context: ../../ms_trivance_auth
       dockerfile: ../trivance-dev-config/docker/Dockerfile.ms_trivance_auth
+      args:
+        - NODE_ENV=${NODE_ENV:-production}
+        - RUN_MODE=${RUN_MODE:-prod}
     container_name: trivance_auth
     restart: unless-stopped
     ports:
       - "3001:3001"
     env_file:
-      - .env.docker-auth-local
+      - ${DOCKER_AUTH_ENV_FILE:-".env.docker-auth-local"}
     environment:
-      # Forzar configuración crítica
-      - NODE_ENV=production
+      # Environment variables (configurable)
+      - NODE_ENV=${NODE_ENV:-production}
+      - RUN_MODE=${RUN_MODE:-prod}
+      - APP_ENV=${APP_ENV:-development}
       - PORT=3001
       
     networks:

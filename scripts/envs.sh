@@ -357,6 +357,89 @@ create_environment_templates() {
     fi
 }
 
+# 🐳 Generar archivo de variables para Docker Compose
+generate_docker_environment_file() {
+    local env="$1"
+    local docker_dir="$2"
+    local docker_env_file="$docker_dir/.env"
+    
+    log_info "🐳 Generando variables Docker para environment: $env"
+    
+    # Determinar configuración específica por environment
+    local node_env run_mode app_env docker_env_file_suffix docker_auth_env_file_suffix
+    case "$env" in
+        "local")
+            node_env="production"
+            run_mode="local"
+            app_env="development"
+            docker_env_file_suffix=".env.docker-local"
+            docker_auth_env_file_suffix=".env.docker-auth-local"
+            ;;
+        "qa")
+            node_env="production"
+            run_mode="qa"
+            app_env="qa"
+            docker_env_file_suffix=".env.docker-qa"
+            docker_auth_env_file_suffix=".env.docker-auth-qa"
+            ;;
+        "production")
+            node_env="production"
+            run_mode="production"
+            app_env="production"
+            docker_env_file_suffix=".env.docker-production"
+            docker_auth_env_file_suffix=".env.docker-auth-production"
+            ;;
+        *)
+            log_error "Environment no soportado: $env"
+            return 1
+            ;;
+    esac
+    
+    # Generar archivo .env para docker-compose
+    {
+        echo "# 🐳 Docker Environment Variables for $env"
+        echo "# Generado automáticamente - $(date)"
+        echo "# Variables para docker-compose.yaml"
+        echo ""
+        echo "# Environment Configuration"
+        echo "NODE_ENV=$node_env"
+        echo "RUN_MODE=$run_mode"
+        echo "APP_ENV=$app_env"
+        echo ""
+        echo "# Docker Environment Files"
+        echo "DOCKER_ENV_FILE=$docker_env_file_suffix"
+        echo "DOCKER_AUTH_ENV_FILE=$docker_auth_env_file_suffix"
+        echo ""
+        echo "# Database Configuration (for Docker hostnames)"
+        case "$env" in
+            "local")
+                echo "POSTGRES_DB=trivance_development"
+                echo "POSTGRES_USER=trivance_dev"
+                echo "POSTGRES_PASSWORD=trivance_dev_pass"
+                ;;
+            "qa")
+                echo "POSTGRES_DB=trivance_qa"
+                echo "POSTGRES_USER=trivance_qa_user"
+                echo "POSTGRES_PASSWORD=\${QA_DB_PASSWORD:-trivance_qa_pass}"
+                ;;
+            "production")
+                echo "POSTGRES_DB=trivance_production"
+                echo "POSTGRES_USER=\${PROD_DB_USER:-trivance_prod}"
+                echo "POSTGRES_PASSWORD=\${PROD_DB_PASSWORD:-CHANGE_ME}"
+                ;;
+        esac
+    } > "$docker_env_file"
+    
+    # Aplicar permisos seguros
+    chmod 600 "$docker_env_file"
+    
+    log_success "✅ Generado $docker_env_file"
+    log_info "   - NODE_ENV: $node_env"
+    log_info "   - RUN_MODE: $run_mode"  
+    log_info "   - APP_ENV: $app_env"
+    log_info "   - Docker env files configurados para $env"
+}
+
 # 🔄 Cambiar environment
 switch_environment() {
     local env="$1"
@@ -450,6 +533,9 @@ switch_environment() {
         rm -f "$docker_dir/.env.docker-auth-local.bak"
         log_success "✅ Generado .env.docker-auth-local"
     fi
+    
+    # Generar variables de environment para docker-compose.yaml
+    generate_docker_environment_file "$env" "$docker_dir"
     
     # Guardar environment actual
     echo "$env" > "$ENVS_DIR/.current_environment"

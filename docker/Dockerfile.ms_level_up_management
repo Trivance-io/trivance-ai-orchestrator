@@ -57,8 +57,9 @@ COPY --from=builder --chown=nestjs:nodejs /app/prisma ./prisma
 # Ensure proper permissions for GraphQL schema generation in root directory
 RUN chown -R nestjs:nodejs /app
 
-# Set production environment
-ENV NODE_ENV=production
+# Set environment (configurable via build args or runtime env)
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
 
 USER nestjs
 
@@ -68,5 +69,9 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
   CMD timeout 3 bash -c 'cat < /dev/null > /dev/tcp/localhost/3000' || exit 1
 
+# Add runtime environment configuration
+ARG RUN_MODE=prod
+ENV RUN_MODE=${RUN_MODE}
+
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["sh", "-c", "npx prisma migrate deploy && npm run start:prod"]
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run start:${RUN_MODE}"]
