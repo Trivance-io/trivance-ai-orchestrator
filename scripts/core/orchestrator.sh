@@ -49,8 +49,12 @@ main() {
     apply_post_setup_fixes
     
     # Paso 7: Verificar compilación
-    log "PASO 7/7: OBLIGATORIO - Verificando compilación de todos los repositorios"
+    log "PASO 7/8: OBLIGATORIO - Verificando compilación de todos los repositorios"
     verify_compilation
+    
+    # Paso 8: Configurar herramientas de monitoreo (opcional)
+    log "PASO 8/8: Configurando herramientas de monitoreo"
+    setup_monitoring_tools
     
     local end_time duration
     end_time=$(date +%s)
@@ -508,6 +512,28 @@ verify_compilation() {
             exit 1
         fi
     fi
+}
+
+setup_monitoring_tools() {
+    info "📊 Configurando herramientas de monitoreo..."
+    
+    # Configurar Dozzle (monitor de logs Docker)
+    if command -v docker &> /dev/null && docker info &> /dev/null 2>&1; then
+        info "🔧 Configurando Dozzle (monitor de logs Docker)..."
+        
+        # Ejecutar instalación silenciosa de Dozzle
+        if "${SCRIPT_DIR}/../docker/install-dozzle.sh" --silent 2>/dev/null; then
+            success "✅ Dozzle configurado correctamente"
+            info "   📊 Accede al monitor en: http://localhost:9999"
+        else
+            warn "⚠️  Dozzle no se pudo configurar automáticamente"
+            info "   💡 Puedes instalarlo manualmente: ./trivance-dev-config/scripts/docker/install-dozzle.sh"
+        fi
+    else
+        warn "⚠️  Docker no está disponible, saltando configuración de Dozzle"
+    fi
+    
+    info "📈 Herramientas de monitoreo configuradas"
 }
 
 create_claude_md_final() {

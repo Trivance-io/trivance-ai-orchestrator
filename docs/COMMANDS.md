@@ -30,6 +30,20 @@
 ./trivance-dev-config/scripts/utils/verify-compilation.sh
 ```
 
+## 📊 Monitor de Logs Docker
+
+```bash
+# Gestión de Dozzle (Monitor de logs)
+./trivance-dev-config/scripts/docker/dozzle.sh start     # Iniciar monitor
+./trivance-dev-config/scripts/docker/dozzle.sh status    # Ver estado
+./trivance-dev-config/scripts/docker/dozzle.sh open      # Abrir en navegador
+./trivance-dev-config/scripts/docker/dozzle.sh logs      # Ver logs de Dozzle
+./trivance-dev-config/scripts/docker/dozzle.sh stop      # Detener monitor
+
+# Instalación manual (si no está incluido)
+./trivance-dev-config/scripts/docker/install-dozzle.sh
+```
+
 ## 🔧 Comandos por Servicio
 
 ### Backend Management API

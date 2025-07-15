@@ -80,6 +80,7 @@ Una vez iniciados, accede a:
 | API Principal | http://localhost:3000 | Backend con GraphQL |
 | API Auth | http://localhost:3001 | Servicio de autenticación |
 | GraphQL Playground | http://localhost:3000/graphql | Explorador GraphQL |
+| Dozzle Logs | http://localhost:9999 | Monitor de logs Docker en tiempo real |
 | Mobile App | Ver instrucciones abajo | App móvil con Expo |
 
 ### 📱 App Móvil con Docker

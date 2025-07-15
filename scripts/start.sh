@@ -164,8 +164,9 @@ show_main_menu() {
         echo -e "  ${GREEN}4)${NC} 🛑 Detener servicios"
         echo -e "  ${GREEN}5)${NC} 🔍 Verificar salud del sistema"
         echo -e "  ${GREEN}6)${NC} 🐳 Gestión Docker"
-        echo -e "  ${GREEN}7)${NC} 📚 Ver documentación"
-        echo -e "  ${GREEN}8)${NC} 🗑️  Limpiar y reconfigurar"
+        echo -e "  ${GREEN}7)${NC} � Monitor de Logs (Dozzle)"
+        echo -e "  ${GREEN}8)${NC} �📚 Ver documentación"
+        echo -e "  ${GREEN}9)${NC} 🗑️  Limpiar y reconfigurar"
     fi
     
     echo -e "  ${GREEN}0)${NC} 🚪 Salir"
@@ -337,6 +338,32 @@ execute_option() {
                 fi
             ;;
         "7")
+            # Monitor de Logs Dozzle
+            echo -e "${BLUE}📊 Monitor de Logs (Dozzle):${NC}"
+            echo "  1) Iniciar Dozzle"
+            echo "  2) Ver estado de Dozzle"
+            echo "  3) Abrir en navegador"
+            echo "  4) Ver logs de Dozzle"
+            echo "  5) Detener Dozzle"
+            echo "  0) Volver al menú principal"
+            echo
+            read -p "Selecciona opción: " dozzle_option
+            
+            case "$dozzle_option" in
+                "1") "${CONFIG_DIR}/scripts/docker/dozzle.sh" start ;;
+                "2") "${CONFIG_DIR}/scripts/docker/dozzle.sh" status ;;
+                "3") "${CONFIG_DIR}/scripts/docker/dozzle.sh" open ;;
+                "4") "${CONFIG_DIR}/scripts/docker/dozzle.sh" logs ;;
+                "5") "${CONFIG_DIR}/scripts/docker/dozzle.sh" stop ;;
+                "0") return ;;
+                *) echo -e "${RED}Opción inválida${NC}" ;;
+            esac
+            
+            if [[ "$dozzle_option" != "0" ]]; then
+                read -p "Presiona Enter para continuar..."
+            fi
+            ;;
+        "8")
             # Documentación
             echo -e "${BLUE}📚 Documentación disponible:${NC}"
             echo
@@ -347,7 +374,7 @@ execute_option() {
             echo "  🐳 Docker: ${CONFIG_DIR}/docs/DOCKER.md"
             echo
             ;;
-        "8")
+        "9")
             echo -e "${YELLOW}⚠️  Esto eliminará toda la configuración actual${NC}"
             read -p "¿Estás seguro? (yes/no): " confirm
             if [[ "$confirm" == "yes" ]]; then

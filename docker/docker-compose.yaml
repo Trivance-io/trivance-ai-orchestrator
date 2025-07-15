@@ -104,3 +104,22 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+
+  # 📊 Log monitoring service
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: trivance_dozzle
+    restart: unless-stopped
+    ports:
+      - "9999:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - DOZZLE_LEVEL=info
+      - DOZZLE_TAILSIZE=300
+      - DOZZLE_FILTER=name=trivance_*
+    networks:
+      - trivance_network
+    labels:
+      - "dozzle.enable=true"
+      - "dozzle.name=Trivance Logs"

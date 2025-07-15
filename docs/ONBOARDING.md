@@ -171,11 +171,24 @@ sudo systemctl start mongod
 Después del setup, confirma:
 
 - [ ] `pm2 status` muestra todos los servicios como `online`
-- [ ] Puedes acceder a http://localhost:5173
-- [ ] Puedes acceder a http://localhost:3000/graphql
+- [ ] Puedes acceder a http://localhost:5173 (Frontend Admin)
+- [ ] Puedes acceder a http://localhost:3000/graphql (GraphQL Playground)
+- [ ] Puedes acceder a http://localhost:9999 (Dozzle - Monitor de logs)
 - [ ] No hay errores en `pm2 logs`
 - [ ] Existe `.trivance-secrets` en el workspace
 - [ ] Existe carpeta `envs/` con archivos `.env`
+
+## 📊 Herramientas de Monitoreo
+
+### Monitor de Logs Docker (Dozzle)
+- **URL**: http://localhost:9999
+- **Propósito**: Monitoreo en tiempo real de logs de contenedores Docker
+- **Comando**: `./trivance-dev-config/scripts/docker/dozzle.sh start`
+- **Funcionalidad**: 
+  - Logs en tiempo real de todos los servicios Docker
+  - Filtrado automático de contenedores Trivance
+  - Búsqueda y navegación por logs
+  - Interfaz web moderna y responsiva
 
 ## 🎯 Próximos Pasos
 
