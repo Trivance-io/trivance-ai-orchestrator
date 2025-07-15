@@ -89,11 +89,27 @@ start_services() {
     echo -e "${CYAN}🐳 Iniciando contenedores Docker...${NC}"
     cd "${CONFIG_DIR}/docker"
     
+    # Detectar si las imágenes ya existen
+    local images_exist=true
+    for image in "docker-ms_level_up_management" "docker-ms_trivance_auth"; do
+        if ! docker images --format "{{.Repository}}" | grep -q "^${image}$"; then
+            images_exist=false
+            break
+        fi
+    done
+    
+    # Si las imágenes no existen, informar que tomará más tiempo
+    if [[ "$images_exist" == "false" ]]; then
+        echo -e "${YELLOW}⚠️  Primera ejecución detectada: construyendo imágenes Docker...${NC}"
+        echo -e "${CYAN}   Esto puede tomar 3-5 minutos la primera vez${NC}"
+        echo
+    fi
+    
     # Usar docker compose (v2) si está disponible, sino docker-compose
     if command -v docker &>/dev/null && docker compose version &>/dev/null 2>&1; then
-        docker compose up -d postgres mongodb ms_level_up_management ms_trivance_auth
+        docker compose up -d postgres mongodb ms_level_up_management ms_trivance_auth dozzle
     else
-        docker-compose up -d postgres mongodb ms_level_up_management ms_trivance_auth
+        docker-compose up -d postgres mongodb ms_level_up_management ms_trivance_auth dozzle
     fi
     
     # Verificar salud de servicios
@@ -120,9 +136,24 @@ start_services() {
         npm install -g pm2
     fi
     
+    # Crear directorio de logs si no existe
+    local logs_dir="${WORKSPACE_DIR}/level_up_backoffice/logs"
+    if [[ ! -d "$logs_dir" ]]; then
+        echo -e "${CYAN}📁 Creando directorio de logs...${NC}"
+        mkdir -p "$logs_dir"
+    fi
+    
     # Iniciar frontend
     if ! pm2 list | grep -q "backoffice.*online"; then
+        # Usar --no-autorestart para evitar reintentos infinitos si hay errores
         pm2 start "${WORKSPACE_DIR}/ecosystem.config.js" --only backoffice
+        
+        # Verificar que se inició correctamente
+        sleep 2
+        if ! pm2 list | grep -q "backoffice.*online"; then
+            echo -e "${YELLOW}⚠️  Frontend tuvo problemas al iniciar, verificando logs...${NC}"
+            pm2 logs backoffice --lines 10 --nostream
+        fi
     else
         echo -e "${GREEN}✅ Frontend ya está corriendo${NC}"
     fi
@@ -135,6 +166,7 @@ start_services() {
     echo "  • Management API: http://localhost:3000 (Docker)"
     echo "  • GraphQL Playground: http://localhost:3000/graphql"
     echo "  • Frontend Admin: http://localhost:5173 (PM2 con hot-reload)"
+    echo "  • Dozzle (Monitor de logs): http://localhost:9999 (Docker)"
     echo
     echo -e "${BLUE}📱 Para Mobile App:${NC}"
     echo "  1. Abre una nueva terminal"

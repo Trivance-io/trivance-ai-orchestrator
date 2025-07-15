@@ -204,8 +204,12 @@ execute_option() {
                     return
                 fi
                 echo -e "${BLUE}🚀 Iniciando servicios...${NC}"
-                # Usar inicio inteligente con Docker
-                "${CONFIG_DIR}/scripts/utils/start-services-smart.sh" start
+                # Llamar script en subshell para evitar problemas de timeout
+                (
+                    # Ejecutar en subshell para aislar el proceso
+                    "${CONFIG_DIR}/scripts/utils/start-services-smart.sh" start
+                )
+                # El menú seguirá funcionando después
             fi
             ;;
         "2")
