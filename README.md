@@ -81,6 +81,7 @@ Una vez iniciados, accede a:
 | API Auth | http://localhost:3001 | Servicio de autenticación |
 | GraphQL Playground | http://localhost:3000/graphql | Explorador GraphQL |
 | Dozzle Logs | http://localhost:9999 | Monitor de logs Docker en tiempo real |
+| Metro Bundler | http://localhost:8081 | Desarrollo móvil (solo cuando está activo) |
 | Mobile App | Ver instrucciones abajo | App móvil con Expo |
 
 ### 📱 App Móvil con Docker
@@ -181,8 +182,11 @@ npm run start:qa        # Se conecta a servicios remotos de QA
 
 ### ⚠️ Importante sobre QA/Producción:
 - Los archivos de QA y producción NO vienen incluidos por seguridad
-- Debes crearlos manualmente copiando los archivos locales
-- Nunca subas credenciales reales a Git
+- **Sistema de Templates**: Usa archivos `.env.template` como punto de partida
+  - `qa.*.env.template` - Plantillas con variables como `$QA_HOST`
+  - `production.*.env.template` - Plantillas con variables como `$PROD_HOST`
+- **Proceso**: Copia templates → Edita variables → Nunca subas a Git
+- Ejemplo: `cp envs/qa.management.env.template envs/qa.management.env`
 
 ## 🛠️ Comandos PM2 Útiles
 
@@ -206,8 +210,17 @@ pm2 monit           # Monitor interactivo
 Estos archivos NUNCA deben subirse a Git:
 - `.trivance-secrets`
 - `.env` (todos)
-- `envs/*.env`
+- `envs/*.env` (archivos reales, NO templates)
 - `.current_environment`
+
+### Sistema de Templates
+✅ **Incluidos en Git** (seguros):
+- `envs/*.env.template` - Plantillas con variables
+- Configuraciones de desarrollo local auto-generadas
+
+❌ **NUNCA en Git** (contienen credenciales):
+- `envs/qa.*.env` - Archivos reales de QA
+- `envs/production.*.env` - Archivos reales de producción
 
 ## 🆘 Solución de Problemas
 

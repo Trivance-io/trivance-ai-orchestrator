@@ -72,7 +72,9 @@ Te dirá algo como:
 
 Reinicia los servicios:
 ```bash
-./start-all.sh
+./start.sh              # Recomendado (symlink del workspace)
+# O alternativamente:
+./trivance-dev-config/start-all.sh
 ```
 
 ## 🔐 Seguridad - MUY IMPORTANTE
@@ -85,27 +87,68 @@ Reinicia los servicios:
 ### Para QA/Producción
 - ⚠️ **CONFIGURACIÓN MANUAL REQUERIDA**
 - 📝 Pasos:
-  1. Copia el archivo local como plantilla:
+  1. Usa los templates como punto de partida:
      ```bash
-     cp envs/local.management.env envs/qa.management.env
+     # Para QA
+     cp envs/qa.management.env.template envs/qa.management.env
+     cp envs/local.auth.env envs/qa.auth.env
+     cp envs/local.backoffice.env envs/qa.backoffice.env
+     cp envs/local.mobile.env envs/qa.mobile.env
+     
+     # Para Producción  
+     cp envs/production.management.env.template envs/production.management.env
+     # (repetir para otros servicios)
      ```
-  2. Edita con valores REALES de QA:
-     - URLs reales del servidor QA
-     - Credenciales de base de datos QA
-     - API keys de servicios externos
+  2. Edita con valores REALES:
+     - Reemplaza `$QA_HOST` con URLs reales del servidor
+     - Actualiza credenciales de base de datos reales
+     - Configura API keys de servicios externos reales
   3. **NUNCA** subas estos archivos a Git
+
+## 📝 Archivos Template vs Archivos Reales
+
+### ¿Cuál es la diferencia?
+
+| Tipo | Propósito | Contenido | Uso |
+|------|-----------|-----------|-----|
+| `local.*.env` | ✅ Archivos reales | Valores auto-generados listos | Usar directamente |
+| `qa.*.env.template` | 📝 Plantillas QA | Variables como `$QA_HOST` | Copiar y editar |
+| `production.*.env.template` | 📝 Plantillas Prod | Variables como `$PROD_HOST` | Copiar y editar |
+| `qa.*.env` | 🔧 Archivos reales QA | Valores reales de QA | Crear manualmente |
+| `production.*.env` | 🔧 Archivos reales Prod | Valores reales de producción | Crear manualmente |
+
+### Ejemplo de contenido:
+
+**Template (qa.management.env.template)**:
+```bash
+DATABASE_URL=postgresql://user:pass@$QA_HOST:5432/trivance_qa
+API_URL=https://$QA_HOST/api
+```
+
+**Archivo real (qa.management.env)** - después de editarlo:
+```bash
+DATABASE_URL=postgresql://user:pass@qa.servidor.com:5432/trivance_qa
+API_URL=https://qa.servidor.com/api
+```
+
+### ⚠️ Importante:
+- Los **templates** contienen variables que NO funcionarán hasta ser reemplazadas
+- Los **archivos reales** deben tener valores concretos sin variables
+- **NUNCA** comitees archivos `.env` reales a Git
 
 ## 🗂️ ¿Dónde están los archivos?
 
 ```
 tu-proyecto/
 ├── envs/                          # 📁 Aquí están TODAS las configuraciones
-│   ├── local.management.env       # Config local del backend
-│   ├── local.auth.env            # Config local de auth
-│   ├── local.backoffice.env      # Config local del frontend
-│   ├── local.mobile.env          # Config local de la app
-│   ├── qa.*.env                  # Configs de QA (crearlas manualmente)
-│   └── production.*.env          # Configs de producción (crearlas manualmente)
+│   ├── local.management.env       # ✅ Config local del backend (auto-generado)
+│   ├── local.auth.env            # ✅ Config local de auth (auto-generado)
+│   ├── local.backoffice.env      # ✅ Config local del frontend (auto-generado)
+│   ├── local.mobile.env          # ✅ Config local de la app (auto-generado)
+│   ├── qa.*.env.template         # 📝 Templates de QA (contienen variables como $QA_HOST)
+│   ├── production.*.env.template # 📝 Templates de producción (contienen variables)
+│   ├── qa.*.env                  # 🔧 Configs reales de QA (crearlas manualmente desde templates)
+│   └── production.*.env          # 🔧 Configs reales de producción (crearlas manualmente)
 ├── trivance-mobile/src/environments/  # 📱 Configuración TypeScript auto-generada
 │   └── env.local.ts              # ✨ NUEVO: Generado automáticamente desde .env
 └── .trivance-secrets             # 🔐 Secrets autogenerados (NO SUBIR A GIT)
@@ -191,9 +234,15 @@ cp envs/local.mobile.env envs/qa.mobile.env
 ```bash
 # Asegúrate de reiniciar después de cambiar environment
 ./start.sh              # El menú te permitirá detener y reiniciar servicios
-# O manualmente:
-# docker-compose down && docker-compose up -d  # Para servicios Docker
-# pm2 restart all                               # Para el frontend
+
+# O manualmente (2 opciones):
+# Opción 1: Desde workspace
+docker-compose -f trivance-dev-config/docker/docker-compose.yaml restart
+pm2 restart backoffice
+
+# Opción 2: Desde carpeta docker
+cd trivance-dev-config/docker && docker-compose restart && cd ../..
+pm2 restart backoffice
 ```
 
 ### "No sé en qué environment estoy"
@@ -224,24 +273,35 @@ Cuando cambias de environment, el sistema también genera archivos `.env` espec�
 # Ver contenedores corriendo
 docker ps
 
-# Reiniciar servicios Docker después de cambiar environment
+# Reiniciar servicios Docker después de cambiar environment (2 opciones):
+
+# Opción 1: Desde el workspace (recomendado)
 docker-compose -f trivance-dev-config/docker/docker-compose.yaml down
 docker-compose -f trivance-dev-config/docker/docker-compose.yaml up -d
+
+# Opción 2: Desde la carpeta docker (más simple)
+cd trivance-dev-config/docker
+docker-compose down
+docker-compose up -d
+cd ../..  # Volver al workspace
 
 # Ver logs de Docker
 docker logs trivance_management
 docker logs trivance_auth
+docker logs -f trivance_postgres  # -f para seguir los logs en tiempo real
 ```
 
 ### Servicios en Docker vs PM2:
 
-| Servicio | Tecnología | Puerto | Comando |
-|----------|------------|---------|----------|
-| PostgreSQL | Docker | 5432 | `docker logs trivance_postgres` |
-| MongoDB | Docker | 27017 | `docker logs trivance_mongodb` |
-| Auth API | Docker | 3001 | `docker logs trivance_auth` |
-| Management API | Docker | 3000 | `docker logs trivance_management` |
-| Frontend | PM2 | 5173 | `pm2 logs backoffice` |
+| Servicio | Tecnología | Puerto | Comando | Estado Típico |
+|----------|------------|---------|----------|---------------|
+| PostgreSQL | Docker | 5432 | `docker logs trivance_postgres` | Siempre activo |
+| MongoDB | Docker | 27017 | `docker logs trivance_mongodb` | Siempre activo |
+| Auth API | Docker | 3001 | `docker logs trivance_auth` | Siempre activo |
+| Management API | Docker | 3000 | `docker logs trivance_management` | Siempre activo |
+| Frontend | PM2 | 5173 | `pm2 logs backoffice` | Siempre activo |
+| Metro Bundler (Mobile) | Expo | 8081 | Solo cuando se inicia la app móvil | Opcional |
+| Dozzle (Monitor logs) | Docker | 9999 | Acceder vía http://localhost:9999 | Siempre activo |
 
 ## 📚 Para Aprender Más
 
