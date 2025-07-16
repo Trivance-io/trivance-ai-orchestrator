@@ -27,6 +27,46 @@
 └────────────────┘           └─────────────────┘
 ```
 
+## ⚙️ Sistema de Variables de Entorno
+
+### 🎯 Triple Sistema de Variables
+
+**¿Por qué NODE_ENV=production en desarrollo local?**
+
+Para compatibilidad con el `ReadEnvService`, Docker usa un sistema de triple variables:
+
+```bash
+NODE_ENV=production    # Técnico: Estabilidad Docker (siempre production)
+RUN_MODE=local        # Operacional: Scripts NPM (local/qa/production)
+APP_ENV=development   # Funcional: Lógica de aplicación (development/qa/production)
+```
+
+### 📋 Archivos de Configuración
+
+| Archivo | NODE_ENV | APP_ENV | RUN_MODE | Propósito |
+|---------|----------|---------|----------|-----------|
+| `.env` | `production` | `development` | `local` | Variables globales Docker |
+| `.env.docker-local` | - | `development` | `local` | Management API |
+| `.env.docker-auth-local` | `development` | - | - | Auth Service |
+
+**Nota**: El `NODE_ENV` en `environment:` del docker-compose siempre sobrescribe otros valores.
+
+### 💡 Para Desarrolladores
+
+Si tu código en Docker necesita detectar el entorno:
+
+```typescript
+// ❌ NO funcionará en Docker
+if (process.env.NODE_ENV === 'development') {
+  enableDebugMode();
+}
+
+// ✅ SÍ funcionará correctamente
+if (process.env.APP_ENV === 'development') {
+  enableDebugMode();
+}
+```
+
 ## 🚨 IMPORTANTE: SEGURIDAD DE CREDENCIALES
 
 ### ⚠️ NUNCA COMMITEAR ARCHIVOS DE CONFIGURACIÓN CON CREDENCIALES REALES

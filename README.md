@@ -188,6 +188,22 @@ npm run start:qa        # Se conecta a servicios remotos de QA
 - **Proceso**: Copia templates → Edita variables → Nunca subas a Git
 - Ejemplo: `cp envs/qa.management.env.template envs/qa.management.env`
 
+## ⚙️ Sistema de Variables Docker
+
+### 🎯 ¿Por qué NODE_ENV=production en desarrollo?
+
+**Diseño técnico intencional** para compatibilidad Docker:
+
+```bash
+NODE_ENV=production    # Docker estabilidad (ReadEnvService compatibilidad)
+APP_ENV=development   # Lógica de aplicación (logging, features)
+RUN_MODE=local       # Scripts NPM (start:local)
+```
+
+**Para desarrolladores**: Usa `APP_ENV` en lugar de `NODE_ENV` para detectar entorno de desarrollo en código que corre en Docker.
+
+**Más detalles**: Ver [ENVIRONMENTS.md](envs/ENVIRONMENTS.md) y [DOCKER.md](docs/DOCKER.md)
+
 ## 🛠️ Comandos PM2 Útiles
 
 ```bash

@@ -49,6 +49,51 @@ apps: [{
 }]
 ```
 
+## ⚙️ Sistema de Variables de Entorno
+
+### 🎯 Triple Sistema de Variables
+
+**Trivance usa un sistema único de triple variables** para compatibilidad Docker y claridad semántica:
+
+```bash
+NODE_ENV=production    # Técnico: Estabilidad Docker
+RUN_MODE=local        # Operacional: Scripts NPM  
+APP_ENV=development   # Funcional: Lógica de aplicación
+```
+
+### 📋 Configuración por Environment
+
+| Environment | NODE_ENV | RUN_MODE | APP_ENV | Docker Command |
+|-------------|----------|----------|---------|----------------|
+| **Local** | `production` | `local` | `development` | `npm run start:local` |
+| **QA** | `production` | `qa` | `qa` | `npm run start:qa` |
+| **Production** | `production` | `production` | `production` | `npm run start:production` |
+
+### 🔧 ¿Por qué NODE_ENV=production en desarrollo?
+
+**Razón técnica**: El `ReadEnvService` en los backends:
+- En `development`: busca archivo `.env` (❌ no existe en contenedores)
+- En `production`: usa `process.env` directamente (✅ correcto para Docker)
+
+**Solución**: Docker siempre usa `NODE_ENV=production`, pero `APP_ENV` controla la lógica de aplicación.
+
+### 💡 Guía para Desarrolladores
+
+```typescript
+// ❌ INCORRECTO en código que corre en Docker
+if (process.env.NODE_ENV === 'development') {
+  console.log('Debug info'); // Nunca se ejecutará
+}
+
+// ✅ CORRECTO usar APP_ENV para lógica de aplicación
+if (process.env.APP_ENV === 'development') {
+  console.log('Debug info'); // Se ejecutará en desarrollo local
+}
+
+// ✅ CORRECTO usar RUN_MODE para comandos específicos
+const command = `start:${process.env.RUN_MODE}`; // start:local
+```
+
 ## 🚀 Flujo de Inicio
 
 ### Requisitos
