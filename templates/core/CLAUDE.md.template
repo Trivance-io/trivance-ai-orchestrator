@@ -92,6 +92,8 @@ Claude Code debe entender que opera en un **workspace multi-repositorio** donde:
 - **GraphQL Playground**: http://localhost:3000/graphql (Docker)
 - **Frontend Admin**: http://localhost:5173 (PM2)
 - **Swagger Auth Docs**: http://localhost:3001/api-docs (Docker)
+- **🔍 Log Viewer**: **http://localhost:4000** (Docker) - Sistema de observabilidad unificado
+- **📊 Dozzle Logs**: http://localhost:9999 (Docker) - Monitor visual de logs
 - **PostgreSQL**: localhost:5432 (Docker)
 - **MongoDB**: localhost:27017 (Docker)
 
@@ -423,7 +425,7 @@ Cada repositorio tiene su propia documentación en el directorio `docs/`:
 
 - 🔄 **Auto-sincronización**: Cada pull del repo config actualiza este archivo
 - 🤖 **Generado automáticamente**: Por script `setup.sh`
-- 📅 **Última actualización**: {{TIMESTAMP_PLACEHOLDER}}
+- 📅 **Última actualización**: $(date '+%Y-%m-%d %H:%M:%S')
 - 🌟 **Optimizado para**: Claude Code en español con workspace multi-repo
 - 🔧 **Fuente de verdad**: `trivance-dev-config/templates/CLAUDE.md.template`
 

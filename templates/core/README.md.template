@@ -87,6 +87,8 @@ echo "🎉 Setup completo - workspace listo para desarrollo"
 | **🔐 Auth Service** | http://localhost:3001 | Docker | Servicio de autenticación |
 | **📊 GraphQL Playground** | http://localhost:3000/graphql | Docker | Explorador interactivo GraphQL |
 | **📖 Auth API Docs** | http://localhost:3001/api-docs | Docker | Documentación Swagger |
+| **🔍 Log Viewer** | **http://localhost:4000** | **Docker** | **Sistema de observabilidad unificado** |
+| **📊 Dozzle Logs** | http://localhost:9999 | Docker | Monitor de logs Docker en tiempo real |
 | **🗄️ PostgreSQL** | localhost:5432 | Docker | Base de datos principal |
 | **🗄️ MongoDB** | localhost:27017 | Docker | Base de datos auth |
 
@@ -288,7 +290,7 @@ pm2 monit
 
 > **⚡ Auto-Sincronizado**: Este archivo se actualiza automáticamente desde `trivance-dev-config/templates/README.md.template`
 
-**🔄 Última sincronización**: {{TIMESTAMP_PLACEHOLDER}}  
+**🔄 Última sincronización**: $(date '+%Y-%m-%d %H:%M:%S')  
 **📦 Fuente de verdad**: [trivance-dev-config](trivance-dev-config/README.md)  
 **🤖 Optimizado para**: Claude Code + VS Code + GitHub Codespaces
 
