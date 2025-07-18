@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trivance Log Viewer - AI-First Debugging</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Monaco', 'Consolas', monospace;
+      background: #0d1117;
+      color: #c9d1d9;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    
+    .header {
+      background: #161b22;
+      padding: 16px 20px;
+      border-bottom: 1px solid #30363d;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    
+    h1 {
+      font-size: 20px;
+      margin-bottom: 12px;
+      color: #58a6ff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .filters {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    input, select, button {
+      padding: 6px 12px;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      color: #c9d1d9;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    
+    input:focus, select:focus {
+      outline: none;
+      border-color: #58a6ff;
+      box-shadow: 0 0 0 2px rgba(88,166,255,0.3);
+    }
+    
+    button {
+      cursor: pointer;
+      background: #238636;
+      color: white;
+      font-weight: 500;
+      border: none;
+    }
+    
+    button:hover {
+      background: #2ea043;
+    }
+    
+    button.secondary {
+      background: #21262d;
+      color: #c9d1d9;
+    }
+    
+    button.secondary:hover {
+      background: #30363d;
+    }
+    
+    button.active {
+      background: #1158c7;
+    }
+    
+    .status {
+      margin-left: auto;
+      font-size: 11px;
+      color: #8b949e;
+    }
+    
+    .logs-container {
+      padding: 20px;
+      max-height: calc(100vh - 140px);
+      overflow-y: auto;
+    }
+    
+    .log-trace {
+      margin-bottom: 16px;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #0d1117;
+    }
+    
+    .log-trace.has-error {
+      border-color: #f85149;
+    }
+    
+    .log-trace.has-warning {
+      border-color: #f0883e;
+    }
+    
+    .trace-header {
+      background: #161b22;
+      padding: 12px 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      user-select: none;
+      transition: background 0.2s;
+    }
+    
+    .trace-header:hover {
+      background: #1c2128;
+    }
+    
+    .trace-header .icon {
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    
+    .trace-header .services {
+      font-weight: 500;
+      color: #f0f6fc;
+    }
+    
+    .trace-header .trace-id {
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 11px;
+      color: #8b949e;
+      margin-left: auto;
+    }
+    
+    .trace-header .summary {
+      font-size: 11px;
+      color: #8b949e;
+      background: #21262d;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+    
+    .trace-header .time {
+      font-size: 11px;
+      color: #8b949e;
+    }
+    
+    .trace-content {
+      background: #0d1117;
+      border-top: 1px solid #21262d;
+    }
+    
+    .log-entry {
+      padding: 12px 16px;
+      border-bottom: 1px solid #21262d;
+      position: relative;
+    }
+    
+    .log-entry:last-child {
+      border-bottom: none;
+    }
+    
+    .log-entry.error {
+      background: rgba(248,81,73,0.05);
+      border-left: 3px solid #f85149;
+    }
+    
+    .log-entry.warn, .log-entry.warning {
+      background: rgba(240,136,62,0.05);
+      border-left: 3px solid #f0883e;
+    }
+    
+    .log-entry.info {
+      border-left: 3px solid #58a6ff;
+    }
+    
+    .log-header {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .timestamp {
+      color: #8b949e;
+      font-size: 11px;
+      font-family: 'Consolas', 'Monaco', monospace;
+    }
+    
+    .service {
+      background: #1158c7;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+    
+    .service.frontend {
+      background: #6f42c1;
+    }
+    
+    .service.backend {
+      background: #0969da;
+    }
+    
+    .service.auth {
+      background: #2ea043;
+    }
+    
+    .type {
+      color: #58a6ff;
+      font-size: 11px;
+      font-family: 'Consolas', 'Monaco', monospace;
+    }
+    
+    .level {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 3px;
+      text-transform: uppercase;
+    }
+    
+    .level.error {
+      background: #f85149;
+      color: white;
+    }
+    
+    .level.warn, .level.warning {
+      background: #f0883e;
+      color: white;
+    }
+    
+    .level.info {
+      background: #58a6ff;
+      color: white;
+    }
+    
+    .level.debug {
+      background: #8b949e;
+      color: white;
+    }
+    
+    .message {
+      color: #f0f6fc;
+      margin: 8px 0;
+      font-family: 'Consolas', 'Monaco', monospace;
+    }
+    
+    .payload {
+      background: #010409;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      padding: 12px;
+      margin-top: 8px;
+      font-size: 12px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      overflow-x: auto;
+    }
+    
+    .payload-header {
+      color: #58a6ff;
+      margin-bottom: 8px;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+    }
+    
+    .payload.error-details .payload-header {
+      color: #f85149;
+    }
+    
+    .payload.response.error {
+      border-color: #f85149;
+    }
+    
+    .http-line {
+      color: #79c0ff;
+      margin-bottom: 8px;
+    }
+    
+    .status {
+      color: #a5d6ff;
+    }
+    
+    .headers, .body, .query {
+      margin-top: 8px;
+      color: #8b949e;
+    }
+    
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: #c9d1d9;
+    }
+    
+    .stack-trace {
+      color: #f85149;
+      font-size: 11px;
+      margin-top: 8px;
+    }
+    
+    .error-message {
+      color: #f85149;
+      font-weight: 500;
+    }
+    
+    .no-logs {
+      text-align: center;
+      padding: 60px;
+      color: #8b949e;
+      font-size: 14px;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #58a6ff;
+      font-size: 14px;
+    }
+    
+    .error-message {
+      text-align: center;
+      padding: 40px;
+      color: #f85149;
+      font-size: 14px;
+    }
+    
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 12px;
+      height: 12px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: #010409;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: #30363d;
+      border-radius: 6px;
+      border: 2px solid #010409;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: #484f58;
+    }
+    
+    /* Animations */
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+    
+    .loading {
+      animation: pulse 1.5s infinite;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🔍 Trivance Log Viewer - AI-First Debugging</h1>
+    <div class="filters">
+      <input type="text" id="traceId" placeholder="Trace ID" title="Filter by trace ID" />
+      <input type="text" id="sessionId" placeholder="Session ID" title="Filter by session ID" />
+      <select id="service" title="Filter by service">
+        <option value="">All Services</option>
+        <option value="frontend">Frontend</option>
+        <option value="backend">Backend</option>
+        <option value="auth">Auth</option>
+      </select>
+      <select id="level" title="Filter by log level">
+        <option value="">All Levels</option>
+        <option value="error">Error</option>
+        <option value="warn">Warning</option>
+        <option value="info">Info</option>
+        <option value="debug">Debug</option>
+      </select>
+      <input type="text" id="text" placeholder="Search text..." title="Search in log content" />
+      <button onclick="logViewer.search()" title="Search logs">🔍 Search</button>
+      <button onclick="logViewer.loadLatest()" title="Load latest logs">🔄 Latest</button>
+      <button onclick="logViewer.clearFilters()" class="secondary" title="Clear all filters">🗑️ Clear</button>
+      <button id="autoRefresh" onclick="logViewer.toggleAutoRefresh()" class="secondary" title="Toggle auto-refresh">⏱️ Auto-Refresh</button>
+      <button id="expandAll" onclick="logViewer.expandAll()" class="secondary" title="Expand all traces">📖 Expand All</button>
+      <button id="collapseAll" onclick="logViewer.collapseAll()" class="secondary" title="Collapse all traces">📕 Collapse All</button>
+      <div class="status" id="status">Loading...</div>
+    </div>
+  </div>
+  
+  <div class="logs-container" id="logsContainer">
+    <div class="loading">Loading logs...</div>
+  </div>
+  
+  <script src="app.js"></script>
+</body>
+</html>

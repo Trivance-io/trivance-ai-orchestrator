@@ -68,7 +68,9 @@ services:
       - RUN_MODE=${RUN_MODE:-prod}
       - APP_ENV=${APP_ENV:-development}
       - PORT=3000
-      
+      - LOG_DIR=/logs
+    volumes:
+      - ../../logs:/logs
     networks:
       - trivance_network
     depends_on:
@@ -102,7 +104,9 @@ services:
       - RUN_MODE=${RUN_MODE:-prod}
       - APP_ENV=${APP_ENV:-development}
       - PORT=3001
-      
+      - LOG_DIR=/logs
+    volumes:
+      - ../../logs:/logs
     networks:
       - trivance_network
     depends_on:
@@ -133,3 +137,24 @@ services:
     labels:
       - "dozzle.enable=true"
       - "dozzle.name=Trivance Logs"
+  
+  # 🔍 Unified Log Viewer
+  log-viewer:
+    image: node:20-alpine
+    container_name: trivance_log_viewer
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    volumes:
+      - ../../logs:/logs:ro
+      - ../tools/log-viewer:/app
+    working_dir: /app
+    command: >
+      sh -c "npm install express && node server.js"
+    networks:
+      - trivance_network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

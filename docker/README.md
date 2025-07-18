@@ -80,22 +80,22 @@ Este directorio contiene configuraciones Docker que **REQUIEREN MANEJO SEGURO**:
 
 1. **Para desarrollo local - Management Service**:
    ```bash
-   cp .env.management.example .env.docker-local
+   cp ../templates/env/.env.management.example .env.docker-local
    # Editar .env.docker-local con valores de desarrollo
    ```
 
 2. **Para desarrollo local - Auth Service**:
    ```bash
-   cp .env.auth.example .env.docker-auth-local
+   cp ../templates/env/.env.auth.example .env.docker-auth-local
    # Editar .env.docker-auth-local con valores de desarrollo
    ```
 
 3. **Para producción**:
    ```bash
    # Management Service
-   cp .env.management.example .env.production
+   cp ../templates/env/.env.management.example .env.production
    # Auth Service  
-   cp .env.auth.example .env.auth.production
+   cp ../templates/env/.env.auth.example .env.auth.production
    # Configurar valores reales de producción
    # USAR SECRETOS SEGUROS (Azure Key Vault, AWS Secrets Manager, etc.)
    ```

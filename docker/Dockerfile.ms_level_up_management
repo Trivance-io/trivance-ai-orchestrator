@@ -57,6 +57,9 @@ COPY --from=builder --chown=nestjs:nodejs /app/prisma ./prisma
 # Ensure proper permissions for GraphQL schema generation in root directory
 RUN chown -R nestjs:nodejs /app
 
+# Create logs directory with proper permissions
+RUN mkdir -p /logs && chown -R nestjs:nodejs /logs
+
 # Set environment (configurable via build args or runtime env)
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
