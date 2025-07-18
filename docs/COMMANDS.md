@@ -13,6 +13,60 @@
 ./start.sh setup      # Configurar desde cero
 ```
 
+## 🐳 Smart Docker Manager
+
+```bash
+# Gestión inteligente de Docker con timeouts adaptativos
+cd trivance-dev-config/scripts/utils
+
+# Iniciar servicios (timeouts: 600s first_build, 180s startup)
+./smart-docker-manager.sh up ../docker/docker-compose.yaml "postgres mongodb ms_level_up_management ms_trivance_auth dozzle log-viewer"
+
+# Health check con reintentos inteligentes
+./smart-docker-manager.sh health_check ../docker/docker-compose.yaml
+
+# Restart optimizado (300s rebuild)
+./smart-docker-manager.sh restart ../docker/docker-compose.yaml [servicio]
+
+# Logs con filtros
+./smart-docker-manager.sh logs ../docker/docker-compose.yaml [servicio]
+
+# Detener servicios (60s quick_ops)
+./smart-docker-manager.sh down ../docker/docker-compose.yaml
+```
+
+## 🔍 Sistema de Observabilidad
+
+```bash
+# Log Viewer unificado - Sistema principal de observabilidad
+open http://localhost:4000
+
+# Consultas programáticas por servicio
+curl "http://localhost:4000/api/logs/search?service=frontend&level=error" | jq
+curl "http://localhost:4000/api/logs/search?service=backend&level=error" | jq
+curl "http://localhost:4000/api/logs/search?service=auth&level=error" | jq
+
+# Búsquedas específicas
+curl "http://localhost:4000/api/logs/search?sessionId=abc-123" | jq
+curl "http://localhost:4000/api/logs/search?traceId=xyz-789" | jq
+curl "http://localhost:4000/api/logs/search?text=unauthorized" | jq
+
+# Iniciar Log Viewer independiente
+./trivance-dev-config/scripts/utils/start-log-viewer.sh
+```
+
+## 📊 Dozzle - Monitor Visual Docker
+
+```bash
+# Monitor visual de logs Docker en tiempo real
+open http://localhost:9999
+
+# Gestión con script dedicado
+./trivance-dev-config/scripts/utils/dozzle.sh start
+./trivance-dev-config/scripts/utils/dozzle.sh status
+./trivance-dev-config/scripts/utils/dozzle.sh open
+```
+
 ## 📁 Comandos Originales (Rutas Completas)
 
 ```bash

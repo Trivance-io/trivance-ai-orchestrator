@@ -16,9 +16,8 @@ build/
 .env.production.local
 
 # Docker environment files - ACTIVOS
-docker/.env.docker-local
-docker/.env.docker-auth-local
-docker/.env.docker-compose
+docker/.env
+templates/env-templates/.env.*
 
 # Docker environment files - PRODUCCIÓN  
 docker/.env.production
@@ -33,7 +32,9 @@ docker/.env.BACKUP_*
 docker/.env.defaults.BACKUP_*
 
 # Logs
-logs/
+logs/*.json
+logs/*.log
+!logs/.gitkeep
 *.log
 npm-debug.log*
 yarn-debug.log*

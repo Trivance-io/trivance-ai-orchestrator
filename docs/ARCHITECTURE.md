@@ -32,7 +32,7 @@ trivance-dev-config/
 │   └── envs.sh         # Gestión de entornos
 ├── templates/          # Plantillas de configuración
 ├── setup.sh           # Punto de entrada principal
-├── start-all.sh       # Orquestación de servicios con PM2
+├── start.sh           # Orquestación de servicios con PM2 + Docker
 └── status.sh          # Monitoreo del estado de servicios
 ```
 

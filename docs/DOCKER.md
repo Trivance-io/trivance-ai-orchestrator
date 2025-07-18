@@ -37,6 +37,10 @@ services:
   # Backends
   ms_level_up_management:  # Puerto 3000 - API principal + GraphQL
   ms_trivance_auth:        # Puerto 3001 - Servicio de autenticación
+  
+  # Observabilidad
+  log-viewer:       # Puerto 4000 - Sistema de observabilidad unificado
+  dozzle:          # Puerto 9999 - Monitor visual de logs Docker
 ```
 
 ### Frontend (PM2)
@@ -111,8 +115,60 @@ Docker es **OBLIGATORIO**. El sistema verificará:
 
 1. **Verifica Docker**: Si no está corriendo, no permite continuar
 2. **Genera .env Docker**: `envs.sh` crea automáticamente los archivos adaptados
-3. **Inicia backends**: PostgreSQL, MongoDB, APIs en contenedores
-4. **Inicia frontend**: PM2 para hot-reload óptimo
+3. **Smart Docker Manager**: Gestión inteligente con timeouts adaptativos
+4. **Inicia backends**: PostgreSQL, MongoDB, APIs en contenedores
+5. **Inicia observabilidad**: Log Viewer (4000) y Dozzle (9999)
+6. **Inicia frontend**: PM2 para hot-reload óptimo
+
+## 🎛️ Smart Docker Manager
+
+### ¿Qué es?
+
+El **Smart Docker Manager** es un sistema inteligente que reemplaza comandos Docker manuales con:
+
+- **⏱️ Timeouts adaptativos**: 600s first_build, 300s rebuild, 180s startup, 120s health_check
+- **🔄 Reintentos inteligentes**: Health checks con backoff exponencial
+- **📊 Feedback visual**: Progreso en tiempo real para eliminar sensación de errores
+- **🖥️ Compatibilidad macOS**: Detecta `gtimeout` vs `timeout` automáticamente
+
+### Uso desde Menu Principal
+
+```bash
+# El Smart Docker Manager está integrado en el menú principal
+./start.sh
+# Opción 6: 🐳 Gestión Docker
+# - Incluye Smart Docker Manager
+# - Health checks inteligentes  
+# - Rebuild optimizado
+```
+
+### Uso Directo
+
+```bash
+cd trivance-dev-config/scripts/utils
+
+# Iniciar servicios con timeouts adaptativos
+./smart-docker-manager.sh up ../docker/docker-compose.yaml "postgres mongodb ms_level_up_management ms_trivance_auth log-viewer dozzle"
+
+# Health check completo con reintentos
+./smart-docker-manager.sh health_check ../docker/docker-compose.yaml
+
+# Restart optimizado (detecta si necesita rebuild)
+./smart-docker-manager.sh restart ../docker/docker-compose.yaml [servicio-especifico]
+
+# Logs con filtros inteligentes
+./smart-docker-manager.sh logs ../docker/docker-compose.yaml ms_level_up_management
+```
+
+### Ventajas vs Docker Compose Manual
+
+| Operación | Docker Compose Manual | Smart Docker Manager |
+|-----------|----------------------|----------------------|
+| **Primera compilación** | Timeout en 2min | ✅ 600s adaptive timeout |
+| **Restart service** | No diferencia rebuild | ✅ Detecta y optimiza |
+| **Health check** | Manual y básico | ✅ Reintentos inteligentes |
+| **Feedback visual** | Silencioso | ✅ Progress en tiempo real |
+| **Error handling** | Genérico | ✅ Context-aware messages |
 5. **Health checks**: Verifica que todos los servicios respondan
 
 ## ⚙️ Configuración Automática

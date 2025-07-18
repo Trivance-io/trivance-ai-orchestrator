@@ -80,6 +80,7 @@ Una vez iniciados, accede a:
 | API Principal | http://localhost:3000 | Backend con GraphQL |
 | API Auth | http://localhost:3001 | Servicio de autenticación |
 | GraphQL Playground | http://localhost:3000/graphql | Explorador GraphQL |
+| **🔍 Log Viewer** | **http://localhost:4000** | **Sistema de observabilidad unificado** |
 | Dozzle Logs | http://localhost:9999 | Monitor de logs Docker en tiempo real |
 | Metro Bundler | http://localhost:8081 | Desarrollo móvil (solo cuando está activo) |
 | Mobile App | Ver instrucciones abajo | App móvil con Expo |
@@ -136,9 +137,11 @@ Opciones disponibles:
 3) 🔄 Cambiar environment
 4) 🛑 Detener servicios
 5) 🔍 Verificar salud del sistema
-6) 🐳 Gestión Docker        # Solo si Docker está disponible
-7) 📚 Ver documentación
-8) 🗑️  Limpiar y reconfigurar
+6) 🐳 Gestión Docker
+7) 📊 Monitor de Logs (Dozzle)
+8) 🔍 Log Viewer (Observabilidad)    # NUEVO: Sistema unificado
+9) 📚 Ver documentación
+10) 🗑️  Limpiar y reconfigurar
 0) 🚪 Salir
 ```
 
