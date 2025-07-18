@@ -105,21 +105,35 @@ start_services() {
         echo
     fi
     
-    # Usar docker compose (v2) si está disponible, sino docker-compose
-    if command -v docker &>/dev/null && docker compose version &>/dev/null 2>&1; then
-        docker compose up -d postgres mongodb ms_level_up_management ms_trivance_auth dozzle
+    # Usar Smart Docker Manager para operación robusta
+    if [[ -f "${SCRIPT_DIR}/smart-docker-manager.sh" ]]; then
+        echo -e "${CYAN}🧠 Usando Smart Docker Manager para operación robusta${NC}"
+        "${SCRIPT_DIR}/smart-docker-manager.sh" up "${CONFIG_DIR}/docker/docker-compose.yaml" "postgres mongodb ms_level_up_management ms_trivance_auth dozzle"
     else
-        docker-compose up -d postgres mongodb ms_level_up_management ms_trivance_auth dozzle
+        # Fallback al método anterior
+        echo -e "${YELLOW}⚠️  Smart Docker Manager no disponible, usando método tradicional${NC}"
+        if command -v docker &>/dev/null && docker compose version &>/dev/null 2>&1; then
+            docker compose up -d postgres mongodb ms_level_up_management ms_trivance_auth dozzle
+        else
+            docker-compose up -d postgres mongodb ms_level_up_management ms_trivance_auth dozzle
+        fi
     fi
     
-    # Verificar salud de servicios
+    # Verificar salud de servicios usando Smart Docker Manager
     echo -e "${YELLOW}⏳ Esperando a que los servicios estén listos...${NC}"
     
     local all_healthy=true
-    check_service_health "PostgreSQL" "localhost:5432" || all_healthy=false
-    check_service_health "MongoDB" "localhost:27017" || all_healthy=false
-    check_service_health "Auth API" "http://localhost:3001/health" || all_healthy=false
-    check_service_health "Management API" "http://localhost:3000/health" || all_healthy=false
+    if [[ -f "${SCRIPT_DIR}/smart-docker-manager.sh" ]]; then
+        # Usar health checks inteligentes
+        "${SCRIPT_DIR}/smart-docker-manager.sh" health "Auth API" "http://localhost:3001/health" || all_healthy=false
+        "${SCRIPT_DIR}/smart-docker-manager.sh" health "Management API" "http://localhost:3000/health" || all_healthy=false
+    else
+        # Fallback a método tradicional
+        check_service_health "PostgreSQL" "localhost:5432" || all_healthy=false
+        check_service_health "MongoDB" "localhost:27017" || all_healthy=false
+        check_service_health "Auth API" "http://localhost:3001/health" || all_healthy=false
+        check_service_health "Management API" "http://localhost:3000/health" || all_healthy=false
+    fi
     
     if [[ "$all_healthy" == "false" ]]; then
         echo -e "${YELLOW}⚠️  Algunos servicios no responden, verificando logs...${NC}"

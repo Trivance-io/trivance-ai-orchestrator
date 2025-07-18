@@ -88,11 +88,16 @@ install_dependencies_for_repo() {
     info "⏱️  Tiempo máximo: 3 minutos por repo"
     info "🔄 Instalando dependencias con progreso visible..."
     
-    # Función de timeout con progreso visible
+    # Función de timeout con progreso visible usando safe_timeout
     run_with_timeout_and_progress() {
         local timeout_duration=$1
         shift
         local command=("$@")
+        
+        # Cargar command validator para usar safe_timeout
+        if [[ -f "${SCRIPT_DIR:-$(dirname "${BASH_SOURCE[0]}")}/command-validator.sh" ]]; then
+            source "${SCRIPT_DIR:-$(dirname "${BASH_SOURCE[0]}")}/command-validator.sh"
+        fi
         
         # Ejecutar comando en background
         "${command[@]}" > "${log_dir}/${repo_name}_install.log" 2>&1 &
@@ -246,17 +251,22 @@ health_check() {
     fi
 }
 
-# Configurar variables globales
+# Configurar variables globales usando el path resolver
 setup_globals() {
-    # Detectar workspace si no está definido
-    if [[ -z "${WORKSPACE_DIR:-}" ]]; then
-        WORKSPACE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-        # Ir un nivel más arriba para llegar al workspace real
-        WORKSPACE_DIR="$(dirname "$WORKSPACE_DIR")"
+    # Usar el path resolver centralizado
+    if [[ -f "${SCRIPT_DIR:-$(dirname "${BASH_SOURCE[0]}")}/path-resolver.sh" ]]; then
+        source "${SCRIPT_DIR:-$(dirname "${BASH_SOURCE[0]}")}/path-resolver.sh"
+        resolve_paths
+    else
+        # Fallback al método anterior si path-resolver no está disponible
+        if [[ -z "${WORKSPACE_DIR:-}" ]]; then
+            WORKSPACE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+            WORKSPACE_DIR="$(dirname "$WORKSPACE_DIR")"
+        fi
+        
+        export WORKSPACE_DIR
+        validate_workspace
     fi
-    
-    export WORKSPACE_DIR
-    validate_workspace
 }
 
 # 🔒 Verificaciones de seguridad

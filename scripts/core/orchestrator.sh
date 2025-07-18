@@ -97,60 +97,74 @@ main() {
 validate_configuration() {
     log "Validando archivos de configuración y prerequisitos..."
     
-    # Check configuration files
-    if [[ ! -f "${SCRIPT_DIR}/../../config/repositories.json" ]]; then
-        error "Archivo repositories.json no encontrado"
-        exit 1
-    fi
-    
-    if [[ ! -f "${SCRIPT_DIR}/../../config/environments.json" ]]; then
-        error "Archivo environments.json no encontrado"
-        exit 1
-    fi
-    
-    # Check Git
-    if ! command -v git &> /dev/null; then
-        error "Git no está instalado"
-        exit 1
-    fi
-    
-    # Check Node.js version
-    if ! command -v node &> /dev/null; then
-        error "Node.js no está instalado"
-        exit 1
-    fi
-    
-    local node_version=$(node --version | sed 's/v//')
-    local required_version="18.0.0"
-    if [ "$(printf '%s\n' "$required_version" "$node_version" | sort -V | head -n1)" != "$required_version" ]; then
-        error "Node.js version $node_version is below minimum required version $required_version"
-        exit 1
-    fi
-    
-    if ! command -v npm &> /dev/null; then
-        error "npm no está instalado"
-        exit 1
-    fi
-    
-    # Check Docker - OBLIGATORIO
-    if ! command -v docker &> /dev/null; then
-        error "❌ Docker no está instalado - Docker es OBLIGATORIO"
-        error "Por favor instala Docker Desktop desde: https://www.docker.com/products/docker-desktop/"
-        exit 1
-    fi
-    
-    # Check if Docker daemon is running
-    if ! docker ps &> /dev/null; then
-        error "❌ Docker no está corriendo"
-        error "Por favor inicia Docker Desktop y vuelve a ejecutar este script"
-        exit 1
-    fi
-    
-    # Check Docker Compose
-    if ! command -v docker &>/dev/null || ! docker compose version &>/dev/null 2>&1; then
-        if ! command -v docker-compose &>/dev/null; then
-            error "❌ Docker Compose no está instalado"
+    # Usar command validator para validación robusta
+    if [[ -f "${SCRIPT_DIR}/../utils/command-validator.sh" ]]; then
+        source "${SCRIPT_DIR}/../utils/command-validator.sh"
+        
+        # Usar validación completa de setup
+        if ! validate_setup_requirements; then
+            error "❌ Faltan prerequisitos necesarios"
             exit 1
+        fi
+    else
+        # Fallback a validación manual
+        log "Usando validación manual (command-validator.sh no disponible)"
+        
+        # Check configuration files
+        if [[ ! -f "${SCRIPT_DIR}/../../config/repositories.json" ]]; then
+            error "Archivo repositories.json no encontrado"
+            exit 1
+        fi
+        
+        if [[ ! -f "${SCRIPT_DIR}/../../config/environments.json" ]]; then
+            error "Archivo environments.json no encontrado"
+            exit 1
+        fi
+        
+        # Check Git
+        if ! command -v git &> /dev/null; then
+            error "Git no está instalado"
+            exit 1
+        fi
+        
+        # Check Node.js version
+        if ! command -v node &> /dev/null; then
+            error "Node.js no está instalado"
+            exit 1
+        fi
+        
+        local node_version=$(node --version | sed 's/v//')
+        local required_version="18.0.0"
+        if [ "$(printf '%s\n' "$required_version" "$node_version" | sort -V | head -n1)" != "$required_version" ]; then
+            error "Node.js version $node_version is below minimum required version $required_version"
+            exit 1
+        fi
+        
+        if ! command -v npm &> /dev/null; then
+            error "npm no está instalado"
+            exit 1
+        fi
+        
+        # Check Docker - OBLIGATORIO
+        if ! command -v docker &> /dev/null; then
+            error "❌ Docker no está instalado - Docker es OBLIGATORIO"
+            error "Por favor instala Docker Desktop desde: https://www.docker.com/products/docker-desktop/"
+            exit 1
+        fi
+        
+        # Check if Docker daemon is running
+        if ! docker ps &> /dev/null; then
+            error "❌ Docker no está corriendo"
+            error "Por favor inicia Docker Desktop y vuelve a ejecutar este script"
+            exit 1
+        fi
+        
+        # Check Docker Compose
+        if ! command -v docker &>/dev/null || ! docker compose version &>/dev/null 2>&1; then
+            if ! command -v docker-compose &>/dev/null; then
+                error "❌ Docker Compose no está instalado"
+                exit 1
+            fi
         fi
     fi
     
@@ -336,7 +350,7 @@ setup_tools() {
     log "Configurando herramientas de desarrollo..."
     
     # Crear workspace de VS Code
-    local workspace_template="${SCRIPT_DIR}/../../templates/TrivancePlatform.code-workspace.template"
+    local workspace_template="${SCRIPT_DIR}/../../templates/core/workspace.code-workspace.template"
     local workspace_file="${WORKSPACE_DIR}/TrivancePlatform.code-workspace"
     
     if [[ -f "$workspace_template" ]]; then
@@ -345,7 +359,7 @@ setup_tools() {
     fi
     
     # Crear .gitignore del workspace
-    local gitignore_template="${SCRIPT_DIR}/../../templates/.gitignore.workspace"
+    local gitignore_template="${SCRIPT_DIR}/../../templates/config/.gitignore.workspace"
     local gitignore_file="${WORKSPACE_DIR}/.gitignore"
     
     if [[ -f "$gitignore_template" ]] && [[ ! -f "$gitignore_file" ]]; then
@@ -356,7 +370,7 @@ setup_tools() {
     # CLAUDE.md se creará automáticamente al final cuando el setup esté completo
     
     # Crear README.md principal desde template
-    local readme_template="${SCRIPT_DIR}/../../templates/README.md.template"
+    local readme_template="${SCRIPT_DIR}/../../templates/core/README.md.template"
     local readme_file="${WORKSPACE_DIR}/README.md"
     
     if [[ -f "$readme_template" ]]; then
@@ -364,7 +378,7 @@ setup_tools() {
         success "✅ Archivo README.md configurado"
     else
         # Fallback al README dinámico si existe
-        local readme_dynamic="${SCRIPT_DIR}/../../templates/dynamic/README.workspace.template"
+        # README dinámico no disponible - se eliminó por estar incompleto
         if [[ -f "$readme_dynamic" ]]; then
             envsubst < "$readme_dynamic" > "$readme_file"
             success "✅ README del workspace configurado (dinámico)"
@@ -420,7 +434,7 @@ setup_docker_integration() {
     
     # Crear ecosystem.config.js desde template
     local ecosystem_file="${WORKSPACE_DIR}/ecosystem.config.js"
-    local ecosystem_template="${SCRIPT_DIR}/../../templates/ecosystem.config.js.template"
+    local ecosystem_template="${SCRIPT_DIR}/../../templates/core/ecosystem.config.js.template"
     
     if [[ ! -f "$ecosystem_file" ]]; then
         if [[ -f "$ecosystem_template" ]]; then
@@ -529,11 +543,29 @@ setup_monitoring_tools() {
             warn "⚠️  Dozzle no se pudo configurar automáticamente"
             info "   💡 Puedes instalarlo manualmente: ./trivance-dev-config/scripts/docker/install-dozzle.sh"
         fi
+        
+        # Configurar Log Viewer (sistema de observabilidad unificado)
+        info "🔍 Configurando Log Viewer unificado..."
+        
+        # Usar el script dedicado para iniciar el Log Viewer
+        if [[ -x "${SCRIPT_DIR}/../utils/start-log-viewer.sh" ]]; then
+            if "${SCRIPT_DIR}/../utils/start-log-viewer.sh" start; then
+                success "✅ Log Viewer configurado y funcionando"
+                info "   🔍 Accede al visor de logs en: http://localhost:4000"
+            else
+                warn "⚠️  Log Viewer no se pudo iniciar automáticamente durante el setup"
+                info "   💡 Puedes iniciarlo manualmente desde el menú principal (opción 8)"
+            fi
+        else
+            warn "⚠️  Script de Log Viewer no encontrado"
+        fi
     else
-        warn "⚠️  Docker no está disponible, saltando configuración de Dozzle"
+        warn "⚠️  Docker no está disponible, saltando configuración de herramientas de monitoreo"
     fi
     
-    info "📈 Herramientas de monitoreo configuradas"
+    success "📈 Herramientas de monitoreo configuradas"
+    info "   📊 Dozzle (logs Docker): http://localhost:9999"
+    info "   🔍 Log Viewer (observabilidad): http://localhost:4000"
 }
 
 create_claude_md_final() {
@@ -565,14 +597,14 @@ create_claude_md_final() {
     echo -e "${CYAN}   3. Sigue las instrucciones para generar CLAUDE.md${NC}"
     echo
     echo -e "${CYAN}🔧 Alternativamente, podemos crear un CLAUDE.md básico ahora:${NC}"
-    echo -e "${CYAN}   • Copia el template: ${YELLOW}cp trivance-dev-config/templates/CLAUDE.md.template CLAUDE.md${NC}"
+    echo -e "${CYAN}   • Copia el template: ${YELLOW}cp trivance-dev-config/templates/core/CLAUDE.md.template CLAUDE.md${NC}"
     echo -e "${CYAN}   • Edita el archivo con información específica de tu proyecto${NC}"
     echo
     
     # Crear CLAUDE.md básico automáticamente
     if [[ ! -f "${WORKSPACE_DIR}/CLAUDE.md" ]]; then
         info "📝 Creando CLAUDE.md básico automáticamente..."
-        cp "${SCRIPT_DIR}/../../templates/CLAUDE.md.template" "${WORKSPACE_DIR}/CLAUDE.md"
+        cp "${SCRIPT_DIR}/../../templates/core/CLAUDE.md.template" "${WORKSPACE_DIR}/CLAUDE.md"
         success "✅ CLAUDE.md creado desde template"
         info "   Puedes personalizarlo más tarde con el comando /init de Claude Code"
     else
