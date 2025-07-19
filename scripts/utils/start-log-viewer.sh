@@ -39,15 +39,21 @@ check_docker() {
 
 # Verificar si el servicio está en docker-compose
 check_log_viewer_service() {
-    local docker_compose_file="${CONFIG_DIR}/docker/docker-compose.yaml"
+    # Priorizar docker-compose.dev.yml (ESTÁNDAR para desarrollo)
+    local docker_compose_file="${CONFIG_DIR}/docker/docker-compose.dev.yml"
+    
+    # Fallback a docker-compose.yaml si no existe dev
+    if [[ ! -f "$docker_compose_file" ]]; then
+        docker_compose_file="${CONFIG_DIR}/docker/docker-compose.yaml"
+    fi
     
     if [[ ! -f "$docker_compose_file" ]]; then
-        error "docker-compose.yaml no encontrado en ${CONFIG_DIR}/docker/"
+        error "docker-compose.dev.yml o docker-compose.yaml no encontrado en ${CONFIG_DIR}/docker/"
         return 1
     fi
     
     if ! grep -q "log-viewer:" "$docker_compose_file"; then
-        error "Servicio log-viewer no encontrado en docker-compose.yaml"
+        error "Servicio log-viewer no encontrado en $docker_compose_file"
         return 1
     fi
     
@@ -77,7 +83,12 @@ start_log_viewer() {
     # Usar Smart Docker Manager si está disponible
     if [[ -f "${SCRIPT_DIR}/smart-docker-manager.sh" ]]; then
         info "🧠 Usando Smart Docker Manager para iniciar log-viewer..."
-        if "${SCRIPT_DIR}/smart-docker-manager.sh" up "${CONFIG_DIR}/docker/docker-compose.yaml" "log-viewer"; then
+        # Determinar qué archivo docker-compose usar (priorizar dev)
+        local compose_file="${CONFIG_DIR}/docker/docker-compose.dev.yml"
+        if [[ ! -f "$compose_file" ]]; then
+            compose_file="${CONFIG_DIR}/docker/docker-compose.yaml"
+        fi
+        if "${SCRIPT_DIR}/smart-docker-manager.sh" up "$compose_file" "log-viewer"; then
             timeout_success=true
         else
             timeout_success=false
@@ -191,7 +202,8 @@ status_log_viewer() {
     fi
     
     echo -n "• Contenedor: "
-    if docker ps --format "table {{.Names}}" | grep -q "trivance_log_viewer"; then
+    # Buscar tanto el nombre dev como el regular
+    if docker ps --format "table {{.Names}}" | grep -qE "trivance_log_viewer(_dev)?"; then
         echo -e "${GREEN}✅ Ejecutándose${NC}"
     else
         echo -e "${RED}❌ No ejecutándose${NC}"
@@ -224,7 +236,18 @@ logs_log_viewer() {
         return 1
     fi
     
-    docker logs --tail 50 trivance_log_viewer || {
+    # Intentar con nombre dev primero, luego regular
+    local container_name=""
+    if docker ps --format "{{.Names}}" | grep -q "trivance_log_viewer_dev"; then
+        container_name="trivance_log_viewer_dev"
+    elif docker ps --format "{{.Names}}" | grep -q "trivance_log_viewer"; then
+        container_name="trivance_log_viewer"
+    else
+        error "No se encontró el contenedor log-viewer"
+        return 1
+    fi
+    
+    docker logs --tail 50 "$container_name" || {
         error "Error al obtener logs del contenedor"
         return 1
     }

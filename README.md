@@ -316,6 +316,7 @@ cd .. && ./start.sh
 | [COMMANDS.md](trivance-dev-config/docs/COMMANDS.md) | Todos los comandos disponibles |
 | [TROUBLESHOOTING.md](trivance-dev-config/docs/TROUBLESHOOTING.md) | Solución de problemas detallada |
 | [ONBOARDING.md](trivance-dev-config/docs/ONBOARDING.md) | Guía para nuevos desarrolladores |
+| [LOG-VIEWER.md](trivance-dev-config/docs/LOG-VIEWER.md) | 🔍 Sistema de observabilidad unificado |
 
 ## ✅ Checklist Post-Instalación
 
