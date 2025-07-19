@@ -7,13 +7,27 @@
 ./start.sh
 
 # O con argumentos directos:
-./start.sh start      # Iniciar servicios
-./start.sh stop       # Detener servicios
-./start.sh status     # Ver estado
-./start.sh setup      # Configurar desde cero
+./start.sh start   # 🚀 Iniciar desarrollo (Docker + hot-reload ≤2s) - ESTÁNDAR
+./start.sh stop    # 🛑 Detener todos los servicios
+./start.sh status  # 📊 Ver estado del sistema
+./start.sh setup   # 🔧 Configurar desde cero
 ```
 
-## 🐳 Smart Docker Manager
+## 🐳 Docker Development Mode (ESTÁNDAR)
+
+```bash
+# ⚡ MODO DESARROLLO CON HOT-RELOAD (usado por ./start.sh start)
+cd trivance-dev-config/scripts/utils
+./smart-docker-manager.sh dev ../docker/docker-compose.dev.yml
+
+# Características del modo dev:
+# - Hot-reload ≤2s garantizado
+# - Volúmenes montados para código fuente
+# - Targets de desarrollo en Dockerfiles
+# - Observabilidad integrada
+```
+
+## 🛠️ Smart Docker Manager (Gestión Avanzada)
 
 ```bash
 # Gestión inteligente de Docker con timeouts adaptativos

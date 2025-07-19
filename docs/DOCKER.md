@@ -12,31 +12,43 @@
 
 ## 🎯 Introducción
 
-Trivance Platform utiliza una **arquitectura híbrida** que combina Docker y PM2:
+Trivance Platform utiliza **Docker Development Mode** con hot-reload ≤2s como ESTÁNDAR:
 
-- **Docker (OBLIGATORIO)**: Para backends y bases de datos
-- **PM2**: Para el frontend con hot-reload nativo
+- **Docker**: Backend y bases de datos en contenedores
+- **PM2**: Frontend con hot-reload nativo
+- **Hot-reload ≤2s**: ESTÁNDAR garantizado para todos los servicios
+- **Smart Docker Manager**: Gestión inteligente sin falsos timeouts
 
-### ¿Por qué arquitectura híbrida?
+### ⚡ Arquitectura Híbrida - El Estándar Actual
 
-1. **Backends en Docker**: Entorno consistente, aislamiento completo
-2. **Frontend en PM2**: Hot-reload instantáneo para desarrollo ágil
-3. **Integración automática**: Todo se configura solo con `envs.sh`
+1. **Backend en Docker**: Hot-reload con volúmenes montados
+2. **Frontend en PM2**: Vite nativo para máxima velocidad
+3. **Observabilidad integrada**: Log Viewer unificado
+4. **Gestión unificada**: `./start.sh start` inicia todo
 
 ## 🏗️ Arquitectura Docker
 
 ### Servicios Dockerizados
 
 ```yaml
-# docker-compose.yaml
+# docker-compose.dev.yml (ESTÁNDAR para desarrollo)
 services:
   # Bases de datos
   postgres:         # Puerto 5432 - Base de datos principal
   mongodb:          # Puerto 27017 - Base de datos de autenticación
   
-  # Backends
+  # Backends (con hot-reload ≤2s)
   ms_level_up_management:  # Puerto 3000 - API principal + GraphQL
+    build:
+      target: development    # Target específico para hot-reload
+    volumes:
+      - ./src:/app/src      # Volúmenes para hot-reload
+  
   ms_trivance_auth:        # Puerto 3001 - Servicio de autenticación
+    build:
+      target: development
+    volumes:
+      - ./src:/app/src
   
   # Observabilidad
   log-viewer:       # Puerto 4000 - Sistema de observabilidad unificado
@@ -100,15 +112,16 @@ const command = `start:${process.env.RUN_MODE}`; // start:local
 
 ## 🚀 Flujo de Inicio
 
-### Requisitos
-
-Docker es **OBLIGATORIO**. El sistema verificará:
+### Comando Estándar
 
 ```bash
-# Al ejecutar ./start.sh
-✅ Docker OK
-# o
-❌ Docker NO disponible - No puedes continuar
+# SIEMPRE usar este comando para desarrollo
+./start.sh start    # Inicia Docker dev + PM2 frontend
+
+# Esto ejecuta internamente:
+# - Smart Docker Manager con docker-compose.dev.yml
+# - PM2 para frontend con hot-reload nativo
+# - Hot-reload ≤2s GARANTIZADO
 ```
 
 ### Proceso de Inicio
@@ -201,16 +214,16 @@ trivance-dev-config/docker/
 
 ## 📝 Comandos Principales
 
-### Usando ./start.sh (Recomendado)
+### Usando ./start.sh (ÚNICO MÉTODO RECOMENDADO)
 
 ```bash
-# Menú interactivo principal
-./start.sh
+# Comando estándar para desarrollo
+./start.sh start    # 🚀 Docker dev + hot-reload ≤2s
 
-# Comandos directos
-./start.sh start    # Inicia servicios (detecta Docker automáticamente)
-./start.sh stop     # Detiene todos los servicios
-./start.sh status   # Muestra estado de servicios
+# Otros comandos disponibles
+./start.sh stop     # 🛑 Detiene todos los servicios
+./start.sh status   # 📊 Muestra estado de servicios
+./start.sh setup    # 🔧 Configuración inicial
 ```
 
 ### Gestión Docker (desde el menú)
@@ -345,9 +358,10 @@ lsof -i :27017 # MongoDB
 
 ### Desarrollo Local
 
-1. **Usa el modo híbrido**: Mejor experiencia de desarrollo
-2. **No modifiques .env de Docker manualmente**: Se regeneran automáticamente
-3. **Commits**: Nunca incluyas archivos .env en git
+1. **Usa SIEMPRE `./start.sh start`**: Docker dev es el ESTÁNDAR
+2. **Hot-reload ≤2s garantizado**: No es opcional, es el estándar
+3. **No modifiques .env de Docker manualmente**: Se regeneran automáticamente
+4. **Commits**: Nunca incluyas archivos .env en git
 
 ### Debugging
 
@@ -433,6 +447,7 @@ pm2 logs
 
 ---
 
-**Última actualización**: Configuración automática desde trivance-dev-config
-**Modo recomendado**: Híbrido (Docker + PM2)
+**Última actualización**: Docker Evolution con hot-reload ≤2s como ESTÁNDAR
+**Comando estándar**: `./start.sh start` (Docker dev + PM2 frontend)
+**Hot-reload**: ≤2s GARANTIZADO (no es opcional)
 **Soporte**: Slack #dev-support

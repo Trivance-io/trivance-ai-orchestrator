@@ -36,6 +36,51 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# 🔨 Docker Development Mode (NUEVA FUNCIÓN)
+docker_dev_mode() {
+    local compose_file="$1"
+    local timeout="${2:-$TIMEOUT_FIRST_BUILD}"
+    
+    log "INFO" "🚀 Iniciando modo desarrollo Docker con hot-reload"
+    log "INFO" "📁 Compose file: $compose_file"
+    
+    # Verificar que existe el archivo compose
+    if [[ ! -f "$compose_file" ]]; then
+        log "ERROR" "❌ Archivo compose no encontrado: $compose_file"
+        return 1
+    fi
+    
+    local original_dir=$(pwd)
+    local compose_dir=$(dirname "$compose_file")
+    cd "$compose_dir"
+    
+    # Build con feedback visual claro
+    log "BUILD" "🔨 Construyendo imágenes de desarrollo..."
+    log "INFO" "⏱️  Esto puede tomar 2-10 minutos en primera ejecución"
+    log "INFO" "📝 Los warnings de Prisma sobre OpenSSL son NORMALES y no afectan funcionalidad"
+    
+    if ! docker compose -f "$(basename "$compose_file")" build --parallel 2>&1 | while IFS= read -r line; do
+        # Filtrar warnings conocidos de Prisma para no confundir al usuario
+        if [[ ! "$line" =~ "Prisma failed to detect the libssl/openssl version" ]] && 
+           [[ ! "$line" =~ "Please manually install OpenSSL" ]] && 
+           [[ ! "$line" =~ "Defaulting to \"openssl-1.1.x\"" ]]; then
+            echo "$line"
+        fi
+    done; then
+        log "ERROR" "❌ Build falló - revisar Dockerfiles"
+        cd "$original_dir"
+        return 1
+    fi
+    
+    log "SUCCESS" "✅ Build completado exitosamente"
+    log "INFO" "🚀 Iniciando servicios con hot-reload..."
+    
+    # Start con watch mode y feedback claro
+    smart_docker_operation "up" "$compose_file" "" "$timeout" "--watch --remove-orphans"
+    
+    cd "$original_dir"
+}
+
 # 📝 Logging mejorado
 log() {
     local level="$1"
@@ -396,6 +441,9 @@ main() {
         "up")
             smart_docker_operation "up" "$2" "${3:-}" "${4:-}"
             ;;
+        "dev")
+            docker_dev_mode "$2" "${3:-$TIMEOUT_FIRST_BUILD}"
+            ;;
         "restart")
             smart_docker_operation "restart" "$2" "${3:-}" "${4:-}"
             ;;
@@ -406,15 +454,18 @@ main() {
             smart_health_check "$2" "$3" "${4:-}"
             ;;
         *)
+            echo "🧠 Smart Docker Manager - Trivance Docker Evolution"
             echo "Uso: $0 OPERATION [args...]"
             echo
             echo "Operaciones disponibles:"
+            echo "  🚀 dev COMPOSE_FILE [TIMEOUT]             - Modo desarrollo con hot-reload"
             echo "  up COMPOSE_FILE [SERVICES] [TIMEOUT]     - Iniciar servicios"
             echo "  restart COMPOSE_FILE [SERVICES] [TIMEOUT] - Reiniciar servicios"
             echo "  stop COMPOSE_FILE [SERVICES] [TIMEOUT]    - Detener servicios"
             echo "  health SERVICE_NAME URL [TIMEOUT]         - Verificar salud"
             echo
             echo "Ejemplos:"
+            echo "  🔥 $0 dev docker-compose.dev.yml          - HOT RELOAD DEVELOPMENT"
             echo "  $0 up docker-compose.yaml 'ms_level_up_management ms_trivance_auth'"
             echo "  $0 health 'Management API' http://localhost:3000/health"
             exit 1

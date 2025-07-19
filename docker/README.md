@@ -67,6 +67,34 @@ if (process.env.APP_ENV === 'development') {
 }
 ```
 
+## 🔧 Configuración de Red y Servicios
+
+### Network Aliases
+Para garantizar compatibilidad entre servicios, docker-compose.dev.yml utiliza network aliases:
+
+```yaml
+ms_level_up_management:
+  networks:
+    trivance_dev:
+      aliases:
+        - trivance_management  # Alias para compatibilidad con Auth Service
+```
+
+**¿Por qué es necesario?**
+- El contenedor se llama `trivance_mgmt_dev` (nombre corto para evitar límites)
+- Auth Service espera conectarse a `trivance_management` (nombre histórico)
+- El alias permite que ambos nombres resuelvan al mismo servicio
+- Evita modificar el código fuente del UnifiedLogger
+
+### Comunicación entre Servicios
+```
+Auth Service (UnifiedLogger) → http://trivance_management:3000 → Management API
+                                         ↓
+                               Network Alias Resolution
+                                         ↓
+                                 trivance_mgmt_dev container
+```
+
 ## 🚨 IMPORTANTE: SEGURIDAD DE CREDENCIALES
 
 ### ⚠️ NUNCA COMMITEAR ARCHIVOS DE CONFIGURACIÓN CON CREDENCIALES REALES

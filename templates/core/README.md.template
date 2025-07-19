@@ -68,7 +68,7 @@ echo "🎉 Setup completo - workspace listo para desarrollo"
 # 🎮 Comando principal - menú interactivo inteligente
 ./start.sh
 
-# ⚡ O directamente iniciar todos los servicios
+# ⚡ Iniciar desarrollo con hot-reload ≤2s (ESTÁNDAR)
 ./start.sh start
 
 # 📊 Ver estado actual
@@ -104,6 +104,11 @@ npm run start:qa        # Se conecta a servicios remotos de QA
 ```
 
 ## 🎛️ GESTIÓN DE ENVIRONMENTS
+
+### 🎯 Importante: Desarrollo vs QA/Producción
+
+- **Desarrollo Local**: SIEMPRE usa Docker con hot-reload ≤2s (estándar por defecto)
+- **QA/Producción**: Requiere proceso diferente con imágenes optimizadas (no hot-reload)
 
 ### Cambiar Environment en UN Comando
 ```bash
@@ -145,7 +150,7 @@ El sistema genera automáticamente:
 ```
 
 **Opciones disponibles:**
-- 🚀 **Iniciar servicios** - Docker + PM2 automático
+- 🚀 **Iniciar desarrollo** - Docker + hot-reload ≤2s (ESTÁNDAR)
 - 📊 **Ver estado** - Servicios, puertos y health checks
 - 🔄 **Cambiar environment** - Local, QA, Production
 - 🛑 **Detener servicios** - Cleanup completo
@@ -155,11 +160,13 @@ El sistema genera automáticamente:
 
 ### Comandos Directos
 ```bash
-./start.sh start      # Iniciar todos los servicios
-./start.sh stop       # Detener todos los servicios
-./start.sh status     # Ver estado actual
-./start.sh setup      # Reconfigurar desde cero
+./start.sh start   # 🚀 Iniciar desarrollo (Docker + hot-reload ≤2s)
+./start.sh stop    # 🛑 Detener todos los servicios
+./start.sh status  # 📊 Ver estado del sistema
+./start.sh setup   # 🔧 Reconfigurar desde cero
 ```
+
+**⚡ IMPORTANTE**: El modo desarrollo con hot-reload ≤2s es el ESTÁNDAR por defecto.
 
 ## 📚 DOCUMENTACIÓN COMPLETA
 

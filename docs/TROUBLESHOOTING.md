@@ -119,6 +119,32 @@ grep "DATABASE_URL\|DB_MONGO" trivance-dev-config/docker/.env.docker-*
 ./trivance-dev-config/scripts/envs.sh switch local
 ```
 
+### Error "fetch failed" en UnifiedLogger
+Si ves errores como:
+```
+[Nest] 29  - 07/19/2025, 3:03:59 PM    WARN [UnifiedLogger] Error sending log to unified logger: fetch failed
+```
+
+**Causa**: Auth Service no puede conectarse a Management API.
+
+**Solución**: El archivo `docker-compose.dev.yml` incluye un network alias para resolver este problema:
+```yaml
+ms_level_up_management:
+  networks:
+    trivance_dev:
+      aliases:
+        - trivance_management  # Alias necesario para Auth Service
+```
+
+**Verificar**:
+```bash
+# Comprobar que el alias está funcionando
+docker exec trivance_auth_dev ping trivance_management
+
+# Ver logs del Management API
+docker logs trivance_mgmt_dev | grep "health"
+```
+
 ## ⚙️ Problemas de PM2 (Solo Frontend)
 
 ### PM2 no encontrado

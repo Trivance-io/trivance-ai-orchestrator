@@ -158,7 +158,7 @@ show_main_menu() {
         echo -e "  ${GREEN}1)${NC} 🔧 Configurar entorno completo (setup inicial)"
         echo -e "  ${YELLOW}   Las demás opciones estarán disponibles después del setup${NC}"
     else
-        echo -e "  ${GREEN}1)${NC} 🚀 Iniciar servicios"
+        echo -e "  ${GREEN}1)${NC} 🚀 Iniciar desarrollo (Docker + hot-reload ≤2s)"
         echo -e "  ${GREEN}2)${NC} 📊 Ver estado de servicios"
         echo -e "  ${GREEN}3)${NC} 🔄 Cambiar environment (actual: ${current_env})"
         echo -e "  ${GREEN}4)${NC} 🛑 Detener servicios"
@@ -198,19 +198,18 @@ execute_option() {
                 echo -e "${BLUE}🔧 Iniciando configuración completa...${NC}"
                 "${CONFIG_DIR}/setup.sh"
             else
-                # Verificar Docker antes de iniciar
+                # SIEMPRE usar docker-dev como estándar
+                echo -e "${PURPLE}🐳 Iniciando modo desarrollo Docker con hot-reload...${NC}"
+                echo -e "${CYAN}⚡ Hot-reload ≤2s es el ESTÁNDAR de desarrollo${NC}"
                 if ! check_docker; then
-                    echo -e "${RED}❌ No puedes iniciar servicios sin Docker${NC}"
+                    echo -e "${RED}❌ Docker es requerido${NC}"
                     read -p "Presiona Enter para continuar..."
                     return
                 fi
-                echo -e "${BLUE}🚀 Iniciando servicios...${NC}"
-                # Llamar script en subshell para evitar problemas de timeout
+                echo -e "${CYAN}🔍 Los logs estarán disponibles en http://localhost:4000${NC}"
                 (
-                    # Ejecutar en subshell para aislar el proceso
-                    "${CONFIG_DIR}/scripts/utils/start-services-smart.sh" start
+                    "${CONFIG_DIR}/scripts/utils/smart-docker-manager.sh" dev "${CONFIG_DIR}/docker/docker-compose.dev.yml"
                 )
-                # El menú seguirá funcionando después
             fi
             ;;
         "2")
@@ -458,19 +457,22 @@ main() {
 if [[ $# -gt 0 ]]; then
     case "$1" in
         "start")
-            # Usar inicio inteligente con Docker
-            if [[ -x "${CONFIG_DIR}/scripts/utils/start-services-smart.sh" ]]; then
-                "${CONFIG_DIR}/scripts/utils/start-services-smart.sh" start
-            else
-                # Fallback al método tradicional
-                if ! command -v pm2 &> /dev/null; then
-                    echo "Instalando PM2..."
-                    npm install -g pm2
-                fi
-                pm2 start "${CONFIG_DIR}/../ecosystem.config.js" 2>/dev/null || {
-                    "${CONFIG_DIR}/start-all.sh"
-                }
+            # SIEMPRE usar docker-dev como estándar
+            echo -e "${PURPLE}🐳 Iniciando modo desarrollo Docker con hot-reload...${NC}"
+            echo -e "${CYAN}⚡ Hot-reload ≤2s es el ESTÁNDAR de desarrollo${NC}"
+            if ! check_docker; then
+                echo -e "${RED}❌ Docker es requerido${NC}"
+                exit 1
             fi
+            "${CONFIG_DIR}/scripts/utils/smart-docker-manager.sh" dev "${CONFIG_DIR}/docker/docker-compose.dev.yml"
+            ;;
+        "docker-dev")
+            echo -e "${PURPLE}🐳 Iniciando modo desarrollo Docker con hot-reload...${NC}"
+            if ! check_docker; then
+                echo -e "${RED}❌ Docker es requerido para este modo${NC}"
+                exit 1
+            fi
+            "${CONFIG_DIR}/scripts/utils/smart-docker-manager.sh" dev "${CONFIG_DIR}/docker/docker-compose.dev.yml"
             ;;
         "stop")
             pm2 stop all

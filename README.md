@@ -47,7 +47,6 @@ docker ps         # Verifica que Docker esté corriendo
 ```bash
 git clone https://github.com/GLab-Projects/trivance-dev-config.git
 cd trivance-dev-config
-Configura V.1 de Claude.md (IMPORTANTE ACTUALIZAR LUEGO DE FINALIZAR LA CONFIGURACION COMPLETA)
 ```
 
 ### Paso 2: Ejecutar setup automático
@@ -147,11 +146,13 @@ Opciones disponibles:
 
 También puedes usar comandos directos:
 ```bash
-./start.sh start    # Iniciar servicios (Docker + PM2)
-./start.sh stop     # Detener servicios
-./start.sh status   # Ver estado
-./start.sh setup    # Reconfigurar todo
+./start.sh start   # 🚀 Iniciar desarrollo (Docker + hot-reload ≤2s)
+./start.sh stop    # 🛑 Detener todos los servicios
+./start.sh status  # 📊 Ver estado del sistema
+./start.sh setup   # 🔧 Reconfigurar desde cero
 ```
+
+**⚡ IMPORTANTE**: El modo desarrollo con hot-reload ≤2s es el ESTÁNDAR. No es opcional.
 
 ### 📱 Desarrollo Mobile con Docker:
 ```bash
@@ -167,6 +168,11 @@ npm run start:qa        # Se conecta a servicios remotos de QA
 **✨ Configuración automática**: La app móvil genera automáticamente `src/environments/env.local.ts` con las configuraciones Docker locales.
 
 ## 🔄 Gestión de Environments
+
+### 🎯 Importante: Desarrollo vs QA/Producción
+
+- **Desarrollo Local**: SIEMPRE usa Docker con hot-reload ≤2s (estándar por defecto)
+- **QA/Producción**: Requiere proceso diferente con imágenes optimizadas (no hot-reload)
 
 ### Cambiar entre ambientes:
 ```bash

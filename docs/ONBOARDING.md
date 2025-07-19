@@ -56,7 +56,7 @@ cd trivance-dev-config
 ### Paso 3: Iniciar Servicios
 ```bash
 cd ..  # Volver al workspace
-./start.sh
+./start.sh start   # 🚀 ESTÁNDAR: Docker dev + hot-reload ≤2s
 ```
 
 ## 🎉 ¡Listo!
@@ -86,10 +86,10 @@ npm start
 
 ### Comandos Diarios
 ```bash
-./start.sh          # Menú interactivo
-./start.sh start    # Iniciar servicios
-./start.sh status   # Ver estado
-./start.sh stop     # Detener servicios
+./start.sh start    # 🚀 ESTÁNDAR: Docker dev + hot-reload ≤2s
+./start.sh status   # 📊 Ver estado
+./start.sh stop     # 🛑 Detener servicios
+./start.sh          # 📋 Menú interactivo (opciones avanzadas)
 ```
 
 ## 🔧 Desarrollo Diario
@@ -97,12 +97,12 @@ npm start
 ### Flujo Típico
 ```bash
 # 1. Iniciar día
-./start.sh start
+./start.sh start    # 🚀 Docker dev + hot-reload ≤2s GARANTIZADO
 
 # 2. Verificar que todo funciona
 ./start.sh status
 
-# 3. Desarrollar (los servicios se recargan automáticamente)
+# 3. Desarrollar (hot-reload ≤2s en TODOS los servicios)
 
 # 4. Antes de commit (OBLIGATORIO)
 ./trivance-dev-config/scripts/utils/verify-compilation.sh
@@ -140,7 +140,7 @@ docker logs -f trivance_management  # Logs del backend
 ### Error: Puerto en uso
 ```bash
 pm2 stop all
-./start.sh start
+./start.sh start    # 🚀 Reiniciar con Docker dev estándar
 ```
 
 ### Error: Dependencias
