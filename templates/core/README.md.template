@@ -1,313 +1,360 @@
-# 🚀 Trivance Platform - Workspace Multi-Repo
+# 🚀 Trivance Platform - Workspace Development
 
-**Workspace completo** para desarrollo de Trivance Platform con **gestión automática de environments** y **arquitectura híbrida Docker + PM2**.
+> **Workspace completo para desarrollo de Trivance Platform configurado automáticamente**
+> 
+> **⚡ IMPORTANTE**: Este workspace contiene TODA la plataforma configurada y lista para usar.
 
-[![Docker](https://img.shields.io/badge/Docker-Required-blue.svg)](https://www.docker.com/)
-[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.3+-blue.svg)](https://www.typescriptlang.org/)
-[![License](https://img.shields.io/badge/License-Private-red.svg)]()
+## 🎯 ¿Qué es este workspace?
 
-> **🎯 Generado automáticamente** desde [trivance-dev-config](./trivance-dev-config/README.md) • **Configuración centralizada y sincronizada**
+Este es el **workspace completo de Trivance** generado automáticamente desde [trivance-dev-config](./trivance-dev-config/README.md). Contiene todos los repositorios, configuraciones y herramientas necesarias para desarrollar la plataforma completa.
 
-## 🏗️ Estructura del Workspace Completo
+### ✅ Lo que ya tienes configurado:
+- **4 repositorios** clonados y configurados
+- **Arquitectura híbrida** Docker (backends) + PM2 (frontend)
+- **Variables de entorno** generadas automáticamente
+- **Hot-reload ≤2s** garantizado
+- **Sistema de environments** (local/QA/prod)
+- **Secrets únicos y seguros**
+
+## 🏗️ Arquitectura del Workspace
 
 ```
-📁 Trivance Platform/                    # 📁 Workspace principal auto-creado
-├── CLAUDE.md                           # 🤖 Configuración Claude Code (auto-generado)
-├── README.md                           # 📖 Este archivo (auto-generado)
-├── start.sh                            # 🚀 Comando principal (enlace simbólico)
-├── TrivancePlatform.code-workspace     # 💻 VS Code workspace (auto-configurado)
-├── .gitignore                          # 🚫 Git ignore maestro (auto-creado)
-├── ecosystem.config.js                 # ⚙️ PM2 config híbrido (auto-generado)
-├── envs/                               # 🔐 Configuraciones por environment
-│   ├── .current_environment           # 📍 Environment actual
-│   ├── ENVIRONMENTS.md                 # 📚 Guía completa
-│   └── *.env                           # 🔒 Archivos de configuración
-├── logs/                               # 📊 Logs de PM2
-├── .trivance-secrets                   # 🔑 Secrets generados (NO en git)
-├── 🔧 trivance-dev-config/             # REPO: Configuraciones maestras
-├── 🌐 level_up_backoffice/             # REPO: Frontend Admin (React + Vite) - PM2
-├── 🚀 ms_level_up_management/          # REPO: API Backend (NestJS + GraphQL) - Docker  
-├── 🔐 ms_trivance_auth/                # REPO: Auth Service (NestJS) - Docker
-└── 📱 trivance-mobile/                 # REPO: Mobile App (React Native + Expo)
+📁 tu-workspace/
+├── 🔧 trivance-dev-config/          # ← CONFIGURACIÓN MAESTRA
+│   ├── scripts/start.sh            # ← COMANDO PRINCIPAL
+│   ├── config/                     # Variables y secrets
+│   ├── docker/                     # Orquestación Docker
+│   └── docs/                       # Documentación especializada
+├── 🏢 ms_level_up_management/       # Backend principal (NestJS + GraphQL)
+├── 🔐 ms_trivance_auth/             # Servicio de autenticación (NestJS)
+├── 🖥️ level_up_backoffice/          # Frontend admin (React + Vite)
+├── 📱 trivance-mobile/              # App móvil (React Native + Expo)
+├── 🎛️ envs/                         # Configuración de environments
+├── 🚀 start.sh                     # → Comando maestro (symlink)
+└── 📖 CLAUDE.md                     # Guía para Claude Code AI
 ```
 
-## 🐳 Arquitectura Híbrida Inteligente
+### 🐳 Arquitectura Híbrida Docker + PM2
 
-### ⚡ Modo Híbrido: Lo Mejor de Ambos Mundos
-
-- **🗄️ Bases de Datos**: PostgreSQL y MongoDB en Docker (aislamiento y consistencia)
-- **🚀 APIs Backend**: NestJS en contenedores Docker (configuración idéntica en todos los environments)
-- **🌐 Frontend**: React con PM2 para hot-reload instantáneo (desarrollo ágil)
-- **📱 Mobile**: Expo con conexión automática a APIs Docker locales
-
-### 🔄 Flujo de Datos Optimizado
 ```
-[Mobile App] ←→ [Auth Docker:3001] ←→ [MongoDB Docker:27017]
-      ↓               ↓
-[Frontend PM2:5173] ←→ [Management API Docker:3000] ←→ [PostgreSQL Docker:5432]
+┌─────────────────────────────────────────────────────────────┐
+│                    TRIVANCE PLATFORM                       │
+├─────────────────────────────────────────────────────────────┤
+│ FRONTEND LAYER (PM2)                                       │
+│ ┌─────────────────┐                                        │
+│ │ Backoffice      │ ←→ Hot-reload ≤2s (Vite + PM2)        │
+│ │ localhost:5173  │                                        │
+│ └─────────────────┘                                        │
+├─────────────────────────────────────────────────────────────┤
+│ BACKEND LAYER (Docker)                                     │
+│ ┌─────────────────┐ ┌─────────────────┐                   │
+│ │ Management API  │ │ Auth Service    │                   │
+│ │ localhost:3000  │ │ localhost:3001  │                   │
+│ │ (GraphQL)       │ │ (REST)          │                   │
+│ └─────────────────┘ └─────────────────┘                   │
+├─────────────────────────────────────────────────────────────┤
+│ DATABASE LAYER (Docker)                                    │
+│ ┌─────────────────┐ ┌─────────────────┐                   │
+│ │ PostgreSQL      │ │ MongoDB         │                   │
+│ │ localhost:5432  │ │ localhost:27017 │                   │
+│ └─────────────────┘ └─────────────────┘                   │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-### 🎯 Beneficios de la Arquitectura
-- ✅ **Development Speed**: Hot-reload para frontend + APIs estables en Docker
-- ✅ **Environment Parity**: Backends idénticos en local, QA y production
-- ✅ **Database Consistency**: Mismas versiones y configuraciones en Docker
-- ✅ **Zero Config**: Todo funciona automáticamente al ejecutar `./start.sh`
+## 🚀 Quick Start (Ya Configurado)
 
-## ⚡ QUICK START (5 minutos)
+### ⚡ Iniciar Desarrollo
 
-### 1️⃣ **Setup Inicial (Ya Hecho)**
 ```bash
-# ✅ Ya realizado automáticamente durante la configuración inicial
-# El workspace está 100% configurado y listo para usar
-echo "🎉 Setup completo - workspace listo para desarrollo"
-```
-
-### 2️⃣ **Iniciar Servicios**
-```bash
-# 🎮 Comando principal - menú interactivo inteligente
+# COMANDO PRINCIPAL - Menú interactivo completo
 ./start.sh
 
-# ⚡ Iniciar desarrollo con hot-reload ≤2s (ESTÁNDAR)
+# Iniciar modo desarrollo (Docker + PM2 con hot-reload ≤2s)
 ./start.sh start
 
-# 📊 Ver estado actual
+# Ver estado del sistema
 ./start.sh status
 
-# 🛑 Detener todos los servicios
+# Detener todos los servicios
 ./start.sh stop
 ```
 
-### 3️⃣ **¡Listo! URLs de Desarrollo**
+### 🌐 URLs del Sistema
 
-| Servicio | URL | Tipo | Descripción |
-|----------|-----|------|-------------|
-| **🌐 Frontend Admin** | http://localhost:5173 | PM2 | Panel administrativo con hot-reload |
-| **🚀 Management API** | http://localhost:3000 | Docker | API principal con GraphQL |
-| **🔐 Auth Service** | http://localhost:3001 | Docker | Servicio de autenticación |
-| **📊 GraphQL Playground** | http://localhost:3000/graphql | Docker | Explorador interactivo GraphQL |
-| **📖 Auth API Docs** | http://localhost:3001/api-docs | Docker | Documentación Swagger |
-| **🔍 Log Viewer** | **http://localhost:4000** | **Docker** | **Sistema de observabilidad unificado** |
-| **📊 Dozzle Logs** | http://localhost:9999 | Docker | Monitor de logs Docker en tiempo real |
-| **🗄️ PostgreSQL** | localhost:5432 | Docker | Base de datos principal |
-| **🗄️ MongoDB** | localhost:27017 | Docker | Base de datos auth |
+Una vez iniciado, accede a:
 
-### 4️⃣ **Mobile App**
+| Servicio | URL | Tecnología | Descripción |
+|----------|-----|------------|-------------|
+| **🖥️ Frontend Admin** | http://localhost:5173 | PM2 + Vite | Panel de administración React |
+| **🔧 Management API** | http://localhost:3000 | Docker | Backend principal NestJS + GraphQL |
+| **🔐 Auth Service** | http://localhost:3001 | Docker | Autenticación y autorización |
+| **🎮 GraphQL Playground** | http://localhost:3000/graphql | Docker | Explorador de APIs GraphQL |
+| **🔍 Log Viewer** | http://localhost:4000 | Docker | Sistema de observabilidad unificado |
+| **📊 Dozzle** | http://localhost:9999 | Docker | Monitor de logs en tiempo real |
+| **📱 Mobile (Expo)** | *Dinámico* | Expo | App móvil React Native |
+
+### 🔥 Hot-Reload Garantizado ≤2s
+
+- **Frontend**: Cambios visibles instantáneamente (Vite + PM2)
+- **Backend**: Recarga automática en contenedores Docker
+- **Mobile**: Metro bundler con recarga rápida
+- **Environments**: Switch automático entre local/QA/prod
+
+## 🎛️ Gestión de Environments
+
+### 🔄 Cambiar Environments
+
 ```bash
-cd trivance-mobile
-
-# 🐳 Para desarrollo con Docker local (recomendado)
-npm run start:docker    # Se conecta automáticamente a APIs Docker
-
-# 🧪 Para desarrollo con QA
-npm run start:qa        # Se conecta a servicios remotos de QA
-```
-
-## 🎛️ GESTIÓN DE ENVIRONMENTS
-
-### 🎯 Importante: Desarrollo vs QA/Producción
-
-- **Desarrollo Local**: SIEMPRE usa Docker con hot-reload ≤2s (estándar por defecto)
-- **QA/Producción**: Requiere proceso diferente con imágenes optimizadas (no hot-reload)
-
-### Cambiar Environment en UN Comando
-```bash
-# 🏠 Desarrollo local (99% del tiempo)
-./trivance-dev-config/scripts/envs.sh switch local
-
-# 🧪 Testing en QA
-./trivance-dev-config/scripts/envs.sh switch qa
-
-# 🚀 Production (con confirmación de seguridad)
-./trivance-dev-config/scripts/envs.sh switch production
-```
-
-### Ver Estado Completo del Sistema
-```bash
-# 📊 Status completo con validaciones
+# Ver environment actual
 ./trivance-dev-config/scripts/envs.sh status
 
-# ❓ Ver todos los comandos disponibles
-./trivance-dev-config/scripts/envs.sh help
+# Cambiar environment (cambia TODOS los configs automáticamente)
+./trivance-dev-config/scripts/envs.sh switch local       # Desarrollo
+./trivance-dev-config/scripts/envs.sh switch qa          # QA/Testing
+./trivance-dev-config/scripts/envs.sh switch production  # Producción
 
-# 🔍 Validar configuración actual
+# Validar configuración
 ./trivance-dev-config/scripts/envs.sh validate
 ```
 
-### 🔄 Auto-Generación de Archivos
+### 🧬 Sistema de Triple Variables
 
-El sistema genera automáticamente:
-- ✅ **Archivos .env** para todos los repositorios
-- ✅ **ecosystem.config.js** para PM2 híbrido
-- ✅ **env.local.ts** para mobile app (TypeScript)
-- ✅ **Configuraciones Docker** específicas por environment
-
-## 🎮 Comando Principal: ./start.sh
-
-### Menú Interactivo
 ```bash
-./start.sh  # Muestra menú con detección automática
+NODE_ENV=production    # Docker stability (siempre production)
+RUN_MODE=local        # Execution mode (local|qa|production)  
+APP_ENV=development   # Application logic (development|qa|production)
 ```
 
-**Opciones disponibles:**
-- 🚀 **Iniciar desarrollo** - Docker + hot-reload ≤2s (ESTÁNDAR)
-- 📊 **Ver estado** - Servicios, puertos y health checks
-- 🔄 **Cambiar environment** - Local, QA, Production
-- 🛑 **Detener servicios** - Cleanup completo
-- 🔍 **Verificar salud** - Validaciones end-to-end
-- 🐳 **Gestión Docker** - Logs, rebuild, reset DBs
-- 🗑️ **Limpiar workspace** - Reset completo
+## 🔧 Desarrollo por Repositorio
 
-### Comandos Directos
+### 🧪 Testing
+
 ```bash
-./start.sh start   # 🚀 Iniciar desarrollo (Docker + hot-reload ≤2s)
-./start.sh stop    # 🛑 Detener todos los servicios
-./start.sh status  # 📊 Ver estado del sistema
-./start.sh setup   # 🔧 Reconfigurar desde cero
+# Backend API (ms_level_up_management)
+cd ms_level_up_management
+npm test                    # Unit tests
+npm run test:watch          # Watch mode
+npm run test:e2e           # End-to-end
+
+# Frontend (level_up_backoffice)
+cd level_up_backoffice
+npm test                    # Tests con Vitest
+
+# Mobile (trivance-mobile)
+cd trivance-mobile
+npm test                    # Unit tests
+npm run type-check          # TypeScript validation
 ```
 
-**⚡ IMPORTANTE**: El modo desarrollo con hot-reload ≤2s es el ESTÁNDAR por defecto.
+### 🎨 Linting y Formateo
 
-## 📚 DOCUMENTACIÓN COMPLETA
-
-### 📖 Documentación Principal
-- **🏗️ [CLAUDE.md](CLAUDE.md)** - Configuración completa para Claude Code
-- **🎛️ [ENVIRONMENTS.md](envs/ENVIRONMENTS.md)** - Guía completa de environments
-- **🔧 [trivance-dev-config](trivance-dev-config/README.md)** - Setup y configuración maestra
-
-### 📁 Por Repositorio
-- **🌐 [Frontend Admin](level_up_backoffice/README.md)** - Panel administrativo React
-- **🚀 [Management API](ms_level_up_management/README.md)** - Backend principal NestJS + GraphQL
-- **🔐 [Auth Service](ms_trivance_auth/README.md)** - Microservicio de autenticación
-- **📱 [Mobile App](trivance-mobile/README.md)** - Aplicación React Native + Expo
-
-### 🛠️ Documentación Técnica
-| Documento | Descripción |
-|-----------|-------------|
-| [DOCKER.md](trivance-dev-config/docs/DOCKER.md) | Arquitectura Docker e integración híbrida |
-| [COMMANDS.md](trivance-dev-config/docs/COMMANDS.md) | Todos los comandos y scripts disponibles |
-| [TROUBLESHOOTING.md](trivance-dev-config/docs/TROUBLESHOOTING.md) | Solución de problemas comunes |
-| [ONBOARDING.md](trivance-dev-config/docs/ONBOARDING.md) | Guía para nuevos desarrolladores |
-| [WORKFLOWS.md](trivance-dev-config/docs/WORKFLOWS.md) | Metodologías y procesos del equipo |
-
-## 🆘 COMANDOS DE EMERGENCIA
-
-### 🔧 Solución Rápida de Problemas
 ```bash
-# 🛑 Parar todo y limpiar
-./start.sh stop
-docker system prune -f
-
-# 🔄 Reset completo a configuración local
-./trivance-dev-config/scripts/envs.sh switch local
-
-# 🚀 Reiniciar todo desde cero
-./start.sh setup
-
-# 🔍 Verificar que todo funciona
-./start.sh status
+# En cada repositorio
+npm run lint               # ESLint
+npm run lint:fix          # ESLint con auto-fix
+npm run format            # Prettier
+npm run type-check        # TypeScript check
 ```
 
-### 🐳 Comandos Docker Específicos
+### 🗄️ Base de Datos (Prisma)
+
 ```bash
-# Ver estado de contenedores
-docker ps
+cd ms_level_up_management
+npx prisma migrate dev      # Nueva migración
+npx prisma generate         # Regenerar cliente
+npx prisma studio          # GUI de base de datos
+npx prisma db push         # Sincronizar schema
+```
 
-# Ver logs de servicios específicos
-docker logs trivance_auth           # Auth service
-docker logs trivance_management     # Management API
-docker logs trivance_postgres       # PostgreSQL
-docker logs trivance_mongodb        # MongoDB
+## 🐳 Docker Management
 
-# Reconstruir imágenes
+### 🛠️ Smart Docker Manager (Recomendado)
+
+```bash
+cd trivance-dev-config/scripts/utils
+./smart-docker-manager.sh dev ../docker/docker-compose.dev.yml     # Desarrollo con hot-reload
+./smart-docker-manager.sh up ../docker/docker-compose.dev.yml      # Iniciar servicios
+./smart-docker-manager.sh down ../docker/docker-compose.dev.yml    # Detener servicios
+./smart-docker-manager.sh logs ../docker/docker-compose.dev.yml    # Ver logs
+```
+
+### 🐳 Docker Tradicional
+
+```bash
 cd trivance-dev-config/docker
-docker compose build --no-cache
-
-# Reset completo de bases de datos (⚠️ DESTRUCTIVO)
-docker compose down -v
-docker compose up -d postgres mongodb
+docker compose -f docker-compose.dev.yml up -d     # Iniciar
+docker compose -f docker-compose.dev.yml down      # Detener
+docker compose -f docker-compose.dev.yml logs -f   # Logs en tiempo real
 ```
 
-### 📊 Comandos PM2 (Frontend)
+## 📊 Observabilidad
+
+### 🔍 Log Viewer Unificado (Puerto 4000)
+
 ```bash
-# Estado de servicios PM2
-pm2 status
+# Acceder al Log Viewer
+open http://localhost:4000
 
-# Logs en tiempo real
-pm2 logs backoffice
-
-# Reiniciar frontend
-pm2 restart backoffice
-
-# Monitor interactivo
-pm2 monit
+# API programática
+curl "http://localhost:4000/api/logs/search?level=error&limit=20"
+curl "http://localhost:4000/api/logs/search?service=backend"
+curl "http://localhost:4000/api/logs/search?text=unauthorized"
 ```
 
-## 🔒 Seguridad y Secrets
+### 📊 Dozzle (Puerto 9999)
 
-### 🔑 Gestión Automática de Secrets
-- ✅ **Secrets únicos** generados automáticamente para cada instalación
-- ✅ **No hardcoded credentials** en ningún archivo del repositorio
-- ✅ **Archivo `.trivance-secrets`** excluido de Git automáticamente
-- ✅ **Rotación segura** de secrets con un comando
-
-### 🛡️ Verificaciones de Seguridad
 ```bash
-# El sistema previene automáticamente:
-# - Ejecución en entornos de producción sin confirmación
-# - Uso de secrets por defecto en environments críticos
-# - Exposición accidental de credenciales en logs
+# Monitor visual de logs Docker
+open http://localhost:9999
 ```
 
-## 🎯 Para Desarrolladores
+## 🔐 Seguridad Integrada
 
-### 🆕 Nuevo en el Proyecto
-1. **Empezar aquí**: [ONBOARDING.md](trivance-dev-config/docs/ONBOARDING.md)
-2. **Configurar Claude**: Revisar [CLAUDE.md](CLAUDE.md)
-3. **Entender flujos**: [WORKFLOWS.md](trivance-dev-config/docs/WORKFLOWS.md)
+### 🔑 Secrets Auto-generados
 
-### 👨‍💻 Desarrollador Experimentado
-1. **Comandos rápidos**: [COMMANDS.md](trivance-dev-config/docs/COMMANDS.md)
-2. **Arquitectura Docker**: [DOCKER.md](trivance-dev-config/docs/DOCKER.md)
-3. **Troubleshooting**: [TROUBLESHOOTING.md](trivance-dev-config/docs/TROUBLESHOOTING.md)
+Cada instalación genera secrets únicos automáticamente:
+```bash
+# Se crean en trivance-dev-config/config/.trivance-secrets
+AUTH_JWT_SECRET=jwt_[64_chars_random]_[timestamp]
+MGMT_JWT_SECRET=jwt_[64_chars_random]_[timestamp]
+AUTH_ENCRYPT_SECRET=[64_chars_random]
+# ... todos los secrets necesarios
+```
 
-### 🚀 DevOps y Deploy
-1. **Environments**: [ENVIRONMENTS.md](envs/ENVIRONMENTS.md)
-2. **Procesos**: [WORKFLOWS.md](trivance-dev-config/docs/WORKFLOWS.md)
-3. **Monitoreo**: Scripts de validación automática
+### 🛡️ Principios de Seguridad
 
-## 🔗 Enlaces y Recursos
+- ✅ **Secrets únicos**: Cada instalación tiene secrets diferentes
+- ✅ **Git ignore automático**: Archivos sensibles nunca se commitean
+- ✅ **Permisos restrictivos**: Archivos de secrets con permisos 600
+- ✅ **Zero hardcoding**: No hay credenciales en código
+- ✅ **Environment isolation**: QA/Prod requieren configuración manual
 
-### 🌐 Repositorios del Ecosistema
-- **[GLab-Projects/trivance-dev-config](https://github.com/GLab-Projects/trivance-dev-config)** - Configuraciones maestras
-- **[GLab-Projects/ms_level_up_management](https://github.com/GLab-Projects/ms_level_up_management)** - API principal
-- **[GLab-Projects/ms_trivance_auth](https://github.com/GLab-Projects/ms_trivance_auth)** - Servicio de auth
-- **[GLab-Projects/level_up_backoffice](https://github.com/GLab-Projects/level_up_backoffice)** - Frontend admin
-- **[GLab-Projects/trivance-mobile](https://github.com/GLab-Projects/trivance-mobile)** - App móvil
+## 🚨 Troubleshooting
 
-### 📞 Soporte y Escalación
-- **📝 Issues**: Usar GitHub Issues en el repo correspondiente
-- **💬 Slack**: Canal #dev-support para consultas rápidas
-- **📖 Docs**: Documentación completa en cada repositorio
-- **🆘 Emergencias**: Contactar al tech lead directamente
+### ❌ Problemas Comunes
+
+**Error: "Docker no está corriendo"**
+```bash
+# Solución:
+1. Abrir Docker Desktop
+2. Esperar a que diga "Running"
+3. Ejecutar: docker ps
+4. Si funciona, reintentar: ./start.sh start
+```
+
+**Error: "Puerto ocupado"**
+```bash
+# Verificar qué está usando el puerto
+lsof -i:3000
+lsof -i:3001
+lsof -i:5173
+
+# Liberar puertos Node.js
+killall node
+
+# Reiniciar servicios
+./start.sh stop && ./start.sh start
+```
+
+### 🔄 Comandos de Recuperación
+
+```bash
+# Reset completo (cuando todo falla)
+./trivance-dev-config/scripts/utils/clean-workspace.sh
+./trivance-dev-config/setup.sh
+
+# Reinstalar dependencias específicas
+cd [repositorio] && rm -rf node_modules && npm install
+
+# Regenerar secrets
+rm trivance-dev-config/config/.trivance-secrets
+./trivance-dev-config/scripts/utils/generate-secrets.sh
+```
+
+## 📚 Documentación Completa
+
+Para información detallada, consulta:
+
+| Tema | Archivo | Descripción |
+|------|---------|-------------|
+| **🏗️ Arquitectura** | [trivance-dev-config/README.md](trivance-dev-config/README.md) | Documentación maestra completa |
+| **🤖 Claude Code** | [CLAUDE.md](CLAUDE.md) | Guía operacional para IA |
+| **🐳 Docker** | [trivance-dev-config/docs/DOCKER.md](trivance-dev-config/docs/DOCKER.md) | Configuración Docker avanzada |
+| **🎛️ Environments** | [envs/ENVIRONMENTS.md](envs/ENVIRONMENTS.md) | Sistema de environments completo |
+| **🔄 Workflows** | [trivance-dev-config/docs/WORKFLOWS.md](trivance-dev-config/docs/WORKFLOWS.md) | Flujos de desarrollo |
+| **🚨 Troubleshooting** | [trivance-dev-config/docs/TROUBLESHOOTING.md](trivance-dev-config/docs/TROUBLESHOOTING.md) | Solución de problemas |
+
+## 🎯 Para Nuevos Desarrolladores
+
+### 🆕 Primer Día
+
+1. **Leer primero**: [trivance-dev-config/README.md](trivance-dev-config/README.md)
+2. **Configurar Claude**: Revisar [CLAUDE.md](CLAUDE.md) 
+3. **Iniciar desarrollo**: `./start.sh start`
+4. **Verificar que todo funciona**: Visitar todas las URLs
+
+### 👨‍💻 Desarrollo Diario
+
+1. **Iniciar**: `./start.sh start`
+2. **Desarrollar**: Hot-reload automático ≤2s
+3. **Cambiar environments**: `./trivance-dev-config/scripts/envs.sh switch [env]`
+4. **Detener**: `./start.sh stop`
+
+### 🔧 Cuando Algo Falla
+
+1. **Verificar estado**: `./start.sh status`
+2. **Ver logs**: Log Viewer en http://localhost:4000
+3. **Reset si es necesario**: `./start.sh stop && ./start.sh start`
+4. **Consultar troubleshooting**: [trivance-dev-config/docs/TROUBLESHOOTING.md](trivance-dev-config/docs/TROUBLESHOOTING.md)
+
+## 🤖 Para Claude Code AI
+
+**Si eres Claude Code, LEE OBLIGATORIAMENTE:**
+
+1. **[CLAUDE.md](CLAUDE.md)** - Comandos operacionales y reglas críticas
+2. **[trivance-dev-config/README.md](trivance-dev-config/README.md)** - Arquitectura maestra
+3. **NUNCA recrear soluciones existentes** - El sistema ya está optimizado
+
+### ⚠️ Reglas Críticas
+
+- ❌ **NUNCA crear `start-all.sh` o `status.sh`** (eliminados por arquitectura limpia)
+- ❌ **NUNCA duplicar `ENVIRONMENTS.md`** (existe symlink a docs/)
+- ❌ **NUNCA modificar `docker-compose.dev.yml`** (configuración maestra)
+- ✅ **SIEMPRE usar `./start.sh`** (comando maestro unificado)
+- ✅ **SIEMPRE verificar documentación antes de actuar**
+
+## 🎯 Filosofía del Workspace
+
+### 🏛️ Principios
+
+1. **Configuration as Code** - Todo desde trivance-dev-config
+2. **Security by Default** - Secrets únicos automáticos
+3. **Developer Happiness** - Hot-reload ≤2s estándar
+4. **Zero Breaking Changes** - Actualizaciones sin romper
+5. **Single Source of Truth** - Un lugar para toda la configuración
+
+### 🎨 Diseño
+
+- **Español en docs** - Equipo hispano-hablante
+- **Emojis para navegación** - Identificación visual rápida
+- **Comandos ejecutables** - Todos los ejemplos funcionan
+- **Progressive disclosure** - Información básica primero
+- **Fail-fast philosophy** - Errores claros, soluciones específicas
 
 ---
 
-## 🤖 Configuración Automática
+## 🚀 ¿Listo para desarrollar?
 
-> **⚡ Auto-Sincronizado**: Este archivo se actualiza automáticamente desde `trivance-dev-config/templates/README.md.template`
-
-**🔄 Última sincronización**: $(date '+%Y-%m-%d %H:%M:%S')  
-**📦 Fuente de verdad**: [trivance-dev-config](trivance-dev-config/README.md)  
-**🤖 Optimizado para**: Claude Code + VS Code + GitHub Codespaces
-
-### Para actualizar este README:
-1. Editar: `trivance-dev-config/templates/README.md.template`
-2. Ejecutar: `./trivance-dev-config/setup.sh`
-3. Resultado: README.md actualizado automáticamente
+```bash
+# ¡3 comandos y estás desarrollando!
+./start.sh start
+open http://localhost:5173
+# ¡A programar! 🎉
+```
 
 ---
 
-**Última actualización**: Enero 2025 • **Mantenido por**: G-Lab Development Team
+**🔄 Última actualización**: Julio 2025 • **📦 Fuente**: [trivance-dev-config](trivance-dev-config/README.md)  
+**🤖 Generado automáticamente** desde template • **⚡ Hot-reload ≤2s estándar**
 
-*Parte del ecosistema Trivance Platform - Moderno, escalable y optimizado para desarrollo ágil.*
+*Parte del ecosistema Trivance Platform - Configurado automáticamente para máxima productividad*
