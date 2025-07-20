@@ -15,8 +15,10 @@ build/
 .env.test.local
 .env.production.local
 
-# Docker environment files - ACTIVOS
+# Docker environment files - ACTIVOS (generados automáticamente)
 docker/.env
+docker/.env.docker-*
+docker/.env.*
 templates/env-templates/.env.*
 
 # Docker environment files - PRODUCCIÓN  
@@ -109,6 +111,10 @@ Thumbs.db
 # Local state files
 .current_environment
 .trivance-secrets
+
+# Configuration directory (contiene secrets locales)
+config/.trivance-secrets
+config/*.local.*
 
 # Backup and temporary files  
 *.backup
