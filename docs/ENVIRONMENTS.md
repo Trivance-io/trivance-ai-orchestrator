@@ -74,7 +74,7 @@ Reinicia los servicios:
 ```bash
 ./start.sh              # Recomendado (symlink del workspace)
 # O alternativamente:
-./trivance-dev-config/start-all.sh
+./start.sh
 ```
 
 ## ⚙️ Sistema de Variables de Entorno - IMPORTANTE

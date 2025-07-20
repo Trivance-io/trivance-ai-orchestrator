@@ -31,20 +31,20 @@ cd trivance-dev-config
 ./setup.sh
 
 # Start all services
-./start-all.sh
+./start.sh
 ```
 
 ### Service Management with PM2
 
 #### Start All Services
 ```bash
-./start-all.sh
+./start.sh
 ```
 
 #### Check Status
 ```bash
 pm2 status
-./status.sh  # Enhanced status with health checks
+./start.sh   # Option 2: Check service status
 ```
 
 #### View Logs
@@ -138,7 +138,7 @@ sudo systemctl start mongod
 ### Health Checks
 ```bash
 # Quick health check
-./status.sh
+./start.sh   # Option 2: Service status
 
 # Detailed PM2 monitoring
 pm2 monit
@@ -166,7 +166,7 @@ pm2 monit
 3. Ensure database exists and user has permissions
 
 ### Memory Issues
-Edit PM2 configuration in `start-all.sh`:
+Edit PM2 configuration in `config/ecosystem.config.js`:
 ```javascript
 max_memory_restart: '2G'  // Increase from 1G
 ```

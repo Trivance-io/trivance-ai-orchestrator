@@ -31,9 +31,7 @@ trivance-dev-config/
 │   │   └── verify-parity.sh        # Verificación de paridad
 │   └── envs.sh         # Gestión de entornos
 ├── templates/          # Plantillas de configuración
-├── setup.sh           # Punto de entrada principal
-├── start.sh           # Orquestación de servicios con PM2 + Docker
-└── status.sh          # Monitoreo del estado de servicios
+└── setup.sh           # Punto de entrada principal
 ```
 
 ## Características Principales
@@ -186,7 +184,7 @@ La app móvil usa un sistema unificado de entornos que:
 ### Agregar Nuevos Servicios
 1. Actualizar `config/repositories.json`
 2. Agregar plantilla de entorno en `config/environments.json`
-3. Actualizar configuración PM2 en `start-all.sh`
+3. Actualizar configuración PM2 en `config/ecosystem.config.js`
 
 ### Actualizar Dependencias
 Ejecutar setup nuevamente para obtener últimos cambios:
@@ -198,7 +196,7 @@ Ejecutar setup nuevamente para obtener últimos cambios:
 
 ### El Servicio No Inicia
 - Verificar logs: `pm2 logs [nombre-servicio]`
-- Verificar que los puertos estén disponibles: `./status.sh`
+- Verificar que los puertos estén disponibles: `./start.sh` (opción 2)
 - Reiniciar servicio: `pm2 restart [nombre-servicio]`
 
 ### Timeout de Instalación
