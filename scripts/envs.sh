@@ -68,11 +68,15 @@ setup_environment_system() {
     # Crear directorio envs si no existe
     mkdir -p "$ENVS_DIR"
     
-    # Copiar ENVIRONMENTS.md desde docs/ a envs/
+    # Crear symlink a ENVIRONMENTS.md (Single Source of Truth)
     local env_docs="${CONFIG_DIR}/docs/ENVIRONMENTS.md"
+    local target_link="$ENVS_DIR/ENVIRONMENTS.md"
     if [[ -f "$env_docs" ]]; then
-        cp "$env_docs" "$ENVS_DIR/ENVIRONMENTS.md"
-        log_info "📖 Documentación ENVIRONMENTS.md copiada a envs/"
+        # Crear symlink solo si no existe
+        if [[ ! -L "$target_link" ]]; then
+            ln -sf "../trivance-dev-config/docs/ENVIRONMENTS.md" "$target_link"
+            log_info "📖 Symlink ENVIRONMENTS.md creado (Single Source of Truth)"
+        fi
     else
         log_warning "⚠️  No se encontró docs/ENVIRONMENTS.md"
     fi
@@ -91,7 +95,8 @@ generate_templates_from_json() {
     log_info "📝 Generando templates desde environments.json..."
     
     # Cargar o generar secrets si no existen
-    local secrets_file="$WORKSPACE_DIR/.trivance-secrets"
+    # Secrets ahora se guardan en config/ del repo trivance-dev-config
+    local secrets_file="$SCRIPT_DIR/../config/.trivance-secrets"
     if [[ ! -f "$secrets_file" ]]; then
         log_info "🔑 Generando secrets seguros..."
         "$SCRIPT_DIR/utils/generate-secrets.sh" "$secrets_file"

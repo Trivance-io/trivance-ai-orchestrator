@@ -297,7 +297,8 @@ setup_environments_legacy() {
 generate_secure_secrets() {
     log "Generando secrets seguros para desarrollo..."
     
-    local secrets_file="${WORKSPACE_DIR}/.trivance-secrets"
+    # Secrets ahora se guardan en config/ del repo trivance-dev-config
+    local secrets_file="${SCRIPT_DIR}/../../config/.trivance-secrets"
     
     # Check if secrets already exist
     if [[ -f "$secrets_file" ]]; then
@@ -358,14 +359,8 @@ setup_tools() {
         success "✅ Workspace de VS Code configurado"
     fi
     
-    # Crear .gitignore del workspace
-    local gitignore_template="${SCRIPT_DIR}/../../templates/config/.gitignore.workspace"
-    local gitignore_file="${WORKSPACE_DIR}/.gitignore"
-    
-    if [[ -f "$gitignore_template" ]] && [[ ! -f "$gitignore_file" ]]; then
-        cp "$gitignore_template" "$gitignore_file"
-        success "✅ .gitignore del workspace configurado"
-    fi
+    # .gitignore ya no se crea en el workspace porque no es un repositorio Git
+    # El workspace es un directorio contenedor de múltiples repos independientes
     
     # CLAUDE.md se creará automáticamente al final cuando el setup esté completo
     
@@ -385,15 +380,18 @@ setup_tools() {
         fi
     fi
     
-    # Copiar documentación de environments a la carpeta envs/
+    # Crear symlink a documentación de environments (Single Source of Truth)
     local envs_doc_source="${SCRIPT_DIR}/../../docs/ENVIRONMENTS.md"
     local envs_doc_target="${WORKSPACE_DIR}/envs/ENVIRONMENTS.md"
     
     if [[ -f "$envs_doc_source" ]]; then
         # Asegurar que existe el directorio envs/
         mkdir -p "${WORKSPACE_DIR}/envs"
-        cp "$envs_doc_source" "$envs_doc_target"
-        success "✅ Documentación ENVIRONMENTS.md copiada a envs/"
+        # Crear symlink solo si no existe
+        if [[ ! -L "$envs_doc_target" ]]; then
+            ln -sf "../trivance-dev-config/docs/ENVIRONMENTS.md" "$envs_doc_target"
+            success "✅ Symlink ENVIRONMENTS.md creado (Single Source of Truth)"
+        fi
     fi
     
     # Configurar Docker si está disponible
@@ -432,8 +430,8 @@ setup_docker_integration() {
         return 1
     fi
     
-    # Crear ecosystem.config.js desde template
-    local ecosystem_file="${WORKSPACE_DIR}/ecosystem.config.js"
+    # Crear ecosystem.config.js desde template en config/
+    local ecosystem_file="${SCRIPT_DIR}/../../config/ecosystem.config.js"
     local ecosystem_template="${SCRIPT_DIR}/../../templates/core/ecosystem.config.js.template"
     
     if [[ ! -f "$ecosystem_file" ]]; then

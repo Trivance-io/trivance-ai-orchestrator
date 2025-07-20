@@ -52,7 +52,8 @@ detect_system_state() {
        [[ -d "${WORKSPACE_DIR}/trivance-mobile" ]]; then
         
         # Verificar configuración completa
-        if [[ -f "${WORKSPACE_DIR}/.trivance-secrets" ]] && \
+        # Secrets ahora están en config/ del repo trivance-dev-config
+        if [[ -f "${SCRIPT_DIR}/../config/.trivance-secrets" ]] && \
            [[ -f "${WORKSPACE_DIR}/envs/.current_environment" ]]; then
             state="configured"
             

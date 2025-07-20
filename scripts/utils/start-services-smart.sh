@@ -108,14 +108,14 @@ start_services() {
     # Usar Smart Docker Manager para operación robusta
     if [[ -f "${SCRIPT_DIR}/smart-docker-manager.sh" ]]; then
         echo -e "${CYAN}🧠 Usando Smart Docker Manager para operación robusta${NC}"
-        "${SCRIPT_DIR}/smart-docker-manager.sh" up "${CONFIG_DIR}/docker/docker-compose.yaml" "postgres mongodb ms_level_up_management ms_trivance_auth dozzle"
+        "${SCRIPT_DIR}/smart-docker-manager.sh" up "${CONFIG_DIR}/docker/docker-compose.dev.yml" "postgres mongodb ms_level_up_management ms_trivance_auth log-viewer dozzle"
     else
         # Fallback al método anterior
         echo -e "${YELLOW}⚠️  Smart Docker Manager no disponible, usando método tradicional${NC}"
         if command -v docker &>/dev/null && docker compose version &>/dev/null 2>&1; then
-            docker compose up -d postgres mongodb ms_level_up_management ms_trivance_auth dozzle
+            docker compose -f "${CONFIG_DIR}/docker/docker-compose.dev.yml" up -d postgres mongodb ms_level_up_management ms_trivance_auth log-viewer dozzle
         else
-            docker-compose up -d postgres mongodb ms_level_up_management ms_trivance_auth dozzle
+            docker-compose -f "${CONFIG_DIR}/docker/docker-compose.dev.yml" up -d postgres mongodb ms_level_up_management ms_trivance_auth log-viewer dozzle
         fi
     fi
     
@@ -160,7 +160,8 @@ start_services() {
     # Iniciar frontend
     if ! pm2 list | grep -q "backoffice.*online"; then
         # Usar --no-autorestart para evitar reintentos infinitos si hay errores
-        pm2 start "${WORKSPACE_DIR}/ecosystem.config.js" --only backoffice
+        # ecosystem.config.js ahora está en config/ del repo trivance-dev-config
+        pm2 start "${SCRIPT_DIR}/../../config/ecosystem.config.js" --only backoffice
         
         # Verificar que se inició correctamente
         sleep 2
@@ -207,9 +208,9 @@ stop_services() {
         cd "${CONFIG_DIR}/docker"
         
         if command -v docker &>/dev/null && docker compose version &>/dev/null 2>&1; then
-            docker compose down
+            docker compose -f docker-compose.dev.yml down
         else
-            docker-compose down
+            docker-compose -f docker-compose.dev.yml down
         fi
     else
         echo -e "${YELLOW}⚠️  Docker no está corriendo${NC}"
@@ -234,9 +235,9 @@ status_services() {
     echo -e "${CYAN}🐳 Contenedores Docker:${NC}"
     cd "${CONFIG_DIR}/docker"
     if command -v docker &>/dev/null && docker compose version &>/dev/null 2>&1; then
-        docker compose ps
+        docker compose -f docker-compose.dev.yml ps
     else
-        docker-compose ps
+        docker-compose -f docker-compose.dev.yml ps
     fi
     echo
     

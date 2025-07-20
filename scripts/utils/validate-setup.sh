@@ -77,7 +77,8 @@ test_dependencies_installed() {
 
 test_secrets_generated() {
     echo -n "Testing: Secrets file generated... "
-    if [[ -f "$WORKSPACE_DIR/.trivance-secrets" ]]; then
+    # Secrets ahora están en config/ del repo trivance-dev-config
+    if [[ -f "$SCRIPT_DIR/../../config/.trivance-secrets" ]]; then
         success "PASS"
         ((TESTS_PASSED++))
     else
