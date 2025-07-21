@@ -8,12 +8,39 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/common.sh"
 
+# Variables globales para modo de operación AI-First
+INTERACTIVE_MODE=true
+FIXES_TO_APPLY=()
+FIXES_APPLIED=0
+FIXES_SKIPPED=0
+
+# Sistema de detección de issues (usando arrays simples por compatibilidad bash 3.x)
+DETECTED_ISSUES=()
+ISSUE_IMPACTS=()
+ISSUE_ACTIONS=()
+ISSUE_KEYS=()
+
 # Verificación de seguridad
 if [[ "${NODE_ENV:-}" == "production" ]] || [[ -f "${WORKSPACE_DIR}/.production" ]]; then
     error "❌ SEGURIDAD: Este script es SOLO para desarrollo local"
     error "   No debe ejecutarse en entornos de producción"
     exit 1
 fi
+
+# Detectar modo interactivo vs automatizado
+detect_interactive_mode() {
+    # Si hay un TTY y no estamos en CI, es interactivo
+    if [[ -t 0 ]] && [[ -z "${CI:-}" ]] && [[ -z "${CONTINUOUS_INTEGRATION:-}" ]] && [[ -z "${NONINTERACTIVE:-}" ]]; then
+        INTERACTIVE_MODE=true
+    else
+        INTERACTIVE_MODE=false
+    fi
+    
+    # Permitir override explícito
+    if [[ "${TRIVANCE_AUTO_FIX:-}" == "yes" ]]; then
+        INTERACTIVE_MODE=false
+    fi
+}
 
 show_fixes_banner() {
     cat << 'EOF'
@@ -22,6 +49,231 @@ show_fixes_banner() {
 ║                   Aplicando correcciones para desarrollo                    ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 EOF
+}
+
+# Función principal de detección de issues (AI-First pattern)
+detect_all_issues() {
+    log "🔍 Analizando consistencia del sistema..."
+    
+    # Reset arrays
+    DETECTED_ISSUES=()
+    ISSUE_IMPACTS=()
+    ISSUE_ACTIONS=()
+    ISSUE_KEYS=()
+    
+    # Detectar cada tipo de issue tradicional
+    detect_sentry_issue
+    detect_firebase_issue
+    detect_port_conflicts_issue
+    
+    # NUEVO: Análisis inteligente de logs (AI-First pattern)
+    detect_log_analysis_issues
+    
+    # Retornar número de issues
+    return ${#ISSUE_KEYS[@]}
+}
+
+detect_sentry_issue() {
+    local repo_path="${WORKSPACE_DIR}/ms_level_up_management"
+    
+    if [[ -d "$repo_path" ]] && [[ -f "${repo_path}/package.json" ]]; then
+        if ! grep -q '"build:dev"' "${repo_path}/package.json"; then
+            ISSUE_KEYS+=("sentry")
+            DETECTED_ISSUES+=("Falta comando build:dev sin Sentry")
+            ISSUE_IMPACTS+=("Build fallará en desarrollo sin credenciales Sentry")
+            ISSUE_ACTIONS+=("critical")
+        fi
+    fi
+}
+
+detect_firebase_issue() {
+    local env_file="${WORKSPACE_DIR}/ms_level_up_management/.env"
+    
+    if [[ -f "$env_file" ]]; then
+        if grep -q "PLACEHOLDER_WILL_BE_REPLACED_BY_POST_SETUP_FIX" "$env_file"; then
+            ISSUE_KEYS+=("firebase")
+            DETECTED_ISSUES+=("Firebase tiene placeholders vacíos")
+            ISSUE_IMPACTS+=("Warnings en logs, pero no bloquea desarrollo")
+            ISSUE_ACTIONS+=("recommended")
+        fi
+    fi
+}
+
+detect_port_conflicts_issue() {
+    local ports=(3000 3001 5173)
+    local conflicts=0
+    
+    for port in "${ports[@]}"; do
+        # Usar netstat más rápido que lsof en macOS
+        if netstat -an 2>/dev/null | grep -q ":${port} .*LISTEN" 2>/dev/null; then
+            ((conflicts++))
+        fi
+    done
+    
+    if [[ $conflicts -gt 0 ]]; then
+        ISSUE_KEYS+=("ports")
+        DETECTED_ISSUES+=("$conflicts puerto(s) ya están en uso")
+        ISSUE_IMPACTS+=("Los servicios no podrán iniciar")
+        ISSUE_ACTIONS+=("warning")
+    fi
+}
+
+# NUEVO: Análisis inteligente de logs (AI-First pattern)
+detect_log_analysis_issues() {
+    # Verificar si existe el analizador de logs
+    local log_analyzer="${SCRIPT_DIR}/log-analyzer.sh"
+    
+    if [[ ! -f "$log_analyzer" ]]; then
+        # Fallback silencioso - no afecta funcionamiento existente
+        return 0
+    fi
+    
+    # Cargar el analizador sin ejecutar main
+    source "$log_analyzer"
+    
+    # Ejecutar análisis
+    if get_log_analysis_results 2>/dev/null; then
+        # No hay issues críticos de logs
+        return 0
+    fi
+    
+    # Procesar resultados si existen
+    if [[ -n "${LOG_ANALYSIS_RESULTS:-}" ]] && [[ ${#LOG_ANALYSIS_RESULTS[@]} -gt 0 ]]; then
+        local i
+        for i in "${!LOG_ANALYSIS_RESULTS[@]}"; do
+            local result="${LOG_ANALYSIS_RESULTS[$i]}"
+            local suggestion="${LOG_ANALYSIS_SUGGESTIONS[$i]:-}"
+            
+            # Categorizar según severidad
+            case "$result" in
+                *"missing_deps"*|*"permissions"*|*"conflicts"*)
+                    ISSUE_KEYS+=("log_$result")
+                    DETECTED_ISSUES+=("Problema en logs: $(echo "$suggestion" | cut -d':' -f2 | xargs)")
+                    ISSUE_IMPACTS+=("Puede afectar instalación/compilación futura")
+                    ISSUE_ACTIONS+=("critical")
+                    ;;
+                *"typescript"*|*"sentry"*)
+                    ISSUE_KEYS+=("log_$result")
+                    DETECTED_ISSUES+=("Optimización sugerida: $(echo "$suggestion" | cut -d':' -f2 | xargs)")
+                    ISSUE_IMPACTS+=("Mejora calidad código/build")
+                    ISSUE_ACTIONS+=("recommended")
+                    ;;
+                *"build"*|*"optimization"*)
+                    ISSUE_KEYS+=("log_$result")
+                    DETECTED_ISSUES+=("Optimización build: $(echo "$suggestion" | cut -d':' -f2 | xargs)")
+                    ISSUE_IMPACTS+=("Mejora performance de compilación")
+                    ISSUE_ACTIONS+=("recommended")
+                    ;;
+            esac
+        done
+    fi
+}
+
+# Mostrar reporte de issues detectados
+show_issues_report() {
+    if [[ ${#ISSUE_KEYS[@]} -eq 0 ]]; then
+        success "✅ No se detectaron problemas de configuración"
+        return 0
+    fi
+    
+    echo
+    echo "┌─────────────────────────┬────────────────────────────────────┬──────────────┐"
+    echo "│ Issue                   │ Impacto                            │ Prioridad    │"
+    echo "├─────────────────────────┼────────────────────────────────────┼──────────────┤"
+    
+    local i
+    for i in "${!ISSUE_KEYS[@]}"; do
+        local desc="${DETECTED_ISSUES[$i]}"
+        local impact="${ISSUE_IMPACTS[$i]}"
+        local action="${ISSUE_ACTIONS[$i]}"
+        
+        # Colorear según prioridad
+        case "$action" in
+            "critical")
+                printf "│ %-23s │ %-34s │ \033[31m%-12s\033[0m │\n" "$desc" "$impact" "CRÍTICA"
+                ;;
+            "recommended")
+                printf "│ %-23s │ %-34s │ \033[33m%-12s\033[0m │\n" "$desc" "$impact" "Recomendada"
+                ;;
+            "warning")
+                printf "│ %-23s │ %-34s │ \033[36m%-12s\033[0m │\n" "$desc" "$impact" "Advertencia"
+                ;;
+        esac
+    done
+    
+    echo "└─────────────────────────┴────────────────────────────────────┴──────────────┘"
+    echo
+}
+
+# Solicitar autorización del usuario
+request_user_authorization() {
+    if ! $INTERACTIVE_MODE; then
+        log "Modo no-interactivo detectado, aplicando fixes automáticamente..."
+        return 0
+    fi
+    
+    local response
+    read -p "¿Aplicar fixes recomendados? ([s]í/[n]o/[d]etalles): " -r response
+    
+    case "$response" in
+        s|S|si|SI|yes|YES|y|Y|"")
+            return 0
+            ;;
+        n|N|no|NO)
+            log "Fixes omitidos por el usuario"
+            return 1
+            ;;
+        d|D|detalles|DETALLES)
+            show_fix_details
+            # Preguntar de nuevo
+            request_user_authorization
+            ;;
+        *)
+            warn "Opción no válida. Por favor responde s, n o d."
+            request_user_authorization
+            ;;
+    esac
+}
+
+show_fix_details() {
+    echo
+    info "📋 DETALLES DE FIXES DISPONIBLES:"
+    echo
+    
+    local i
+    for i in "${!ISSUE_KEYS[@]}"; do
+        local key="${ISSUE_KEYS[$i]}"
+        case "$key" in
+            "sentry")
+                echo "🔧 FIX DE SENTRY:"
+                echo "  - Agrega script 'build:dev' sin dependencia de Sentry"
+                echo "  - Permite compilar en desarrollo sin credenciales"
+                echo "  - Cambio: package.json en ms_level_up_management"
+                echo
+                ;;
+            "firebase")
+                echo "🔧 FIX DE FIREBASE:"
+                echo "  - Reemplaza placeholders con valores de desarrollo"
+                echo "  - Elimina warnings molestos en logs"
+                echo "  - Cambio: .env en ms_level_up_management"
+                echo
+                ;;
+            "ports")
+                echo "⚠️  CONFLICTO DE PUERTOS:"
+                echo "  - No se puede arreglar automáticamente"
+                echo "  - Ejecuta: killall node"
+                echo "  - O detén manualmente los procesos"
+                echo
+                ;;
+            log_*)
+                echo "🤖 ANÁLISIS DE LOGS:"
+                echo "  - Detectado en análisis automático de logs"
+                echo "  - Sugerencia: ${DETECTED_ISSUES[$i]}"
+                echo "  - Impacto: ${ISSUE_IMPACTS[$i]}"
+                echo
+                ;;
+        esac
+    done
 }
 
 # Fix para ms_level_up_management: Sentry opcional en desarrollo
@@ -187,20 +439,67 @@ fix_port_conflicts() {
 apply_all_fixes() {
     show_fixes_banner
     
-    log "Aplicando fixes automáticos para desarrollo..."
+    # Detectar modo de operación
+    detect_interactive_mode
     
-    # Fix crítico: Sentry en ms_level_up_management
-    fix_sentry_build_command
+    # Fase 1: Detección AI-First
+    detect_all_issues
+    local num_issues=$?
     
-    # Fix crítico: Firebase en ms_level_up_management
-    fix_firebase_credentials
+    if [[ $num_issues -eq 0 ]]; then
+        success "✅ No se detectaron problemas de configuración"
+        return 0
+    fi
     
-    # Verificaciones adicionales
+    # Fase 2: Reporte inteligente
+    show_issues_report
+    
+    # Fase 3: Autorización (si es interactivo)
+    if ! request_user_authorization; then
+        info "📋 Fixes omitidos. Puedes ejecutar este script más tarde si es necesario."
+        return 0
+    fi
+    
+    # Fase 4: Aplicación inteligente de fixes
+    log "Aplicando fixes autorizados..."
+    
+    # Aplicar solo los fixes necesarios basados en detección
+    local key
+    for key in "${ISSUE_KEYS[@]}"; do
+        case "$key" in
+            "sentry")
+                fix_sentry_build_command
+                ((FIXES_APPLIED++))
+                ;;
+            "firebase")
+                fix_firebase_credentials
+                ((FIXES_APPLIED++))
+                ;;
+            "ports")
+                fix_port_conflicts
+                # Los conflictos de puerto no se "aplican", solo se reportan
+                ;;
+            log_*)
+                # Los issues de logs son informativos, no requieren fixes específicos
+                info "🤖 Issue de logs detectado: $key (solo informativo)"
+                ;;
+        esac
+    done
+    
+    # Verificaciones adicionales (siempre se ejecutan)
     fix_development_env_values
     fix_react_native_typescript
-    fix_port_conflicts
     
-    success "✅ Todos los fixes post-setup completados"
+    # Resumen final inteligente
+    echo
+    if [[ $FIXES_APPLIED -gt 0 ]]; then
+        success "✅ Fixes aplicados: $FIXES_APPLIED"
+    fi
+    if [[ $FIXES_SKIPPED -gt 0 ]]; then
+        info "ℹ️  Fixes omitidos: $FIXES_SKIPPED"
+    fi
+    
+    success "🎉 Proceso de fixes AI-First completado"
 }
 
 main() {
