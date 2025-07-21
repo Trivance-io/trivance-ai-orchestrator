@@ -18,9 +18,9 @@ if [[ -z "${RED:-}" ]]; then
 fi
 
 # 📊 Configuración de timeouts adaptativos
-TIMEOUT_FIRST_BUILD=600     # 10 minutos primera compilación
+TIMEOUT_FIRST_BUILD=1200    # 20 minutos primera compilación (incluye descarga de imágenes base)
 TIMEOUT_REBUILD=300         # 5 minutos rebuild con cache
-TIMEOUT_STARTUP=180         # 3 minutos para startup
+TIMEOUT_STARTUP=300         # 5 minutos para startup (incluye descarga si es necesario)
 TIMEOUT_HEALTH_CHECK=120    # 2 minutos para health checks
 TIMEOUT_QUICK_OPS=60        # 1 minuto operaciones rápidas
 
@@ -54,29 +54,51 @@ docker_dev_mode() {
     local compose_dir=$(dirname "$compose_file")
     cd "$compose_dir"
     
-    # Build con feedback visual claro
-    log "BUILD" "🔨 Construyendo imágenes de desarrollo..."
-    log "INFO" "⏱️  Esto puede tomar 2-10 minutos en primera ejecución"
-    log "INFO" "📝 Los warnings de Prisma sobre OpenSSL son NORMALES y no afectan funcionalidad"
+    # Verificar si las imágenes ya existen
+    local need_build=false
+    local main_services=("ms_level_up_management" "ms_trivance_auth" "log-viewer")
     
-    if ! docker compose -f "$(basename "$compose_file")" build --parallel 2>&1 | while IFS= read -r line; do
-        # Filtrar warnings conocidos de Prisma para no confundir al usuario
-        if [[ ! "$line" =~ "Prisma failed to detect the libssl/openssl version" ]] && 
-           [[ ! "$line" =~ "Please manually install OpenSSL" ]] && 
-           [[ ! "$line" =~ "Defaulting to \"openssl-1.1.x\"" ]]; then
-            echo "$line"
+    for service in "${main_services[@]}"; do
+        local image_name="docker-${service}"
+        if [[ "$service" == "log-viewer" ]]; then
+            image_name="docker-log-viewer"
         fi
-    done; then
-        log "ERROR" "❌ Build falló - revisar Dockerfiles"
-        cd "$original_dir"
-        return 1
+        
+        if ! docker images --format "{{.Repository}}" | grep -q "^${image_name}$"; then
+            need_build=true
+            log "INFO" "🔍 Imagen faltante: $image_name"
+            break
+        fi
+    done
+    
+    if [[ "$need_build" == "true" ]]; then
+        # Build con feedback visual claro
+        log "BUILD" "🔨 Construyendo imágenes de desarrollo..."
+        log "INFO" "⏱️  Esto puede tomar 2-10 minutos en primera ejecución"
+        log "INFO" "📝 Los warnings de Prisma sobre OpenSSL son NORMALES y no afectan funcionalidad"
+        
+        if ! docker compose -f "$(basename "$compose_file")" build --parallel 2>&1 | while IFS= read -r line; do
+            # Filtrar warnings conocidos de Prisma para no confundir al usuario
+            if [[ ! "$line" =~ "Prisma failed to detect the libssl/openssl version" ]] && 
+               [[ ! "$line" =~ "Please manually install OpenSSL" ]] && 
+               [[ ! "$line" =~ "Defaulting to \"openssl-1.1.x\"" ]]; then
+                echo "$line"
+            fi
+        done; then
+            log "ERROR" "❌ Build falló - revisar Dockerfiles"
+            cd "$original_dir"
+            return 1
+        fi
+        
+        log "SUCCESS" "✅ Build completado exitosamente"
+    else
+        log "SUCCESS" "✅ Imágenes ya construidas - saltando build"
     fi
     
-    log "SUCCESS" "✅ Build completado exitosamente"
     log "INFO" "🚀 Iniciando servicios con hot-reload..."
     
-    # Start con watch mode y feedback claro
-    smart_docker_operation "up" "$compose_file" "" "$timeout" "--watch --remove-orphans"
+    # Start con feedback claro (hot-reload via volume mounts)
+    smart_docker_operation "up" "$compose_file" "" "$timeout"
     
     cd "$original_dir"
 }
@@ -154,14 +176,15 @@ show_context_message() {
     
     case "$context" in
         "first_build")
-            log "INFO" "🎯 Primera compilación detectada"
+            log "INFO" "🎯 Primera configuración completa detectada"
             log "INFO" "📦 Esto incluye:"
-            log "INFO" "   • Descarga de imágenes base (Node.js, PostgreSQL, MongoDB)"
-            log "INFO" "   • Instalación de dependencias npm"
+            log "INFO" "   • Descarga de imágenes base (Node.js, PostgreSQL ~380MB, MongoDB ~1GB, Dozzle)"
+            log "INFO" "   • Instalación de dependencias npm en contenedores"
             log "INFO" "   • Compilación de código TypeScript"
-            log "INFO" "   • Construcción de imágenes Docker"
-            log "WARNING" "⏱️  Tiempo estimado: 5-10 minutos (solo la primera vez)"
-            log "INFO" "☕ Perfecto momento para un café - el sistema está trabajando"
+            log "INFO" "   • Construcción de imágenes Docker custom"
+            log "INFO" "   • Inicio de todos los servicios con health checks"
+            log "WARNING" "⏱️  Tiempo estimado: 10-20 minutos (solo la primera vez)"
+            log "INFO" "☕ Perfecto momento para un café largo - descargando ~1.5GB"
             ;;
         "rebuild")
             log "INFO" "🔄 Reconstrucción con cache detectada"
@@ -170,9 +193,9 @@ show_context_message() {
             log "INFO" "🚀 Mucho más rápido gracias al cache Docker"
             ;;
         "startup")
-            log "INFO" "🚀 Iniciando servicios existentes"
-            log "WARNING" "⏱️  Tiempo estimado: 30-180 segundos"
-            log "INFO" "🔧 Los servicios necesitan tiempo para inicializarse"
+            log "INFO" "🚀 Iniciando servicios"
+            log "WARNING" "⏱️  Tiempo estimado: 2-5 minutos (incluye descarga de imágenes si es necesario)"
+            log "INFO" "🔧 Los servicios necesitan tiempo para inicializarse y health checks"
             ;;
         "health")
             log "INFO" "🏥 Verificando salud de servicios"
@@ -318,16 +341,43 @@ smart_docker_operation() {
             ;;
     esac
     
-    # Ejecutar comando en background
+    # Ejecutar comando en background con manejo inteligente de señales
     log "BUILD" "Ejecutando: ${cmd[*]}"
+    
+    # Variables de control
+    local user_interrupted=false
+    local docker_pid=""
+    
+    # Función para manejar interrupciones del usuario
+    handle_user_interrupt() {
+        user_interrupted=true
+        log "WARNING" "⚠️  Interrupción detectada - esperando que Docker termine de forma segura..."
+        log "INFO" "💡 Presiona Ctrl+C de nuevo para forzar la salida (no recomendado)"
+        
+        # En la segunda interrupción, forzar salida
+        trap 'log "ERROR" "🚨 Salida forzada - Docker puede quedar en estado inconsistente"; kill -9 "$docker_pid" 2>/dev/null; exit 130' INT TERM
+    }
+    
+    # Configurar trap para primera interrupción
+    trap handle_user_interrupt INT TERM
+    
     "${cmd[@]}" > "$STATE_DIR/docker_output.log" 2>&1 &
-    local docker_pid=$!
+    docker_pid=$!
+    
+    # Backup trap para cleanup
+    trap 'cleanup; if [[ "$user_interrupted" == "true" ]]; then exit 130; fi' EXIT
     
     # Monitor inteligente con feedback visual
     local elapsed=0
     local last_progress=0
     
     while kill -0 "$docker_pid" 2>/dev/null; do
+        # Salir inmediatamente si el usuario interrumpió
+        if [[ "$user_interrupted" == "true" ]]; then
+            log "INFO" "🔄 Esperando que Docker termine limpiamente..."
+            break
+        fi
+        
         # Verificar timeout
         if (( elapsed >= timeout_seconds )); then
             # Antes de cancelar, verificar si realmente hay un problema
@@ -360,13 +410,33 @@ smart_docker_operation() {
     echo
     
     # Verificar resultado
+    if [[ "$user_interrupted" == "true" ]]; then
+        log "WARNING" "⚠️  Operación interrumpida por el usuario"
+        log "INFO" "🔄 Esperando que Docker termine limpiamente..."
+        
+        # Esperar máximo 30 segundos para que Docker termine
+        local wait_count=0
+        while kill -0 "$docker_pid" 2>/dev/null && [[ $wait_count -lt 30 ]]; do
+            sleep 1
+            ((wait_count++))
+        done
+        
+        if kill -0 "$docker_pid" 2>/dev/null; then
+            log "WARNING" "🕐 Docker no terminó en 30s - siguiendo con el proceso"
+            log "INFO" "💡 Los contenedores pueden haber iniciado correctamente"
+        fi
+        
+        cd "$original_dir"
+        return 130  # Código estándar para interrupción
+    fi
+    
     wait "$docker_pid"
     local exit_code=$?
     
     cd "$original_dir"
     
     if [[ $exit_code -eq 0 ]]; then
-        log "SUCCESS" "Operación completada exitosamente en ${elapsed}s"
+        log "SUCCESS" "✅ Operación completada exitosamente en ${elapsed}s"
         
         # Mostrar mensaje de éxito contextual
         case "$context" in
@@ -376,15 +446,35 @@ smart_docker_operation() {
             "rebuild")
                 log "SUCCESS" "🚀 Servicios actualizados correctamente"
                 ;;
+            "startup")
+                log "SUCCESS" "🚀 Servicios iniciados correctamente"
+                ;;
         esac
+        
+        # Post-verificación para asegurar que los servicios están realmente ejecutándose
+        log "INFO" "🔍 Verificando estado final de los servicios..."
+        sleep 3  # Dar tiempo para que los health checks se ejecuten
+        
+        # Verificar contenedores principales
+        local mgmt_running=$(docker ps --filter "name=trivance_mgmt_dev" --filter "status=running" --quiet)
+        local auth_running=$(docker ps --filter "name=trivance_auth_dev" --filter "status=running" --quiet)
+        
+        if [[ -n "$mgmt_running" && -n "$auth_running" ]]; then
+            log "SUCCESS" "✅ Servicios principales confirmados ejecutándose"
+        else
+            log "WARNING" "⚠️  Algunos servicios pueden estar iniciando - verificar con 'docker ps'"
+        fi
+        
     else
-        log "ERROR" "Operación falló con código $exit_code"
+        log "ERROR" "❌ Operación falló con código $exit_code"
         
         # Mostrar logs útiles para debugging
         if [[ -f "$STATE_DIR/docker_output.log" ]]; then
-            log "ERROR" "Últimas líneas del log:"
+            log "ERROR" "📋 Últimas líneas del log:"
             tail -10 "$STATE_DIR/docker_output.log" | sed 's/^/  /'
         fi
+        
+        log "INFO" "💡 Para más detalles: docker compose logs"
     fi
     
     return $exit_code
