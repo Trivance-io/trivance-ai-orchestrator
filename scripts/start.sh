@@ -53,7 +53,7 @@ detect_system_state() {
         
         # Verificar configuración completa
         # Secrets ahora están en config/ del repo trivance-dev-config
-        if [[ -f "${SCRIPT_DIR}/../config/.trivance-secrets" ]] && \
+        if [[ -f "${CONFIG_DIR}/config/.trivance-secrets" ]] && \
            [[ -f "${WORKSPACE_DIR}/envs/.current_environment" ]]; then
             state="configured"
             
@@ -490,6 +490,27 @@ if [[ $# -gt 0 ]]; then
             ;;
     esac
 else
-    # Modo interactivo
-    main
+    # Comportamiento por defecto: iniciar servicios automáticamente si están configurados
+    state=$(detect_system_state)
+    
+    if [[ "$state" == "configured" ]]; then
+        echo -e "${PURPLE}🚀 Iniciando servicios automáticamente (consistente con documentación)${NC}"
+        echo -e "${CYAN}⚡ Hot-reload ≤2s es el ESTÁNDAR de desarrollo${NC}"
+        if ! check_docker; then
+            echo -e "${RED}❌ Docker es requerido${NC}"
+            exit 1
+        fi
+        echo -e "${CYAN}🔍 Los logs estarán disponibles en http://localhost:4000${NC}"
+        "${CONFIG_DIR}/scripts/utils/smart-docker-manager.sh" dev "${CONFIG_DIR}/docker/docker-compose.dev.yml"
+    elif [[ "$state" == "running" ]]; then
+        echo -e "${GREEN}✅ Los servicios ya están ejecutándose${NC}"
+        echo -e "${CYAN}🔍 Accede a:${NC}"
+        echo -e "${CYAN}   • Frontend: http://localhost:5173${NC}"
+        echo -e "${CYAN}   • Management API: http://localhost:3000${NC}"
+        echo -e "${CYAN}   • Auth Service: http://localhost:3001${NC}"
+        echo -e "${CYAN}   • Log Viewer: http://localhost:4000${NC}"
+    else
+        # Si no está configurado, mostrar menú interactivo
+        main
+    fi
 fi
