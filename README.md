@@ -49,7 +49,7 @@ Configura automáticamente el entorno completo de desarrollo de Trivance en minu
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 🎯 Decisiones Arquitecturales Clave
+### 🎯 Decisiones de Arquitectura Claves
 
 | Decisión | Justificación | Beneficio |
 |----------|---------------|-----------|
@@ -83,10 +83,10 @@ git clone https://github.com/GLab-Projects/trivance-dev-config.git
 # Si ya existe, omitir clonado y usar directorio existente
 cd trivance-dev-config
 
-# 2. Ejecutar setup (toma 5-10 minutos):
+# 2. Ejecutar setup (toma 1 - 3 minutos):
 ./setup.sh
 
-# 3. Cuando termine, iniciar servicios:
+# 3. Cuando termine, iniciar servicios ( toma 3 - 6 minutos dependara de factores como tu maquina, internet, etc):
 cd ..  # Volver al directorio workspace (padre de trivance-dev-config)
 ./start.sh
 ```
@@ -115,7 +115,7 @@ npm run start:docker    # Configurado para conectar con Docker local
 # Escanea el QR con Expo Go
 ```
 
-Los cambios en el código se reflejan automáticamente:
+**Hot-reload automático garantizado:**
 - **Frontend Web**: ≤1s (Vite + PM2)
 - **Management API**: ≤2s (Docker volumes)
 - **Auth Service**: ≤2s (Docker volumes)
@@ -185,21 +185,17 @@ tu-workspace/
 ./trivance-dev-config/scripts/envs.sh switch local
 ```
 
-### 🐳 Docker Management
+## 🐳 Docker Avanzado
 
 ```bash
-# Via Smart Docker Manager (recomendado)
+# Smart Docker Manager (recomendado para debugging)
 cd trivance-dev-config/scripts/utils
-./smart-docker-manager.sh dev ../../docker/docker-compose.dev.yml      # Modo desarrollo con hot-reload
-./smart-docker-manager.sh up ../../docker/docker-compose.dev.yml       # Iniciar servicios
-./smart-docker-manager.sh down ../../docker/docker-compose.dev.yml     # Detener servicios
-./smart-docker-manager.sh logs ../../docker/docker-compose.dev.yml     # Ver logs
+./smart-docker-manager.sh dev ../../docker/docker-compose.dev.yml   # Con hot-reload
 
-# Docker tradicional
+# Docker directo
 cd trivance-dev-config/docker
-docker compose -f docker-compose.dev.yml up -d          # Iniciar
-docker compose -f docker-compose.dev.yml down           # Detener  
-docker compose -f docker-compose.dev.yml logs -f        # Logs en tiempo real
+docker compose -f docker-compose.dev.yml logs -f        # Ver logs
+docker compose -f docker-compose.dev.yml down           # Detener contenedores
 ```
 
 ## 🧬 Sistema de Environments
@@ -282,10 +278,10 @@ npm run test:e2e           # End-to-end
 cd level_up_backoffice
 npm test                    # Unit tests
 
-# Mobile (React Native)
+# Mobile (React Native) - NO tiene npm test
 cd trivance-mobile
-npm test                    # Unit tests
 npm run type-check          # TypeScript validation
+npm run lint                # ESLint validation
 ```
 
 ### 🎨 Linting y Formateo
@@ -310,39 +306,13 @@ npx prisma db push         # Sincronizar schema
 
 ## 📊 Observabilidad
 
-### 🔍 Log Viewer Unificado (Puerto 4000)
+**Log Viewer Unificado**: http://localhost:4000
+- API programática: `/api/logs/search?level=error&service=backend`
+- Filtros: service, level, traceId, sessionId, text
 
-Sistema de observabilidad moderno:
-```bash
-# Acceder al Log Viewer
-open http://localhost:4000
-
-# API programática
-curl "http://localhost:4000/api/logs/search?level=error&limit=20"
-curl "http://localhost:4000/api/logs/search?service=backend"
-curl "http://localhost:4000/api/logs/search?text=unauthorized"
-
-# Filtros disponibles:
-# - service: frontend, backend, auth
-# - level: error, warn, info, debug  
-# - traceId: seguimiento de requests
-# - sessionId: seguimiento de sesiones
-# - text: búsqueda de texto completo
-```
-
-### 📊 Dozzle (Puerto 9999)
-
-Monitor visual de logs Docker:
-```bash
-# Ver logs en tiempo real
-open http://localhost:9999
-
-# Características:
-# - Logs de todos los contenedores
-# - Filtrado en tiempo real
-# - Interfaz web moderna
-# - Sin instalación adicional
-```
+**Dozzle (Monitor Docker)**: http://localhost:9999  
+- Logs todos los contenedores en tiempo real
+- Interfaz web moderna, sin instalación
 
 ## Si algo falla
 
@@ -360,7 +330,7 @@ lsof -i:5173
 killall node
 
 # Reiniciar
-./start.sh stop && ./start.sh
+./start.sh stop && ./start.sh start
 ```
 
 ### Reset completo
@@ -376,100 +346,24 @@ cd trivance-dev-config
 - Arquitectura detallada: `trivance-dev-config/docs/ARCHITECTURE.md`
 - Sistema de environments: `trivance-dev-config/docs/ENVIRONMENTS.md`
 
-## Desarrollo diario
-
-### 🖥️ Frontend Web (React)
-Los cambios en `level_up_backoffice/src` se reflejan instantáneamente (≤1s).
-
-### 🔧 Management API (NestJS + GraphQL)
-Los cambios en `ms_level_up_management/src` se recargan automáticamente (≤2s).
-
-### 🔐 Auth Service (NestJS + REST)  
-Los cambios en `ms_trivance_auth/src` se recargan automáticamente (≤2s).
-
-### 📱 Mobile App (React Native + Expo)
-```bash
-cd trivance-mobile
-npm run start:docker    # Modo desarrollo con APIs Docker
-# O alternativamente:
-npm run start:local     # Si tienes APIs corriendo en host local
-```
-
-Funciones mobile importantes:
-- Hot-reload instantáneo (≤1s) con Expo
-- Configuración automática para Docker local
-- Debugging con Flipper integrado
-- Builds de desarrollo y producción
-
-### 🗄️ Base de datos
-```bash
-cd ms_level_up_management
-npx prisma studio   # Abre interfaz visual de la BD
-```
-
-### 📊 Logs
-- Ver todos: http://localhost:4000
-- Ver Docker: http://localhost:9999
-
-## Arquitectura
-
-Trivance es una **plataforma completa** con 4 componentes principales:
-
-### 🎯 Componentes del Sistema
-
-- **🖥️ Web Admin (React + Vite)**: Panel de administración → PM2 nativo
-- **📱 Mobile App (React Native + Expo)**: Aplicación principal de usuarios → Metro bundler  
-- **🔧 Management API (NestJS + GraphQL)**: Backend de gestión → Docker (puerto 3000)
-- **🔐 Auth Service (NestJS + REST)**: Microservicio de autenticación → Docker (puerto 3001)
-
-### 🗄️ Persistencia de Datos
-
-- **PostgreSQL**: Base de datos principal para Management API
-- **MongoDB**: Base de datos para Auth Service (usuarios, sesiones, permisos)
-
-### 🛠️ Stack Tecnológico
-
-- **2 Backends independientes**: Separación de responsabilidades (management vs auth)
-- **Arquitectura híbrida**: Docker (backends) + PM2 (web) + Expo (mobile)
-- **Hot-reload universal**: ≤2s en backends, ≤1s en frontends
-- **Environment switching**: Cambia toda la stack automáticamente
-- **Secrets únicos**: Generados por instalación, nunca reutilizados
-
-## Ejemplo de flujo completo
+## 🎯 Flujo de Desarrollo Típico
 
 ```bash
-# 1. Instalación inicial
+# 1. Instalación única (5-10 min)
 git clone https://github.com/GLab-Projects/trivance-dev-config.git
-cd trivance-dev-config
-./setup.sh    # Toma 5-10 minutos
+cd trivance-dev-config && ./setup.sh
 
-# 2. Iniciar servicios backend
-cd ..
-./start.sh    # Inicia Docker + PM2
+# 2. Inicio diario 
+cd .. && ./start.sh    # Docker + PM2 + hot-reload
 
-# 3. Iniciar app mobile (nueva terminal)
-cd trivance-mobile
-npm run start:docker    # Expo + Metro bundler
-# Escanea QR con Expo Go en tu teléfono
+# 3. Mobile (terminal separada)
+cd trivance-mobile && npm run start:docker
 
-# 4. Desarrollo full-stack
-cd level_up_backoffice/src   # Frontend web
-# Editar → cambios ≤1s
+# 4. Desarrollo con hot-reload automático:
+# Frontend: level_up_backoffice/src → cambios ≤1s  
+# APIs: ms_*_*/src → recarga ≤2s
+# Mobile: trivance-mobile/src → hot-reload ≤1s
 
-cd ../trivance-mobile/src    # Mobile app  
-# Editar → hot-reload ≤1s
-
-cd ../ms_level_up_management/src  # Management API
-# Editar → recarga ≤2s
-
-cd ../ms_trivance_auth/src  # Auth Service
-# Editar → recarga ≤2s
-
-# 5. Testing en QA
-./trivance-dev-config/scripts/envs.sh switch qa
-./start.sh    # 2 backends en modo QA
-cd trivance-mobile && npm run start:docker  # Mobile apunta a QA
-
-# 6. Volver a desarrollo
-./trivance-dev-config/scripts/envs.sh switch local
+# 5. Switch environments cuando necesario
+./trivance-dev-config/scripts/envs.sh switch qa|local
 ```
