@@ -1,5 +1,27 @@
 #!/bin/bash
 
+# Load timeout configuration for AI-first workflows
+load_timeout_config() {
+    local config_file="${SCRIPT_DIR}/../../config/timeouts.conf"
+    if [[ -f "$config_file" ]]; then
+        source "$config_file"
+        
+        # Apply context-aware timeout multipliers
+        if [[ "${AI_EXECUTION_MODE:-false}" == "true" ]]; then
+            # Double timeouts for AI workflows
+            DOCKER_FIRST_BUILD_TIMEOUT=$((DOCKER_FIRST_BUILD_TIMEOUT * 2))
+            NPM_INSTALL_TIMEOUT=$((NPM_INSTALL_TIMEOUT * 2))
+        elif [[ "${CI_MODE:-false}" == "true" ]]; then
+            # 1.5x timeouts for CI
+            DOCKER_FIRST_BUILD_TIMEOUT=$((DOCKER_FIRST_BUILD_TIMEOUT * 3 / 2))
+            NPM_INSTALL_TIMEOUT=$((NPM_INSTALL_TIMEOUT * 3 / 2))
+        fi
+    fi
+}
+
+# Auto-load timeout config when common.sh is sourced
+load_timeout_config
+
 # Colores para output
 RED='\033[0;31m'
 GREEN='\033[0;32m'

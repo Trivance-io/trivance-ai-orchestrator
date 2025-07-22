@@ -186,9 +186,9 @@ src/
 
 ### Desarrollo
 ```bash
-./scripts/start-all-services.sh     # Iniciar todo
-./scripts/stop-all-services.sh      # Detener todo
-./scripts/check-health.sh           # Verificar estado
+./start.sh start                     # Iniciar todo
+./start.sh stop                      # Detener todo
+./start.sh status                    # Verificar estado
 ```
 
 ### Por Repositorio

@@ -26,7 +26,7 @@ trivance-dev-config/
 │   │   ├── generate-secrets.sh     # Generación dinámica de secretos
 │   │   ├── parallel-install.sh     # Instalación paralela con npm
 │   │   ├── post-setup-fixes.sh     # Correcciones post-instalación
-│   │   ├── verify-compilation.sh   # Verificación de compilación
+│   │   ├── validate-setup.sh       # Verificación de setup y compilación
 │   │   ├── verify-docker-mobile.sh # Verificación Docker + Mobile
 │   │   └── verify-parity.sh        # Verificación de paridad
 │   └── envs.sh         # Gestión de entornos
@@ -97,8 +97,8 @@ npm run start:docker   # O usa .env.local con ENV_LOCAL=true
 
 ### Gestionar Entornos
 ```bash
-./change-env.sh status        # Mostrar entorno actual
-./change-env.sh switch qa     # Cambiar a entorno QA
+./trivance-dev-config/scripts/envs.sh status        # Mostrar entorno actual
+./trivance-dev-config/scripts/envs.sh switch qa     # Cambiar a entorno QA
 ```
 
 ## Decisiones Técnicas

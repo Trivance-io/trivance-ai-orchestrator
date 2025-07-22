@@ -18,7 +18,7 @@
 ```bash
 # ⚡ MODO DESARROLLO CON HOT-RELOAD (usado por ./start.sh start)
 cd trivance-dev-config/scripts/utils
-./smart-docker-manager.sh dev ../docker/docker-compose.dev.yml
+./smart-docker-manager.sh dev ../../docker/docker-compose.dev.yml
 
 # Características del modo dev:
 # - Hot-reload ≤2s garantizado
@@ -95,7 +95,7 @@ open http://localhost:9999
 ./trivance-dev-config/scripts/utils/clean-workspace.sh
 
 # Verificar compilación
-./trivance-dev-config/scripts/utils/verify-compilation.sh
+./trivance-dev-config/scripts/utils/validate-setup.sh
 ```
 
 ## 📊 Monitor de Logs Docker
@@ -160,7 +160,7 @@ npm run build          # Build con EAS
 
 ## 💡 Tips
 
-- Usa `./check-health.sh fix` para resolver problemas automáticamente
-- Cambia environments con `./change-env.sh switch [env]` antes de iniciar
+- Usa `./start.sh status` para verificar el estado de todos los servicios
+- Cambia environments con `./trivance-dev-config/scripts/envs.sh switch [env]` antes de iniciar
 - Los logs se guardan en `./logs/` para debugging
 - Ejecuta `./setup.sh` si necesitas reconfigurar todo desde cero

@@ -81,8 +81,9 @@ install_repo_dependencies() {
     # Cambiar al directorio del repo
     cd "$repo_path"
     
-    # Instalación con timeout de 180 segundos (3 minutos) - Universal para todos los SO
-    if run_with_timeout 180 npm install --silent --no-audit --no-fund > "$log_file" 2>&1; then
+    # Instalación con timeout configurable (default 10 minutos para AI workflows)
+    local timeout="${NPM_INSTALL_TIMEOUT:-600}"
+    if run_with_timeout "$timeout" npm install --silent --no-audit --no-fund > "$log_file" 2>&1; then
         local end_time=$(date +%s)
         local duration=$((end_time - start_time))
         success "✅ ${repo_name}: Completado en ${duration}s"
@@ -93,7 +94,8 @@ install_repo_dependencies() {
         local duration=$((end_time - start_time))
         
         if [[ $exit_code -eq 124 ]]; then
-            error "❌ ${repo_name}: TIMEOUT después de 3 minutos"
+            local timeout_minutes=$((timeout / 60))
+            error "❌ ${repo_name}: TIMEOUT después de ${timeout_minutes} minutos"
         else
             error "❌ ${repo_name}: Error en instalación (${duration}s)"
         fi

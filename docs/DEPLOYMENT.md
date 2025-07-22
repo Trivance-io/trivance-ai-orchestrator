@@ -14,7 +14,7 @@ This guide covers deployment procedures for all Trivance platform environments.
 ### QA Environment
 - Requires manual configuration
 - Update `config/environments.json` with QA values
-- Switch using: `./change-env.sh switch qa`
+- Switch using: `./trivance-dev-config/scripts/envs.sh switch qa`
 
 ### Production Environment
 - Highly restricted, manual configuration only
@@ -95,20 +95,20 @@ sudo systemctl start mongod
 ### Switching Environments
 ```bash
 # View current environment
-./change-env.sh status
+./trivance-dev-config/scripts/envs.sh status
 
 # Switch to QA
-./change-env.sh switch qa
+./trivance-dev-config/scripts/envs.sh switch qa
 
 # Validate configuration
-./change-env.sh validate
+./trivance-dev-config/scripts/envs.sh validate local
 ```
 
 ### Adding New Environment Variables
 1. Update `config/environments.json`
 2. Sync environment files:
    ```bash
-   ./change-env.sh sync
+   ./trivance-dev-config/scripts/envs.sh sync
    ```
 3. Restart affected services:
    ```bash
@@ -157,7 +157,7 @@ pm2 monit
 
 ### Service Won't Start
 1. Check logs: `pm2 logs [service-name]`
-2. Verify environment variables: `./change-env.sh validate`
+2. Verify environment variables: `./trivance-dev-config/scripts/envs.sh validate`
 3. Check port availability: `lsof -i:[port]`
 
 ### Database Connection Failed

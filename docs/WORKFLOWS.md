@@ -54,7 +54,7 @@ graph LR
 
 ```bash
 # OBLIGATORIO: Verificar que todos los repos compilen
-./scripts/utils/verify-compilation.sh
+./scripts/utils/validate-setup.sh
 
 # Solo si pasa la verificación, proceder con commit
 git add .
@@ -115,7 +115,7 @@ git checkout -b feat/TKT123-nueva-funcionalidad
 # Mobile changes en trivance-mobile (si aplica)
 
 # 3. OBLIGATORIO: Verificar compilación antes de commit
-./scripts/utils/verify-compilation.sh
+./scripts/utils/validate-setup.sh
 
 # 4. Solo si compila correctamente, hacer commits atómicos
 git add .
@@ -408,7 +408,7 @@ npm run test:e2e:full
 ```bash
 ./scripts/utils/validate-setup.sh                # Tests en todos los repos
 ./scripts/utils/run-lint.sh                # Linting en todos los repos
-./scripts/utils/verify-compilation.sh               # Build de todos los repos
+./scripts/utils/validate-setup.sh               # Build de todos los repos
 ```
 
 ### Monitoring y Debugging

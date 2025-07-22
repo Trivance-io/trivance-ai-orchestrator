@@ -6,6 +6,9 @@
 
 set -euo pipefail
 
+# 📁 Directorio del script
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # 🎨 Colores (compatible con otros scripts)
 if [[ -z "${RED:-}" ]]; then
     readonly RED='\033[0;31m'
@@ -17,12 +20,13 @@ if [[ -z "${RED:-}" ]]; then
     readonly NC='\033[0m'
 fi
 
-# 📊 Configuración de timeouts adaptativos
-TIMEOUT_FIRST_BUILD=1200    # 20 minutos primera compilación (incluye descarga de imágenes base)
-TIMEOUT_REBUILD=300         # 5 minutos rebuild con cache
-TIMEOUT_STARTUP=300         # 5 minutos para startup (incluye descarga si es necesario)
-TIMEOUT_HEALTH_CHECK=120    # 2 minutos para health checks
-TIMEOUT_QUICK_OPS=60        # 1 minuto operaciones rápidas
+# 📊 Configuración de timeouts adaptativos OPTIMIZADOS
+# Balanceados para mejor UX sin comprometer funcionalidad
+TIMEOUT_FIRST_BUILD=${DOCKER_FIRST_BUILD_TIMEOUT:-600}     # 10 min (primera ejecución con descargas)
+TIMEOUT_REBUILD=${DOCKER_REBUILD_TIMEOUT:-180}             # 3 min (con cache es rápido)
+TIMEOUT_STARTUP=${DOCKER_STARTUP_TIMEOUT:-120}             # 2 min (servicios simples)
+TIMEOUT_HEALTH_CHECK=${DOCKER_HEALTH_CHECK_TIMEOUT:-60}    # 1 min (health endpoints rápidos)
+TIMEOUT_QUICK_OPS=${DOCKER_QUICK_OPS_TIMEOUT:-30}          # 30 seg (operaciones simples)
 
 # 📁 Directorio de estado
 STATE_DIR="/tmp/trivance-smart-docker"
@@ -36,13 +40,39 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# 🔨 Docker Development Mode (NUEVA FUNCIÓN)
+# 🔨 Docker Development Mode (MEJORADO CON PRE-CHECKS)
 docker_dev_mode() {
     local compose_file="$1"
     local timeout="${2:-$TIMEOUT_FIRST_BUILD}"
     
     log "INFO" "🚀 Iniciando modo desarrollo Docker con hot-reload"
     log "INFO" "📁 Compose file: $compose_file"
+    
+    # PRE-FLIGHT CHECKS ANTES DE DOCKER
+    local pre_flight_script="${SCRIPT_DIR}/pre-flight-checks.sh"
+    if [[ -x "$pre_flight_script" ]]; then
+        log "INFO" "🔍 Ejecutando validaciones pre-vuelo..."
+        if ! "$pre_flight_script"; then
+            log "WARNING" "⚠️ Pre-flight checks encontraron problemas"
+            
+            # APLICAR FALLBACKS AUTOMÁTICOS
+            local fallback_script="${SCRIPT_DIR}/docker-fallbacks.sh"
+            if [[ -x "$fallback_script" ]]; then
+                log "INFO" "🛡️ Aplicando correcciones automáticas..."
+                "$fallback_script"
+                
+                # Re-ejecutar pre-flight checks
+                log "INFO" "🔄 Re-verificando después de correcciones..."
+                if ! "$pre_flight_script"; then
+                    log "ERROR" "❌ Problemas críticos no resueltos - intervención manual requerida"
+                    return 1
+                fi
+            else
+                return 1
+            fi
+        fi
+        echo  # Línea en blanco para separación visual
+    fi
     
     # Verificar que existe el archivo compose
     if [[ ! -f "$compose_file" ]]; then
@@ -98,8 +128,13 @@ docker_dev_mode() {
     log "INFO" "🚀 Iniciando servicios con hot-reload..."
     
     # Start con feedback claro (hot-reload via volume mounts)
-    smart_docker_operation "up" "$compose_file" "" "$timeout"
+    if ! smart_docker_operation "up" "$compose_file" "" "$timeout"; then
+        log "ERROR" "❌ Falló el inicio de servicios Docker"
+        cd "$original_dir"
+        return 1
+    fi
     
+    log "SUCCESS" "🎉 Modo desarrollo Docker iniciado correctamente"
     cd "$original_dir"
 }
 
@@ -176,15 +211,14 @@ show_context_message() {
     
     case "$context" in
         "first_build")
-            log "INFO" "🎯 Primera configuración completa detectada"
-            log "INFO" "📦 Esto incluye:"
-            log "INFO" "   • Descarga de imágenes base (Node.js, PostgreSQL ~380MB, MongoDB ~1GB, Dozzle)"
-            log "INFO" "   • Instalación de dependencias npm en contenedores"
-            log "INFO" "   • Compilación de código TypeScript"
-            log "INFO" "   • Construcción de imágenes Docker custom"
-            log "INFO" "   • Inicio de todos los servicios con health checks"
-            log "WARNING" "⏱️  Tiempo estimado: 10-20 minutos (solo la primera vez)"
-            log "INFO" "☕ Perfecto momento para un café largo - descargando ~1.5GB"
+            log "INFO" "🎯 Primera configuración detectada"
+            log "INFO" "📦 Pasos automáticos:"
+            log "INFO" "   1️⃣ Descarga de imágenes base (~1.5GB total)"
+            log "INFO" "   2️⃣ Instalación de dependencias npm"
+            log "INFO" "   3️⃣ Compilación TypeScript"
+            log "INFO" "   4️⃣ Construcción de imágenes Docker"
+            log "WARNING" "⏱️  Tiempo REAL estimado: 3-5 minutos"
+            log "INFO" "☕ Momento para un café rápido"
             ;;
         "rebuild")
             log "INFO" "🔄 Reconstrucción con cache detectada"
@@ -237,23 +271,27 @@ show_progress_indicator() {
            "$mins" "$secs" "$total_mins" "$total_secs"
 }
 
-# 📋 Verificar si Docker está compilando
+# 📋 Verificar si Docker está progresando
 check_docker_build_progress() {
     local compose_file="$1"
-    local service_name="$2"
+    local services="$2"
     
-    # Verificar logs de Docker para indicadores de progreso
-    local container_name="trivance_${service_name}"
-    
-    if docker ps --format "{{.Names}}" | grep -q "$container_name"; then
-        local recent_logs=$(docker logs "$container_name" --tail 5 2>/dev/null || echo "")
-        
-        if echo "$recent_logs" | grep -q -i "installing\|downloading\|compiling\|building"; then
-            return 0  # Está compilando
-        fi
+    # Verificar si docker compose está activo (proceso corriendo)
+    if docker compose -f "$(basename "$compose_file")" ps --quiet | head -1 >/dev/null 2>&1; then
+        return 0  # Docker compose está trabajando
     fi
     
-    return 1  # No está compilando
+    # Verificar si hay descargas/builds activos en el sistema
+    if docker system events --since=10s --until=1s --filter type=image 2>/dev/null | grep -q "pull\|build"; then
+        return 0  # Actividad de Docker detectada
+    fi
+    
+    # Verificar logs de compose para actividad reciente
+    if docker compose -f "$(basename "$compose_file")" logs --tail=10 --since=30s 2>/dev/null | grep -q -i "starting\|waiting\|pulling\|building"; then
+        return 0  # Actividad en logs
+    fi
+    
+    return 1  # No hay progreso detectable
 }
 
 # 🔍 Mostrar información útil durante la espera
@@ -265,14 +303,18 @@ show_helpful_info() {
     if (( elapsed > 0 && elapsed % 30 == 0 )); then
         case "$context" in
             "first_build")
-                if (( elapsed == 30 )); then
-                    log "INFO" "💡 Tip: Las próximas ejecuciones serán mucho más rápidas"
+                if (( elapsed == 20 )); then
+                    log "PROGRESS" "🔄 Descargando imágenes base..."
+                elif (( elapsed == 40 )); then
+                    log "PROGRESS" "📦 Instalando dependencias npm..."
                 elif (( elapsed == 60 )); then
-                    log "INFO" "💡 Tip: Puedes ver logs detallados con 'docker logs trivance_management'"
+                    log "PROGRESS" "🔨 Compilando TypeScript..."
+                elif (( elapsed == 90 )); then
+                    log "PROGRESS" "🚀 Iniciando servicios..."
                 elif (( elapsed == 120 )); then
-                    log "INFO" "💡 Tip: El sistema está descargando dependencias npm (puede ser lento)"
-                elif (( elapsed == 180 )); then
-                    log "INFO" "💡 Tip: Compilando código TypeScript - casi terminando"
+                    log "WARNING" "⏳ Tomando más tiempo del esperado - verificando..."
+                    # Mostrar logs del contenedor para debugging
+                    docker logs trivance_mgmt_dev --tail 5 2>/dev/null || true
                 fi
                 ;;
             "rebuild")
@@ -326,7 +368,7 @@ smart_docker_operation() {
     cd "$compose_dir"
     
     # Construir comando Docker
-    local cmd=("docker" "compose" "$operation")
+    local cmd=("docker" "compose" "-f" "$(basename "$compose_file")" "$operation")
     case "$operation" in
         "up")
             cmd+=("-d")
@@ -472,6 +514,21 @@ smart_docker_operation() {
         if [[ -f "$STATE_DIR/docker_output.log" ]]; then
             log "ERROR" "📋 Últimas líneas del log:"
             tail -10 "$STATE_DIR/docker_output.log" | sed 's/^/  /'
+        fi
+        
+        # INTENTAR FALLBACKS POST-ERROR
+        local fallback_script="${SCRIPT_DIR}/docker-fallbacks.sh"
+        if [[ -x "$fallback_script" ]]; then
+            log "INFO" "🛡️ Intentando correcciones automáticas post-error..."
+            source "$fallback_script"
+            
+            # Detectar tipo de error y aplicar fallback específico
+            if grep -q "npm.*build:dev" "$STATE_DIR/docker_output.log" 2>/dev/null; then
+                apply_post_error_fallbacks "build_failed"
+                log "INFO" "🔄 Reintentando después de corregir scripts de build..."
+                # Reintentar operación
+                return $(smart_docker_operation "$operation" "$compose_file" "$services" "$custom_timeout")
+            fi
         fi
         
         log "INFO" "💡 Para más detalles: docker compose logs"

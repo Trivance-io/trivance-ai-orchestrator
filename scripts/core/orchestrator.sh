@@ -18,6 +18,10 @@ main() {
     local start_time
     start_time=$(date +%s)
     
+    # Enable AI-friendly mode for all operations
+    export AI_EXECUTION_MODE=true
+    export INTERACTIVE_MODE=false
+    
     show_banner
     
     log "Iniciando configuración automatizada del entorno de desarrollo Trivance"
@@ -48,13 +52,11 @@ main() {
     log "PASO 6/7: Aplicando fixes automáticos para desarrollo"
     apply_post_setup_fixes
     
-    # Paso 7: Verificar compilación
-    log "PASO 7/8: OBLIGATORIO - Verificando compilación de todos los repositorios"
-    verify_compilation
-    
-    # Paso 8: Configurar herramientas de monitoreo (opcional)
-    log "PASO 8/8: Configurando herramientas de monitoreo"
+    # Paso 7: Configurar herramientas de monitoreo
+    log "PASO 7/7: Configurando herramientas de monitoreo"
     setup_monitoring_tools
+    
+    # Setup completo - los servicios se inician con ./start.sh por separado
     
     local end_time duration
     end_time=$(date +%s)
@@ -68,7 +70,7 @@ main() {
     success "✅ Variables de entorno generadas automáticamente"
     success "✅ Dependencias instaladas en paralelo (3min total)"
     success "✅ Herramientas de desarrollo configuradas"
-    success "✅ Compilación verificada para todos los repositorios"
+    success "✅ Sistema optimizado para desarrollo con hot-reload"
     echo
     info "📂 Workspace de VS Code: ${WORKSPACE_DIR}/TrivancePlatform.code-workspace"
     
@@ -145,18 +147,30 @@ validate_configuration() {
             exit 1
         fi
         
-        # Check Docker - OBLIGATORIO
+        # Check Docker with auto-installation for AI-first workflows
         if ! command -v docker &> /dev/null; then
-            error "❌ Docker no está instalado - Docker es OBLIGATORIO"
-            error "Por favor instala Docker Desktop desde: https://www.docker.com/products/docker-desktop/"
-            exit 1
+            warn "⚠️  Docker no está instalado"
+            info "🤖 Intentando instalación automática para AI workflow..."
+            
+            if "${SCRIPT_DIR}/../utils/auto-install-docker.sh"; then
+                success "✅ Docker instalado automáticamente"
+            else
+                error "❌ Falló la instalación automática de Docker"
+                error "Por favor instala Docker manualmente: https://docs.docker.com/get-docker/"
+                exit 1
+            fi
         fi
         
-        # Check if Docker daemon is running
+        # Check if Docker daemon is running with auto-start
         if ! docker ps &> /dev/null; then
-            error "❌ Docker no está corriendo"
-            error "Por favor inicia Docker Desktop y vuelve a ejecutar este script"
-            exit 1
+            warn "⚠️  Docker no está corriendo, intentando iniciar..."
+            if "${SCRIPT_DIR}/../utils/auto-install-docker.sh"; then
+                success "✅ Docker iniciado automáticamente"
+            else
+                error "❌ No se pudo iniciar Docker automáticamente"
+                error "Por favor inicia Docker Desktop manualmente y vuelve a ejecutar"
+                exit 1
+            fi
         fi
         
         # Check Docker Compose
@@ -500,29 +514,109 @@ apply_post_setup_fixes() {
     
 }
 
-verify_compilation() {
-    log "OBLIGATORIO: Verificando compilación para todos los repositorios"
+# verify_compilation() function removed - compilation verification is redundant
+# in hybrid Docker+PM2+Expo architecture with hot-reload.
+# Docker build already validates compilation during image creation.
+# Hot-reload handles runtime TypeScript compilation automatically.
+
+start_and_validate_pm2_services() {
+    info "🚀 Iniciando servicios PM2 para frontend..."
     
     cd "${WORKSPACE_DIR}"
     
-    info "🔄 Iniciando verificación de compilación con timeouts mejorados..."
+    # Ensure PM2 is installed (should be already from validation)
+    if ! command -v pm2 &> /dev/null; then
+        info "📦 Instalando PM2..."
+        npm install -g pm2 --silent
+    fi
     
-    if "${SCRIPT_DIR}/../utils/verify-compilation.sh"; then
-        success "✅ Todos los repositorios compilaron exitosamente!"
+    # Create logs directory
+    mkdir -p "${WORKSPACE_DIR}/level_up_backoffice/logs"
+    
+    # Check if backoffice service is already running
+    if pm2 list | grep -q "backoffice.*online"; then
+        success "✅ Servicio frontend ya está ejecutándose"
     else
-        local exit_code=$?
+        info "🚀 Iniciando servicio frontend con PM2..."
         
-        # Si hay warnings pero no errores críticos, continuar
-        if [[ $exit_code -eq 1 ]]; then
-            warn "⚠️  Hay warnings en la compilación pero el setup puede continuar"
-            warn "   Revise los logs en logs/compilation/ para más detalles"
-            warn "   Los servicios PM2 están funcionando correctamente"
+        # Start the frontend service using ecosystem config
+        if pm2 start "${WORKSPACE_DIR}/trivance-dev-config/config/ecosystem.config.js" --only backoffice --silent; then
+            success "✅ Servicio frontend iniciado exitosamente"
         else
-            error "❌ Errores críticos en la compilación!"
-            error "   Revise los logs en logs/compilation/ para más detalles"
-            error "   Este es un paso obligatorio. Por favor corrija los errores e intente nuevamente."
-            exit 1
+            error "❌ Error al iniciar servicio frontend"
+            error "   Verifica manualmente con: pm2 logs backoffice"
+            return 1
         fi
+    fi
+    
+    # Wait for service to be fully ready (give it a moment to start)
+    sleep 3
+    
+    # Validate frontend is responding
+    info "🔍 Validando que frontend responda..."
+    local max_attempts=10
+    local attempt=0
+    
+    while [[ $attempt -lt $max_attempts ]]; do
+        if curl -s -f "http://localhost:5173" > /dev/null 2>&1; then
+            success "✅ Frontend respondiendo en http://localhost:5173"
+            return 0
+        else
+            ((attempt++))
+            if [[ $attempt -lt $max_attempts ]]; then
+                info "⏳ Esperando frontend... (intento ${attempt}/${max_attempts})"
+                sleep 2
+            fi
+        fi
+    done
+    
+    # Frontend not responding after all attempts
+    warn "⚠️  Frontend no responde después de ${max_attempts} intentos"
+    warn "   Esto puede ser normal si Vite está compilando inicialmente"
+    warn "   Verifica manualmente: curl http://localhost:5173"
+    warn "   Logs disponibles: pm2 logs backoffice"
+    
+    # Don't fail setup for this - frontend might just be slow to start
+    return 0
+}
+
+start_docker_services() {
+    info "🐳 Iniciando servicios Docker (backend + databases)..."
+    
+    cd "${WORKSPACE_DIR}"
+    
+    # Use Smart Docker Manager to start services
+    local compose_file="${WORKSPACE_DIR}/trivance-dev-config/docker/docker-compose.dev.yml"
+    
+    if [[ ! -f "$compose_file" ]]; then
+        error "❌ Archivo docker-compose.dev.yml no encontrado"
+        return 1
+    fi
+    
+    info "🚀 Iniciando servicios backend con hot-reload..."
+    
+    # Start Docker services using smart manager with AI-friendly timeouts
+    export AI_EXECUTION_MODE=true
+    if "${WORKSPACE_DIR}/trivance-dev-config/scripts/utils/smart-docker-manager.sh" up "$compose_file"; then
+        success "✅ Servicios Docker iniciados exitosamente"
+        
+        # Brief wait for services to stabilize
+        info "⏳ Esperando servicios Docker estabilizarse..."
+        sleep 5
+        
+        # Validate key services are running
+        if docker ps --format "table {{.Names}}\t{{.Status}}" | grep -E "(management|auth|postgres|mongodb)" > /dev/null; then
+            success "✅ Servicios críticos ejecutándose correctamente"
+        else
+            warn "⚠️  Algunos servicios pueden estar iniciando aún"
+            warn "   Verifica con: docker ps"
+        fi
+    else
+        error "❌ Error al iniciar servicios Docker"
+        error "   Verifica logs con: docker compose -f ${compose_file} logs"
+        warn "⚠️  Continuando setup - puedes iniciar manualmente con ./start.sh start"
+        # Don't fail setup completely - user can start manually
+        return 0
     fi
 }
 

@@ -238,7 +238,7 @@ pm2 kill
 ./trivance-dev-config/scripts/utils/validate-setup.sh
 
 # Verificar compilación
-./trivance-dev-config/scripts/utils/verify-compilation.sh
+./trivance-dev-config/scripts/utils/validate-setup.sh
 ```
 
 ## 🚨 Errores Comunes Específicos

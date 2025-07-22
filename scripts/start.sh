@@ -64,15 +64,21 @@ detect_system_state() {
                 pm2_running=true
             fi
             
-            # Verificar Docker
+            # Verificar Docker (servicios críticos con nombres reales)
             local docker_running=false
-            if command -v docker &> /dev/null && docker ps --format "table {{.Names}}" 2>/dev/null | grep -q "trivance_"; then
-                docker_running=true
+            if command -v docker &> /dev/null; then
+                local mgmt_running=$(docker ps --filter "name=trivance_mgmt_dev" --filter "status=running" --quiet)
+                local auth_running=$(docker ps --filter "name=trivance_auth_dev" --filter "status=running" --quiet)
+                if [[ -n "$mgmt_running" && -n "$auth_running" ]]; then
+                    docker_running=true
+                fi
             fi
             
-            # Si algún servicio está corriendo, cambiar estado
-            if [[ "$pm2_running" == true ]] || [[ "$docker_running" == true ]]; then
+            # Sistema completo solo si AMBOS PM2 Y Docker están corriendo
+            if [[ "$pm2_running" == true ]] && [[ "$docker_running" == true ]]; then
                 state="running"
+            elif [[ "$pm2_running" == true ]] || [[ "$docker_running" == true ]]; then
+                state="partial"
             fi
         fi
     fi
@@ -145,9 +151,14 @@ show_main_menu() {
             echo -e "  ${docker_status}"
             ;;
         "running")
-            echo -e "  ${GREEN}✅ Servicios ejecutándose${NC}"
+            echo -e "  ${GREEN}✅ Sistema completo ejecutándose${NC}"
             echo -e "  ${BLUE}📍 Environment: ${current_env}${NC}"
             echo -e "  ${GREEN}🐳 Docker + PM2 (arquitectura híbrida)${NC}"
+            ;;
+        "partial")
+            echo -e "  ${YELLOW}⚠️  Sistema parcialmente ejecutándose${NC}"
+            echo -e "  ${BLUE}📍 Environment: ${current_env}${NC}"
+            echo -e "  ${YELLOW}   Algunos servicios faltan - usar opción 1 para completar${NC}"
             ;;
     esac
     
@@ -158,7 +169,7 @@ show_main_menu() {
     if [[ "$state" == "not_setup" ]]; then
         echo -e "  ${GREEN}1)${NC} 🔧 Configurar entorno completo (setup inicial)"
         echo -e "  ${YELLOW}   Las demás opciones estarán disponibles después del setup${NC}"
-    else
+    elif [[ "$state" == "partial" || "$state" == "configured" || "$state" == "running" ]]; then
         echo -e "  ${GREEN}1)${NC} 🚀 Iniciar desarrollo (Docker + hot-reload ≤2s)"
         echo -e "  ${GREEN}2)${NC} 📊 Ver estado de servicios"
         echo -e "  ${GREEN}3)${NC} 🔄 Cambiar environment (actual: ${current_env})"
@@ -296,10 +307,10 @@ execute_option() {
                         
                         cd "${CONFIG_DIR}/docker"
                         case "$service_option" in
-                            "1") docker logs -f trivance_management ;;
-                            "2") docker logs -f trivance_auth ;;
-                            "3") docker logs -f trivance_postgres ;;
-                            "4") docker logs -f trivance_mongodb ;;
+                            "1") docker logs -f trivance_mgmt_dev ;;
+                            "2") docker logs -f trivance_auth_dev ;;
+                            "3") docker logs -f trivance_postgres_dev ;;
+                            "4") docker logs -f trivance_mongodb_dev ;;
                             "5") docker compose logs -f ;;
                             *) echo -e "${RED}Opción inválida${NC}" ;;
                         esac
@@ -327,8 +338,8 @@ execute_option() {
                         read -p "Contenedor: " container_option
                         
                         case "$container_option" in
-                            "1") docker exec -it trivance_management sh ;;
-                            "2") docker exec -it trivance_auth sh ;;
+                            "1") docker exec -it trivance_mgmt_dev sh ;;
+                            "2") docker exec -it trivance_auth_dev sh ;;
                             *) echo -e "${RED}Opción inválida${NC}" ;;
                         esac
                         ;;
@@ -494,13 +505,21 @@ else
     state=$(detect_system_state)
     
     if [[ "$state" == "configured" ]]; then
-        echo -e "${PURPLE}🚀 Iniciando servicios automáticamente (consistente con documentación)${NC}"
+        echo -e "${PURPLE}🚀 Iniciando servicios automáticamente${NC}"
         echo -e "${CYAN}⚡ Hot-reload ≤2s es el ESTÁNDAR de desarrollo${NC}"
         if ! check_docker; then
             echo -e "${RED}❌ Docker es requerido${NC}"
             exit 1
         fi
         echo -e "${CYAN}🔍 Los logs estarán disponibles en http://localhost:4000${NC}"
+        "${CONFIG_DIR}/scripts/utils/smart-docker-manager.sh" dev "${CONFIG_DIR}/docker/docker-compose.dev.yml"
+    elif [[ "$state" == "partial" ]]; then
+        echo -e "${YELLOW}⚠️  Sistema parcialmente ejecutándose - completando servicios${NC}"
+        echo -e "${CYAN}⚡ Iniciando servicios faltantes${NC}"
+        if ! check_docker; then
+            echo -e "${RED}❌ Docker es requerido${NC}"
+            exit 1
+        fi
         "${CONFIG_DIR}/scripts/utils/smart-docker-manager.sh" dev "${CONFIG_DIR}/docker/docker-compose.dev.yml"
     elif [[ "$state" == "running" ]]; then
         echo -e "${GREEN}✅ Los servicios ya están ejecutándose${NC}"

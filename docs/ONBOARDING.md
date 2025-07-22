@@ -105,7 +105,7 @@ npm start
 # 3. Desarrollar (hot-reload ≤2s en TODOS los servicios)
 
 # 4. Antes de commit (OBLIGATORIO)
-./trivance-dev-config/scripts/utils/verify-compilation.sh
+./trivance-dev-config/scripts/utils/validate-setup.sh
 
 # 5. Finalizar día
 ./start.sh stop

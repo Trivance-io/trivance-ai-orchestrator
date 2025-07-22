@@ -60,7 +60,7 @@
 
 # O directamente con Smart Docker Manager
 cd trivance-dev-config/scripts/utils
-./smart-docker-manager.sh dev ../docker/docker-compose.dev.yml
+./smart-docker-manager.sh dev ../../docker/docker-compose.dev.yml
 ```
 
 #### Características del Docker Dev Mode
@@ -98,6 +98,12 @@ npm run test:cov      # Tests con cobertura
 # Frontend (level_up_backoffice)
 cd level_up_backoffice
 npm test              # Tests con Vitest
+
+# Mobile App (trivance-mobile) - NO tiene npm test
+cd trivance-mobile
+npm run type-check    # TypeScript validation
+npm run lint          # ESLint validation
+npm run format:check  # Prettier validation
 ```
 
 ## 🎨 Lint y Formateo
@@ -271,7 +277,7 @@ docker logs -f trivance_auth_dev  # Auth logs
 open http://localhost:9999   # Dozzle - interfaz web moderna
 
 # Acceso a bases de datos
-docker exec -it trivance_postgres_dev psql -U trivance -d trivance_dev
+docker exec -it trivance_postgres_dev psql -U trivance_dev -d trivance_development
 docker exec -it trivance_mongodb_dev mongosh
 
 # Debug NestJS
@@ -285,10 +291,37 @@ npm run start:debug  # Attach debugger en puerto 9229
 - **Docker obligatorio**: Sistema requiere Docker para backends y DBs
 - **Smart Docker Manager**: Previene timeouts falsos con gestión inteligente
 - **Sistema de Observabilidad**: Log Viewer unificado en puerto 4000
-- **Secrets automáticos**: Se generan en `.trivance-secrets` (no commitear)
+- **Secrets automáticos**: Se generan en `trivance-dev-config/config/.trivance-secrets` (no commitear)
 - **Multi-tenant**: Todas las queries deben filtrar por `organizationId`
 - **Español en docs**: Documentación y comentarios en español, código en inglés
 - **Hot-reload**: Frontend (Vite) y backends (NestJS) con recarga automática
+
+## ⚠️ COMMAND VALIDATION PARA CLAUDE
+
+**ANTES de ejecutar cualquier comando, Claude DEBE validar:**
+
+```bash
+# 1. Verificar que servicios Docker estén activos
+docker ps --filter "name=trivance" --format "table {{.Names}}\t{{.Status}}"
+
+# 2. Verificar estado del sistema completo
+./start.sh status
+
+# 3. Si comando falla, usar troubleshooting
+./start.sh --help  # Ver comandos disponibles
+```
+
+### 🚨 ERROR PATTERNS PARA CLAUDE
+
+**Si encuentras estos errores, usa estas soluciones:**
+
+| Error | Solución Inmediata |
+|-------|-------------------|
+| `docker: command not found` | Verificar Docker Desktop activo |
+| `Port already in use` | `./start.sh stop && ./start.sh start` |
+| `Hot-reload >2s` | Verificar volúmenes Docker en docker-compose |
+| `npm test fails` | Verificar que dependencias estén instaladas |
+| `Database connection error` | Verificar containers PostgreSQL/MongoDB activos |
 
 ### 🔗 Documentación Especializada
 Toda la documentación está centralizada en `trivance-dev-config/`:
