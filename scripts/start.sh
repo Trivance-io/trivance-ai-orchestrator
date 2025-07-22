@@ -220,7 +220,7 @@ execute_option() {
                 fi
                 echo -e "${CYAN}🔍 Los logs estarán disponibles en http://localhost:4000${NC}"
                 (
-                    "${CONFIG_DIR}/scripts/utils/smart-docker-manager.sh" dev "${CONFIG_DIR}/docker/docker-compose.dev.yml"
+                    "${CONFIG_DIR}/scripts/utils/start-services-smart.sh" start
                 )
             fi
             ;;
@@ -476,7 +476,7 @@ if [[ $# -gt 0 ]]; then
                 echo -e "${RED}❌ Docker es requerido${NC}"
                 exit 1
             fi
-            "${CONFIG_DIR}/scripts/utils/smart-docker-manager.sh" dev "${CONFIG_DIR}/docker/docker-compose.dev.yml"
+            "${CONFIG_DIR}/scripts/utils/start-services-smart.sh" start
             ;;
         "docker-dev")
             echo -e "${PURPLE}🐳 Iniciando modo desarrollo Docker con hot-reload...${NC}"
@@ -484,7 +484,7 @@ if [[ $# -gt 0 ]]; then
                 echo -e "${RED}❌ Docker es requerido para este modo${NC}"
                 exit 1
             fi
-            "${CONFIG_DIR}/scripts/utils/smart-docker-manager.sh" dev "${CONFIG_DIR}/docker/docker-compose.dev.yml"
+            "${CONFIG_DIR}/scripts/utils/start-services-smart.sh" start
             ;;
         "stop")
             pm2 stop all
@@ -512,7 +512,7 @@ else
             exit 1
         fi
         echo -e "${CYAN}🔍 Los logs estarán disponibles en http://localhost:4000${NC}"
-        "${CONFIG_DIR}/scripts/utils/smart-docker-manager.sh" dev "${CONFIG_DIR}/docker/docker-compose.dev.yml"
+        "${CONFIG_DIR}/scripts/utils/start-services-smart.sh" start
     elif [[ "$state" == "partial" ]]; then
         echo -e "${YELLOW}⚠️  Sistema parcialmente ejecutándose - completando servicios${NC}"
         echo -e "${CYAN}⚡ Iniciando servicios faltantes${NC}"
@@ -520,7 +520,7 @@ else
             echo -e "${RED}❌ Docker es requerido${NC}"
             exit 1
         fi
-        "${CONFIG_DIR}/scripts/utils/smart-docker-manager.sh" dev "${CONFIG_DIR}/docker/docker-compose.dev.yml"
+        "${CONFIG_DIR}/scripts/utils/start-services-smart.sh" start
     elif [[ "$state" == "running" ]]; then
         echo -e "${GREEN}✅ Los servicios ya están ejecutándose${NC}"
         echo -e "${CYAN}🔍 Accede a:${NC}"

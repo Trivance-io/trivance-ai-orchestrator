@@ -4,7 +4,7 @@ module.exports = {
   apps: [
     {
       name: 'backoffice',
-      cwd: './level_up_backoffice',
+      cwd: process.env.WORKSPACE_DIR ? `${process.env.WORKSPACE_DIR}/level_up_backoffice` : '../../level_up_backoffice',
       script: 'npm',
       args: 'run dev',
       env: {

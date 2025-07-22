@@ -161,7 +161,7 @@ start_services() {
     if ! pm2 list | grep -q "backoffice.*online"; then
         # Usar --no-autorestart para evitar reintentos infinitos si hay errores
         # ecosystem.config.js ahora está en config/ del repo trivance-dev-config
-        pm2 start "${SCRIPT_DIR}/../../config/ecosystem.config.js" --only backoffice
+        WORKSPACE_DIR="${WORKSPACE_DIR}" pm2 start "${SCRIPT_DIR}/../../config/ecosystem.config.js" --only backoffice
         
         # Verificar que se inició correctamente
         sleep 2
