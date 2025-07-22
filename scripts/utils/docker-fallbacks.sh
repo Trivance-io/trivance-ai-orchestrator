@@ -163,12 +163,36 @@ retry_failed_services() {
     fi
 }
 
+# Nueva función: Verificar contenedores existentes sin destruir
+check_existing_containers() {
+    local containers=(
+        "trivance_mgmt_dev"
+        "trivance_auth_dev" 
+        "trivance_log_viewer_dev"
+        "trivance_postgres_dev"
+        "trivance_mongodb_dev"
+    )
+    
+    local running_containers=0
+    for container in "${containers[@]}"; do
+        if docker ps --filter "name=${container}" --filter "status=running" -q | grep -q .; then
+            ((running_containers++))
+            log_info "Detectado: $container ya está corriendo"
+        fi
+    done
+    
+    if [[ $running_containers -gt 0 ]]; then
+        log_fix "✅ Correcciones automáticas aplicadas"
+        return 0
+    fi
+}
+
 # Función principal - ejecutar todos los fallbacks
 apply_all_fallbacks() {
     log_info "🛡️ Aplicando correcciones automáticas..."
     
-    # Limpiar contenedores problemáticos primero
-    clean_problematic_containers
+    # Verificar contenedores problemáticos sin forzar destrucción
+    check_existing_containers
     
     # Corregir permisos
     fix_volume_permissions

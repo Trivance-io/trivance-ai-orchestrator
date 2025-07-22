@@ -57,8 +57,19 @@ check_ports() {
     for port in "${ports[@]}"; do
         if lsof -Pi :$port -sTCP:LISTEN -t &>/dev/null; then
             local process=$(lsof -Pi :$port -sTCP:LISTEN | grep LISTEN | head -1)
-            log_error "Puerto $port ocupado por: $process"
-            all_clear=false
+            
+            # Detección inteligente de servicios Trivance ya corriendo
+            if echo "$process" | grep -q "com.docke"; then
+                # Servicios Trivance (Docker) - solo warning
+                log_warn "Puerto $port ocupado por servicio Trivance existente"
+            elif [[ "$port" == "5173" ]] && echo "$process" | grep -q "node"; then
+                # Frontend Trivance (PM2) - solo warning
+                log_warn "Puerto $port ocupado por frontend Trivance (PM2)"
+            else
+                # Servicios externos - error real
+                log_error "Puerto $port ocupado por: $process"
+                all_clear=false
+            fi
         fi
     done
     

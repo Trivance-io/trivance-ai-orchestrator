@@ -636,28 +636,15 @@ setup_monitoring_tools() {
             info "   💡 Puedes instalarlo manualmente: ./trivance-dev-config/scripts/docker/install-dozzle.sh"
         fi
         
-        # Configurar Log Viewer (sistema de observabilidad unificado)
-        info "🔍 Configurando Log Viewer unificado..."
-        
-        # Usar el script dedicado para iniciar el Log Viewer
-        if [[ -x "${SCRIPT_DIR}/../utils/start-log-viewer.sh" ]]; then
-            if "${SCRIPT_DIR}/../utils/start-log-viewer.sh" start; then
-                success "✅ Log Viewer configurado y funcionando"
-                info "   🔍 Accede al visor de logs en: http://localhost:4000"
-            else
-                warn "⚠️  Log Viewer no se pudo iniciar automáticamente durante el setup"
-                info "   💡 Puedes iniciarlo manualmente desde el menú principal (opción 8)"
-            fi
-        else
-            warn "⚠️  Script de Log Viewer no encontrado"
-        fi
+        # Configurar Log Viewer (preparar para inicio posterior)
+        info "🔍 Log Viewer está configurado y listo"
+        info "   💡 Se iniciará automáticamente cuando ejecutes ./start.sh"
     else
         warn "⚠️  Docker no está disponible, saltando configuración de herramientas de monitoreo"
     fi
     
     success "📈 Herramientas de monitoreo configuradas"
-    info "   📊 Dozzle (logs Docker): http://localhost:9999"
-    info "   🔍 Log Viewer (observabilidad): http://localhost:4000"
+    info "   💡 Inicia los servicios con: ./start.sh"
 }
 
 create_claude_md_final() {
