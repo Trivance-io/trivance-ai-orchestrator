@@ -100,7 +100,6 @@
     "git.autofetch": true,
     "git.confirmSync": false,
     // Configuración de terminal
-    "terminal.integrated.defaultProfile.osx": "bash",
     "terminal.integrated.cwd": "${workspaceFolder}",
     // Configuración de Docker
     "docker.showStartPage": false,
