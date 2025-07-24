@@ -90,7 +90,8 @@ cd trivance-dev-config
 cd ..  # Volver al directorio workspace (padre de trivance-dev-config)
 ./start.sh
 ```
-
+ # Recomendado: copia la carpeta commands dentro de .claue en la raiz de tu workspace para hacer uso sin problemas de los comandos personalizados
+ 
 El sistema está listo cuando veas el menú principal.
 
 ## URLs del Sistema
