@@ -141,6 +141,40 @@ Si eres una IA analizando este proyecto:
 - No crear archivos duplicados, usar symlinks existentes
 - Sistema detecta estado automáticamente: not_setup → configured → running
 
+### 🎯 Comandos Personalizados de Claude Code
+
+Trivance incluye comandos especializados para Claude Code que optimizan el desarrollo:
+
+#### `/deep [consulta]`
+Activa razonamiento profundo para análisis complejos.
+```
+Uso: /deep analizar arquitectura microservicios
+Cuándo: Problemas complejos, auditorías, planeación estratégica
+```
+
+#### `/e-team [componente]`
+Simula un equipo de expertos técnicos (QA, CTO, Técnico, entre otros) para evaluaciones profesionales.
+```
+Uso: /e-team code architecture system
+Cuándo: Revisiones de código, evaluaciones de arquitectura, análisis de calidad
+```
+
+#### `/git-up [mensaje]`
+Workflow inteligente de Git con validaciones de seguridad automáticas y commits empresariales.
+```
+Uso: /git-up agregar nueva funcionalidad de auth
+Cuándo: Hacer commits seguros con validaciones automáticas
+```
+
+#### `/validate-doc [scope]`
+Validación inteligente de consistencia del ecosistema y actualización proactiva de documentación.
+```
+Uso: /validate-doc security architecture ecosystem
+Cuándo: Verificar consistencia, actualizar documentación automáticamente
+```
+
+**Nota**: Estos comandos son exclusivos para Claude Code y automatizan tareas específicas de desarrollo empresarial.
+
 ## 📁 Estructura Post-Instalación
 
 ```
