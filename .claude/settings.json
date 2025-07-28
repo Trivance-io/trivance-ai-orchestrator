@@ -69,5 +69,47 @@
   },
   "includeCoAuthoredBy": true,
   "cleanupPeriodDays": 30,
-  "hooks": {}
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|MultiEdit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "HOOK_EVENT_TYPE=PreToolUse bash .claude/hooks/ai-discipline-engine.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "HOOK_EVENT_TYPE=PreToolUse bash .claude/hooks/ai-discipline-engine.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|MultiEdit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "HOOK_EVENT_TYPE=PostToolUse bash .claude/hooks/ai-discipline-engine.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "HOOK_EVENT_TYPE=Stop bash .claude/hooks/ai-discipline-engine.sh"
+          }
+        ]
+      }
+    ]
+  }
 }

@@ -43,6 +43,12 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+# Claude Code hooks logs (generados automáticamente)
+.claude/logs/
+.claude/logs/*.log
+.claude/logs/*.json
+!.claude/logs/.gitkeep
+
 # Runtime data
 pids/
 *.pid
