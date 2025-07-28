@@ -24,6 +24,7 @@ Comprehensive expert evaluation of: **$ARGUMENTS**
 
 ### **🔧 Claude Code Expert**
 **Domain**: Claude Code compliance and optimization
+**only true source**: https://docs.anthropic.com/en/docs/claude-code/overview
 **Evaluation Framework**:
 - Official documentation adherence (0-10 vs standard)
 - Tool utilization efficiency (0-10 vs best practices)
