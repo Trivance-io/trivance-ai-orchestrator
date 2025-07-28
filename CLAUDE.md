@@ -1,6 +1,10 @@
 # TRIVANCE-DEV-CONFIG - Configuration Orchestrator
 <!-- repo: trivance-dev-config | role: master_orchestrator | scope: ecosystem -->
 
+## **Seguir SIEMPRE** este principio: **"Todo debe hacerse tan simple como sea posible, pero no más simple"** - Albert Einstein
+
+## no agregar a la documentación, titulos, comentarios, entre otros, frases promocionales, redundantes, **Manten siempre un lenguaje profesional, minimalista y fácil de entender**
+
 ## Project Overview - Master Configuration Repository
 @./README.md
 

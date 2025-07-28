@@ -34,7 +34,8 @@
       "Bash(ps *)",
       "Bash(kill *)",
       "Bash(lsof *)",
-      "Bash(cd *)"
+      "Bash(cd *)",
+      "Bash(diff *)"
     ],
     "deny": [
       "Bash(rm -rf *)",
@@ -46,8 +47,6 @@
       "Edit(/etc/**)",
       "Edit(~/.ssh/**)",
       "Edit(~/.gnupg/**)",
-      "Bash(curl *)",
-      "Bash(wget *)",
       "Bash(nc *)",
       "Bash(netcat *)",
       "Bash(nmap *)",
@@ -69,5 +68,6 @@
     "disableBypassPermissionsMode": "disable"
   },
   "includeCoAuthoredBy": true,
-  "cleanupPeriodDays": 30
+  "cleanupPeriodDays": 30,
+  "hooks": {}
 }

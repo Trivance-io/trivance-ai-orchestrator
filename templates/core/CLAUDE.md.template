@@ -1,7 +1,14 @@
-# 🤖 CLAUDE.md - Guía Operacional para Claude Code AI
+# TRIVANCE PLATFORM - Workspace Principal
+<!-- workspace: trivance-platform | role: master_workspace | scope: ecosystem_completo -->
 
 > **WORKSPACE AUTO-CONFIGURADO** desde trivance-dev-config  
 > **⚡ HOT-RELOAD ≤2s ESTÁNDAR** para desarrollo ultra-rápido
+
+Este archivo proporciona orientación completa a Claude Code para trabajar eficientemente en el ecosistema Trivance Platform.
+
+## **Seguir SIEMPRE** este principio: **"Todo debe hacerse tan simple como sea posible, pero no más simple"** - Albert Einstein
+
+## no agregar a la documentación, titulos, comentarios, entre otros, frases promocionales, redundantes, **Manten siempre un lenguaje profesional, minimalista y fácil de entender**
 
 ## 🎯 MISSION CRITICAL - Read This First
 
@@ -323,12 +330,32 @@ docker ps --filter "name=trivance" --format "table {{.Names}}\t{{.Status}}"
 | `npm test fails` | Verificar que dependencias estén instaladas |
 | `Database connection error` | Verificar containers PostgreSQL/MongoDB activos |
 
-### 🔗 Documentación Especializada
-Toda la documentación está centralizada en `trivance-dev-config/`:
-- **README.md** - Fuente de verdad maestra y arquitectura completa
-- **docs/DOCKER.md** - Guía completa Docker y contenedores
-- **docs/ENVIRONMENTS.md** - Sistema completo de environments
-- **docs/TROUBLESHOOTING.md** - Solución de problemas y debugging
+## 📚 Documentación de Referencia
+
+### Workspace Context
+@./README.md
+@./trivance-dev-config/docs/ARCHITECTURE.md
+@./trivance-dev-config/docs/COMMANDS.md
+@./trivance-dev-config/docs/ENVIRONMENTS.md
+@./trivance-dev-config/docs/DOCKER.md
+@./trivance-dev-config/docs/TROUBLESHOOTING.md
+@./trivance-dev-config/docs/WORKFLOWS.md
+
+### Service-Specific Context
+@./ms_level_up_management/docs/API.md
+@./ms_level_up_management/docs/ARCHITECTURE.md
+@./ms_trivance_auth/docs/API.md
+@./ms_trivance_auth/docs/ARCHITECTURE.md
+@./level_up_backoffice/docs/ARCHITECTURE.md
+@./level_up_backoffice/docs/FEATURES.md
+@./trivance-mobile/docs/ARCHITECTURE.md
+@./trivance-mobile/docs/DEVELOPMENT.md
+
+### Referencias Externas
+- [NestJS Documentation](https://docs.nestjs.com) - Framework backend
+- [GraphQL Best Practices](https://graphql.org/learn/best-practices/) - APIs GraphQL
+- [React Documentation](https://react.dev) - Frontend moderno
+- [Expo Documentation](https://docs.expo.dev) - Desarrollo móvil
 
 ---
 
