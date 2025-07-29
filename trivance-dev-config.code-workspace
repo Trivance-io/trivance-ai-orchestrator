@@ -1,0 +1,44 @@
+{
+  "folders": [
+    {
+      "name": "🔧 DevConfig",
+      "path": "./trivance-dev-config"
+    }
+  ],
+  "settings": {
+    // Essentials only
+    "files.exclude": {
+      "**/node_modules": true,
+      "**/logs": true,
+      "**/*.log": true
+    },
+    // Shell scripting
+    "shellcheck.enable": true,
+    "shellcheck.run": "onSave",
+    // Format on save
+    "editor.formatOnSave": true,
+    // Terminal in project folder
+    "terminal.integrated.cwd": "${workspaceFolder}/trivance-dev-config"
+  },
+  "extensions": {
+    "recommendations": [
+      "timonwong.shellcheck",
+      "redhat.vscode-yaml",
+      "ms-azuretools.vscode-docker"
+    ]
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Setup Workspace", 
+        "type": "shell",
+        "command": "./setup.sh",
+        "group": "build",
+        "options": {
+          "cwd": "${workspaceFolder}/trivance-dev-config"
+        }
+      }
+    ]
+  }
+}
