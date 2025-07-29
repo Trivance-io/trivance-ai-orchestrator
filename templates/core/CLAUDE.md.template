@@ -1,334 +1,120 @@
 # TRIVANCE PLATFORM - Workspace Principal
 <!-- workspace: trivance-platform | role: master_workspace | scope: ecosystem_completo -->
 
-> **WORKSPACE AUTO-CONFIGURADO** desde trivance-dev-config  
-> **⚡ HOT-RELOAD ≤2s ESTÁNDAR** para desarrollo ultra-rápido
+## **Einstein Principle**: "Everything should be made as simple as possible, but not simpler"
 
-Este archivo proporciona orientación completa a Claude Code para trabajar eficientemente en el ecosistema Trivance Platform.
+## **Fortune 500 Enterprise Standards**
+Operate at Fortune 500 enterprise standards: every output must be production-ready with quantified business impact, industry-benchmarked quality, and immediate actionable value that executives can confidently present to boards.
 
-## **Seguir SIEMPRE** este principio: **"Todo debe hacerse tan simple como sea posible, pero no más simple"** - Albert Einstein
+## Professional Communication Standards
+- Maintain professional, minimalist, and clear language
+- Eliminate promotional or redundant content
+- Focus on actionable intelligence and measurable outcomes
 
-## no agregar a la documentación, titulos, comentarios, entre otros, frases promocionales, redundantes, **Manten siempre un lenguaje profesional, minimalista y fácil de entender**
+## 🎯 Plataforma Esencial
 
-## 🎯 MISSION CRITICAL - Read This First
+**Trivance Platform**: 4 servicios integrados con arquitectura híbrida Docker + PM2 + Expo
+- **Management API** (NestJS + GraphQL, puerto 3000)
+- **Auth Service** (NestJS + REST, puerto 3001) 
+- **Admin Frontend** (React + Vite, puerto 5173)
+- **Mobile App** (React Native + Expo)
 
-**Este workspace está COMPLETAMENTE configurado y optimizado. No reinventes soluciones existentes.**
+### ⚡ Reglas Críticas
 
-### ⚡ GOLDEN RULES (Non-Negotiable)
+**NUNCA:**
+- ❌ Crear `start-all.sh` o scripts duplicados (eliminados por arquitectura limpia)
+- ❌ Modificar `docker-compose.dev.yml` sin revisar documentación
+- ❌ Ignorar hot-reload ≤2s estándar (no es opcional)
 
-1. **🚀 `./start.sh`** - ÚNICO comando maestro para TODO
-2. **🐳 Hot-reload ≤2s** - ESTÁNDAR obligatorio, no opcional  
-3. **📁 Multi-repo workspace** - 4 repositorios integrados
-4. **🔧 trivance-dev-config** - Configuración centralizada y autoridad
-5. **🇪🇸 Spanish-first** - Docs y comunicación en español
+**SIEMPRE:**
+- ✅ Usar `./start.sh` como comando maestro
+- ✅ Preservar arquitectura multi-repo existente
+- ✅ Consultar @documentación antes de cambios mayores
 
-## 🛡️ Critical Rules for AI
+## ⚡ Comandos Esenciales
 
-### ❌ NEVER DO THESE (Anti-Patterns)
-
-**PROHIBIDO ABSOLUTAMENTE:**
-- ❌ **Crear `start-all.sh`, `status.sh`** (eliminados por arquitectura limpia)
-- ❌ **Duplicar `ENVIRONMENTS.md`** (symlink a docs/ implementado)
-- ❌ **Modificar `docker-compose.dev.yml`** (configuración maestra intocable)
-- ❌ **Ignorar documentación existente** (revisa SIEMPRE antes de actuar)
-- ❌ **Crear archivos en workspace root** (van en trivance-dev-config/config/)
-- ❌ **Generar secrets manualmente** (sistema automático implementado)
-
-### ✅ ALWAYS DO THESE (Best Practices)
-
-**OBLIGATORIO SIEMPRE:**
-- ✅ **Usar `./start.sh`** (comando unificado)
-- ✅ **Leer README.md antes de actuar** (fuente de verdad)
-- ✅ **Verificar carpeta templates** antes de crear archivos
-- ✅ **Respetar arquitectura multi-repo** (no mono-repo)
-- ✅ **Documentar en español** (equipo hispano-hablante)
-- ✅ **Preservar hot-reload ≤2s** (estándar de productividad)
-
-## 🏗️ Comandos Principales
-
-### 🚀 Comando Maestro
 ```bash
-# COMANDO PRINCIPAL con menú interactivo
+# Comando maestro - Menú interactivo completo
 ./start.sh
 
 # Comandos directos
-./start.sh start   # 🚀 ESTÁNDAR: Docker + hot-reload ≤2s
+./start.sh start   # 🚀 ESTÁNDAR: Docker dev + hot-reload ≤2s
 ./start.sh stop    # 🛑 Detener todos los servicios
 ./start.sh status  # 📊 Ver estado del sistema
-./start.sh setup   # 🔧 Reconfigurar desde cero
-
-# ⚡ IMPORTANTE: Hot-reload ≤2s es el ESTÁNDAR, no opcional
 ```
 
-### 🐳 Docker Development Mode (NUEVA FUNCIONALIDAD)
+### URLs de Desarrollo
+- **Frontend Admin**: http://localhost:5173
+- **Management API**: http://localhost:3000 (GraphQL: /graphql)
+- **Auth Service**: http://localhost:3001 (Swagger: /api-docs)
+- **Log Viewer**: http://localhost:4000
+- **Dozzle Monitor**: http://localhost:9999
+
+## 🔧 Comandos de Desarrollo
+
 ```bash
-# Comando mágico - Una sola línea para desarrollo completo
-./start.sh docker-dev
+# Testing por servicio
+cd ms_level_up_management && npm test        # Backend: Jest
+cd level_up_backoffice && npm test           # Frontend: Vitest
+cd trivance-mobile && npm run type-check     # Mobile: TypeScript
 
-# O directamente con Smart Docker Manager
-cd trivance-dev-config/scripts/utils
-./smart-docker-manager.sh dev ../../docker/docker-compose.dev.yml
-```
+# Linting estándar en cada repo
+npm run lint && npm run format
 
-#### Características del Docker Dev Mode
-- ⚡ **Hot-reload ≤2s**: Cambios visibles instantáneamente
-- 🐳 **Containers optimizados**: Multi-stage Dockerfiles con cache inteligente
-- 📊 **Observabilidad integrada**: Log Viewer automático en puerto 4000
-- 🛡️ **Error prevention**: Warnings filtrados, feedback visual claro
-- 🔄 **Context optimization**: Build context reducido 95% (.dockerignore)
-
-### URLs de Servicios (Desarrollo Local)
-- Frontend Admin: http://localhost:5173
-- API Principal: http://localhost:3000
-- GraphQL Playground: http://localhost:3000/graphql
-- API Auth: http://localhost:3001
-- Swagger Auth: http://localhost:3001/api-docs
-- **🔍 Log Viewer**: **http://localhost:4000** (Sistema de observabilidad unificado)
-- Dozzle (Monitor logs): http://localhost:9999
-- Prisma Studio: http://localhost:5555
-
-## 🔧 Testing por Repositorio
-```bash
-# Backend API (ms_level_up_management)
+# Base de datos (Prisma)
 cd ms_level_up_management
-npm test              # Unit tests con Jest
-npm run test:watch    # Tests en modo watch
-npm run test:cov      # Tests con cobertura
-npm run test:e2e      # Tests end-to-end
-
-# Auth Service (ms_trivance_auth)
-cd ms_trivance_auth
-npm test              # Unit tests con Jest
-npm run test:watch    # Tests en modo watch
-npm run test:cov      # Tests con cobertura
-
-# Frontend (level_up_backoffice)
-cd level_up_backoffice
-npm test              # Tests con Vitest
-
-# Mobile App (trivance-mobile) - NO tiene npm test
-cd trivance-mobile
-npm run type-check    # TypeScript validation
-npm run lint          # ESLint validation
-npm run format:check  # Prettier validation
-```
-
-## 🎨 Lint y Formateo
-```bash
-# Backend services
-npm run lint          # ESLint con auto-fix
-npm run format        # Prettier
-
-# Frontend
-npm run lint          # ESLint
-
-# Mobile
-npm run lint          # ESLint
-npm run lint:fix      # ESLint con auto-fix
-npm run format        # Prettier
-npm run format:check  # Verificar formato
-npm run type-check    # TypeScript check
-```
-
-## 🗄️ Base de Datos (Prisma)
-```bash
-cd ms_level_up_management
-npx prisma migrate dev    # Crear nueva migración
-npx prisma generate       # Generar cliente Prisma
-npx prisma studio         # GUI para explorar DB
-npx prisma db push        # Sincronizar schema sin migración
+npx prisma migrate dev && npx prisma generate
 ```
 
 ## 🎛️ Gestión de Environments
+
 ```bash
-# Ver environment actual
+# Ver/cambiar environment
 ./trivance-dev-config/scripts/envs.sh status
-
-# Cambiar environment
-./trivance-dev-config/scripts/envs.sh switch local       # Desarrollo local
-./trivance-dev-config/scripts/envs.sh switch qa          # QA
-./trivance-dev-config/scripts/envs.sh switch production  # Producción
-
-# Validar configuración
-./trivance-dev-config/scripts/envs.sh validate local
+./trivance-dev-config/scripts/envs.sh switch [local|qa|production]
 ```
 
-## 🏗️ Arquitectura del Sistema
+## 🏗️ Arquitectura
 
-### Flujo de Comunicación
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   Backoffice    │────▶│  Management API │────▶│   PostgreSQL    │
-│  (Port: 5173)   │     │  (Port: 3000)   │     │  (Port: 5432)   │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-         │                       │
-         │                       │ GraphQL
-         ▼                       ▼
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│  Mobile App     │────▶│    Auth API     │────▶│    MongoDB      │
-│   (Expo Dev)    │     │  (Port: 3001)   │     │  (Port: 27017)  │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-```
+**Stack Principal:**
+- **Backend**: NestJS + GraphQL/REST + PostgreSQL/MongoDB
+- **Frontend**: React + Vite + Redux Toolkit + Tailwind
+- **Mobile**: React Native + Expo
+- **Infraestructura**: Docker + PM2 híbrido
 
-### Arquitectura Multi-tenant
-- **Aislamiento de datos**: Por `organizationId` en todas las tablas
-- **Permisos granulares**: Sistema de roles y permisos por organización
-- **Contexto de usuario**: JWT contiene `organizationId` y permisos
-
-### Stack Tecnológico
-- **Backend**: NestJS + TypeScript + Prisma (PostgreSQL) + Mongoose (MongoDB)
-- **Frontend**: React 18 + Vite + Redux Toolkit + Tailwind CSS
-- **Mobile**: React Native + Expo + Redux Persist
-- **Infraestructura**: Docker + PM2 + Nginx (producción)
-- **Testing**: Jest (backend) + Vitest (frontend)
-- **Monitoreo**: Sentry + Dozzle (logs Docker)
+**Flujo de Datos:** Frontend/Mobile → Management API → PostgreSQL, Auth API → MongoDB
 
 ## 🎨 Patrones de Código
 
-### NestJS Service Pattern
-```typescript
-@Injectable()
-export class EntityService {
-  constructor(
-    private prisma: PrismaService,
-    private readonly relatedService: RelatedService
-  ) {}
+**NestJS**: Repository pattern con Prisma/Mongoose, DTO validation, Dependency injection
+**React**: Hooks-first, Redux Toolkit, TypeScript interfaces
+**Mobile**: Redux Persist, Expo services, environment switching
 
-  async findAll(organizationId: string, query: QueryDto) {
-    return this.prisma.entity.findMany({
-      where: { organizationId, ...query },
-      include: { relations: true }
-    });
-  }
-}
-```
+## 📊 Observabilidad
 
-### React Component Pattern
-```typescript
-interface ComponentProps {
-  data: DataType;
-  onAction: (id: string) => void;
-}
-
-export const Component: React.FC<ComponentProps> = ({ data, onAction }) => {
-  // Hooks primero
-  const dispatch = useAppDispatch();
-  const { isLoading } = useAppSelector(selectState);
-  
-  // Lógica del componente
-  const handleClick = useCallback(() => {
-    onAction(data.id);
-  }, [data.id, onAction]);
-  
-  // Render condicional
-  if (isLoading) return <Spinner />;
-  
-  return <div>{/* JSX */}</div>;
-};
-```
-
-## 🔍 Sistema de Observabilidad
-
-### Log Viewer Unificado (Puerto 4000)
-```bash
-# Iniciar Log Viewer
-./trivance-dev-config/scripts/utils/start-log-viewer.sh
-
-# Acceder al sistema
-open http://localhost:4000
-
-# API para consultas programáticas
-curl "http://localhost:4000/api/logs/search?level=error&limit=20" | jq
-curl "http://localhost:4000/api/logs/search?sessionId=abc-123" | jq
-curl "http://localhost:4000/api/logs/search?text=unauthorized" | jq
-
-# Filtros disponibles:
-# - service: frontend, backend, auth
-# - level: error, warn, info, debug
-# - traceId: seguimiento de requests
-# - sessionId: seguimiento de sesiones
-# - text: búsqueda de texto completo
-```
+**Log Viewer** (puerto 4000): Sistema centralizado con API REST para búsquedas
+**Dozzle** (puerto 9999): Monitor visual de contenedores Docker
+**Filtros**: service, level, traceId, sessionId, text search
 
 ## 🚨 Troubleshooting
 
-### 🔧 Smart Docker Manager
-```bash
-# Usar Smart Docker Manager para evitar falsos errores de timeout
-cd trivance-dev-config/scripts/utils
+**Problemas comunes:**
+- Puerto ocupado: `./start.sh stop && ./start.sh start`
+- Docker no disponible: Verificar Docker Desktop activo
+- Hot-reload >2s: Comprobar volúmenes Docker en docker-compose
 
-# Operaciones con timeouts adaptativos
-./smart-docker-manager.sh up compose_file services     # 600s para first_build, 180s para startup
-./smart-docker-manager.sh down compose_file           # 60s para operaciones rápidas
-./smart-docker-manager.sh restart compose_file        # 300s para rebuild
-./smart-docker-manager.sh health_check compose_file   # 120s con múltiples reintentos
+**Debugging:**
+- Logs: `pm2 logs` (frontend), `docker logs [container]` (backend)
+- Observabilidad: http://localhost:4000 (unificado), http://localhost:9999 (Docker)
+- Health checks: `./start.sh status`
 
-# Ventajas del Smart Manager:
-# - Timeouts adaptativos según el contexto (primera compilación vs reinicio)
-# - Feedback visual para eliminar sensación de errores falsos
-# - Validación robusta de dependencias y comandos
-# - Compatibilidad con macOS (gtimeout vs timeout)
-```
+## ⚠️ Reglas Técnicas Críticas
 
-### 🛠️ Debugging
-```bash
-# Sistema de Observabilidad Unificado (RECOMENDADO)
-open http://localhost:4000  # Log Viewer con filtros avanzados
-
-# Logs en tiempo real
-pm2 logs backoffice          # Frontend logs
-docker logs -f trivance_mgmt_dev  # Backend logs
-docker logs -f trivance_auth_dev  # Auth logs
-
-# Monitor visual de logs Docker
-open http://localhost:9999   # Dozzle - interfaz web moderna
-
-# Acceso a bases de datos
-docker exec -it trivance_postgres_dev psql -U trivance_dev -d trivance_development
-docker exec -it trivance_mongodb_dev mongosh
-
-# Debug NestJS
-cd ms_level_up_management
-npm run start:debug  # Attach debugger en puerto 9229
-```
-
-## 📚 Notas Importantes
-
-### ⚠️ Reglas de Arquitectura
-- **Docker obligatorio**: Sistema requiere Docker para backends y DBs
-- **Smart Docker Manager**: Previene timeouts falsos con gestión inteligente
-- **Sistema de Observabilidad**: Log Viewer unificado en puerto 4000
-- **Secrets automáticos**: Se generan en `trivance-dev-config/config/.trivance-secrets` (no commitear)
-- **Multi-tenant**: Todas las queries deben filtrar por `organizationId`
-- **Español en docs**: Documentación y comentarios en español, código en inglés
-- **Hot-reload**: Frontend (Vite) y backends (NestJS) con recarga automática
-
-## ⚠️ COMMAND VALIDATION PARA CLAUDE
-
-**ANTES de ejecutar cualquier comando, Claude DEBE validar:**
-
-```bash
-# 1. Verificar que servicios Docker estén activos
-docker ps --filter "name=trivance" --format "table {{.Names}}\t{{.Status}}"
-
-# 2. Verificar estado del sistema completo
-./start.sh status
-
-# 3. Si comando falla, usar troubleshooting
-./start.sh --help  # Ver comandos disponibles
-```
-
-### 🚨 ERROR PATTERNS PARA CLAUDE
-
-**Si encuentras estos errores, usa estas soluciones:**
-
-| Error | Solución Inmediata |
-|-------|-------------------|
-| `docker: command not found` | Verificar Docker Desktop activo |
-| `Port already in use` | `./start.sh stop && ./start.sh start` |
-| `Hot-reload >2s` | Verificar volúmenes Docker en docker-compose |
-| `npm test fails` | Verificar que dependencias estén instaladas |
-| `Database connection error` | Verificar containers PostgreSQL/MongoDB activos |
+- **Docker obligatorio**: Backends y DBs requieren Docker activo
+- **Hot-reload ≤2s**: Estándar no negociable (frontend + backends)
+- **Secrets automáticos**: Generados en `.trivance-secrets` (no commitear)
+- **Multi-tenant**: Filtrar siempre por `organizationId`
+- **Environment switch**: Afecta toda la plataforma simultáneamente
 
 ## 📚 Documentación de Referencia
 
@@ -362,15 +148,43 @@ docker ps --filter "name=trivance" --format "table {{.Names}}\t{{.Status}}"
 - [React Documentation](https://react.dev) - Frontend moderno
 - [Expo Documentation](https://docs.expo.dev) - Desarrollo móvil
 
+## 📚 Referencias de Documentación
+
+@./README.md - Guía general del workspace
+@./trivance-dev-config/docs/ARCHITECTURE.md - Arquitectura técnica detallada
+@./trivance-dev-config/docs/COMMANDS.md - Referencia completa de comandos
+@./trivance-dev-config/docs/DOCKER.md - Configuración Docker avanzada
+@./trivance-dev-config/docs/ENVIRONMENTS.md - Sistema de environments
+@./trivance-dev-config/docs/TROUBLESHOOTING.md - Solución de problemas
+@./ms_level_up_management/docs/ - Documentación Management API
+@./ms_trivance_auth/docs/ - Documentación Auth Service
+@./level_up_backoffice/docs/ - Documentación Frontend
+@./trivance-mobile/docs/ - Documentación Mobile
+
 ---
 
-## 🎯 TEMPLATE AUTO-SINCRONIZADO
+**⚠️ TEMPLATE AUTO-SINCRONIZADO**
 
-**⚠️ IMPORTANTE**: Este archivo es **GENERADO AUTOMÁTICAMENTE**
+Fuente: `trivance-dev-config/templates/core/CLAUDE.md.template`
+Para modificar: editar template y ejecutar `./setup.sh`
 
-- 🔧 **Fuente**: `trivance-dev-config/templates/core/CLAUDE.md.template`
-- 🤖 **Generado por**: Script `setup.sh` 
-- 🔄 **Auto-update**: Cada vez que se ejecuta setup
-- 🌟 **Optimizado para**: Claude Code con workspace multi-repo en español
+## Claude Code Memories
 
-**Para modificar, edita el template y ejecuta `./trivance-dev-config/setup.sh`**
+- Never mix Spanish and English. Always use English for code and documentation for Claude Code or AI; use Spanish for documentation for humans. There should never be cases of files with English and Spanish.
+
+- **Einstein Principle**: "Everything should be made as simple as possible, but not simpler"
+
+- **Fortune 500 Enterprise Standards**
+**Operate at Fortune 500 enterprise standards: every output must be production-ready with quantified business impact, industry-benchmarked quality, and immediate actionable value that executives can confidently present to boards.**
+
+- Interaction Language
+1. Respond in **the language of the user's first interaction**
+2. On startup, show: *(You can change the language by typing `language` - replace with your preferred one -)*
+
+- **Professional Communication Standards**
+1. Maintain professional, minimalist, and clear language
+2. Eliminate promotional or redundant content
+3. Focus on actionable intelligence and measurable outcomes
+
+- All plans you propose of any kind must be AI-first, meaning they must be executed by an advanced AI like Claude Code and overseen and directed by a human. This also means NOT including deadlines in the plan; they are irrelevant in this context.
+

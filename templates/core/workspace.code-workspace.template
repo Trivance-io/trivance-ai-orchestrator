@@ -76,25 +76,12 @@
       "typescript",
       "typescriptreact"
     ],
-    // Configuración de formato
+    // Configuración de formato (sin dependencias de extensiones específicas)
     "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "explicit",
-      "source.organizeImports": "explicit"
-    },
-    // Configuración específica por tipo de archivo
-    "[typescript]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "[javascript]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "[json]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "[jsonc]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
+      "source.organizeImports": "always",
+      "source.addMissingImports": "explicit"
     },
     // Configuración de Git
     "git.autofetch": true,
