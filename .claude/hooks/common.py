@@ -12,17 +12,30 @@ Utilidades comunes para hooks de Claude Code - Enterprise Optimized.
 Claude Code expone CLAUDE_PROJECT_DIR al ejecutar hooks.
 Doc: Hooks receive JSON via stdin; environment and paths are available. 
 """
-import os, json, sys, datetime, hashlib, glob
-from typing import Dict, Optional, List
+import os, json, sys, datetime, hashlib
 
 def _project_dir() -> str:
-    return os.environ.get("CLAUDE_PROJECT_DIR") or os.getcwd()
+    """Returns the project root directory - SIMPLIFIED."""
+    # Claude Code always provides CLAUDE_PROJECT_DIR
+    project_dir = os.environ.get("CLAUDE_PROJECT_DIR")
+    if project_dir:
+        return project_dir
+    
+    # Simple fallback: navigate up from hooks directory 
+    current = os.getcwd()
+    if current.endswith('.claude/hooks'):
+        return os.path.dirname(os.path.dirname(current))
+    elif current.endswith('.claude'):
+        return os.path.dirname(current)
+    return current
 
 def _logs_dir() -> str:
+    """Creates and returns the logs directory path - SIMPLIFIED."""
     today = datetime.datetime.now().strftime("%Y-%m-%d")
-    base = os.path.join(_project_dir(), ".claude", "logs", today)
-    os.makedirs(base, exist_ok=True)
-    return base
+    project_root = _project_dir()
+    logs_path = os.path.join(project_root, ".claude", "logs", today)
+    os.makedirs(logs_path, exist_ok=True)
+    return logs_path
 
 def log_event(filename: str, payload: dict):
     """Escribe una línea JSON en .claude/logs/YYYY-MM-DD/<filename>."""
