@@ -7,26 +7,32 @@ AI-First Prompt Router - Enterprise Optimized (40 lines)
 • Zero false positives
 • 100% Claude Code spec compliant
 """
-import os, re, json, glob
-from common import log_event, read_stdin_json, short, _project_dir
+import re, json
+from common import log_event, read_stdin_json
 
-# Simplified but powerful patterns
+# Simplified but powerful patterns - Multilingual support
 SENSITIVE = re.compile(r"(?i)\b(password|secret|token|key)\s*[=:]\s*['\"][^'\"]*['\"]")
-STRATEGIC = re.compile(r"(?i)\b(deep|plan|architect|strategy|enterprise)\b")
+STRATEGIC = re.compile(r"(?i)\b(deep|plan|architect|strategy|enterprise|profundo|planificar|arquitectura|estrategia|empresarial|diseñar|análisis|evaluar|diseño|planear)\b")
 
 def inject_enterprise_context() -> str:
-    """Inject Fortune 500 enterprise context for strategic prompts."""
+    """Inject Fortune 500 excellence standards with AI-first execution."""
     return """
-**🏢 ENTERPRISE EXECUTION MODE**
-- Apply Fortune 500 standards with quantified business impact
-- 60% faster time-to-market vs traditional approaches  
-- Production-ready output suitable for executive presentation
-- Industry-benchmarked architectural patterns
+**🏢 FORTUNE 500 EXCELLENCE + AI-FIRST EXECUTION**
+- Apply Fortune 500 non-negotiable excellence standards
+- Critical thinking first: analyze deeply before executing
+- Elegant simplicity: best solution is simplest possible (without sacrificing completeness)
+- Assume contextual expert roles based on prompt domain
 
-**⚡ PERFORMANCE TARGETS**
-- Hot-reload: ≤2s (3x faster than industry standard)
-- Build time: <2min frontend, <3min backend
-- Zero-downtime deployment with automated rollback
+**🧠 EXPERT-LEVEL THINKING REQUIRED**
+- Identify and prioritize what is truly important first
+- Assume domain expertise: architect, senior engineer, strategist, etc.
+- Multi-perspective deep analysis before recommending
+- Production-ready output with first-level engineering rigor
+
+**⚡ AI-FIRST DELIVERY (NO traditional bureaucracy)**  
+- Semi-autonomous execution with strategic human oversight
+- Intelligent iteration: days/hours, not months of processes
+- Zero traditional change management overhead
 """
 
 def main():
@@ -37,7 +43,7 @@ def main():
     if SENSITIVE.search(prompt):
         print(json.dumps({
             "decision": "block", 
-            "reason": "Posible información sensible detectada. Reformula sin credenciales."
+            "reason": "Possible sensitive information detected. Reformulate without credentials."
         }, ensure_ascii=False))
         
         log_event("user_prompt.jsonl", {
