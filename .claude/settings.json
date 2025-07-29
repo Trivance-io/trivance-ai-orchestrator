@@ -6,16 +6,24 @@
     "defaultMode": "acceptEdits",
     "allow": [
       "WebFetch(domain:docs.anthropic.com)",
-      "Bash(*)",
-      "Bash(git *)",
-      "Bash(npm *)",
+      "Bash(git log *)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git show *)",
+      "Bash(npm run *)",
+      "Bash(npm test *)",
+      "Bash(npm install)",
       "Bash(yarn *)",
       "Bash(pnpm *)",
       "Bash(node *)",
       "Bash(python *)",
+      "Bash(python3 *)",
       "Bash(pip *)",
-      "Bash(docker *)",
-      "Bash(kubectl *)",
+      "Bash(docker ps *)",
+      "Bash(docker logs *)",
+      "Bash(docker compose *)",
+      "Bash(kubectl get *)",
+      "Bash(kubectl describe *)",
       "Bash(curl *)",
       "Bash(wget *)",
       "Bash(find *)",
@@ -27,20 +35,25 @@
       "Bash(tail *)",
       "Bash(mkdir *)",
       "Bash(touch *)",
-      "Bash(rm *)",
       "Bash(mv *)",
       "Bash(cp *)",
-      "Bash(chmod *)",
+      "Bash(chmod +x *)",
       "Bash(ps *)",
-      "Bash(kill *)",
       "Bash(lsof *)",
       "Bash(cd *)",
-      "Bash(diff *)"
+      "Bash(diff *)",
+      "Bash(echo *)",
+      "Bash(pwd *)",
+      "Bash(which *)",
+      "Bash(whoami *)"
     ],
     "deny": [
-      "Bash(rm -rf *)",
+      "Bash(*)",
+      "Bash(rm *)",
       "Bash(sudo *)",
-      "Bash(git push*)",
+      "Bash(git push *)",
+      "Bash(git reset --hard *)",
+      "Bash(git clean -fd *)",
       "Write(/etc/**)",
       "Write(~/.ssh/**)",
       "Write(~/.gnupg/**)",
@@ -54,49 +67,51 @@
       "Write(/sbin/**)",
       "Write(/usr/bin/**)",
       "Write(/usr/sbin/**)",
-      "Bash(rm -r *)",
       "Bash(mv * /dev/null)",
       "Bash(dd *)",
       "Bash(ssh *)",
       "Bash(scp *)",
-      "Bash(git reset --hard *)",
-      "Bash(git clean -fd *)",
       "Bash(npm install -g *)",
-      "Bash(kill -9 *)",
-      "Bash(killall *)"
-    ],
-    "disableBypassPermissionsMode": "disable"
+      "Bash(kill *)",
+      "Bash(killall *)",
+      "Bash(chmod 777 *)",
+      "Bash(chmod -R *)"
+    ]
   },
   "includeCoAuthoredBy": true,
   "cleanupPeriodDays": 30,
   "hooks": {
-    "PreToolUse": [
+    "UserPromptSubmit": [
       {
-        "matcher": "Edit|MultiEdit|Write",
         "hooks": [
           {
             "type": "command",
-            "command": "HOOK_EVENT_TYPE=PreToolUse bash .claude/hooks/ai-discipline-engine.sh"
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/prompt_router.py\"",
+            "timeout": 10
           }
         ]
-      },
+      }
+    ],
+    "PreToolUse": [
       {
-        "matcher": "Bash",
+        "matcher": "Write|Edit|MultiEdit|Bash|WebFetch|WebSearch|Task",
         "hooks": [
           {
             "type": "command",
-            "command": "HOOK_EVENT_TYPE=PreToolUse bash .claude/hooks/ai-discipline-engine.sh"
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/pretool_guard.py\"",
+            "timeout": 30
           }
         ]
       }
     ],
     "PostToolUse": [
       {
-        "matcher": "Edit|MultiEdit|Write",
+        "matcher": "Write|Edit|MultiEdit",
         "hooks": [
           {
             "type": "command",
-            "command": "HOOK_EVENT_TYPE=PostToolUse bash .claude/hooks/ai-discipline-engine.sh"
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/architecture_enforcer.py\"",
+            "timeout": 15
           }
         ]
       }
@@ -106,7 +121,19 @@
         "hooks": [
           {
             "type": "command",
-            "command": "HOOK_EVENT_TYPE=Stop bash .claude/hooks/ai-discipline-engine.sh"
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/on_stop.py\" main",
+            "timeout": 20
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/on_stop.py\" subagent",
+            "timeout": 20
           }
         ]
       }
