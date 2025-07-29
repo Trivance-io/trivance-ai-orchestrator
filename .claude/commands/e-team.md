@@ -1,162 +1,160 @@
 ---
-description: "World-class multidisciplinary technical analysis by expert team"
+description: "World-class expert team strategic analysis → Claude Code execution-ready plan"
 argument-hint: "code|architecture|system|implementation|project|component|feature"
-allowed-tools: ["Read", "Write", "Edit", "MultiEdit", "Bash", "Grep", "LS", "Glob", "WebFetch", "WebSearch", "Task", "TodoWrite", "ExitPlanMode"]
-execution-mode: "structured-analysis"
+allowed-tools: ["Read", "Write", "Edit", "MultiEdit", "Bash", "Grep", "LS", "Glob", "WebFetch", "WebSearch", "Task", "TodoWrite", "ExitPlanMode"]  
+execution-mode: "ai-first-strategic-analysis"
 auto-context: true
 ---
 
-# 🔬 E-Team World-Class Technical Analysis
+# 🔬 E-Team AI-First Strategic Analysis
 
-## 🎯 Analysis Scope
+## 🎯 Expert Challenge Analysis
 
-Comprehensive expert evaluation of: **$ARGUMENTS**
+**Deep strategic evaluation of:** **$ARGUMENTS**
 
-## 🤖 Intelligent Context Detection
+## 🧠 AI-First Context Understanding
 
-**Analyzing project automatically...**
-- Detecting project type and technology stack
-- Identifying architectural patterns
-- Evaluating tools and configurations
-- Adapting analysis frameworks to specific context
+**Auto-detecting challenge context...**
+- Understanding core problem and constraints
+- Identifying optimal solution approaches  
+- Evaluating implementation complexity
+- Generating Claude Code execution strategy
 
-## 👥 Expert Team
+## 👥 World-Class Expert Team
 
-### **🔧 Claude Code Expert**
-**Domain**: Claude Code compliance and optimization
-**only true source**: https://docs.anthropic.com/en/docs/claude-code/overview
-**Evaluation Framework**:
-- Official documentation adherence (0-10 vs standard)
-- Tool utilization efficiency (0-10 vs best practices)
-- Pattern consistency (0-10 vs Claude Code standards)
-- Performance optimization (0-10 vs benchmarks)
-**Output**: Compliance assessment + optimization recommendations
+### **🔧 Claude Code Strategist**
+**Expertise**: AI-first development with Claude Code mastery
+**Critical Analysis**:
+- Deep understanding of challenge within Claude Code ecosystem
+- Optimal tool combinations and workflows for AI execution
+- Integration points and potential automation opportunities
+- Claude Code execution path design
+**Strategic Output**: Claude Code implementation strategy
 
-### **🛡️ QA Expert** 
-**Domain**: Quality assurance and risk mitigation
-**Evaluation Framework**:
-- Security posture (0-10 vs industry standards)
-- Performance grade (0-10 vs top-quartile)
-- Reliability index (0-10 vs enterprise requirements)
-- Maintainability factor (0-10 vs best practices)
-**Output**: Quality gates report + risk mitigation strategies
+### **🛡️ Security & Quality Architect** 
+**Expertise**: Enterprise-grade security and reliability
+**Critical Analysis**:
+- Security implications and mitigation approaches
+- Quality gates that matter for the specific challenge
+- Risk factors and defensive strategies
+- Production-readiness considerations
+**Strategic Output**: Security-first implementation approach
 
-### **💻 Technical Expert** 
-**Domain**: Implementation excellence and architectural integrity
-**Evaluation Framework**:
-- Code quality + patterns (0-10 vs industry benchmarks)
-- Implementation efficiency (0-10 vs top-quartile standards)
-- Technical debt quantification (0-10 + cost impact assessment)
-- Innovation opportunities (competitive advantage potential)
-**Output**: Technical excellence assessment + strategic recommendations
+### **💻 Technical Architect** 
+**Expertise**: System design and implementation excellence
+**Critical Analysis**:
+- Architectural patterns best suited for the challenge
+- Implementation complexity and simplification opportunities
+- Technical constraints and optimization paths
+- Integration and scalability considerations
+**Strategic Output**: Technical implementation blueprint
 
-### **🎯 CTO**
-**Domain**: Strategic alignment and ROI optimization
-**Coordination Protocol**:
-- Expert findings synthesis
-- Conflict resolution authority
-- Priority matrix definition
-- Final recommendations approval
-**Output**: Executive summary + strategic roadmap
+### **🎯 Strategic Director**
+**Expertise**: Business alignment and execution priority
+**Critical Analysis**:
+- Challenge impact and business value prioritization
+- Resource optimization and effort estimation
+- Implementation sequence and dependency management
+- Success metrics and validation approach
+**Strategic Output**: AI-execution roadmap
 
-## 🔄 Structured Methodology
+## 🧠 AI-First Expert Analysis Protocol
 
-### 🔍 Phase 1: Parallel Analysis
-**Process**: Each expert evaluates independently using domain-specific frameworks
-**Deliverables**:
-- Scoring using standardized matrices
-- Identification of 3 critical issues + 3 improvement opportunities
-- Effort and impact estimation per recommendation
+### 🔍 Deep Challenge Understanding
+**Expert Intelligence Process**:
+- Each expert analyzes challenge from their domain perspective
+- Focus on understanding ROOT PROBLEMS, not surface symptoms
+- Identify what matters MOST for successful resolution
+- Consider AI execution constraints and opportunities
 
-### 🤝 Phase 2: Structured Convergence
-**Consensus Building Protocol**:
-- Conflict identification between recommendations
-- Priority weighting matrix:
-  - Security/Risk: 30%
-  - Business Impact: 25%
-  - Implementation Effort: 20%
-  - Technical Debt: 15%
-  - Innovation Opportunity: 10%
+### 🤝 Strategic Convergence  
+**Multi-Perspective Synthesis**:
+- Integrate insights from all expert domains
+- Identify the SIMPLEST path to excellence (Einstein principle)
+- Resolve conflicting approaches through technical merit
+- Prioritize based on impact and AI-execution feasibility
 
-**Escalation Rules**:
-- Auto-resolution: ≥80% expert agreement
-- Mediation: 60-80% agreement (CTO-facilitated discussion)
-- Authority: <60% agreement (CTO executive decision)
+### 🚀 Claude Code Execution Plan
+**AI-Ready Strategic Output**:
+- Clear problem definition and success criteria
+- Concrete implementation steps for AI execution
+- Tool combinations and workflow sequences  
+- Validation checkpoints and quality gates
+**Designed for**: Semi-autonomous AI execution with strategic human oversight
 
-### 🚀 Phase 3: Strategic Synthesis
-**World-Class Output**:
-- Critical issues with quantified business impact
-- Innovation opportunities + competitive advantage potential
-- Risk assessment with probability × impact scoring
-- Industry-benchmarked recommendations with ROI projections
-**Integrated Validation**: Technical coherence + feasibility + strategic alignment
+## 🔬 Contextual Expert Analysis
 
-## 🔬 Analysis Domains
+### 🎯 Challenge-Specific Expert Focus
+**Adaptive expertise based on challenge domain**:
 
-### 📋 Cross-Cutting Technical Evaluation
-**Contextual Adaptation by Project Type**:
+**System Architecture Challenges**:
+- Expert focus: Scalability patterns, integration points, data flow
+- AI execution: Architecture decisions, component design, system boundaries
 
-**Web Application**:
-- Focus: Performance, accessibility, SEO, user experience
-- Metrics: Core Web Vitals, bundle size, load times
+**Implementation Challenges**:
+- Expert focus: Code patterns, technology choices, optimization paths  
+- AI execution: Implementation approach, tool selection, quality gates
 
-**API/Backend Services**:
-- Focus: Scalability, security, API design, performance
-- Metrics: Response times, throughput, error rates
+**Performance/Reliability Challenges**:
+- Expert focus: Bottleneck identification, monitoring, resilience patterns
+- AI execution: Performance optimization, reliability improvements
 
-**Mobile Application**:
-- Focus: Performance, UX, platform compliance, offline capability
-- Metrics: App size, startup time, battery usage
+**Security/Compliance Challenges**:
+- Expert focus: Threat modeling, mitigation strategies, compliance requirements
+- AI execution: Security implementation, audit trail, validation
 
-**Infrastructure/DevOps**:
-- Focus: Reliability, scalability, security, monitoring
-- Metrics: Uptime, resource utilization, deployment frequency
+### 🧠 Deep Technical Intelligence
+**Expert analysis priorities**:
+- Understand the REAL problem (often different from stated problem)
+- Identify the simplest solution that achieves excellence
+- Consider maintenance, scalability, and evolution paths
+- Design for AI-assisted implementation and validation
 
-### 🏗️ Systematic Architectural Review
-- SOLID principles adherence
-- Design pattern appropriateness
-- Scalability architecture evaluation
-- Dependency management analysis
+### 🤖 AI-Execution Optimization
+**Claude Code implementation readiness**:
+- Break complex challenges into AI-executable steps
+- Identify optimal tool combinations and sequences
+- Plan validation and feedback loops
+- Design for semi-autonomous execution
 
-### 💻 Deep Implementation Analysis
-- Code quality standards verification
-- Implementation efficiency analysis
-- Refactoring opportunity identification
-- Developer experience optimization
+## 📊 AI-First Strategic Analysis Output
 
-## 📊 World-Class Analysis Output
-
-### 📋 Executive Intelligence Summary
+### 🧠 Expert Challenge Assessment
 ```
-Context: [Stack + architecture + industry vertical]
-Overall Health: [X/10] (Industry median: Y, Top-quartile: Z)
-Critical Issues: [Top 3 with business impact in $ or %]
-Innovation Opportunities: [Competitive advantages identified]
-Risk Profile: [High/Medium/Low with quantified probability × impact]
-ROI Projection: [Expected value from implementing recommendations]
+Challenge Context: [Technology stack + complexity + constraints]
+Core Problem: [Root cause analysis - what REALLY needs solving]
+Success Definition: [Clear, measurable outcomes]
+AI-Execution Feasibility: [High/Medium/Low with specific considerations]
+Strategic Priority: [Why this matters and impact potential]
 ```
 
-### 🔍 Expert Domain Analysis
+### 🔍 Multi-Expert Intelligence
 ```
-Claude Code Expert: [X/10 vs benchmark] → [Optimization opportunities]
-QA Expert: [X/10 vs industry] → [Risk mitigation with probability scoring]
-Technical Expert: [X/10 vs top-quartile] → [Innovation potential + technical debt cost]
-
-CTO Strategic Synthesis: [Business-aligned recommendations] + [Competitive positioning]
+Claude Code Strategist: → [AI execution path + tool strategy]
+Security & Quality Architect: → [Risk mitigation + quality approach]  
+Technical Architect: → [Implementation blueprint + optimization opportunities]
+Strategic Director: → [Priority sequence + validation approach]
 ```
 
-### 🎯 Strategic Technical Roadmap
+### 🤖 Claude Code Execution Plan
 ```
-High-Impact Fixes:
-  - [Issue] → [Solution + business value] → [Implementation approach]
+UNDERSTANDING:
+  - Problem: [Clear problem statement]
+  - Context: [Relevant constraints and requirements]
+  - Success: [Specific success criteria]
 
-Innovation Implementations:
-  - [Opportunity] → [Competitive advantage] → [Technical approach]
+STRATEGY:
+  - Approach: [Chosen solution path and rationale]
+  - Tools: [Claude Code tools and sequences to use]
+  - Validation: [How to verify success at each step]
 
-Risk Mitigations:
-  - [Risk: P×I score] → [Mitigation strategy] → [Cost-benefit analysis]
+EXECUTION:
+  - Step 1: [Specific AI-executable action]
+  - Step 2: [Next AI-executable action]  
+  - Step N: [Final AI-executable action]
+  - Human checkpoints: [Where strategic oversight needed]
 ```
 
 ---
 
-**🚀 Initiating multidisciplinary analysis of:** $ARGUMENTS
+**🚀 Initiating AI-first expert analysis of:** $ARGUMENTS
