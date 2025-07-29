@@ -124,8 +124,13 @@
 @./README.md - Platform overview and quick start
 @./docs/ARCHITECTURE.md - Technical architecture deep dive
 @./docs/COMMANDS.md - Command reference and automation
+@./docs/DEPLOYMENT.md - Deployment procedures and strategies
 @./docs/DOCKER.md - Container orchestration and management
+@./docs/DOZZLE.md - Docker log monitoring system
 @./docs/ENVIRONMENTS.md - Environment configuration and management
+@./docs/HOOKS_SYSTEM.md - Claude Code hooks system technical implementation
+@./docs/LOG-VIEWER.md - Centralized log viewer system
+@./docs/ONBOARDING.md - Team onboarding procedures
 @./docs/TROUBLESHOOTING.md - Operational issue resolution
 @./docs/WORKFLOWS.md - Development and deployment procedures
 

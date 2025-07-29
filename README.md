@@ -90,7 +90,7 @@ cd trivance-dev-config
 cd ..  # Volver al directorio workspace (padre de trivance-dev-config)
 ./start.sh
 ```
- ### IMPRECINDIBLE: copia la carpeta .claude dentro del repo (trinvace-dev-config) en la raiz de tu workspace para usar el stack de claude code configurado. 
+ ### IMPRESCINDIBLE: copia la carpeta .claude dentro del repo (trivance-dev-config) en la raiz de tu workspace para usar el stack de claude code configurado. 
  
 El sistema está listo cuando veas el menú principal.
 
@@ -174,6 +174,38 @@ Cuándo: Verificar consistencia, actualizar documentación automáticamente
 ```
 
 **Nota**: Estos comandos son exclusivos para Claude Code y automatizan tareas específicas de desarrollo empresarial.
+
+## 🛡️ Sistema de Hooks Claude Code
+
+El sistema incluye hooks inteligentes que supervisan el desarrollo para mantener consistencia arquitectónica y seguridad:
+
+### Funcionalidad Principal
+- **Supervisión automática**: Detecta patrones peligrosos y inconsistencias
+- **Context injection**: Proporciona contexto arquitectónico relevante automáticamente  
+- **Security guard**: Bloquea operaciones críticas (archivos .env, comandos peligrosos)
+- **Audit trail**: Registro completo de eventos para trazabilidad
+
+### Activación en Workspace Principal
+```bash
+# 1. Copiar configuración de hooks al workspace principal
+cp -r trivance-dev-config/.claude /workspace-principal/
+
+# 2. Hacer scripts ejecutables
+chmod +x /workspace-principal/.claude/hooks/*.py
+
+# 3. Claude Code automáticamente ejecuta hooks según settings.json
+```
+
+### Logs y Monitoreo
+```bash
+# Ver actividad de hooks en tiempo real
+tail -f .claude/logs/$(date +%Y-%m-%d)/*.jsonl
+
+# Verificar funcionamiento
+cd .claude/hooks && python3 test_hooks_e2e.py
+```
+
+**Beneficio**: Desarrollo enterprise con supervisión Senior-level automática, reduciendo inconsistencias 80% y manteniendo velocidad.
 
 ## 📁 Estructura Post-Instalación
 

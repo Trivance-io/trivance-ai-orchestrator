@@ -336,8 +336,13 @@ docker ps --filter "name=trivance" --format "table {{.Names}}\t{{.Status}}"
 @./README.md
 @./trivance-dev-config/docs/ARCHITECTURE.md
 @./trivance-dev-config/docs/COMMANDS.md
-@./trivance-dev-config/docs/ENVIRONMENTS.md
+@./trivance-dev-config/docs/DEPLOYMENT.md
 @./trivance-dev-config/docs/DOCKER.md
+@./trivance-dev-config/docs/DOZZLE.md
+@./trivance-dev-config/docs/ENVIRONMENTS.md
+@./trivance-dev-config/docs/HOOKS_SYSTEM.md
+@./trivance-dev-config/docs/LOG-VIEWER.md
+@./trivance-dev-config/docs/ONBOARDING.md
 @./trivance-dev-config/docs/TROUBLESHOOTING.md
 @./trivance-dev-config/docs/WORKFLOWS.md
 
