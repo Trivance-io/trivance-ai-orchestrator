@@ -1,127 +1,143 @@
 ---
-description: "Intelligent Git workflow with automated pre-commit validations and smart commits"
+description: "Elegant git workflow with smart validation and semantic commits"
 argument-hint: "commit message or change description"
-allowed-tools: ["Bash", "Read", "Grep", "Glob", "TodoWrite", "Task"]
-execution-mode: "automated-git-flow"
-auto-validation: true
+allowed-tools: ["Bash", "Read", "Grep"]
 ---
 
-# 🚀 Intelligent Git Workflow
+# 🚀 Git Workflow: Einstein Principle Applied
 
-## 🎯 Automated Execution Flow
+*"Everything should be made as simple as possible, but not simpler"*
 
-**AI-optimized commit workflow with enterprise-grade validations**
+## Core Validation & Smart Commit
 
-## 🔍 Smart Context Analysis
-
-**Analyzing repository state...**
-- Detecting changed files and modification patterns
-- Identifying project type and validation requirements  
-- Assessing security risks and compliance needs
-- Determining optimal commit strategy
-
-## 🛡️ Integrated Validation Engine
-
-### **Security Audit (Always Critical)**
 ```bash
-# Advanced security detection
-grep -r -i -E "(password|token|secret|key|api_key|private_key|oauth).*=.*['\"]" . \
-    --exclude-dir=.git --exclude-dir=node_modules --exclude="*.md" --exclude="*.lock"
+# Essential security check - blocks critical secrets
+security_check() {
+    if git diff --cached --name-only | grep -E "\.env$|\.secret" 2>/dev/null; then
+        echo "🚨 Environment files detected in staging area - commit blocked"
+        return 1
+    fi
+    
+    if grep -r -E "(password|token|secret|key).*=.*[\"'][^\"']*[\"']" . \
+        --exclude-dir=.git --exclude-dir=node_modules 2>/dev/null | head -3; then
+        echo "🚨 Potential credentials detected - verify before committing"
+        return 1
+    fi
+    
+    return 0
+}
 
-# Environment file detection
-git diff --cached --name-only | grep -E "\.env$|\.env\.|\.secret"
+# Quality validation when needed
+quality_check() {
+    local changed_files=$(git diff --cached --name-only 2>/dev/null)
+    
+    # Skip validation for docs-only changes
+    if echo "$changed_files" | grep -qvE "\.(md|txt)$" 2>/dev/null; then
+        if [ -f "package.json" ] && command -v npm >/dev/null 2>&1; then
+            npm run lint --silent 2>/dev/null || {
+                echo "❌ Lint check failed - run 'npm run lint' to fix"
+                return 1
+            }
+        fi
+    fi
+    
+    return 0
+}
 
-# Hardcoded endpoint detection
-grep -r -E "https?://[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}" . \
-    --exclude-dir=.git --exclude-dir=node_modules
+# Smart commit type detection
+detect_commit_type() {
+    local files="$1"
+    
+    # Documentation changes
+    if echo "$files" | grep -qE "\.(md|txt)$" && ! echo "$files" | grep -qvE "\.(md|txt)$"; then
+        echo "docs"
+        return
+    fi
+    
+    # Test files
+    if echo "$files" | grep -qE "(test|spec)" && ! echo "$files" | grep -qvE "(test|spec)"; then
+        echo "test"
+        return
+    fi
+    
+    # Configuration files
+    if echo "$files" | grep -qE "(config|\.json$|\.yaml$)" && ! echo "$files" | grep -qvE "\.(js|ts|py)$"; then
+        echo "chore"
+        return
+    fi
+    
+    # Detect fixes vs features
+    local additions=$(git diff --cached --numstat 2>/dev/null | awk '{sum+=$1} END {print sum+0}')
+    local deletions=$(git diff --cached --numstat 2>/dev/null | awk '{sum+=$2} END {print sum+0}')
+    
+    if [ "$deletions" -gt "$additions" ]; then
+        echo "refactor"
+    elif echo "$files" | grep -qE "fix|bug" || git log -1 --format=%B 2>/dev/null | grep -qi "fix"; then
+        echo "fix"
+    else
+        echo "feat"
+    fi
+}
 
-# Large file detection (>1MB)
-find . -type f -size +1M | grep -v -E "(.git|node_modules|dist|build)"
+# Main workflow execution
+execute_workflow() {
+    echo "🔍 Validating changes..."
+    
+    # Security check (always critical)
+    if ! security_check; then
+        echo "🛑 Security validation failed"
+        return 1
+    fi
+    
+    # Quality check (when applicable)
+    if ! quality_check; then
+        echo "🛑 Quality validation failed"
+        return 1
+    fi
+    
+    # Auto-stage if needed
+    local staged_files=$(git diff --cached --name-only 2>/dev/null)
+    if [ -z "$staged_files" ]; then
+        git add -A
+        staged_files=$(git diff --cached --name-only 2>/dev/null)
+    fi
+    
+    # Generate semantic commit
+    local commit_type=$(detect_commit_type "$staged_files")
+    local commit_msg="${commit_type}: $*
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+    
+    echo "✅ Validations passed"
+    echo "📝 Commit type: $commit_type"
+    echo "📄 Files: $(echo "$staged_files" | wc -l | tr -d ' ') staged"
+    
+    # Execute commit
+    git commit -m "$commit_msg"
+    
+    if [ $? -eq 0 ]; then
+        echo "✅ Commit created successfully"
+        
+        # Push confirmation
+        echo ""
+        echo "Push to origin? [y/N]: "
+        read -r confirm
+        case "$confirm" in
+            [yY]|[yY][eE][sS])
+                git push origin "$(git branch --show-current)"
+                ;;
+            *)
+                echo "💡 Run 'git push' when ready"
+                ;;
+        esac
+    else
+        echo "❌ Commit failed"
+        return 1
+    fi
+}
+
+# Execute the workflow
+execute_workflow "$@"
 ```
-
-### **Code Quality Validation (Conditional)**
-```bash
-# TypeScript/JavaScript projects
-if [ -f "package.json" ]; then
-    npm run lint 2>/dev/null || echo "⚠️ Lint validation failed"
-    npm run type-check 2>/dev/null || echo "⚠️ Type validation failed"
-fi
-
-# Python projects  
-if [ -f "requirements.txt" ] || [ -f "pyproject.toml" ]; then
-    flake8 . 2>/dev/null || echo "⚠️ Python lint failed"
-fi
-
-# Documentation-only changes skip code validation
-```
-
-## 🧠 Smart Commit Generation
-
-### **Automated Type Detection**
-- `feat:` → New functionality or files
-- `fix:` → Bug fixes and corrections
-- `refactor:` → Code restructuring without functional changes
-- `docs:` → Documentation updates only
-- `style:` → Formatting and code style
-- `test:` → Test additions or modifications
-- `chore:` → Configuration and maintenance
-- `perf:` → Performance optimizations
-
-### **Intelligent Scope Detection**
-```bash
-/api/ → (api)
-/components/ → (ui)  
-/auth/ → (auth)
-/docs/ → (docs)
-Multiple areas → (core)
-```
-
-### **Atomic Commit Strategy**
-- Group logically related changes
-- Single responsibility per commit
-- Clear business value articulation
-
-## 📊 Execution Summary
-
-```
-🔍 VALIDATION RESULTS:
-├─ Security Scan: [PASSED/FAILED]
-├─ Code Quality: [PASSED/FAILED/SKIPPED]
-├─ File Analysis: [X modified, Y new]
-└─ Large Files: [NONE/DETECTED]
-
-📝 COMMIT STRATEGY:
-├─ Type: [feat/fix/docs/etc]
-├─ Scope: [detected area]
-├─ Files: [grouped by functionality]
-└─ Message: [generated from analysis + arguments]
-
-🚀 EXECUTION:
-├─ Branch: [current branch]
-├─ Commits: [X created]
-└─ Ready for push: [YES/NO]
-```
-
-## ⚡ Push Confirmation
-
-**Automated security validation complete**
-```
-Security: ✅ PASSED
-Quality: ✅ VALIDATED  
-Commits: [X] CREATED
-Target: origin/[branch]
-
-Proceed with push? (requires explicit confirmation)
-```
-
-## 🎯 Enterprise Standards Applied
-
-- **Security-first**: Comprehensive security scanning always executed
-- **Quality gates**: Automated validation based on project type
-- **Atomic commits**: Single responsibility principle enforced
-- **Business clarity**: Commit messages explain value, not just changes
-- **Risk mitigation**: No accidental pushes without explicit confirmation
-
----
-
-**🚀 Executing intelligent Git workflow for:** $ARGUMENTS
