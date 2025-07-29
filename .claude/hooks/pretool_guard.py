@@ -72,6 +72,16 @@ def allow(reason: str, payload: dict):
     output_permission("allow", reason)
     sys.exit(0)
 
+def is_development():
+    """Detección agnóstica de entorno en 3 líneas."""
+    import getpass, socket
+    user = getpass.getuser()
+    hostname = socket.gethostname()
+    
+    # Producción: usuarios de sistema O hostnames de producción
+    return not (user in ['www-data', 'nginx', 'app', 'root', 'deploy'] or 
+               any(x in hostname.lower() for x in ['.com', '.org', '.net', 'prod', 'server']))
+
 def main():
     data = read_stdin_json()
     event = data.get("hook_event_name")
@@ -113,11 +123,15 @@ def main():
     if tool in ("WebFetch", "WebSearch"):
         url = tin.get("url", "")
         
-        # Only allow trusted domains for security
-        if url and not any(re.match(pattern, url) for pattern in TRUSTED_DOMAINS):
-            deny(f"Dominio no autorizado: {url}", payload)
+        # En desarrollo: acceso libre, en producción: restrictivo
+        if is_development():
+            allow("Desarrollo: acceso web libre", payload)
         
-        allow("Dominio web autorizado", payload)
+        # En producción: solo dominios confiables
+        if url and not any(re.match(pattern, url) for pattern in TRUSTED_DOMAINS):
+            deny(f"Producción: dominio no autorizado: {url}", payload)
+        
+        allow("Producción: dominio autorizado", payload)
 
     # 🎯 DEFAULT POLICY: ALLOW
     # Trust by default, verify only critical operations
