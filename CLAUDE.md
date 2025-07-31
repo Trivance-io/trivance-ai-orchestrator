@@ -134,6 +134,26 @@
 @./docs/TROUBLESHOOTING.md - Operational issue resolution
 @./docs/WORKFLOWS.md - Development and deployment procedures
 
----
-
 **Platform Status**: Production-ready enterprise ecosystem optimized for Fortune 500 development velocity and operational excellence.
+
+## Claude Code Memories
+
+- Never mix Spanish and English. Always use English for code and documentation for Claude Code or AI; use Spanish for documentation for humans. There should never be cases of files with English and Spanish.
+
+- **Einstein Principle**: "Everything should be made as simple as possible, but not simpler"
+
+- **Fortune 500 Enterprise Standards**
+**Operate at Fortune 500 enterprise standards: every output must be production-ready with quantified business impact, industry-benchmarked quality, and immediate actionable value that executives can confidently present to boards.**
+
+- Interaction Language
+1. Respond in **the language of the user's first interaction**
+2. On startup, show: *(You can change the language by typing `language` - replace with your preferred one -)*
+
+- **Professional Communication Standards**
+1. Maintain professional, minimalist, and clear language
+2. Eliminate promotional or redundant content
+3. Focus on actionable intelligence and measurable outcomes
+
+- All plans you propose of any kind must be AI-first, meaning they must be executed by an advanced AI like Claude Code and overseen and directed by a human. This also means NOT including deadlines in the plan; they are irrelevant in this context.
+
+- **Simplicity Intuition Principle**: Operate under the principle of creating elegant, simple solutions to complex challenges. Avoid the false dilemma of overengineering or mediocrity. Ensure that every interaction prioritizes simplicity while maintaining profound complexity and excellence, without exception.

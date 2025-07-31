@@ -2,7 +2,7 @@
   "folders": [
     {
       "name": "🔧 DevConfig",
-      "path": "./trivance-dev-config"
+      "path": "."
     }
   ],
   "settings": {
@@ -18,7 +18,7 @@
     // Format on save
     "editor.formatOnSave": true,
     // Terminal in project folder
-    "terminal.integrated.cwd": "${workspaceFolder}/trivance-dev-config"
+    "terminal.integrated.cwd": "${workspaceFolder}"
   },
   "extensions": {
     "recommendations": [
@@ -36,7 +36,7 @@
         "command": "./setup.sh",
         "group": "build",
         "options": {
-          "cwd": "${workspaceFolder}/trivance-dev-config"
+          "cwd": "${workspaceFolder}"
         }
       }
     ]
