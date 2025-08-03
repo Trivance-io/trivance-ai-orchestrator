@@ -1,19 +1,11 @@
-# TRIVANCE PLATFORM - Enterprise Development Ecosystem
+# Trivance-dev-config: Master configutarion repo for Trivance Platform 
 <!-- repo: trivance-dev-config | role: master_orchestrator | scope: enterprise_ecosystem -->
 
-## **Einstein Principle**: "Everything should be made as simple as possible, but not simpler"
+## MUST BE USED: **Einstein Principle**: "Everything should be made as simple as possible, but not simpler"
 
-## **Fortune 500 Enterprise Standards**
-**Operate at Fortune 500 enterprise standards: every output must be production-ready with quantified business impact, industry-benchmarked quality, and immediate actionable value that executives can confidently present to boards.**
-
-## Interaction Language
-- Respond in **the language of the user's first interaction**
-- On startup, show: *(You can change the language by typing `language` - replace with your preferred one -)*
-
-## **Professional Communication Standards**
-- Maintain professional, minimalist, and clear language
-- Eliminate promotional or redundant content
-- Focus on actionable intelligence and measurable outcomes
+## Interaction Language **ALWAYS MUST BE USED**
+1. **Always use Spanish** as the language of communication with the user
+2. In the first message of a session, show: *(You can change the interaction language by asking me whenever you want.)*
 
 ## Strategic Platform Context
 
@@ -23,86 +15,6 @@
 - **Zero-downtime deployment** pipeline with automated rollback capability
 - **Multi-tenant security** with auto-generated unique secrets per installation
 - **Real-time observability** with centralized logging and performance monitoring
-
-### Business Value Proposition
-- **Development velocity**: 60% faster time-to-market vs traditional architectures
-- **Operational efficiency**: 80% reduction in deployment overhead
-- **Security posture**: Enterprise-grade with zero hardcoded credentials
-- **Scalability**: Production-ready for Fortune 500 traffic patterns
-
-## Technical Architecture
-
-### Service Portfolio
-| Component | Technology | Port | Business Function |
-|-----------|------------|------|-------------------|
-| **Management API** | NestJS + GraphQL | 3000 | Core business logic & data orchestration |
-| **Auth Service** | NestJS + REST | 3001 | Identity & access management |
-| **Admin Frontend** | React + Vite | 5173 | Administrative operations interface |
-| **Mobile App** | React Native + Expo | Dynamic | Customer engagement platform |
-| **PostgreSQL** | Database | 5432 | Transactional data persistence |
-| **MongoDB** | Database | 27017 | User & session management |
-| **Log Viewer** | Custom | 4000 | Centralized observability |
-| **Dozzle Monitor** | Docker | 9999 | Real-time container monitoring |
-
-### Architecture Decisions
-- **Hybrid deployment**: Docker (backends/databases) + PM2 (frontend) + Expo (mobile)
-- **Environment isolation**: Local/QA/Production with automated secret management
-- **Performance standards**: Hot-reload ≤2s, startup ≤60s, test execution ≤30s
-- **Security standards**: Zero hardcoded credentials, unique secrets per installation
-
-## AI Execution Framework
-
-### Primary Commands
-```bash
-./start.sh                    # Ecosystem orchestration interface
-./start.sh start             # Launch development environment (≤60s)
-./start.sh status            # System health and performance metrics
-./start.sh stop              # Graceful shutdown all services
-```
-
-### Environment Management
-```bash
-./scripts/envs.sh status     # Current environment configuration
-./scripts/envs.sh switch [env] # Switch between local/QA/production
-./scripts/envs.sh validate   # Configuration integrity verification
-```
-
-### Docker Operations
-```bash
-./scripts/utils/smart-docker-manager.sh dev [compose-file]  # Development mode
-./scripts/utils/smart-docker-manager.sh up [compose-file]   # Service startup
-./scripts/utils/smart-docker-manager.sh logs [compose-file] # Log aggregation
-```
-
-## Security & Compliance Framework
-
-### Critical Security Constraints
-- **Secret management**: Auto-generated unique credentials per installation
-- **Environment isolation**: No cross-environment credential sharing
-- **File security**: All sensitive files in .gitignore with restrictive permissions
-- **Input validation**: All endpoints protected against injection attacks
-- **CORS configuration**: Appropriately configured for production deployment
-
-### Automated Security Validation
-- Credential scanning before all commits
-- Environment file exposure detection
-- Large file monitoring (>1MB alerts)
-- Hardcoded endpoint detection
-
-## Enterprise Performance Standards
-
-### Quantified Benchmarks
-- **Hot-reload performance**: ≤2s (vs industry standard 5-8s)
-- **Build times**: Frontend <2min, Backend <3min (vs industry 5-10min)
-- **Test execution**: Unit tests <30s (vs industry 2-5min)
-- **Ecosystem startup**: Complete platform <60s (vs industry 5-10min)
-- **Full setup**: Zero-to-development ≤10min (vs industry 1-2 hours)
-
-### Operational Excellence
-- **Service availability**: 99.9% uptime target
-- **Error rates**: <0.1% in production
-- **Response times**: API <200ms p95, Frontend <1s LCP
-- **Resource utilization**: <70% CPU/memory under normal load
 
 ## Master Orchestrator Responsibilities
 
@@ -119,41 +31,30 @@
 - **Safe operations**: Status checks, documentation access, log monitoring
 - **Automated validation**: Pre-commit security scanning, configuration integrity checks
 
-## Documentation References
+## Project Operating Agreement — Deterministic AI-first Workflow
 
-@./README.md - Platform overview and quick start
-@./docs/ARCHITECTURE.md - Technical architecture deep dive
-@./docs/COMMANDS.md - Command reference and automation
-@./docs/DEPLOYMENT.md - Deployment procedures and strategies
-@./docs/DOCKER.md - Container orchestration and management
-@./docs/DOZZLE.md - Docker log monitoring system
-@./docs/ENVIRONMENTS.md - Environment configuration and management
-@./docs/HOOKS_SYSTEM.md - Claude Code hooks system technical implementation
-@./docs/LOG-VIEWER.md - Centralized log viewer system
-@./docs/ONBOARDING.md - Team onboarding procedures
-@./docs/TROUBLESHOOTING.md - Operational issue resolution
-@./docs/WORKFLOWS.md - Development and deployment procedures
+**ALWAYS MUST BE USED PROACTIVELY**: each new prompt, task, or new request from the user **MUST** start with the `orchestrator-router` agent.
 
-**Platform Status**: Production-ready enterprise ecosystem optimized for Fortune 500 development velocity and operational excellence.
+The orchestrator-router agent is the single source of truth for:
+- Task classification and routing logic
+- All canonical workflow plans
+- Guardrails and validation rules
+- Agent sequencing and delegation
+
+See `.claude/agents/orchestrator-router.md` for implementation details. 
 
 ## Claude Code Memories
 
 - Never mix Spanish and English. Always use English for code and documentation for Claude Code or AI; use Spanish for documentation for humans. There should never be cases of files with English and Spanish.
 
-- **Einstein Principle**: "Everything should be made as simple as possible, but not simpler"
-
 - **Fortune 500 Enterprise Standards**
 **Operate at Fortune 500 enterprise standards: every output must be production-ready with quantified business impact, industry-benchmarked quality, and immediate actionable value that executives can confidently present to boards.**
-
-- Interaction Language
-1. Respond in **the language of the user's first interaction**
-2. On startup, show: *(You can change the language by typing `language` - replace with your preferred one -)*
 
 - **Professional Communication Standards**
 1. Maintain professional, minimalist, and clear language
 2. Eliminate promotional or redundant content
 3. Focus on actionable intelligence and measurable outcomes
 
-- All plans you propose of any kind must be AI-first, meaning they must be executed by an advanced AI like Claude Code and overseen and directed by a human. This also means NOT including deadlines in the plan; they are irrelevant in this context.
+- All your proposed plans and outcomes, of any kind, **MUST BE AI-first**, meaning they must be executed by an advanced AI like Claude Code and overseen and directed by a human. This also means NOT including deadlines in the plan; they are irrelevant in this context.
 
 - **Simplicity Intuition Principle**: Operate under the principle of creating elegant, simple solutions to complex challenges. Avoid the false dilemma of overengineering or mediocrity. Ensure that every interaction prioritizes simplicity while maintaining profound complexity and excellence, without exception.
