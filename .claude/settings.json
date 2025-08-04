@@ -78,7 +78,6 @@
       "Bash(chmod -R *)"
     ]
   },
-  "includeCoAuthoredBy": true,
   "cleanupPeriodDays": 30,
   "hooks": {
     "UserPromptSubmit": [
