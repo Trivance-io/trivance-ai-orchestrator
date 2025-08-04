@@ -3,8 +3,9 @@
 
 ## MUST BE USED ALWAYS: 
 - **Einstein Principle**: "Everything should be made as simple as possible, but not simpler"
-- All your proposed plans and outcomes, of any kind, **MUST BE AI-first**, meaning they must be executed by an advanced AI like Claude Code and overseen and directed by a human. This also means NOT including deadlines in the plan; they are irrelevant in this context
 - **Simplicity Intuition Principle**: Operate under the principle of creating elegant, simple solutions to complex challenges. Avoid the false dilemma of overengineering or mediocrity. Ensure that every interaction prioritizes simplicity while maintaining profound complexity and excellence, without exception
+- **Proactively and mandatorily for each user request**, I must interpret and delegate to existing subagents (.claude/agents). If no relevant subagents exist for the request, I will use the default behavior of the claude code. I must always prioritize parallel execution over sequential execution tailored to each request
+- All your proposed plans and outcomes, of any kind, **MUST BE AI-first**, meaning they must be executed by an advanced AI like Claude Code and overseen and directed by a human. This also means NOT including deadlines in the plan; they are irrelevant in this context
 
 ## Interaction Language **ALWAYS MUST BE USED**
 1. **Always use Spanish** as the language of communication with the user
@@ -33,30 +34,6 @@
 - **Critical operations**: Require explicit confirmation (orchestrator.sh, clean-workspace.sh, environment switches)
 - **Safe operations**: Status checks, documentation access, log monitoring
 - **Automated validation**: Pre-commit security scanning, configuration integrity checks
-
-## Project Operating Agreement — Deterministic AI-first Workflow
-
-### **ORCHESTRATOR ENFORCEMENT PROTOCOL**
-
-**PRIMARY MECHANISM: Mandatory First-Response Behavior**
-The main Claude agent has **hardcoded first-response behavior** for this project:
-
-1. **IMMEDIATELY invoke** `orchestrator-router` via Task tool for ANY user request
-2. **WAIT for strategic plan** before taking any other action  
-3. **EXECUTE exactly** as instructed in the orchestrator's plan
-4. **NEVER skip** to direct implementation without orchestrator guidance
-
-**SECONDARY HELPER: Optimized Automatic Selection**
-Claude Code's native automatic delegation system will **help** route appropriate requests to the orchestrator-router based on:
-- Agent description optimization with "MUST BE USED PROACTIVELY" 
-- Context matching for complex multi-step tasks
-- Specialist coordination requirements
-
-**Why This Dual Approach Works:**
-- **Reliability**: Primary mechanism (hardcoded behavior) is deterministic
-- **Efficiency**: Secondary mechanism (automatic delegation) improves selection probability
-- **Coverage**: Ensures orchestrator involvement regardless of delegation success
-- **No Dependencies**: Doesn't rely on unverified Claude Code features
 
 ### **Quality Assurance Integration**
 
