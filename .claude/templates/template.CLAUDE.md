@@ -1,5 +1,3 @@
-# Trivance-dev-config: Master configutarion repo for Trivance Platform 
-<!-- repo: trivance-dev-config | role: master_orchestrator | scope: enterprise_ecosystem -->
 
 ## MUST BE USED ALWAYS: 
 - **Einstein Principle**: "Everything should be made as simple as possible, but not simpler"
