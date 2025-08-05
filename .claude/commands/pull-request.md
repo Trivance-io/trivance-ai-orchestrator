@@ -1,5 +1,5 @@
 ---
-description: "Enterprise-grade pull request creation following industry standards (Google, Netflix, Shopify)"
+description: "pull request creation following industry standards (Google, Netflix, Shopify)"
 argument-hint: "optional: --draft, target-branch (auto-detects default branch)"
 allowed-tools: ["Bash", "Read", "Grep"]
 ---
