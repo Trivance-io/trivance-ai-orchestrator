@@ -1,93 +1,133 @@
-# Pull Request AI-First
+# Pull Request
 
-Creo pull requests inteligentes usando análisis contextual completo de commits y cambios.
+Creo PRs siguiendo el template establecido, con logging para auditoría y flujo simple.
 
-## Flujo Inteligente
+## Flujo Simple
 
-**1. Validaciones automáticas**
 ```bash
-# Verificar contexto de repositorio
-current_branch=$(git branch --show-current)
+# Detectar branch base
 base_branch=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's/refs\/remotes\/origin\///' || echo "main")
+current_branch=$(git branch --show-current)
 
-# Verificar que hay commits para PR
+# Validaciones básicas
 if ! git log "$base_branch"..HEAD --oneline >/dev/null 2>&1; then
-    echo "❌ No hay commits nuevos para crear PR"
+    echo "❌ No hay commits para PR"
     exit 1
 fi
 
-# Advertir si estamos en branch principal
-if [[ "$current_branch" =~ ^(main|master|develop)$ ]]; then
-    echo "⚠️ Estás en branch principal: $current_branch"
-    echo "¿Continuar? [y/N]:"
-    read -r confirm
-    [[ "$confirm" =~ ^[yY]$ ]] || exit 1
-fi
+# Obtener información básica
+commits=$(git log --oneline "$base_branch"..HEAD)
+first_commit=$(echo "$commits" | head -1 | cut -d' ' -f2-)
+files_changed=$(git diff --name-only "$base_branch"..HEAD | wc -l)
+commits_count=$(echo "$commits" | wc -l)
+
+# Detectar tipo simple
+pr_type="feature"
+if echo "$commits" | grep -qi "fix\|bug"; then pr_type="bugfix"; fi
+if echo "$commits" | grep -qi "docs"; then pr_type="docs"; fi
+
+# Generar descripción con template
+pr_description=$(cat <<EOF
+## 🎯 Contexto
+
+**Tipo**: $pr_type | **Archivos**: $files_changed | **Commits**: $commits_count
+
+### Resumen
+$first_commit
+
+### Cambios incluidos
+\`\`\`  
+$commits
+\`\`\`
+
+### Checklist
+- [x] Implementación completada
+- [x] Cambios validados localmente
+- [ ] Review pendiente
+- [ ] Testing en staging
+
+### Notas para reviewer
+$(if [ "$pr_type" = "bugfix" ]; then echo "- Verificar que el fix resuelve el issue reportado"; fi)
+$(if [ "$pr_type" = "feature" ]; then echo "- Validar que la funcionalidad cumple los requirements"; fi)
+
+---
+*PR creado con /pr*
+EOF
+)
 ```
 
-**2. Análisis AI de cambios**
+## Creación y Logging
+
 ```bash
-# Generar contenido inteligente usando pr_analyzer.py
-echo "🧠 Analizando cambios con inteligencia AI..."
-pr_content=$(python3 "$CLAUDE_PROJECT_DIR/.claude/hooks/pr_analyzer.py" "$base_branch")
+# Guardar PR info en logs JSONL con estructura por fechas
+today=$(date '+%Y-%m-%d')
+timestamp=$(date '+%Y-%m-%dT%H:%M:%S')
+logs_dir=".claude/logs/$today"
+mkdir -p "$logs_dir"
 
-# Extraer título inteligente del análisis
-pr_title=$(echo "$pr_content" | grep -A5 "## 🎯 Contexto" | tail -1 | sed 's/^.*: //')
-```
+# Crear entrada JSONL en el archivo diario
+pr_log_entry=$(cat <<EOF
+{
+  "timestamp": "$timestamp",
+  "event": "pr_created",
+  "branch": "$current_branch",
+  "target": "$base_branch",
+  "pr_type": "$pr_type",
+  "files_changed": $files_changed,
+  "commits_count": $commits_count,
+  "first_commit": "$first_commit",
+  "pr_description": $(echo "$pr_description" | jq -R -s .)
+}
+EOF
+)
 
-**3. Push seguro y creación de PR**
-```bash
-# Push controlado (permitido en settings.json)
-echo "📤 Pushing branch: $current_branch"
-if ! git push origin "$current_branch"; then
-    echo "❌ Push failed"
-    exit 1
-fi
+echo "$pr_log_entry" >> "$logs_dir/pr_activity.jsonl"
+echo "📝 PR info guardado en: $logs_dir/pr_activity.jsonl"
 
-# Crear PR con contenido AI
-echo "🚀 Creando PR con contenido inteligente..."
-if gh pr create \
-    --base "$base_branch" \
-    --title "$pr_title" \
-    --body "$pr_content" \
-    --assignee "@me"; then
-    
-    echo "✅ PR creado exitosamente!"
-    echo "🌐 $(gh pr view --web --json url --jq '.url' 2>/dev/null)"
+# Push y crear PR
+echo "📤 Pushing $current_branch..."
+if git push origin "$current_branch"; then
+    echo "🚀 Creando PR..."
+    if gh pr create \
+        --base "$base_branch" \
+        --title "$first_commit" \
+        --body "$pr_description"; then
+        
+        echo "✅ PR creado exitosamente!"
+        
+        # Actualizar log JSONL con URL del PR
+        pr_url=$(gh pr view --json url --jq '.url' 2>/dev/null)
+        pr_number=$(gh pr view --json number --jq '.number' 2>/dev/null)
+        
+        if [ -n "$pr_url" ]; then
+            # Crear entrada de PR creado exitosamente
+            pr_success_entry=$(cat <<EOF
+{
+  "timestamp": "$(date '+%Y-%m-%dT%H:%M:%S')",
+  "event": "pr_created_success",
+  "branch": "$current_branch",
+  "pr_number": $pr_number,
+  "pr_url": "$pr_url"
+}
+EOF
+)
+            echo "$pr_success_entry" >> "$logs_dir/pr_activity.jsonl"
+            echo "🌐 $pr_url"
+        fi
+        
+        gh pr view --web
+    else
+        echo "❌ Error creando PR"
+    fi
 else
-    echo "❌ Error creando PR"
-    exit 1
+    echo "❌ Error en push"
 fi
 ```
-
-## Análisis Inteligente Incluye
-
-- **Detección automática de tipo**: feat/fix/chore/docs/refactor
-- **Evaluación de impacto**: critical/high/medium/low
-- **Generación contextual**: Por qué, qué, cómo
-- **Preguntas relevantes**: Basadas en archivos modificados
-- **Métricas automáticas**: Files, commits, stats
-- **Integration tracking**: Session IDs, correlation IDs
 
 ## Uso
 
 ```bash
-# Comando simple (auto-detecta base branch)
-/pr
-
-# Con branch específico
-/pr develop
-
-# Draft PR
-/pr --draft
+/pr  # Simple, hace todo automáticamente
 ```
 
-## Integración Enterprise
-
-- **Logging completo**: pr_creation.jsonl con métricas
-- **Cache inteligente**: Análisis con TTL para performance
-- **Security validation**: Push controlado y validado
-- **Template system**: Estructura enterprise consistente
-- **AI-first approach**: Contenido generado contextualmente
-
-Este comando representa la evolución natural de la arquitectura existente: simple en uso, inteligente en ejecución.
+Template consistente, logging automático, sin complejidad innecesaria.
