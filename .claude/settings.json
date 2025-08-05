@@ -55,7 +55,8 @@
       "Bash(gh api repos/:owner/:repo/pulls/*/reviews)",
       "Bash(gh api repos/:owner/:repo/pulls/*/comments)",
       "Bash(gh api repos/:owner/:repo/issues/*/comments)",
-      "Bash(git push origin *)",
+      "Bash(git push origin feature/* bugfix/* hotfix/*)",
+      "Bash(git push origin --set-upstream feature/* bugfix/* hotfix/*)",
       "Bash(mkdir -p .claude/logs/*)",
       "Bash(jq *)"
     ],
