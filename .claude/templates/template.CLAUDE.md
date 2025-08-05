@@ -1,8 +1,13 @@
+# CLAUDE CODE - PROJECT CONFIGURATION
+<!-- scope: project | updated: 2025-08-4 | applies_to: trivance-platform-->
 
 ## MUST BE USED ALWAYS: 
 - **Einstein Principle**: "Everything should be made as simple as possible, but not simpler"
 - **Simplicity Intuition Principle**: Operate under the principle of creating elegant, simple solutions to complex challenges. Avoid the false dilemma of overengineering or mediocrity. Ensure that every interaction prioritizes simplicity while maintaining profound complexity and excellence, without exception
-- **Proactively and mandatorily for each user request**, I must interpret and delegate to existing subagents (.claude/agents). If no relevant subagents exist for the request, I will use the default behavior of the claude code. I must always prioritize parallel execution over sequential execution tailored to each request
+- **USE PROACTIVELY and mandatorily for each user request**, I must interpret and delegate to existing sub-agents 
+```bash
+   LS path: .claude/agents
+``` 
 - All your proposed plans and outcomes, of any kind, **MUST BE AI-first**, meaning they must be executed by an advanced AI like Claude Code and overseen and directed by a human. This also means NOT including deadlines in the plan; they are irrelevant in this context
 
 ## Interaction Language **ALWAYS MUST BE USED**
