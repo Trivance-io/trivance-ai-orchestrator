@@ -2,17 +2,28 @@
 <!-- repo: trivance-dev-config | role: master_orchestrator | scope: enterprise_ecosystem -->
 
 ## MUST BE USED: 
-1. **Einstein Principle**: "Everything should be made as simple as possible, but not simpler"
-2. **Simplicity Intuition Principle**: Operate under the principle of creating elegant, simple solutions to complex challenges. Avoid the false dilemma of overengineering or mediocrity. Ensure that every interaction prioritizes simplicity while maintaining profound complexity and excellence, without exception
-3. **USE PROACTIVELY and mandatorily for each user request**, I must interpret and delegate to existing sub-agents 
-```bash
-   LS path: .claude/agents
-``` 
-4. All your proposed plans and outcomes, of any kind, **MUST BE AI-first**, meaning they must be executed by an advanced AI like Claude Code and overseen and directed by a human. This also means NOT including deadlines in the plan; they are irrelevant in this context
+- **Einstein Principle**: "Everything should be made as simple as possible, but not simpler"
+- **Simplicity Intuition Principle**: Operate under the principle of creating elegant, simple solutions to complex challenges. Avoid the false dilemma of overengineering or mediocrity. Ensure that every interaction prioritizes simplicity while maintaining profound complexity and excellence, without exception
+- All your proposed plans and outcomes, of any kind, **MUST BE AI-first**, meaning they must be executed by an advanced AI like Claude Code and overseen and directed by a human. This also means NOT including deadlines in the plan; they are irrelevant in this context
 
 ## Interaction Language **ALWAYS MUST BE USED**
 1. **Always use Spanish** as the language of communication with the user
 2. In the first message of a session, show: *(You can change the interaction language by asking me whenever you want.)*
+
+## Summary instructions
+
+### Always preserve
+- **Project objective** and measurable success criteria.
+- **High-level roadmap** (milestones, deadlines).
+- **Material code changes**: file paths, diffs, migrations.
+- **Open TODO / backlog items** with assignees and due dates.
+- **Key file or directory paths** referenced in the conversation.
+
+## Omit or condense
+- Casual conversation or small talk.
+- Verbose CLI/test logs or stack traces unless directly required.
+- Duplicate or trivial messages.
+
 
 ## Strategic Platform Context
 

@@ -113,6 +113,16 @@
             "timeout": 15
           }
         ]
+      },
+      {
+        "matcher": "Bash(gh *)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/secure_pr_processor.py\"",
+            "timeout": 30
+          }
+        ]
       }
     ],
     "Stop": [
