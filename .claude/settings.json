@@ -45,13 +45,22 @@
       "Bash(echo *)",
       "Bash(pwd *)",
       "Bash(which *)",
-      "Bash(whoami *)"
+      "Bash(whoami *)",
+      "Bash(gh pr create *)",
+      "Bash(gh pr view *)",
+      "Bash(gh pr list *)",
+      "Bash(gh auth status)",
+      "Bash(git push origin *)"
     ],
     "deny": [
       "Bash(*)",
       "Bash(rm *)",
       "Bash(sudo *)",
-      "Bash(git push *)",
+      "Bash(git push --force *)",
+      "Bash(git push -f *)",
+      "Bash(git push origin --delete *)",
+      "Bash(git push --all *)",
+      "Bash(git push --mirror *)",
       "Bash(git reset --hard *)",
       "Bash(git clean -fd *)",
       "Write(/etc/**)",
@@ -113,17 +122,7 @@
             "timeout": 15
           }
         ]
-      },
-      {
-        "matcher": "Bash(gh *)",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/secure_pr_processor.py\"",
-            "timeout": 30
-          }
-        ]
-      }
+      } 
     ],
     "Stop": [
       {

@@ -8,7 +8,7 @@
 
 ## Interaction Language **ALWAYS MUST BE USED**
 1. **Always use Spanish** as the language of communication with the user
-2. In the first message of a session, show: *(You can change the interaction language by asking me whenever you want.)*
+2. **Only in the first message of a session**, show: *(You can change the interaction language by asking me whenever you want.)*
 
 ## Summary instructions
 
