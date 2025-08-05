@@ -8,7 +8,7 @@ AI-First Prompt Router - Enterprise Optimized (40 lines)
 • 100% Claude Code spec compliant
 """
 import re, json
-from common import log_event, read_stdin_json
+from common import log_event, read_stdin_json, log_decision
 
 # Simplified but powerful patterns - Multilingual support
 SENSITIVE = re.compile(r"(?i)\b(password|secret|token|key)\s*[=:]\s*['\"][^'\"]*['\"]")
@@ -58,6 +58,13 @@ def main():
     
     if strategic_mode:
         context = inject_enterprise_context()
+        
+        # Log decisión de inyección de contexto
+        log_decision(
+            decision="inject_strategic_context",
+            reason=f"Strategic keywords detected in prompt ({len(prompt)} chars)",
+            confidence="medium"
+        )
         
         print(json.dumps({
             "suppressOutput": True,

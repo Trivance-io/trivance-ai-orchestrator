@@ -11,7 +11,7 @@ OBJETIVO: Actuar como Senior Developer supervisando a IA Junior.
 - Permitir desarrollo ágil sin fricción innecesaria
 """
 import os, re, sys, json
-from common import log_event, read_stdin_json, _project_dir, sanitize_for_log
+from common import log_event, read_stdin_json, _project_dir, sanitize_for_log, log_decision
 
 # 🔒 CRITICAL SECURITY ONLY - Minimal but Effective
 CRITICAL_SECRETS = (
@@ -62,6 +62,14 @@ def deny(reason: str, payload: dict):
     """Block operation with clear reasoning."""
     payload.update({"blocked": True, "reason": reason})
     log_event("security_guard.jsonl", payload)
+    
+    # Log decisión de seguridad
+    log_decision(
+        decision="block_operation",
+        reason=reason,
+        confidence="high"
+    )
+    
     output_permission("deny", f"🛡️ SEGURIDAD: {reason}")
     sys.exit(0)
 
