@@ -111,12 +111,12 @@
 **Qué hace**: Prepara PRs completos con análisis de issues, tests y documentación.
 **Cuándo usarlo**: Antes de contribuir a repos, especialmente open source.
 
-### `/git-push` - Push seguro
+### `/git-pull-request` - PRs enterprise-grade
 ```bash
-/git-push
+/git-pull-request [--draft] [target-branch]
 ```
-**Qué hace**: Validaciones de seguridad completas antes de push con autorización explícita.
-**Cuándo usarlo**: En lugar de `git push` para proyectos críticos.
+**Qué hace**: Crea PRs siguiendo estándares de Google, Netflix y Shopify con estructura automática.
+**Cuándo usarlo**: Para crear PRs profesionales que facilitan review y cumplan standards enterprise.
 
 ### `/cleanproject` - Limpieza integral
 ```bash
