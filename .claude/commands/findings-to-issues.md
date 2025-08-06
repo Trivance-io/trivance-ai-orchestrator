@@ -9,6 +9,10 @@ Extraigo hallazgos de revisiones de PRs y creo GitHub issues automáticamente co
 ```bash
 #!/bin/bash
 
+# Configuración de constantes de seguridad
+MAX_FINDINGS=50
+MAX_COMMENTS=1000
+
 # Configuración de colores para output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -16,16 +20,25 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Función para logging JSONL
+# Función para logging JSONL seguro
 log_event() {
     local event_type="$1"
     local data="$2"
     local timestamp=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
     local today=$(date '+%Y-%m-%d')
+    
+    # Validar formato de fecha para prevenir directory traversal
+    if ! [[ "$today" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+        echo "Error: Invalid date format" >&2
+        return 1
+    fi
+    
     local logs_dir=".claude/logs/$today"
     mkdir -p "$logs_dir"
     
-    echo "{\"timestamp\": \"$timestamp\", \"event\": \"$event_type\", $data}" >> "$logs_dir/findings-to-issues.jsonl"
+    # Usar jq para construir JSON seguro
+    jq -nc --arg ts "$timestamp" --arg event "$event_type" --argjson data "$data" \
+        '{timestamp: $ts, event: $event} + $data' >> "$logs_dir/findings-to-issues.jsonl"
 }
 
 # Validaciones iniciales
@@ -35,7 +48,7 @@ echo "🔍 Validando entorno..."
 if ! command -v gh &> /dev/null; then
     echo -e "${RED}❌ GitHub CLI (gh) no encontrado${NC}"
     echo "   Instalar desde: https://cli.github.com"
-    log_event "error" "\"message\": \"gh CLI not found\""
+    log_event "error" '{"message": "gh CLI not found"}'
     exit 1
 fi
 
@@ -43,14 +56,14 @@ fi
 if ! gh auth status &>/dev/null; then
     echo -e "${RED}❌ No autenticado con GitHub${NC}"
     echo "   Ejecutar: gh auth login"
-    log_event "error" "\"message\": \"GitHub auth failed\""
+    log_event "error" '{"message": "GitHub auth failed"}'
     exit 1
 fi
 
 # Verificar repositorio GitHub
 if ! git remote -v | grep -q github.com; then
     echo -e "${RED}❌ No es un repositorio GitHub${NC}"
-    log_event "error" "\"message\": \"Not a GitHub repository\""
+    log_event "error" '{"message": "Not a GitHub repository"}'
     exit 1
 fi
 
@@ -60,8 +73,15 @@ echo -e "${GREEN}✅ Entorno validado${NC}"
 repo_info=$(gh repo view --json nameWithOwner --jq '.nameWithOwner')
 current_branch=$(git branch --show-current)
 
-# Detectar PR
+# Detectar PR con validación de seguridad
 if [ -n "$1" ]; then
+    # Validar que PR_NUMBER sea estrictamente numérico
+    if ! [[ "$1" =~ ^[0-9]+$ ]]; then
+        echo -e "${RED}❌ PR number debe ser un número entero positivo${NC}"
+        log_event "error" $(jq -nc --arg input "$1" '{message: "Invalid PR number format", input: $input}')
+        exit 1
+    fi
+    
     pr_number="$1"
     echo "📋 Usando PR especificado: #$pr_number"
 else
@@ -75,30 +95,45 @@ else
         gh pr list --limit 5
         echo ""
         echo "Uso: /findings-to-issues [PR_NUMBER]"
-        log_event "error" "\"message\": \"No PR found for branch\", \"branch\": \"$current_branch\""
+        log_event "error" $(jq -nc --arg branch "$current_branch" '{message: "No PR found for branch", branch: $branch}')
         exit 1
     fi
     echo -e "${GREEN}✅ PR detectado: #$pr_number${NC}"
 fi
 
-# Log inicio de procesamiento
-log_event "start" "\"pr_number\": $pr_number, \"branch\": \"$current_branch\", \"repo\": \"$repo_info\""
+# Validar formato de repo_info para prevenir API injection
+if ! [[ "$repo_info" =~ ^[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+$ ]]; then
+    echo -e "${RED}❌ Formato de repositorio inválido${NC}"
+    log_event "error" '{"message": "Invalid repository format"}'
+    exit 1
+fi
 
-# Obtener información del PR
+# Log inicio de procesamiento con JSON seguro
+log_event "start" $(jq -nc --arg pr "$pr_number" --arg branch "$current_branch" --arg repo "$repo_info" \
+    '{pr_number: ($pr | tonumber), branch: $branch, repo: $repo}')
+
+# Obtener información del PR con validación JSON
 echo ""
 echo "📄 Analizando PR #$pr_number..."
 pr_info=$(gh pr view "$pr_number" --json title,author,state,url 2>/dev/null)
 
 if [ -z "$pr_info" ]; then
     echo -e "${RED}❌ No se pudo obtener información del PR #$pr_number${NC}"
-    log_event "error" "\"message\": \"PR not found\", \"pr_number\": $pr_number"
+    log_event "error" $(jq -nc --arg pr "$pr_number" '{message: "PR not found", pr_number: ($pr | tonumber)}')
     exit 1
 fi
 
-pr_title=$(echo "$pr_info" | jq -r '.title')
-pr_author=$(echo "$pr_info" | jq -r '.author.login')
-pr_state=$(echo "$pr_info" | jq -r '.state')
-pr_url=$(echo "$pr_info" | jq -r '.url')
+# Validar que la respuesta sea JSON válido
+if ! echo "$pr_info" | jq empty 2>/dev/null; then
+    echo -e "${RED}❌ Respuesta JSON inválida del PR${NC}"
+    log_event "error" '{"message": "Invalid JSON response from PR API"}'
+    exit 1
+fi
+
+pr_title=$(echo "$pr_info" | jq -r '.title // "N/A"')
+pr_author=$(echo "$pr_info" | jq -r '.author.login // "unknown"')
+pr_state=$(echo "$pr_info" | jq -r '.state // "unknown"')
+pr_url=$(echo "$pr_info" | jq -r '.url // "N/A"')
 
 echo "  Título: $pr_title"
 echo "  Autor: $pr_author"
@@ -109,8 +144,13 @@ echo "  URL: $pr_url"
 echo ""
 echo "💬 Extrayendo comentarios de revisión..."
 
-# Obtener todos los comentarios del PR
+# Obtener comentarios del PR con rate limiting y validación
+echo "  Obteniendo comentarios..."
+sleep 1  # Rate limiting básico
 comments=$(gh api "repos/$repo_info/pulls/$pr_number/comments" --jq '.[] | .body' 2>/dev/null)
+
+echo "  Obteniendo reviews..."
+sleep 1  # Rate limiting básico
 review_comments=$(gh api "repos/$repo_info/pulls/$pr_number/reviews" --jq '.[] | .body' 2>/dev/null)
 
 # Combinar comentarios
@@ -119,7 +159,7 @@ $review_comments"
 
 if [ -z "$all_comments" ]; then
     echo -e "${YELLOW}⚠️  No se encontraron comentarios en el PR${NC}"
-    log_event "complete" "\"pr_number\": $pr_number, \"findings_count\": 0, \"issues_created\": 0, \"status\": \"no_comments\""
+    log_event "complete" $(jq -nc --arg pr "$pr_number" '{pr_number: ($pr | tonumber), findings_count: 0, issues_created: 0, status: "no_comments"}')
     exit 0
 fi
 
@@ -197,9 +237,20 @@ done <<< "$all_comments"
 
 findings_count=${#findings_titles[@]}
 
+# Aplicar límite de procesamiento para prevenir resource exhaustion
+if [ $findings_count -gt $MAX_FINDINGS ]; then
+    echo -e "${YELLOW}⚠️  Limitando procesamiento a $MAX_FINDINGS hallazgos (encontrados: $findings_count)${NC}"
+    findings_count=$MAX_FINDINGS
+    # Truncar arrays
+    findings_titles=("${findings_titles[@]:0:$MAX_FINDINGS}")
+    findings_descriptions=("${findings_descriptions[@]:0:$MAX_FINDINGS}")
+    findings_types=("${findings_types[@]:0:$MAX_FINDINGS}")
+    findings_priorities=("${findings_priorities[@]:0:$MAX_FINDINGS}")
+fi
+
 if [ $findings_count -eq 0 ]; then
     echo -e "${YELLOW}⚠️  No se encontraron hallazgos estructurados en los comentarios${NC}"
-    log_event "complete" "\"pr_number\": $pr_number, \"findings_count\": 0, \"issues_created\": 0, \"status\": \"no_findings\""
+    log_event "complete" $(jq -nc --arg pr "$pr_number" '{pr_number: ($pr | tonumber), findings_count: 0, issues_created: 0, status: "no_findings"}')
     exit 0
 fi
 
@@ -265,12 +316,22 @@ Review the finding in the PR comments and implement the suggested improvement.
     echo "📝 Creando issue: $issue_title"
     echo "   Tipo: $type_emoji $type | Prioridad: $priority_emoji $priority"
     
-    # Crear el issue
+    # Usar archivo temporal para issue body (previene command injection)
+    temp_body=$(mktemp)
+    printf '%s' "$issue_body" > "$temp_body"
+    
+    # Rate limiting para API calls
+    sleep 1
+    
+    # Crear el issue usando archivo temporal
     result=$(gh issue create \
         --title "$issue_title" \
-        --body "$issue_body" \
+        --body-file "$temp_body" \
         --label "$type,$priority,from-pr-review" \
         2>&1)
+    
+    # Limpiar archivo temporal
+    rm -f "$temp_body"
     
     if [ $? -eq 0 ]; then
         issue_url=$(echo "$result" | grep -oE 'https://github.com/[^[:space:]]+')
@@ -284,13 +345,30 @@ Review the finding in the PR comments and implement the suggested improvement.
         echo "   $issue_url"
         
         # Log issue creado
-        log_event "issue_created" "\"pr_number\": $pr_number, \"issue_number\": $issue_number, \"title\": \"$issue_title\", \"type\": \"$type\", \"priority\": \"$priority\", \"url\": \"$issue_url\""
+        log_event "issue_created" $(jq -nc \
+            --arg pr "$pr_number" \
+            --arg issue_num "$issue_number" \
+            --arg title "$issue_title" \
+            --arg type_val "$type" \
+            --arg priority_val "$priority" \
+            --arg url "$issue_url" \
+            '{
+                pr_number: ($pr | tonumber),
+                issue_number: ($issue_num | tonumber),
+                title: $title,
+                type: $type_val,
+                priority: $priority_val,
+                url: $url
+            }')
     else
         echo -e "   ${RED}❌ Error creando issue${NC}"
         echo "   $result"
         
         # Log error
-        log_event "issue_error" "\"pr_number\": $pr_number, \"title\": \"$issue_title\", \"error\": \"Failed to create issue\""
+        log_event "issue_error" $(jq -nc \
+            --arg pr "$pr_number" \
+            --arg title "$issue_title" \
+            '{pr_number: ($pr | tonumber), title: $title, error: "Failed to create issue"}')
     fi
     
     echo ""
@@ -314,7 +392,19 @@ if [ $issues_created -gt 0 ]; then
 fi
 
 # Log resumen final
-log_event "complete" "\"pr_number\": $pr_number, \"findings_count\": $findings_count, \"issues_created\": $issues_created, \"status\": \"success\", \"issue_numbers\": [$(IFS=,; echo "${created_issue_numbers[*]}")]\""
+issue_numbers_json=$(printf '%s\n' "${created_issue_numbers[@]}" | jq -R . | jq -s .)
+log_event "complete" $(jq -nc \
+    --arg pr "$pr_number" \
+    --arg findings_cnt "$findings_count" \
+    --arg issues_cnt "$issues_created" \
+    --argjson issue_nums "$issue_numbers_json" \
+    '{
+        pr_number: ($pr | tonumber),
+        findings_count: ($findings_cnt | tonumber),
+        issues_created: ($issues_cnt | tonumber),
+        status: "success",
+        issue_numbers: $issue_nums
+    }')
 
 echo ""
 echo -e "${GREEN}✨ Proceso completado exitosamente${NC}"
