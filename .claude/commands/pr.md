@@ -26,32 +26,29 @@ pr_type="feature"
 if echo "$commits" | grep -qi "fix\|bug"; then pr_type="bugfix"; fi
 if echo "$commits" | grep -qi "docs"; then pr_type="docs"; fi
 
-# Generar descripción con template
+# Generar descripción con template (inspirado en Kubernetes)
 pr_description=$(cat <<EOF
-## 🎯 Contexto
-
-**Tipo**: $pr_type | **Archivos**: $files_changed | **Commits**: $commits_count
-
-### Resumen
+## What this PR does / why we need it:
 $first_commit
 
-### Cambios incluidos
-\`\`\`  
+**Type:** $pr_type | **Files:** $files_changed | **Commits:** $commits_count
+
+## Changes included:
+\`\`\`
 $commits
 \`\`\`
 
-### Checklist
-- [x] Implementación completada
-- [x] Cambios validados localmente
-- [ ] Review pendiente
-- [ ] Testing en staging
+## Related issues:
+- Closes #
+- Relates to #
 
-### Notas para reviewer
-$(if [ "$pr_type" = "bugfix" ]; then echo "- Verificar que el fix resuelve el issue reportado"; fi)
-$(if [ "$pr_type" = "feature" ]; then echo "- Validar que la funcionalidad cumple los requirements"; fi)
+## Notes for reviewer:
+$(if [ "$pr_type" = "bugfix" ]; then echo "- Verify fix resolves reported issue"; fi)
+$(if [ "$pr_type" = "feature" ]; then echo "- Validate functionality meets requirements"; fi)
+$(if [ "$pr_type" = "docs" ]; then echo "- Review documentation clarity and completeness"; fi)
 
 ---
-*PR creado con /pr*
+*Created with /pr*
 EOF
 )
 ```
@@ -130,4 +127,10 @@ fi
 /pr  # Simple, hace todo automáticamente
 ```
 
-Template consistente, logging automático, sin complejidad innecesaria.
+Template inspirado en Kubernetes (claro y simple), logging automático, sin complejidad innecesaria.
+
+**Mejoras:**
+- ✅ Template basado en mejores prácticas de industria (Kubernetes)
+- ✅ Estructura clara: propósito, cambios, issues relacionados
+- ✅ Notas específicas por tipo de PR
+- ✅ Simple pero profesional
