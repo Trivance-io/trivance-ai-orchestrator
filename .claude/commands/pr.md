@@ -93,8 +93,17 @@ if git push origin "$current_branch"; then
         echo "✅ PR creado exitosamente!"
         
         # Actualizar log JSONL con URL del PR
-        pr_url=$(gh pr view --json url --jq '.url' 2>/dev/null)
-        pr_number=$(gh pr view --json number --jq '.number' 2>/dev/null)
+        # Retry for pr_url
+        for i in {1..2}; do
+            pr_url=$(gh pr view --json url --jq '.url' 2>/dev/null) && break
+            sleep 1
+        done
+        
+        # Retry for pr_number
+        for i in {1..2}; do
+            pr_number=$(gh pr view --json number --jq '.number' 2>/dev/null) && break
+            sleep 1
+        done
         
         if [ -n "$pr_url" ]; then
             # Crear entrada de PR creado exitosamente

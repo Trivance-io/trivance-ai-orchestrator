@@ -111,9 +111,9 @@
 **Qué hace**: Prepara PRs completos con análisis de issues, tests y documentación.
 **Cuándo usarlo**: Antes de contribuir a repos, especialmente open source.
 
-### `/git-pull-request` - PRs enterprise-grade
+### `/pr` - PRs enterprise-grade
 ```bash
-/git-pull-request [--draft] [target-branch]
+/pr [--draft] [target-branch]
 ```
 **Qué hace**: Crea PRs siguiendo estándares de Google, Netflix y Shopify con estructura automática.
 **Cuándo usarlo**: Para crear PRs profesionales que facilitan review y cumplan standards enterprise.

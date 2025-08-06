@@ -166,9 +166,24 @@ echo "$issue_log_entry" >> "$logs_dir/findings_activity.jsonl"
 
 **Security Measures:**
 - Input sanitization for shell injection prevention
-- Content length validation
+- Content length validation  
 - Proper shell escaping
 - Error handling for API failures
+
+**Critical Security Implementation:**
+```bash
+# Sanitize finding content before using in shell commands
+sanitize_finding() {
+    local finding="$1"
+    # Sanitize dangerous shell characters
+    sanitized_finding=$(echo "$finding" | sed 's/[`$"\\|]/\\&/g' | tr -d '\n\r')
+    echo "$sanitized_finding"
+}
+
+# Usage in issue creation:
+# Instead of: issue_body="$finding"
+# Use: issue_body="$(sanitize_finding "$finding")"
+```
 
 I'll handle rate limits and show you a summary of all created issues.
 
