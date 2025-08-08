@@ -46,6 +46,9 @@
       "Bash(pwd *)",
       "Bash(which *)",
       "Bash(whoami *)",
+      "mcp__github__get_pull_request",
+      "mcp__github__get_pull_request_comments",
+      "mcp__github__get_issue_comments",
       "Bash(gh auth status)",
       "Bash(gh pr create --base * --title * --body *)",
       "Bash(gh pr view *)",
@@ -93,6 +96,7 @@
     ]
   },
   "cleanupPeriodDays": 30,
+  "enableAllProjectMcpServers": true,
   "hooks": {
     "UserPromptSubmit": [
       {

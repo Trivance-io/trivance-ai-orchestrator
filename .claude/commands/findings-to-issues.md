@@ -1,197 +1,212 @@
 # Findings to GitHub Issues
 
-I'll scan PR review findings and create professional GitHub issues following your project's standards.
+I'll convert PR review findings into trackable GitHub issues using the GitHub MCP Server.
 
-First, let me analyze your complete project context:
+## Prerequisites Check
 
-**Project Context:**
-- Repository type (fork, personal, organization)
-- Main language and framework conventions
-- Testing requirements and CI/CD setup
-- Branch strategy and release process
-- Team workflow and communication style
+First, let me verify the GitHub MCP Server is configured:
 
-**For Forks - Remote Analysis:**
 ```bash
-# Get upstream repository info
-git remote -v | grep upstream
-# Fetch latest upstream guidelines
-git fetch upstream main:upstream-main 2>/dev/null || true
+claude mcp list | grep -q "github" || echo "⚠️ GitHub MCP Server not configured. Run: .claude/mcp-servers/github/setup.sh"
 ```
 
-Then verify GitHub setup:
+## Phase 1: Context Detection
+
+I'll detect your current repository and PR context:
 
 ```bash
-# Check if we're in a git repository with GitHub remote
-if ! git remote -v | grep -q github.com; then
-    echo "Error: No GitHub remote found"
-    echo "This command requires a GitHub repository"
+# Get repository information from git remote
+git_remote=$(git remote get-url origin 2>/dev/null)
+if [[ "$git_remote" =~ github\.com[:/]([^/]+)/([^/.]+) ]]; then
+    owner="${BASH_REMATCH[1]}"
+    repo="${BASH_REMATCH[2]%.git}"
+    echo "✓ Repository: $owner/$repo"
+else
+    echo "❌ Not a GitHub repository or no remote configured"
     exit 1
 fi
 
-# Check for gh CLI
-if ! command -v gh &> /dev/null; then
-    echo "Error: GitHub CLI (gh) not found"
-    echo "Install from: https://cli.github.com"
-    exit 1
-fi
-
-# Verify authentication
-if ! gh auth status &>/dev/null; then
-    echo "Error: Not authenticated with GitHub"
-    echo "Run: gh auth login"
-    exit 1
-fi
-```
-
-Now I'll detect and analyze the target PR:
-
-```bash
-# Detect PR from current branch if not provided
+# Get current branch and detect PR
 current_branch=$(git branch --show-current)
-pr_number=$(gh pr list --head "$current_branch" --json number --jq '.[0].number' 2>/dev/null)
+echo "✓ Branch: $current_branch"
 
-if [ -z "$pr_number" ]; then
-    echo "Error: No PR found for current branch"
-    echo "Create a PR first or specify PR number"
+# Check if PR exists for current branch
+pr_output=$(gh pr list --head "$current_branch" --json number,title,state --jq '.[0]' 2>/dev/null)
+if [[ -n "$pr_output" ]]; then
+    pr_number=$(echo "$pr_output" | jq -r '.number')
+    pr_title=$(echo "$pr_output" | jq -r '.title')
+    pr_state=$(echo "$pr_output" | jq -r '.state')
+    echo "✓ PR #$pr_number: $pr_title (State: $pr_state)"
+else
+    echo "❌ No PR found for branch '$current_branch'"
+    echo "💡 Create a PR first with: gh pr create"
     exit 1
 fi
-
-echo "Detected PR #$pr_number from branch: $current_branch"
 ```
 
-**MANDATORY Pre-Checks:**
-Before creating ANY GitHub issues, I MUST:
-1. Verify PR exists and has content
-2. Check if PR has review comments 
-3. Validate issue creation permissions
-4. Ensure no duplicate issues exist
+## Phase 2: Extract PR Findings
 
-If ANY check fails → I'll STOP and help fix it first!
+Now I'll extract all review comments and findings from the PR using MCP:
 
-Using native tools for comprehensive analysis:
-- **Bash tool** to extract PR review content via gh CLI
-- **Read tool** to understand project context
-- **Grep tool** to find existing related issues
+### Get PR Details
+Using `mcp__github__get_pull_request`:
 
-I'll intelligently analyze each finding:
-1. Extract review content from PR comments and reviews
-2. Parse findings using robust patterns
-3. Determine priority and categorization
-4. Create professional issue titles and descriptions
+### Get Issue Comments (Claude Code reviews)
+Using `mcp__github__get_issue_comments` - **Critical for Claude Code generated reviews**:
 
-**Finding Detection Patterns:**
-I'll use comprehensive regex patterns to capture ALL finding types:
+### Get PR Comments (Line-specific comments)
+Using `mcp__github__get_pull_request_comments`:
 
-**Critical Findings** (security, bugs):
-- Pattern: `crítico|critical|security|vulnerability|injection|bug|error`
-- Keywords: security, injection, validation, authentication, authorization
-- Label: `bug,security,priority-critical`
+### Get PR Reviews (Formal reviews)
+Using `mcp__github__get_pull_request_reviews`:
 
-**Performance Issues** (optimization):
-- Pattern: `performance|slow|optimization|cache|memory|speed`
-- Keywords: optimize, performance, cache, memory, bottleneck
-- Label: `performance,optimization`
+## Phase 3: Intelligent Analysis
 
-**Testing Gaps** (coverage, testing):
-- Pattern: `test|testing|coverage|spec|unit|integration`
-- Keywords: test, coverage, testing, validation, spec
-- Label: `testing,quality`
+I'll analyze each finding to determine:
 
-**Documentation Issues** (docs, comments):
-- Pattern: `documentation|docs|comment|explain|document`
-- Keywords: document, docs, README, comment, explanation
-- Label: `documentation`
+1. **Actionability**: Is this a real finding that needs work?
+   - Skip: "LGTM", "Great work!", pure emojis, approvals
+   - Process: Suggestions, issues, requests for changes
 
-**Technical Debt** (refactoring, cleanup):
-- Pattern: `refactor|cleanup|debt|architecture|structure`
-- Keywords: refactor, cleanup, technical debt, architecture
-- Label: `refactoring,technical-debt`
+2. **Category**: What type of issue is this?
+   - **Security**: Authentication, validation, injection, exposure risks
+   - **Bug**: Logic errors, crashes, incorrect behavior
+   - **Performance**: Slow queries, memory leaks, optimization needs
+   - **Testing**: Missing tests, coverage gaps
+   - **Documentation**: Missing docs, unclear comments
+   - **Enhancement**: Feature improvements, UX suggestions
+   - **Technical Debt**: Refactoring needs, code cleanup
 
-**Issue creation strategy:**
-- Titles matching project's naming conventions
-- Descriptions following discovered templates
-- Labels from existing project taxonomy
-- Priority based on finding severity
-- Language style matching documentation tone
+3. **Priority**: How urgent is this?
+   - **Critical**: Security vulnerabilities, data loss risks
+   - **High**: Bugs affecting functionality, performance issues
+   - **Medium**: Testing gaps, documentation needs
+   - **Low**: Minor improvements, nice-to-haves
 
-**Professional Issue Template:**
+## Phase 4: Duplicate Prevention
+
+Before creating each issue, I'll check for duplicates:
+
+### Search for Similar Issues
+Using `mcp__github__search_issues` with intelligent queries:
+
+1. **Exact match search**: Search for issues with same keywords
+2. **File-based search**: Issues mentioning the same files
+3. **Semantic search**: Issues with similar meaning (analyzed by Claude)
+
+### Similarity Analysis
+For each potential duplicate:
+- Compare titles semantically
+- Analyze description overlap
+- Check if already resolved in recent commits
+- Calculate similarity score (0-100%)
+
+**Decision Logic**:
+- Similarity > 90%: Skip (definite duplicate)
+- Similarity 60-80%: Ask user confirmation
+- Similarity < 60%: Create new issue
+
+## Phase 5: Issue Creation
+
+For each unique, actionable finding, I'll create a GitHub issue:
+
+Using `mcp__github__create_issue` with:
+
+**Title Format**: `[Category] Clear, actionable description`
+- Examples:
+  - "[Security] Add input validation to user endpoint"
+  - "[Performance] Optimize N+1 queries in dashboard"
+  - "[Testing] Add unit tests for payment processing"
+
+**Body Template**:
 ```markdown
 ## Description
-[Finding content with context]
+[Clear explanation of the finding]
 
 ## Source
-- **PR:** #[PR_NUMBER]
-- **Review Finding:** [FINDING_NUMBER]
-- **File:** [AFFECTED_FILE]
+- **PR**: #[PR_NUMBER] - [PR_TITLE]
+- **Review Type**: [Comment/Review/Suggestion]
+- **File**: [If applicable]
+- **Line**: [If applicable]
+
+## Suggested Solution
+[If reviewer provided suggestions]
 
 ## Acceptance Criteria
-- [ ] Issue addressed according to finding recommendations
-- [ ] Code changes implemented and tested
-- [ ] Documentation updated if needed
+- [ ] Issue addressed according to recommendations
+- [ ] Tests added/updated as needed
+- [ ] Documentation updated if required
 
 ## Priority
-[High/Medium/Low based on finding type]
+[Critical/High/Medium/Low] - [Justification]
 ```
 
-**Smart Categorization:**
-I'll analyze each finding content to determine the correct issue type and labels automatically.
+**Labels**: Automatically assigned based on category
+- `bug`, `security`, `performance`, `testing`, `documentation`, `enhancement`, `technical-debt`
 
-**Logging Strategy:**
-Create clean JSONL logs in `.claude/logs/YYYY-MM-DD/` directory:
+**Assignee**: Current authenticated user (auto-detected via `mcp__github__get_me`)
+
+## Phase 6: Logging & Summary
+
+I'll create a structured log of all actions:
 
 ```bash
-# Single-entry format
-today=$(date '+%Y-%m-%d')
+# Create log directory
 timestamp=$(date '+%Y-%m-%dT%H:%M:%S')
-logs_dir=".claude/logs/$today"
-mkdir -p "$logs_dir"
+today=$(date '+%Y-%m-%d')
+log_dir=".claude/logs/$today"
+mkdir -p "$log_dir"
 
-# Log each created issue
-issue_log_entry=$(cat <<EOF
-{
-  "timestamp": "$timestamp",
-  "command": "findings-to-issues", 
-  "pr": $pr_number,
-  "issue": $issue_number,
-  "title": "$issue_title",
-  "priority": "$priority",
-  "url": "$issue_url"
-}
-EOF
-)
-
-echo "$issue_log_entry" >> "$logs_dir/findings_activity.jsonl"
+# Log entry for each created issue (JSONL format)
+log_file="$log_dir/findings_activity.jsonl"
 ```
 
-**Security Measures:**
-- Input sanitization for shell injection prevention
-- Content length validation  
-- Proper shell escaping
-- Error handling for API failures
+**Summary Output**:
+```
+✅ Findings Analysis Complete
 
-**Critical Security Implementation:**
-```bash
-# Sanitize finding content before using in shell commands
-sanitize_finding() {
-    local finding="$1"
-    # Sanitize dangerous shell characters
-    sanitized_finding=$(echo "$finding" | sed 's/[`$"\\|]/\\&/g' | tr -d '\n\r')
-    echo "$sanitized_finding"
-}
+📊 Summary:
+- Total findings reviewed: X
+- Actionable findings: Y
+- Duplicates prevented: Z
 
-# Usage in issue creation:
-# Instead of: issue_body="$finding"
-# Use: issue_body="$(sanitize_finding "$finding")"
+📝 Issues Created:
+1. #123: [Security] Input validation needed
+   → https://github.com/owner/repo/issues/123
+2. #124: [Performance] Optimize database queries
+   → https://github.com/owner/repo/issues/124
+
+⏭️ Skipped (Duplicates):
+- "Add tests" → Similar to existing #120 (85% match)
+
+📁 Log saved to: .claude/logs/YYYY-MM-DD/findings_activity.jsonl
 ```
 
-I'll handle rate limits and show you a summary of all created issues.
+## Error Handling
 
-**Important**: I will NEVER:
-- Add "Created by Claude" or any AI attribution to issues
-- Include "Generated with Claude Code" in issue descriptions  
-- Modify repository settings or permissions
-- Add any AI/assistant signatures or watermarks
-- Use emojis in issues, PRs, or git-related content
+**Common Issues & Solutions**:
 
-This helps convert PR review findings into trackable work items following industry standards.
+1. **MCP Server Not Connected**:
+   - Check: `claude mcp list`
+   - Fix: Run setup script
+
+2. **No PR Found**:
+   - Check: Current branch has PR
+   - Fix: Create PR with `gh pr create`
+
+3. **Rate Limiting**:
+   - Detection: API returns 403/429
+   - Solution: Wait and retry with exponential backoff
+
+4. **Permission Denied**:
+   - Check: Token has correct scopes
+   - Fix: Update token permissions
+
+## Important Notes
+
+- **No AI Attribution**: Issues created are from human review findings, not AI-generated
+- **Respect Review Context**: Maintain reviewer's intent and tone
+- **Conservative Duplicate Detection**: When uncertain, ask user
+- **Incremental Processing**: Can be run multiple times safely
+
+This command intelligently bridges the gap between PR reviews and actionable work items, ensuring nothing falls through the cracks while preventing duplicate work.

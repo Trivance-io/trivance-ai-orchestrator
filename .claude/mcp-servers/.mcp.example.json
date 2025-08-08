@@ -1,4 +1,8 @@
 {
+  "_README": "IMPORTANTE: Este archivo debe copiarse como .mcp.json en la RAÍZ del workspace donde trabajas (NO dentro de carpetas), para que Claude Code lo detecte correctamente.",
+  "_DOCS": "Documentación: https://modelcontextprotocol.io/introduction | https://docs.anthropic.com/en/docs/claude-code/mcp",
+  "_USAGE": "Comando: cp .claude/mcp-servers/.mcp.example.json ./.mcp.json",
+  
   "mcpServers": {
     "github": {
       "type": "stdio",
