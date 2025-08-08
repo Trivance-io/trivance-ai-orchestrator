@@ -46,19 +46,11 @@ fi
 
 ## Phase 2: Extract PR Findings
 
-Now I'll extract all review comments and findings from the PR using MCP:
-
-### Get PR Details
-Using `mcp__github__get_pull_request`:
-
-### Get Issue Comments (Claude Code reviews)
-Using `mcp__github__get_issue_comments` - **Critical for Claude Code generated reviews**:
-
-### Get PR Comments (Line-specific comments)
-Using `mcp__github__get_pull_request_comments`:
-
-### Get PR Reviews (Formal reviews)
-Using `mcp__github__get_pull_request_reviews`:
+I'll extract all review comments and findings from the PR using MCP functions:
+- `mcp__github__get_pull_request`
+- `mcp__github__get_issue_comments` 
+- `mcp__github__get_pull_request_comments`
+- `mcp__github__get_pull_request_reviews`
 
 ## Phase 3: Intelligent Analysis
 
@@ -85,26 +77,12 @@ I'll analyze each finding to determine:
 
 ## Phase 4: Duplicate Prevention
 
-Before creating each issue, I'll check for duplicates:
-
-### Search for Similar Issues
-Using `mcp__github__search_issues` with intelligent queries:
-
-1. **Exact match search**: Search for issues with same keywords
-2. **File-based search**: Issues mentioning the same files
-3. **Semantic search**: Issues with similar meaning (analyzed by Claude)
-
-### Similarity Analysis
-For each potential duplicate:
-- Compare titles semantically
-- Analyze description overlap
-- Check if already resolved in recent commits
-- Calculate similarity score (0-100%)
+Before creating each issue, I'll check for duplicates using `mcp__github__search_issues`.
 
 **Decision Logic**:
-- Similarity > 90%: Skip (definite duplicate)
-- Similarity 60-80%: Ask user confirmation
-- Similarity < 60%: Create new issue
+- Exact title match: Skip as duplicate
+- Similar keywords: Ask user confirmation
+- No match: Create new issue
 
 ## Phase 5: Issue Creation
 
@@ -146,7 +124,73 @@ Using `mcp__github__create_issue` with:
 
 **Assignee**: Current authenticated user (auto-detected via `mcp__github__get_me`)
 
-## Phase 6: Logging & Summary
+```bash
+# Initialize issue tracking
+created_issues_numbers=""
+
+# For each actionable finding (example implementation):
+# Loop through findings and create issues using MCP
+for finding in "${actionable_findings[@]}"; do
+    # Create issue using MCP function
+    issue_response=$(echo '{"title": "'"$finding_title"'", "body": "'"$finding_body"'", "labels": ["'"$finding_label"'"], "assignee": "'"$current_user"'"}' | mcp__github__create_issue)
+    
+    # Extract issue number from response
+    issue_number=$(echo "$issue_response" | jq -r '.number')
+    
+    # Add to tracking variable
+    created_issues_numbers="$created_issues_numbers $issue_number"
+    
+    echo "✅ Created issue #$issue_number: $finding_title"
+done
+
+# Trim leading space
+created_issues_numbers=$(echo "$created_issues_numbers" | sed 's/^ *//')
+echo "📝 Created issues: $created_issues_numbers"
+```
+
+## Phase 6: Associate Issues to PR
+
+After creating all issues, I'll atomically associate them to the PR:
+
+```bash
+# Variable already populated in Phase 5 with actual issue numbers
+
+# Get current PR body
+pr_body=$(gh pr view "$pr_number" --json body --jq '.body')
+
+# Create AUTO-CLOSE section
+auto_close_section="<!-- AUTO-CLOSE:START -->
+### Associated Issues
+$(echo "$created_issues_numbers" | tr ' ' '\n' | sed 's/^/Fixes #/')
+<!-- AUTO-CLOSE:END -->"
+
+# Update PR body
+if echo "$pr_body" | grep -q "<!-- AUTO-CLOSE:START -->"; then
+    # Replace existing section
+    new_pr_body=$(echo "$pr_body" | sed '/<!-- AUTO-CLOSE:START -->/,/<!-- AUTO-CLOSE:END -->/d')
+    new_pr_body="$new_pr_body
+
+$auto_close_section"
+else
+    # Add new section
+    new_pr_body="$pr_body
+
+$auto_close_section"
+fi
+
+# Update PR via GitHub CLI
+echo "🔗 Associating issues to PR #$pr_number..."
+gh pr edit "$pr_number" --body "$new_pr_body"
+echo "✅ Issues associated to PR #$pr_number (will auto-close on merge)"
+```
+
+**Key Benefits**:
+- **Atomic Operation**: Issues are created AND associated in one command
+- **Auto-close on Merge**: Uses GitHub's closing keywords
+- **Idempotent**: Can be run multiple times safely (replaces AUTO-CLOSE section)
+- **Clear Tracking**: PR shows all associated issues visually
+
+## Phase 7: Logging & Summary
 
 I'll create a structured log of all actions:
 
@@ -170,11 +214,13 @@ log_file="$log_dir/findings_activity.jsonl"
 - Actionable findings: Y
 - Duplicates prevented: Z
 
-📝 Issues Created:
+📝 Issues Created & Associated to PR #[PR_NUMBER]:
 1. #123: [Security] Input validation needed
    → https://github.com/owner/repo/issues/123
 2. #124: [Performance] Optimize database queries
    → https://github.com/owner/repo/issues/124
+
+🔗 PR Association: Issues will auto-close when PR is merged
 
 ⏭️ Skipped (Duplicates):
 - "Add tests" → Similar to existing #120 (85% match)
@@ -202,11 +248,7 @@ log_file="$log_dir/findings_activity.jsonl"
    - Check: Token has correct scopes
    - Fix: Update token permissions
 
-## Important Notes
+## Notes
 
-- **No AI Attribution**: Issues created are from human review findings, not AI-generated
-- **Respect Review Context**: Maintain reviewer's intent and tone
-- **Conservative Duplicate Detection**: When uncertain, ask user
-- **Incremental Processing**: Can be run multiple times safely
-
-This command intelligently bridges the gap between PR reviews and actionable work items, ensuring nothing falls through the cracks while preventing duplicate work.
+- Issues created from PR review findings
+- Can be run multiple times safely (idempotent)

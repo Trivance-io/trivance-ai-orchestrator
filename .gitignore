@@ -49,6 +49,11 @@ lerna-debug.log*
 .claude/logs/*.json
 !.claude/logs/.gitkeep
 
+# Claude Code issues analysis (generados automáticamente)
+.claude/issues-review/
+.claude/issues-review/*.json
+!.claude/issues-review/.gitkeep
+
 # Runtime data
 pids/
 *.pid
