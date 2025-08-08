@@ -1,0 +1,48 @@
+{
+  "mcpServers": {
+    "github": {
+      "type": "stdio",
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "ghcr.io/github/github-mcp-server"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "github_pat_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      }
+    },
+    
+    "example-web-server": {
+      "type": "stdio",
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "API_KEY",
+        "-e", 
+        "API_URL",
+        "example/mcp-web-server"
+      ],
+      "env": {
+        "API_KEY": "your_api_key_here",
+        "API_URL": "https://api.example.com"
+      }
+    },
+
+    "example-local-server": {
+      "type": "stdio", 
+      "command": "node",
+      "args": ["./path/to/local-mcp-server.js"],
+      "env": {
+        "CONFIG_FILE": "./config/local-server.json",
+        "LOG_LEVEL": "info"
+      }
+    }
+  }
+}
