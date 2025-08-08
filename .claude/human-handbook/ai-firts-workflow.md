@@ -1,4 +1,4 @@
-# Workflow AI-First
+# Workflow AI-Firts
 
 *Paso a paso: desde código hasta merge sin fricción*
 
