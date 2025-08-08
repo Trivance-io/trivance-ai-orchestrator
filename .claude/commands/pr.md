@@ -30,9 +30,10 @@ if [ -z "$target_branch" ]; then
     exit 1
 fi
 
-# Verificar commits pendientes
-if ! git log HEAD --not --remotes --oneline | head -1 >/dev/null 2>&1; then
-    echo "❌ No hay commits para PR"
+# Verificar que target branch existe en remoto
+if ! git show-ref --verify --quiet "refs/remotes/origin/$target_branch"; then
+    echo "❌ Target branch '$target_branch' no existe en remoto"
+    echo "💡 Branches disponibles: $(git branch -r | grep -v HEAD | sed 's/origin\///' | tr '\n' ' ')"
     exit 1
 fi
 
@@ -40,10 +41,20 @@ fi
 current_branch=$(git branch --show-current)
 timestamp=$(date +%s)
 temporal_branch="pr/${timestamp}-${current_branch}-to-${target_branch}"
-commits_count=$(git log HEAD --not --remotes --oneline | wc -l | xargs)
-first_commit=$(git log HEAD --not --remotes --oneline | head -1 | cut -d' ' -f2-)
 
 echo "📝 Creando PR: $temporal_branch → $target_branch"
+
+# Verificar commits justo antes de crear branch (evitar race condition)
+commits_check=$(git log HEAD --not --remotes --oneline | head -1 2>/dev/null)
+if [ -z "$commits_check" ]; then
+    echo "❌ No hay commits para PR en el momento de ejecución"
+    exit 1
+fi
+
+commits_count=$(git log HEAD --not --remotes --oneline | wc -l | xargs)
+# Sanitizar first_commit para prevenir command injection
+first_commit_raw=$(git log HEAD --not --remotes --oneline | head -1 | cut -d' ' -f2-)
+first_commit=$(echo "$first_commit_raw" | sed 's/[\$`"\\]/\\&/g' | tr -d '\n\r')
 
 # Crear rama temporal
 git checkout -b "$temporal_branch" || exit 1
