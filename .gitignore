@@ -120,6 +120,9 @@ Thumbs.db
 .ai-config/local.json
 .claude/local.json
 
+# MCP Server configurations (contienen tokens y secrets sensibles)
+.mcp.json
+
 # Local state files
 .current_environment
 .trivance-secrets

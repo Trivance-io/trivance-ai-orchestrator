@@ -45,13 +45,30 @@
       "Bash(echo *)",
       "Bash(pwd *)",
       "Bash(which *)",
-      "Bash(whoami *)"
+      "Bash(whoami *)",
+      "mcp__github__get_pull_request",
+      "mcp__github__get_pull_request_comments",
+      "mcp__github__get_issue_comments",
+      "Bash(gh auth status)",
+      "Bash(gh pr create --base * --title * --body *)",
+      "Bash(gh pr view *)",
+      "Bash(gh pr list *)",
+      "Bash(gh issue create --title * --body * --label *)",
+      "Bash(gh issue list *)",
+      "Bash(gh api repos/:owner/:repo/pulls/*/reviews)",
+      "Bash(gh api repos/:owner/:repo/pulls/*/comments)",
+      "Bash(gh api repos/:owner/:repo/issues/*/comments)",
+      "Bash(git push origin feature/* bugfix/* hotfix/*)",
+      "Bash(git push origin --set-upstream feature/* bugfix/* hotfix/*)",
+      "Bash(mkdir -p .claude/logs/*)",
+      "Bash(jq *)"
     ],
     "deny": [
       "Bash(*)",
       "Bash(rm *)",
       "Bash(sudo *)",
-      "Bash(git push *)",
+      "Bash(git push --force *)",
+      "Bash(git push -f *)",
       "Bash(git reset --hard *)",
       "Bash(git clean -fd *)",
       "Write(/etc/**)",
@@ -79,6 +96,7 @@
     ]
   },
   "cleanupPeriodDays": 30,
+  "enableAllProjectMcpServers": true,
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -113,7 +131,7 @@
             "timeout": 15
           }
         ]
-      }
+      } 
     ],
     "Stop": [
       {
