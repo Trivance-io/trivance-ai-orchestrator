@@ -1,145 +1,133 @@
 # Pull Request
 
-Creo PRs siguiendo el template establecido, con logging para auditoría y flujo simple.
-
-## Flujo Simple
-
-```bash
-# Detectar branch base
-base_branch=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's/refs\/remotes\/origin\///' || echo "main")
-current_branch=$(git branch --show-current)
-
-# Validaciones básicas
-if ! git log "$base_branch"..HEAD --oneline >/dev/null 2>&1; then
-    echo "❌ No hay commits para PR"
-    exit 1
-fi
-
-# Obtener información básica
-commits=$(git log --oneline "$base_branch"..HEAD)
-first_commit=$(echo "$commits" | head -1 | cut -d' ' -f2-)
-files_changed=$(git diff --name-only "$base_branch"..HEAD | wc -l)
-commits_count=$(echo "$commits" | wc -l)
-
-# Detectar tipo simple
-pr_type="feature"
-if echo "$commits" | grep -qi "fix\|bug"; then pr_type="bugfix"; fi
-if echo "$commits" | grep -qi "docs"; then pr_type="docs"; fi
-
-# Generar descripción con template (inspirado en Kubernetes)
-pr_description=$(cat <<EOF
-## What this PR does / why we need it:
-$first_commit
-
-**Type:** $pr_type | **Files:** $files_changed | **Commits:** $commits_count
-
-## Changes included:
-\`\`\`
-$commits
-\`\`\`
-
-## Related issues:
-- Closes #
-- Relates to #
-
-## Notes for reviewer:
-$(if [ "$pr_type" = "bugfix" ]; then echo "- Verify fix resolves reported issue"; fi)
-$(if [ "$pr_type" = "feature" ]; then echo "- Validate functionality meets requirements"; fi)
-$(if [ "$pr_type" = "docs" ]; then echo "- Review documentation clarity and completeness"; fi)
-
----
-*Created with /pr*
-EOF
-)
-```
-
-## Creación y Logging
-
-```bash
-# Guardar PR info en logs JSONL con estructura por fechas
-today=$(date '+%Y-%m-%d')
-timestamp=$(date '+%Y-%m-%dT%H:%M:%S')
-logs_dir=".claude/logs/$today"
-mkdir -p "$logs_dir"
-
-# Crear entrada JSONL en el archivo diario
-pr_log_entry=$(cat <<EOF
-{
-  "timestamp": "$timestamp",
-  "event": "pr_created",
-  "branch": "$current_branch",
-  "target": "$base_branch",
-  "pr_type": "$pr_type",
-  "files_changed": $files_changed,
-  "commits_count": $commits_count,
-  "first_commit": "$first_commit",
-  "pr_description": $(echo "$pr_description" | jq -R -s .)
-}
-EOF
-)
-
-echo "$pr_log_entry" >> "$logs_dir/pr_activity.jsonl"
-echo "📝 PR info guardado en: $logs_dir/pr_activity.jsonl"
-
-# Push y crear PR
-echo "📤 Pushing $current_branch..."
-if git push origin "$current_branch"; then
-    echo "🚀 Creando PR..."
-    if gh pr create \
-        --base "$base_branch" \
-        --title "$first_commit" \
-        --body "$pr_description"; then
-        
-        echo "✅ PR creado exitosamente!"
-        
-        # Actualizar log JSONL con URL del PR
-        # Retry for pr_url
-        for i in {1..2}; do
-            pr_url=$(gh pr view --json url --jq '.url' 2>/dev/null) && break
-            sleep 1
-        done
-        
-        # Retry for pr_number
-        for i in {1..2}; do
-            pr_number=$(gh pr view --json number --jq '.number' 2>/dev/null) && break
-            sleep 1
-        done
-        
-        if [ -n "$pr_url" ]; then
-            # Crear entrada de PR creado exitosamente
-            pr_success_entry=$(cat <<EOF
-{
-  "timestamp": "$(date '+%Y-%m-%dT%H:%M:%S')",
-  "event": "pr_created_success",
-  "branch": "$current_branch",
-  "pr_number": $pr_number,
-  "pr_url": "$pr_url"
-}
-EOF
-)
-            echo "$pr_success_entry" >> "$logs_dir/pr_activity.jsonl"
-            echo "🌐 $pr_url"
-        fi
-        
-        gh pr view --web
-    else
-        echo "❌ Error creando PR"
-    fi
-else
-    echo "❌ Error en push"
-fi
-```
+Crea PR usando rama temporal, con target branch requerido.
 
 ## Uso
 
 ```bash
-/pr  # Simple, hace todo automáticamente
+/pr <target_branch>  # Argumento requerido
 ```
 
-Template inspirado en Kubernetes (claro y simple), logging automático, sin complejidad innecesaria.
+## Ejemplos
 
-**Mejoras:**
-- ✅ Template basado en mejores prácticas de industria (Kubernetes)
-- ✅ Estructura clara: propósito, cambios, issues relacionados
-- ✅ Notas específicas por tipo de PR
-- ✅ Simple pero profesional
+```bash
+/pr develop     # PR hacia develop
+/pr main        # PR hacia main  
+/pr qa          # PR hacia qa
+```
+
+## Implementación
+
+```bash
+#!/bin/bash
+
+# Validar target branch
+target_branch="${1:-$ARGUMENTS}"
+if [ -z "$target_branch" ]; then
+    echo "❌ Error: Target branch requerida"
+    echo "Uso: /pr <target_branch>"
+    echo "Ejemplo: /pr develop"
+    exit 1
+fi
+
+# Verificar commits pendientes
+if ! git log HEAD --not --remotes --oneline | head -1 >/dev/null 2>&1; then
+    echo "❌ No hay commits para PR"
+    exit 1
+fi
+
+# Variables básicas
+current_branch=$(git branch --show-current)
+timestamp=$(date +%s)
+temporal_branch="pr/${timestamp}-${current_branch}-to-${target_branch}"
+commits_count=$(git log HEAD --not --remotes --oneline | wc -l | xargs)
+first_commit=$(git log HEAD --not --remotes --oneline | head -1 | cut -d' ' -f2-)
+
+echo "📝 Creando PR: $temporal_branch → $target_branch"
+
+# Crear rama temporal
+git checkout -b "$temporal_branch" || exit 1
+
+# Push rama temporal
+if ! git push origin "$temporal_branch" --set-upstream; then
+    git checkout "$current_branch" 2>/dev/null
+    git branch -D "$temporal_branch" 2>/dev/null
+    exit 1
+fi
+
+# Generar descripción
+commits_list=$(git log HEAD --not --remotes/${target_branch} --oneline | head -10)
+files_changed=$(git diff --name-only HEAD "origin/$target_branch" 2>/dev/null | wc -l | xargs || echo "N/A")
+
+pr_type="feature"
+if echo "$commits_list" | grep -qi "fix\|bug"; then pr_type="bugfix"; fi
+if echo "$commits_list" | grep -qi "docs"; then pr_type="docs"; fi
+
+pr_description="## Cambios desde $current_branch
+
+**Target:** $target_branch | **Type:** $pr_type | **Commits:** $commits_count | **Files:** $files_changed
+
+### Cambios incluidos:
+\`\`\`
+$commits_list
+\`\`\`
+
+### Related issues:
+- Closes #
+- Relates to #
+
+---
+*Temporal branch: $temporal_branch*"
+
+# Crear PR
+if gh pr create --base "$target_branch" --title "$first_commit" --body "$pr_description"; then
+    echo "✅ PR creado exitosamente!"
+    
+    # Logging
+    today=$(date '+%Y-%m-%d')
+    timestamp_iso=$(date '+%Y-%m-%dT%H:%M:%S')
+    logs_dir=".claude/logs/$today"
+    mkdir -p "$logs_dir"
+    
+    # Obtener PR info
+    pr_url=""
+    pr_number=""
+    for i in {1..3}; do
+        pr_url=$(gh pr view --json url --jq '.url' 2>/dev/null) && break
+        sleep 1
+    done
+    for i in {1..3}; do
+        pr_number=$(gh pr view --json number --jq '.number' 2>/dev/null) && break  
+        sleep 1
+    done
+    
+    # Log entry
+    pr_log_entry=$(cat <<EOF
+{
+  "timestamp": "$timestamp_iso",
+  "event": "temporal_pr_created",
+  "original_branch": "$current_branch", 
+  "temporal_branch": "$temporal_branch",
+  "target_branch": "$target_branch",
+  "pr_type": "$pr_type",
+  "files_changed": $files_changed,
+  "commits_count": $commits_count,
+  "first_commit": $(echo "$first_commit" | jq -R -s .),
+  "pr_number": ${pr_number:-null},
+  "pr_url": $(echo "$pr_url" | jq -R -s .)
+}
+EOF
+)
+    
+    echo "$pr_log_entry" >> "$logs_dir/pr_activity.jsonl"
+    echo "🌐 $pr_url"
+    gh pr view --web
+    
+else
+    echo "❌ Error creando PR - limpiando..."
+    git checkout "$current_branch" 2>/dev/null
+    git branch -D "$temporal_branch" 2>/dev/null
+    git push origin --delete "$temporal_branch" 2>/dev/null
+    exit 1
+fi
+```
