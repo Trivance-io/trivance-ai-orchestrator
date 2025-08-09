@@ -31,6 +31,8 @@ if [ -z "$target_branch" ]; then
 fi
 
 # Verificar que target branch existe en remoto
+echo "🔄 Actualizando información del branch remoto..."
+git fetch origin "$target_branch" 2>/dev/null || git fetch origin 2>/dev/null
 if ! git show-ref --verify --quiet "refs/remotes/origin/$target_branch"; then
     echo "❌ Target branch '$target_branch' no existe en remoto"
     echo "💡 Branches disponibles: $(git branch -r | grep -v HEAD | sed 's/origin\///' | tr '\n' ' ')"
@@ -100,17 +102,16 @@ if gh pr create --base "$target_branch" --title "$first_commit" --body "$pr_desc
     logs_dir=".claude/logs/$today"
     mkdir -p "$logs_dir"
     
-    # Obtener PR info
+    # Obtener PR info con retry consolidado
     pr_url=""
     pr_number=""
+    pr_info=""
     for i in {1..3}; do
-        pr_url=$(gh pr view --json url --jq '.url' 2>/dev/null) && break
+        pr_info=$(gh pr view --json url,number 2>/dev/null) && break
         sleep 1
     done
-    for i in {1..3}; do
-        pr_number=$(gh pr view --json number --jq '.number' 2>/dev/null) && break  
-        sleep 1
-    done
+    pr_url=$(echo "$pr_info" | jq -r '.url // ""')
+    pr_number=$(echo "$pr_info" | jq -r '.number // ""')
     
     # Log entry
     pr_log_entry=$(cat <<EOF
