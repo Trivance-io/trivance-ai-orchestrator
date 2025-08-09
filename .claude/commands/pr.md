@@ -41,6 +41,19 @@ fi
 
 # Variables básicas
 current_branch=$(git branch --show-current)
+
+# CRÍTICO: Verificar si ya existe PR para la rama actual
+existing_pr=$(gh pr list --head "$current_branch" --json number --jq '.[0].number // ""' 2>/dev/null)
+if [ -n "$existing_pr" ]; then
+    echo "⚠️  Ya existe PR #$existing_pr para la rama $current_branch"
+    echo "🔄 Actualizando PR existente en lugar de crear nuevo..."
+    git push origin "$current_branch"
+    pr_url=$(gh pr view "$existing_pr" --json url --jq '.url' 2>/dev/null)
+    echo "🌐 $pr_url"
+    gh pr view --web 2>/dev/null
+    exit 0
+fi
+
 # Obtener próximo número de PR para naming predictivo
 next_pr_number=$(gh pr list --limit 1 --json number --jq '.[0].number // 0' 2>/dev/null || echo "0")
 next_pr_number=$((next_pr_number + 1))
