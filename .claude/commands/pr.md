@@ -47,15 +47,15 @@ temporal_branch="pr/${timestamp}-${current_branch}-to-${target_branch}"
 echo "📝 Creando PR: $temporal_branch → $target_branch"
 
 # Verificar commits justo antes de crear branch (evitar race condition)
-commits_check=$(git log HEAD --not --remotes --oneline | head -1 2>/dev/null)
+commits_check=$(git log HEAD --not origin/$target_branch --oneline | head -1 2>/dev/null)
 if [ -z "$commits_check" ]; then
     echo "❌ No hay commits para PR en el momento de ejecución"
     exit 1
 fi
 
-commits_count=$(git log HEAD --not --remotes --oneline | wc -l | xargs)
+commits_count=$(git log HEAD --not origin/$target_branch --oneline | wc -l | xargs)
 # Sanitizar first_commit para prevenir command injection
-first_commit_raw=$(git log HEAD --not --remotes --oneline | head -1 | cut -d' ' -f2-)
+first_commit_raw=$(git log HEAD --not origin/$target_branch --oneline | head -1 | cut -d' ' -f2-)
 first_commit=$(echo "$first_commit_raw" | sed 's/[\$`"\\]/\\&/g' | tr -d '\n\r')
 
 # Crear rama temporal
@@ -69,7 +69,7 @@ if ! git push origin "$temporal_branch" --set-upstream; then
 fi
 
 # Generar descripción
-commits_list=$(git log HEAD --not --remotes/${target_branch} --oneline | head -10)
+commits_list=$(git log HEAD --not origin/$target_branch --oneline | head -10)
 files_changed=$(git diff --name-only HEAD "origin/$target_branch" | wc -l | xargs)
 
 pr_type="feature"
@@ -113,8 +113,21 @@ if gh pr create --base "$target_branch" --title "$first_commit" --body "$pr_desc
     pr_url=$(echo "$pr_info" | jq -r '.url // ""')
     pr_number=$(echo "$pr_info" | jq -r '.number // ""')
     
-    # Log entry
-    pr_log_entry=$(cat <<EOF
+    # Log entry - evaluar variables jq por separado para evitar errores de path
+    first_commit_json=""
+    pr_url_json=""
+    if command -v jq >/dev/null 2>&1; then
+        first_commit_json=$(echo "$first_commit" | tr -d '\n\r' | jq -R . 2>/dev/null || echo "\"$(echo "$first_commit" | tr -d '\n\r' | sed 's/"/\\"/g')\"")
+        pr_url_json=$(echo "$pr_url" | tr -d '\n\r' | jq -R . 2>/dev/null || echo "\"$(echo "$pr_url" | tr -d '\n\r' | sed 's/"/\\"/g')\"")
+    else
+        # Fallback sin jq - escapar manualmente
+        first_commit_json="\"$(echo "$first_commit" | tr -d '\n\r' | sed 's/"/\\"/g')\""
+        pr_url_json="\"$(echo "$pr_url" | tr -d '\n\r' | sed 's/"/\\"/g')\""
+    fi
+    
+    # Crear log de forma segura
+    if [ -w "$logs_dir" ] || mkdir -p "$logs_dir" 2>/dev/null; then
+        cat > "$logs_dir/pr_activity.jsonl" << EOF
 {
   "timestamp": "$timestamp_iso",
   "event": "temporal_pr_created",
@@ -124,14 +137,14 @@ if gh pr create --base "$target_branch" --title "$first_commit" --body "$pr_desc
   "pr_type": "$pr_type",
   "files_changed": $files_changed,
   "commits_count": $commits_count,
-  "first_commit": $(echo "$first_commit" | jq -R -s .),
+  "first_commit": $first_commit_json,
   "pr_number": ${pr_number:-null},
-  "pr_url": $(echo "$pr_url" | jq -R -s .)
+  "pr_url": $pr_url_json
 }
 EOF
-)
-    
-    echo "$pr_log_entry" >> "$logs_dir/pr_activity.jsonl"
+    else
+        echo "⚠️  Advertencia: No se pudo crear el log de trazabilidad"
+    fi
     echo "🌐 $pr_url"
     gh pr view --web
     
