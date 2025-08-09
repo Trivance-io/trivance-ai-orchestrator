@@ -52,10 +52,13 @@ review_count=$(echo "$reviews" | jq length)
 comment_count=$(echo "$comments" | jq length)
 echo "Found $review_count reviews and $comment_count comments"
 
-actionable_findings=()
 current_user=$(mcp__github__get_me | jq -r '.login' 2>/dev/null || echo "")
 
-echo "$reviews" | jq -c '.[]' | while read -r review; do
+# Usar arrays para evitar problemas de scope
+declare -a actionable_findings
+
+# Procesar reviews usando process substitution
+while IFS= read -r review; do
     review_state=$(echo "$review" | jq -r '.state')
     review_body=$(echo "$review" | jq -r '.body // ""')
     reviewer=$(echo "$review" | jq -r '.user.login')
@@ -65,11 +68,12 @@ echo "$reviews" | jq -c '.[]' | while read -r review; do
     fi
     
     if [[ "$review_state" == "CHANGES_REQUESTED" || "$review_body" =~ (should|must|need|fix|error|issue|problem|security|performance|test) ]]; then
-        echo "Actionable review from $reviewer: $review_body" >> /tmp/actionable_findings.txt
+        actionable_findings+=("Actionable review from $reviewer: $review_body")
     fi
-done
+done < <(echo "$reviews" | jq -c '.[]')
 
-echo "$comments" | jq -c '.[]' | while read -r comment; do
+# Procesar comentarios usando process substitution
+while IFS= read -r comment; do
     comment_body=$(echo "$comment" | jq -r '.body // ""')
     commenter=$(echo "$comment" | jq -r '.user.login')
     
@@ -78,35 +82,42 @@ echo "$comments" | jq -c '.[]' | while read -r comment; do
     fi
     
     if [[ "$comment_body" =~ (should|must|need|fix|error|issue|problem|security|performance|test|suggestion|recommend) ]]; then
-        echo "Actionable comment from $commenter: $comment_body" >> /tmp/actionable_findings.txt
+        actionable_findings+=("Actionable comment from $commenter: $comment_body")
     fi
-done
+done < <(echo "$comments" | jq -c '.[]')
 
 created_issues=""
 issue_count=0
 
-if [[ -f /tmp/actionable_findings.txt ]]; then
-    while IFS= read -r finding; do
-        category="Bug"
-        labels="bug"
-        
-        if [[ "$finding" =~ security|vulnerability|injection ]]; then
-            category="Security"
-            labels="security"
-        elif [[ "$finding" =~ performance|slow|optimize ]]; then
-            category="Performance" 
-            labels="performance"
-        elif [[ "$finding" =~ test|coverage ]]; then
-            category="Testing"
-            labels="testing"
-        elif [[ "$finding" =~ documentation|readme|docs ]]; then
-            category="Documentation"
-            labels="documentation"
-        fi
-        
-        title_text=$(echo "$finding" | cut -c1-50 | sed 's/.*: //')
-        issue_title="[$category] $title_text"
-        issue_body="## Finding from PR #$pr_number
+# Procesar findings desde array (skip si no hay findings)
+if [[ ${#actionable_findings[@]} -eq 0 ]]; then
+    echo "No actionable findings found"
+fi
+
+for finding in "${actionable_findings[@]}"; do
+    category="Bug"
+    labels="bug"
+    
+    if [[ "$finding" =~ (security|vulnerability|injection) ]]; then
+        category="Security"
+        labels="security"
+    elif [[ "$finding" =~ (performance|slow|optimize) ]]; then
+        category="Performance" 
+        labels="performance"
+    elif [[ "$finding" =~ (test|coverage) ]]; then
+        category="Testing"
+        labels="testing"
+    elif [[ "$finding" =~ (documentation|readme|docs) ]]; then
+        category="Documentation"
+        labels="documentation"
+    fi
+    
+    title_text=$(echo "$finding" | cut -c1-50 | sed 's/.*: //')
+    # Validar que title_text no esté vacío
+    [[ -z "$title_text" ]] && title_text="Review finding"
+    issue_title="[$category] $title_text"
+    
+    issue_body="## Finding from PR #$pr_number
 
 **Source**: $finding
 
@@ -123,36 +134,37 @@ Address the concern mentioned in the review comment.
 - [ ] Tests added/updated if needed
 - [ ] No similar issues remain in codebase"
 
-        issue_response=$(mcp__github__create_issue "$pr_number" "$issue_title" "$issue_body" "$labels" "$current_user" 2>/dev/null || echo '{"number": ""}')
-        issue_number=$(echo "$issue_response" | jq -r '.number // ""')
-        
-        if [[ -n "$issue_number" && "$issue_number" != "null" ]]; then
-            created_issues="$created_issues $issue_number"
-            issue_count=$((issue_count + 1))
-            echo "Created issue #$issue_number: $issue_title"
-        fi
-        
-    done < /tmp/actionable_findings.txt
+    # Crear issue via MCP function
+    issue_response=$(mcp__github__create_issue "$issue_title" "$issue_body" "$labels" 2>/dev/null || echo '{"number": ""}')
+    issue_number=$(echo "$issue_response" | jq -r '.number // ""')
     
-    rm -f /tmp/actionable_findings.txt
-fi
+    if [[ -n "$issue_number" && "$issue_number" != "null" ]]; then
+        created_issues="$created_issues $issue_number"
+        issue_count=$((issue_count + 1))
+        echo "Created issue #$issue_number: $issue_title"
+    fi
+done
 
-created_issues=$(echo "$created_issues" | xargs)
+# Limpiar espacios en blanco de created_issues
+created_issues="${created_issues## }"
+created_issues="${created_issues%% }"
 
 if [[ -n "$created_issues" ]]; then
     pr_body=$(gh pr view "$pr_number" --json body --jq '.body // ""')
     
+    # Construir sección AUTO-CLOSE sin subshell
+    auto_close_content=""
+    for num in $created_issues; do
+        if [[ -n "$num" ]]; then
+            issue_info=$(gh issue view "$num" --json title --jq '.title' 2>/dev/null || echo "Issue")
+            auto_close_content+="- Fixes #$num - $issue_info"$'\n'
+        fi
+    done
+    
     auto_close_section="<!-- AUTO-CLOSE:START -->
 ## Associated Issues from Findings
 
-$(echo "$created_issues" | tr ' ' '\n' | while read num; do
-    if [[ -n "$num" ]]; then
-        issue_info=$(gh issue view "$num" --json title --jq '.title' 2>/dev/null || echo "Issue")
-        category=$(echo "$issue_info" | grep -o '\[[^]]*\]' | head -1)
-        echo "- Fixes #$num - $issue_info"
-    fi
-done)
-<!-- AUTO-CLOSE:END -->"
+$auto_close_content<!-- AUTO-CLOSE:END -->"
     
     if echo "$pr_body" | grep -q "<!-- AUTO-CLOSE:START -->"; then
         new_pr_body=$(echo "$pr_body" | sed '/<!-- AUTO-CLOSE:START -->/,/<!-- AUTO-CLOSE:END -->/d')
