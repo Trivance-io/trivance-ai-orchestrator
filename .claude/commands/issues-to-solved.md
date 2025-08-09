@@ -41,7 +41,7 @@ timestamp=$(date '+%Y-%m-%dT%H:%M:%S')
 mkdir -p ".claude/issues-review"
 
 pr_body=$(gh pr view "$pr_number" --json body --jq '.body // ""')
-associated_issues=$(echo "$pr_body" | grep -oE '(Fixes|Closes|Resolves) #[0-9]+' | grep -o '[0-9]\+' | sort -nu | tr '\n' ' ' | xargs)
+associated_issues=$(grep -oE '(Fixes|Closes|Resolves) #[0-9]+' <<< "$pr_body" | grep -o '[0-9]\+' | sort -nu | tr '\n' ' ' | sed 's/[[:space:]]*$//')
 
 if [[ -z "$associated_issues" ]]; then
     echo "❌ No issues asociados al PR #$pr_number"
@@ -54,6 +54,9 @@ echo "Found $issues_count issues: $associated_issues"
 
 issues_data=""
 for issue_num in $associated_issues; do
+    # Validate issue number is numeric only  
+    [[ "$issue_num" =~ ^[0-9]+$ ]] || continue
+    
     if issue_info=$(gh issue view "$issue_num" --json title,body --jq '{title: .title, body: (.body // "")}' 2>/dev/null); then
         title=$(echo "$issue_info" | jq -r '.title')
         body=$(echo "$issue_info" | jq -r '.body')
@@ -67,8 +70,9 @@ for issue_num in $associated_issues; do
         # Extract file information from body
         files_mentioned=$(echo "$body" | grep -oE '\*\*File\*\*: [^\n]+|\- \*\*File\*\*: [^\n]+|\*\*Lines\*\*: [^\n]+' | head -3)
         
-        # Create formatted issue entry
-        printf -v issue_entry "\n\n---\n### 🎯 Issue #%s: %s\n**Priority: %s**\n\n" "$issue_num" "$title" "${priority:-MEDIUM}"
+        # Create formatted issue entry - escape % in user content
+        title_escaped="${title//\%/%%}"
+        printf -v issue_entry "\n\n---\n### 🎯 Issue #%s: %s\n**Priority: %s**\n\n" "$issue_num" "$title_escaped" "${priority:-MEDIUM}"
         issues_data+="$issue_entry"  
         [[ -n "$files_mentioned" ]] && issues_data+="📁 **Files/Lines:**\n$files_mentioned\n\n"
         issues_data+="$body\n"
@@ -171,12 +175,12 @@ mkdir -p "$logs_dir"
 
 jq -n \\
     --arg timestamp "$timestamp" \\
-    --argjson pr "$pr_number" \\
+    --arg pr "$pr_number" \\
     --arg issues "$associated_issues" \\
-    --argjson count "$issues_count" \\
+    --arg count "$issues_count" \\
     --arg plan "$analysis_file" \\
     --arg executed "$([[ "$execute" =~ ^[Yy]$ ]] && echo "true" || echo "false")" \\
-    '{timestamp: $timestamp, pr_number: $pr, issues: $issues, count: $count, plan_file: $plan, executed: $executed}' \\
+    '{timestamp: $timestamp, pr_number: ($pr | tonumber), issues: $issues, count: ($count | tonumber), plan_file: $plan, executed: ($executed == "true")}' \\
     >> "$logs_dir/issues_resolved.jsonl"
 
 if git status --porcelain | grep -q .; then

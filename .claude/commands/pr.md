@@ -68,7 +68,7 @@ fi
 
 # Generar descripción
 commits_list=$(git log HEAD --not --remotes/${target_branch} --oneline | head -10)
-files_changed=$(git diff --name-only HEAD "origin/$target_branch" 2>/dev/null | wc -l | xargs || echo "N/A")
+files_changed=$(git diff --name-only HEAD "origin/$target_branch" | wc -l | xargs)
 
 pr_type="feature"
 if echo "$commits_list" | grep -qi "fix\|bug"; then pr_type="bugfix"; fi
