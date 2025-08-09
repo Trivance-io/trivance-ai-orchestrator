@@ -4,7 +4,7 @@ Servicio de observabilidad para el sistema unificado de logs de Trivance.
 
 ## 📚 Documentación Completa
 
-Ver la documentación detallada en: [`/docs/LOG-VIEWER.md`](../../docs/LOG-VIEWER.md)
+Ver la documentación detallada en: [`/docs/OBSERVABILITY.md`](../../docs/OBSERVABILITY.md)
 
 ## 🚀 Quick Start
 
@@ -35,4 +35,4 @@ log-viewer/
 - **Imagen base**: node:22-alpine
 - **Volumen**: `/logs` (read-only)
 
-Para más información, consultar la [documentación completa](../../docs/LOG-VIEWER.md).
+Para más información, consultar la [documentación completa](../../docs/OBSERVABILITY.md).

@@ -145,19 +145,8 @@ Si eres una IA analizando este proyecto:
 
 Trivance incluye comandos especializados para Claude Code que optimizan el desarrollo:
 
-#### `/deep [consulta]`
-Activa razonamiento profundo para análisis complejos.
-```
-Uso: /deep analizar arquitectura microservicios
-Cuándo: Problemas complejos, auditorías, planeación estratégica
-```
-
-#### `/e-team [componente]`
-Simula un equipo de expertos técnicos (QA, CTO, Técnico, entre otros) para evaluaciones profesionales.
-```
-Uso: /e-team code architecture system
-Cuándo: Revisiones de código, evaluaciones de arquitectura, análisis de calidad
-```
+#### Comandos de Análisis Avanzado
+Ver `/deep` y `/e-team` en `.claude/human-handbook/commands-guide.md`
 
 #### `/git-up [mensaje]`
 Workflow inteligente de Git con validaciones de seguridad automáticas y commits empresariales.
@@ -175,37 +164,16 @@ Cuándo: Verificar consistencia, actualizar documentación automáticamente
 
 **Nota**: Estos comandos son exclusivos para Claude Code y automatizan tareas específicas de desarrollo empresarial.
 
-## 🛡️ Sistema de Hooks Claude Code
+## 🤖 Configuración Claude Code
 
-El sistema incluye hooks inteligentes que supervisan el desarrollo para mantener consistencia arquitectónica y seguridad:
+**IMPRESCINDIBLE**: Copia la carpeta `.claude/` a la raíz de tu workspace para usar el stack AI configurado.
 
-### Funcionalidad Principal
-- **Supervisión automática**: Detecta patrones peligrosos y inconsistencias
-- **Context injection**: Proporciona contexto arquitectónico relevante automáticamente  
-- **Security guard**: Bloquea operaciones críticas (archivos .env, comandos peligrosos)
-- **Audit trail**: Registro completo de eventos para trazabilidad
-
-### Activación en Workspace Principal
 ```bash
-# 1. Copiar configuración de hooks al workspace principal
+# Copiar configuración Claude Code al workspace
 cp -r trivance-dev-config/.claude /workspace-principal/
-
-# 2. Hacer scripts ejecutables
-chmod +x /workspace-principal/.claude/hooks/*.py
-
-# 3. Claude Code automáticamente ejecuta hooks según settings.json
 ```
 
-### Logs y Monitoreo
-```bash
-# Ver actividad de hooks en tiempo real
-tail -f .claude/logs/$(date +%Y-%m-%d)/*.jsonl
-
-# Verificar funcionamiento
-cd .claude/hooks && python3 test_hooks_e2e.py
-```
-
-**Beneficio**: Desarrollo enterprise con supervisión Senior-level automática, reduciendo inconsistencias 80% y manteniendo velocidad.
+**Workflows AI-First**: Consulta `.claude/human-handbook/` para flujos completos de desarrollo con IA.
 
 ## 📁 Estructura Post-Instalación
 
@@ -329,89 +297,29 @@ AUTH_ENCRYPT_SECRET=[64_chars_random]
 - ✅ **Zero hardcoding**: No hay credenciales en código
 - ✅ **Environment isolation**: QA/Prod requieren configuración manual
 
-## 🔧 Desarrollo Avanzado
-
-### 🧪 Testing
-
-```bash
-# Backend (NestJS con Jest)
-cd ms_level_up_management
-npm test                    # Unit tests
-npm run test:watch          # Watch mode
-npm run test:cov            # Con cobertura
-npm run test:e2e           # End-to-end
-
-# Frontend (React con Vitest)  
-cd level_up_backoffice
-npm test                    # Unit tests
-
-# Mobile (React Native) - NO tiene npm test
-cd trivance-mobile
-npm run type-check          # TypeScript validation
-npm run lint                # ESLint validation
-```
-
-### 🎨 Linting y Formateo
-
-```bash
-# Cada repositorio tiene sus comandos
-npm run lint               # ESLint
-npm run lint:fix          # ESLint con auto-fix
-npm run format            # Prettier
-npm run type-check        # TypeScript check
-```
-
-### 🗄️ Base de Datos (Prisma)
-
-```bash
-cd ms_level_up_management
-npx prisma migrate dev      # Nueva migración
-npx prisma generate         # Regenerar cliente
-npx prisma studio          # GUI de base de datos
-npx prisma db push         # Sincronizar schema
-```
-
 ## 📊 Observabilidad
 
-**Log Viewer Unificado**: http://localhost:4000
-- API programática: `/api/logs/search?level=error&service=backend`
-- Filtros: service, level, traceId, sessionId, text
+**Log Viewer**: http://localhost:4000 - Sistema unificado de logs
+**Monitor Docker**: http://localhost:9999 - Logs de contenedores en tiempo real
 
-**Dozzle (Monitor Docker)**: http://localhost:9999  
-- Logs todos los contenedores en tiempo real
-- Interfaz web moderna, sin instalación
+Ver detalles completos en [`docs/OBSERVABILITY.md`](docs/OBSERVABILITY.md)
 
-## Si algo falla
+## 🔧 Desarrollo Avanzado
 
-### Docker no funciona
-1. Abre Docker Desktop
-2. Espera que diga "Running"
-3. Intenta de nuevo
+Testing, linting, base de datos, resolución de problemas: [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md)
 
-### Puerto ocupado
-```bash
-# Ver qué lo usa
-lsof -i:5173
+## 📚 Documentación Especializada
 
-# Detener servicios node
-killall node
+- **Configuración**: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) - Arquitectura detallada
+- **Environments**: [`docs/ENVIRONMENTS.md`](docs/ENVIRONMENTS.md) - Sistema de variables
+- **Desarrollo**: [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) - Testing y herramientas
+- **Observabilidad**: [`docs/OBSERVABILITY.md`](docs/OBSERVABILITY.md) - Logs y monitoreo  
+- **Troubleshooting**: [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) - Resolución problemas
+- **Docker**: [`docs/DOCKER.md`](docs/DOCKER.md) - Configuración avanzada
 
-# Reiniciar
-./start.sh stop && ./start.sh start
-```
+## 🤖 Workflows AI-First
 
-### Reset completo
-```bash
-cd trivance-dev-config
-./scripts/utils/clean-workspace.sh
-./setup.sh
-```
-
-## Más información
-
-- Problemas avanzados: `trivance-dev-config/docs/TROUBLESHOOTING.md`
-- Arquitectura detallada: `trivance-dev-config/docs/ARCHITECTURE.md`
-- Sistema de environments: `trivance-dev-config/docs/ENVIRONMENTS.md`
+**Fuente de verdad**: [`.claude/human-handbook/`](.claude/human-handbook/) - Guías completas para desarrollo con Claude Code
 
 ## 🎯 Flujo de Desarrollo Típico
 
