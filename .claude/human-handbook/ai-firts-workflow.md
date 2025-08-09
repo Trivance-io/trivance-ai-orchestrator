@@ -5,54 +5,34 @@
 ## 🎯 Qué aprenderás
 
 - Crear PR con Claude Code
-- Manejar findings de reviews automáticamente  
-- Resolver issues sin crear PRs nuevos
-- Gestionar iteraciones hasta validación limpia
-- Cuándo un humano puede autorizar pasar issues
+- Convertir findings en issues
+- Resolver issues en el mismo PR
+- Gestionar iteraciones hasta validación
+- Cuándo pedir autorización
 
 ---
 
-## 📋 FLUJO COMPLETO (5 PASOS)
+## 📋 Flujo Completo
 
-### **PASO 1: Crear PR Inicial**
+### **PASO 1: Crear PR**
 
 ```bash
-# Claude Code implementa tu funcionalidad
+# Implementar funcionalidad
 "Claude, implementa autenticación OAuth"
 
-# Cuando estés satisfecho, crea commits y PR
-/commit
-/pr
-```
-
-**Resultado:**
-- PR se crea automáticamente con template
-- Se hace push a GitHub
-- Queda listo para review
-
-```
-✅ PR creado: #123 "feat: implement OAuth authentication" 
-🌐 https://github.com/tu-proyecto/pull/123
+# Crear commits y PR
+/commit    # Crea commit semántico con validaciones
+/pr        # Crea pull request automáticamente
 ```
 
 ---
 
-### **PASO 2: Review → Aparecen Findings**
+### **PASO 2: Review Automático**
 
-**¿Quién revisa tu PR?**
-- **Claude Code** (usando `/review` o comandos automáticos)
-- **Tu equipo humano** (reviewers asignados)  
-- **Ambos** (review automático + validación humana)
+Tipos de findings:
+- SECURITY, BUG, TODO, PERFORMANCE
 
-**¿Qué tipos de findings aparecen?**
-- `SECURITY: This needs input validation`
-- `BUG: Memory leak in line 45`  
-- `TODO: Add error handling here`
-- `PERFORMANCE: This query is slow`
-
-**Tu trabajo:**
-- Esperar el review
-- **NO crear PR nuevo** - seguiremos en el mismo
+⚠️ **Importante:** No crear PR nuevo, usar el mismo
 
 ---
 
@@ -62,205 +42,157 @@
 /findings-to-issues
 ```
 
-**El comando:**
-1. Lee TODO el PR (descripción, comments, reviews)
-2. Encuentra findings inteligentemente
-3. Crea issues organizados por prioridad
-
-```
-✅ Issue #77 [SECURITY] Input validation needed (CRÍTICO)
-✅ Issue #78 [BUG] Fix memory leak (ALTO)
-✅ Issue #79 [TODO] Add error handling (MEDIO)  
-✅ Issue #80 [PERFORMANCE] Optimize query (MEDIO)
-```
+Crea issues organizados por prioridad: CRÍTICO → ALTO → MEDIO → BAJO
 
 ---
 
-### **PASO 4: Resolver Issues en el MISMO PR**
-
-**⚠️ IMPORTANTE: NO crear PR nuevo - actualizar el mismo**
+### **PASO 4: Planificar (Opcional)**
 
 ```bash
-# Para cada issue crítico:
-"Claude, resuelve el issue #77 sobre input validation"
-"Claude, resuelve el issue #78 sobre memory leak"  
-
-# Commit con referencias a issues:
-/commit "fix: resolve security and performance issues
-
-- Fix input validation vulnerability (#77)
-- Resolve memory leak in authentication (#78)  
-- Add proper error handling (#79)
-- Optimize database query performance (#80)
-
-Closes #77, Fixes #78, Resolves #79, Addresses #80"
+/issues-to-solved <pr_number>
 ```
 
-**¿Qué pasa al commitear con "Closes #77"?**
-- El commit se agrega al MISMO PR #123
-- Cuando se mergee el PR, los issues se cerrarán automáticamente
-- Trazabilidad completa: PR → Issues → Fixes → Merge
+Genera plan de resolución por prioridades:
+- **"Y"**: Ejecución automática 
+- **"N"**: Usar como guía manual
 
 ---
 
-### **PASO 5: Re-Review y Decisión Final**
+### **PASO 5: Resolver Issues**
 
-```bash
-gh pr comment 123 --body "✅ Issues críticos resueltos:
-- #77 SECURITY: Input validation implementada  
-- #78 BUG: Memory leak corregido
-- #79 TODO: Error handling añadido
-- #80 PERFORMANCE: Query optimizada
+⚠️ **Importante:** Usar el mismo PR, no crear uno nuevo.
 
-Listo para re-review."
-```
+**3 opciones:**
+- **A:** Ya resueltos automáticamente (solo commitear)
+- **B:** Seguir plan como guía  
+- **C:** Resolver manualmente
 
-**Posibles resultados:**
-
-**✅ CASO 1: Todo limpio**
-- Re-review → Aprobado → Merge → Issues se cierran automáticamente
-
-**🔄 CASO 2: Quedan issues menores**
-- Repite PASO 4 → Commit al mismo PR → Re-review
-- **Repite hasta que esté limpio**
-
-**🚨 CASO 3: Issues críticos persistentes**
-- **DECISIÓN HUMANA requerida**
+Siempre usar `Closes #77` en commits para trazabilidad.
 
 ---
 
-## 🚨 CASOS ESPECIALES: Errores Persistentes
-
-### **Cuándo Pedir Autorización Humana**
-
-**Regla práctica:**
-- **1-2 iteraciones:** Normal, seguir resolviendo
-- **3-4 iteraciones:** Evaluar complejidad
-- **5+ iteraciones:** **OBLIGATORIO pedir autorización humana**
-
-### **Template para Pedir Autorización**
+### **PASO 6: Push y Re-Review**
 
 ```bash
-gh pr comment 123 --body "⚠️ Issue #77 SECURITY persiste después de 3 iteraciones:
-
-**Intentos realizados:**
-- Iteración 1: Input validation básica → Insuficiente
-- Iteración 2: Regex validation → Regex vulnerable  
-- Iteración 3: Sanitization function → Bypass posible
-
-**Problema:** La validación completa requiere librería externa que cambia arquitectura.
-
-**Solicito autorización humana para:**
-- [ ] Mergear PR con issue #77 pendiente 
-- [ ] Crear issue de seguimiento para implementar solución correcta
-- [ ] Implementar fix temporal hasta refactoring mayor
-
-@tech-lead @security-team"
+git push     # Push directo al branch remoto
+# O usar:
+/pr          # Detecta branch existente y pushea cambios
 ```
 
-### **Posibles Decisiones del Líder Técnico**
-
-**✅ Autoriza pasar:** "OK, crea issue de seguimiento"
-```bash
-gh issue create --title "[FOLLOWUP] Implement comprehensive input validation"
-/commit "fix: implement temporary input validation for #77"
-```
-
-**❌ No autoriza:** "Implementa fix básico ahora"
-```bash
-"Claude, implementa input validation básica pero funcional para issue #77"
-/commit "fix: implement basic input validation (temporary solution)"
-```
+**Casos posibles:**
+- ✅ Todo limpio → Merge automático
+- 🔄 Nuevos findings → Repetir pasos 3-6  
+- 🚨 Issues persistentes (4-5 iteraciones) → Pedir autorización
 
 ---
 
-## 🔄 FLUJO RESUMIDO
+## 🚨 Casos Especiales
 
-```bash
-1. /pr                          # Crear PR inicial
-2. [Claude Code/Equipo revisa]  # Aparecen findings  
-3. /findings-to-issues          # Convertir a issues
-4. "Claude, resuelve #X"        # Resolver en MISMO PR
-5. /commit "fix: ... Closes #X" # Commit con referencias
-6. [Re-review]                  # Evaluación
-7a. ✅ Aprobado → Merge         # Caso ideal
-7b. 🔄 Más issues → Repetir 4-6 # Iteración normal
-7c. 🚨 No resuelve → Humano     # Autorización requerida
+### **Cuándo Pedir Autorización**
+
+**Después de 4-5 iteraciones sin resolver, o cuando hay:**
+- Issues de seguridad que requieren cambios arquitectónicos
+- Bloqueos críticos de +48 horas
+- Conflictos técnicos complejos
+- Decisiones que afectan múltiples servicios
+
+### **Template Simple para Autorización**
+
+**Elementos obligatorios a incluir:**
+
 ```
+Asunto: Autorización requerida - PR #[NUMERO] 
+
+Contexto:
+- PR: #[NUMERO] - "[DESCRIPCIÓN]"
+- Issue crítico: #[NUMERO] [TIPO] [DESCRIPCIÓN]
+- Intentos: [NÚMERO] iteraciones sin resolver
+
+Opciones:
+A) Merge con fix temporal + issue de seguimiento
+B) Bloquear hasta implementación completa  
+C) Fix mínimo aceptando riesgo residual
+
+Impacto:
+- Opción A: [IMPACTO_TIEMPO]
+- Opción B: [IMPACTO_DELAY] 
+- Opción C: [IMPACTO_RIESGO]
+
+Recomendación: [TU_RECOMENDACIÓN]
+
+Respuesta esperada: "AUTORIZADO: Opción [A/B/C]"
+```
+
+**Nota:** Usa tu propio lenguaje y estilo. Lo importante es incluir todos los elementos.
+
+### **Respuestas Típicas y Siguientes Pasos**
+
+**Si autorizado → implementar:**
+```bash
+gh issue create --title "[FOLLOWUP] Fix completo para [DESCRIPCIÓN]"
+/commit "fix: implementar solución temporal autorizada"
+git push
+```
+
+**Si denegado → completar:**
+```bash
+"Claude, implementa la solución completa requerida"
+# Continuar hasta resolver completamente
+```
+
+### **Después de la Autorización**
+
+1. **Confirmar recepción**
+2. **Implementar según decisión autorizada**
+3. **Documentar en PR con comentario**
+4. **Crear follow-up issues si aplica**
 
 ---
 
-## ✅ BUENAS PRÁCTICAS
+## 🔄 Flujo Resumido
+
+```bash
+1. /pr                    # Crear PR
+2. [Review automático]     # Aparecen findings
+3. /findings-to-issues    # Convertir a issues
+4. /issues-to-solved [PR] # Planificar (opcional)
+5. Resolver issues        # Manual o automático
+6. /commit + push         # Actualizar PR
+7. Re-review              # Validación final
+```
+
+**Casos:**
+- ✅ Aprobado → Merge
+- 🔄 Nuevos findings → Repetir 3-6
+- 🚨 Issues persistentes → Pedir autorización
+
+---
+
+## ✅ Buenas Prácticas
 
 ### **DO (Hacer)**
-- ✅ Usar MISMO PR para todos los fixes
+- ✅ Usar mismo PR para todos los fixes
 - ✅ Referencias issues en commits: `Closes #77`
-- ✅ Re-review después de cada iteración
-- ✅ Pedir autorización humana después de 5 iteraciones
-- ✅ Documentar problemas persistentes claramente
+- ✅ Pedir autorización por email después de 4-5 iteraciones
+- ✅ Incluir stakeholders relevantes
+- ✅ Documentar intentos técnicos
 
 ### **DON'T (No Hacer)**  
 - ❌ Crear PR nuevo para resolver findings
-- ❌ Mergear issues críticos sin autorización
-- ❌ Iteraciones infinitas sin escalar  
+- ❌ Mergear issues críticos sin autorización formal
+- ❌ Pedir autorización por comentarios en PR
+- ❌ Iteraciones infinitas sin escalar
 - ❌ Commits sin referencias a issues
-- ❌ Resolver issues menores antes que críticos
 
 ---
 
-## 🎯 COMANDOS ESENCIALES
+## 🎯 Comandos Esenciales
 
 ```bash
-# Flujo básico
-/pr                                    # Crear PR inicial
-/findings-to-issues                    # Extraer findings → issues
-
-# Resolución iterativa  
-"Claude, resuelve issue #X"            # Resolver issue específico
-/commit "fix: ... Closes #X"           # Commit con referencia
-
-# Gestión de PR
-gh pr comment {PR} --body "mensaje"    # Comunicar estado
-gh issue list --label priority:high    # Issues críticos pendientes
+/pr [target-branch]       # Crear PR (target opcional)
+/findings-to-issues      # Convertir findings a issues
+/issues-to-solved [PR]   # Planificar resolución
+/commit "fix: Closes #X" # Commit con referencia
+gh pr view [PR]          # Ver estado
 ```
 
----
-
-## 📊 EJEMPLO COMPLETO
-
-```bash
-# Día 1: PR inicial
-/pr
-# → PR #123 creado
-
-# Día 2: Review findings  
-/findings-to-issues
-# → Issues #77(SECURITY), #78(BUG), #79(TODO), #80(PERFORMANCE)
-
-# Día 2: Primera iteración
-"Claude, resuelve #78 y #79"
-/commit "fix: resolve bug and add error handling. Closes #78, #79"
-
-# Día 3: Segunda iteración  
-"Claude, resuelve #80 performance"
-/commit "fix: optimize query performance. Closes #80"
-
-# Día 3-4: Tercera/Cuarta iteración (issue #77 persiste)
-"Claude, intenta otra vez #77 security"
-# → Sigue sin resolverse después de múltiples intentos
-
-# Día 4: Pedir autorización (después de 4 iteraciones)
-gh pr comment 123 --body "🚨 Issue #77 SECURITY persiste después de 4 iteraciones.
-Requiere refactor arquitectural. Solicito autorización para mergear con issue seguimiento.
-@tech-lead"
-
-# Día 5: Autorización + Resolución final
-gh issue create --title "[FOLLOWUP] Complete security validation refactor"
-/commit "fix: implement temporary input validation for #77"
-```
-
-**Resultado:**
-- ✅ PR #123 merged  
-- ✅ Issues #78, #79, #80 cerrados automáticamente
-- ✅ Issue #77 cerrado con fix temporal
-- ✅ Issue #81 creado para seguimiento
