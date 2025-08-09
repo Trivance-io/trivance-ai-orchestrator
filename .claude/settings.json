@@ -5,7 +5,6 @@
   "permissions": {
     "defaultMode": "acceptEdits",
     "allow": [
-      // === DEVELOPMENT COMMANDS ===
       "Bash(npm run *)",
       "Bash(npm test *)",
       "Bash(npm install)",
@@ -13,8 +12,6 @@
       "Bash(pnpm *)",
       "Bash(node *)",
       "Bash(python3 *)",
-      
-      // === GIT WORKFLOW SEGURO ===
       "Bash(git status *)",
       "Bash(git log *)",
       "Bash(git diff *)",
@@ -25,15 +22,11 @@
       "Bash(git push origin hotfix/*)",
       "Bash(git push origin --set-upstream feature/*)",
       "Bash(git push origin --set-upstream bugfix/*)",
-      
-      // === DOCKER SAFE ===
       "Bash(docker ps *)",
       "Bash(docker logs *)",
       "Bash(docker compose up *)",
       "Bash(docker compose down *)",
       "Bash(docker compose restart *)",
-      
-      // === ESSENTIAL TOOLS ===
       "Bash(ls *)",
       "Bash(find *)",
       "Bash(grep *)",
@@ -52,8 +45,6 @@
       "Bash(whoami *)",
       "Bash(echo *)",
       "Bash(diff *)",
-      
-      // === GITHUB CLI ===
       "Bash(gh auth status)",
       "Bash(gh pr create *)",
       "Bash(gh pr view *)",
@@ -61,12 +52,9 @@
       "Bash(gh issue create *)",
       "Bash(gh issue list *)",
       "Bash(gh api *)",
-      
-      // === MCP GITHUB - ACCESO TOTAL (responsabilidad de permisos delegada a GitHub) ===
       "mcp__github__*"
     ],
     "deny": [
-      // === GIT DESTRUCTIVO ===
       "Bash(git push origin main)",
       "Bash(git push origin master)",
       "Bash(git push --force *)",
@@ -74,8 +62,6 @@
       "Bash(git reset --hard *)",
       "Bash(git clean -fd *)",
       "Bash(git branch -D *)",
-      
-      // === SECRETS & ENV FILES ===
       "Read(.env)",
       "Read(*.env)",
       "Read(.env.*)",
@@ -84,8 +70,6 @@
       "Read(*.pem)",
       "Read(id_rsa)",
       "Read(id_ed25519)",
-      
-      // === DESTRUCTIVO SISTEMA ===
       "Bash(rm -rf *)",
       "Bash(sudo *)",
       "Bash(dd *)",
@@ -95,8 +79,6 @@
       "Write(/etc/**)",
       "Write(/bin/**)",
       "Write(/usr/bin/**)",
-      
-      // === SECURITY BYPASS ===
       "Bash(curl * | bash)",
       "Bash(wget * | bash)",
       "Bash(ssh *)",

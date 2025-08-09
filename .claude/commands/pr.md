@@ -41,8 +41,10 @@ fi
 
 # Variables básicas
 current_branch=$(git branch --show-current)
-timestamp=$(date +%s)
-temporal_branch="pr/${timestamp}-${current_branch}-to-${target_branch}"
+# Obtener próximo número de PR para naming predictivo
+next_pr_number=$(gh pr list --limit 1 --json number --jq '.[0].number // 0' 2>/dev/null || echo "0")
+next_pr_number=$((next_pr_number + 1))
+temporal_branch="pull-${next_pr_number}-${current_branch}-to-${target_branch}"
 
 echo "📝 Creando PR: $temporal_branch → $target_branch"
 
