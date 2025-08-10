@@ -45,6 +45,10 @@ cleanup() {
         git checkout - 2>/dev/null || true
         git branch -D "$new_branch" 2>/dev/null || true
     fi
+    # Clean up temp files
+    if [[ -n "${pr_body_file:-}" ]] && [[ -f "$pr_body_file" ]]; then
+        rm -f "$pr_body_file" "$pr_body_file.bak" 2>/dev/null || true
+    fi
 }
 trap cleanup EXIT ERR
 
@@ -57,10 +61,10 @@ target_branch="${1:-}"
 }
 
 # Input sanitization
-[[ ! "$target_branch" =~ ^[a-zA-Z0-9/_.-]+$ ]] && {
+if ! echo "$target_branch" | grep -q '^[a-zA-Z0-9/_\.-][a-zA-Z0-9/_\.-]*$'; then
     echo "❌ Error: Branch name contiene caracteres inválidos"
     exit 1
-}
+fi
 
 # Verificar target existe en remoto
 if ! git fetch origin 2>/dev/null; then
@@ -79,10 +83,10 @@ if ! next_pr_raw=$(gh pr list --state all --json number --jq 'if length == 0 the
     exit 1
 fi
 
-[[ "$next_pr_raw" =~ ^[0-9]+$ ]] || {
+if ! echo "$next_pr_raw" | grep -q '^[0-9][0-9]*$'; then
     echo "❌ Número de PR inválido obtenido: '$next_pr_raw'"
     exit 1
-}
+fi
 
 readonly next_pr=$((next_pr_raw + 1))
 readonly timestamp=$(date +%H%M%S)
@@ -109,18 +113,19 @@ if ! git push origin "$new_branch" --set-upstream; then
 fi
 
 # [4] Crear PR con template minimalista (mejorado)
-first_commit=$(git log -1 --pretty=format:"%s" | head -c 100 | tr -d '\n\r' | sed 's/[^a-zA-Z0-9 .,!?:()-]/_/g')
+first_commit=$(git log -1 --pretty=format:"%s" | head -c 100 | tr -d '\n\r' | sed 's/[^a-zA-Z0-9 .,!?:()\-]/_/g')
 pr_body_file=$(mktemp)
-trap "rm -f $pr_body_file" EXIT
+# Note: cleanup function will handle temp file cleanup
 
-cat > "$pr_body_file" << EOF
-## Changes
-$(git log --oneline "origin/$target_branch..HEAD" | head -3 | sed 's/^[a-f0-9]* /- /')
-
-## Testing
-- [ ] Tests pass
-- [ ] No breaking changes
-EOF
+# Create PR body safely
+{
+    echo "## Changes"
+    git log --oneline "origin/$target_branch..HEAD" | head -3 | sed 's/^[a-f0-9]* /- /'
+    echo ""
+    echo "## Testing"
+    echo "- [ ] Tests pass"
+    echo "- [ ] No breaking changes"
+} > "$pr_body_file"
 
 if ! pr_url=$(gh pr create --base "$target_branch" --title "$first_commit" --body-file "$pr_body_file"); then
     echo "❌ Error creando PR"
