@@ -61,7 +61,7 @@ target_branch="${1:-}"
 }
 
 # Input sanitization
-if ! echo "$target_branch" | grep -q '^[a-zA-Z0-9/_\.-][a-zA-Z0-9/_\.-]*$'; then
+if ! echo "$target_branch" | grep -q '^[a-zA-Z0-9][a-zA-Z0-9/_.-]*$'; then
     echo "❌ Error: Branch name contiene caracteres inválidos"
     exit 1
 fi
@@ -95,10 +95,10 @@ readonly new_branch="pr-${next_pr}-${timestamp}"
 echo "🔄 Próximo PR será #$next_pr, creando rama: $new_branch"
 
 # [3] CORRECCIÓN: Validar variables antes de uso
-[[ -z "$new_branch" ]] && {
+if [ -z "$new_branch" ]; then
     echo "❌ Variable new_branch está vacía"
     exit 1
-}
+fi
 
 # Crear rama temporal MANDATORY
 echo "🚀 Creando rama: $new_branch"
