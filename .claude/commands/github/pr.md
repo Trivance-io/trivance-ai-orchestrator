@@ -1,10 +1,3 @@
----
-allowed-tools: Bash(git:*), Bash(gh:*), Bash(jq:*)
-argument-hint: <target_branch>
-description: Crea o actualiza PR automáticamente
-model: sonnet
----
-
 # Pull Request
 
 Crea o actualiza PR automáticamente usando branch actual, con target branch requerido.
