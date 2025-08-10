@@ -1,8 +1,8 @@
 # Guía Práctica de Comandos Claude Code
 
-## 🚀 Comandos Básicos (Úsalos diario)
+## 🚀 Comandos Básicos
 
-### `/commit` - Commits inteligentes
+### 💾 `/commit` - Commits inteligentes
 ```bash
 /commit "descripción del cambio"
 ```
@@ -10,7 +10,7 @@
 **Cuándo usarlo**: Después de completar cualquier cambio en código.
 **Ejemplo**: `commit "fix user login validation"` → genera commit con mensaje optimizado.
 
-### `/test` - Ejecutar tests con auto-fix
+### ✅ `/test` - Ejecutar tests con auto-fix
 ```bash
 /test
 ```
@@ -28,7 +28,7 @@
 
 ## 🔧 Comandos de Desarrollo
 
-### `/implement` - Motor de implementación
+### ⚙️ `/implement` - Motor de implementación
 ```bash
 /implement "nueva feature de dashboard con notificaciones"
 ```
@@ -43,7 +43,7 @@
 **Qué hace**: Genera estructura completa de archivos siguiendo patrones del proyecto.
 **Cuándo usarlo**: Al empezar nuevos módulos, APIs o componentes.
 
-### `/refactor` - Refactoring inteligente
+### 🔄 `/refactor` - Refactoring inteligente
 ```bash
 /refactor "mejorar performance de consultas de base de datos"
 ```
@@ -75,28 +75,28 @@
 
 ## 🔍 Comandos de Análisis
 
-### `/understand` - Comprensión profunda
+### 🧪 `/understand` - Comprensión profunda
 ```bash
 /understand
 ```
 **Qué hace**: Analiza todo el codebase y explica arquitectura, patrones y funcionamiento.
 **Cuándo usarlo**: Al empezar en un proyecto nuevo o cuando necesitas entender código complejo.
 
-### `/review` - Revisión de código
+### 🔎 `/review` - Revisión de código
 ```bash
 /review
 ```
 **Qué hace**: Revisa cambios recientes y sugiere mejoras de calidad, seguridad y performance.
 **Cuándo usarlo**: Después de implementar features importantes o antes de hacer merge.
 
-### `/security-scan` - Auditoría de seguridad
+### 🔒 `/security-scan` - Auditoría de seguridad
 ```bash
 /security-scan
 ```
 **Qué hace**: Escanea vulnerabilidades, credenciales expuestas y problemas de seguridad.
 **Cuándo usarlo**: Antes de deployments o periódicamente en código crítico.
 
-### `/deep` - Razonamiento profundo
+### 🧠 `/deep` - Razonamiento profundo
 ```bash
 /deep "problema complejo o decisión arquitectónica"
 ```
@@ -123,7 +123,7 @@
 
 ## 📄 Comandos de Documentación
 
-### `/docs` - Gestión de documentación
+### 📚 `/docs` - Gestión de documentación
 ```bash
 /docs
 ```
@@ -188,26 +188,35 @@
 **Qué hace**: Prepara PRs completos con análisis de issues, tests y documentación.
 **Cuándo usarlo**: Antes de contribuir a repos, especialmente open source.
 
-### `/pr` - PRs enterprise-grade
+### 🔄 `/pr` - PRs enterprise-grade
 ```bash
-/pr [--draft] [target-branch]
+/pr [target-branch]
 ```
-**Qué hace**: Crea PRs siguiendo estándares de Google, Netflix y Shopify con estructura automática.
+**Qué hace**: Crea PRs siguiendo estándares enterprise con branch validation automática, security hardening y retry logic optimizado.
 **Cuándo usarlo**: Para crear PRs profesionales que facilitan review y cumplan standards enterprise.
+**Flujo**: Valida target branch → Pre-fetch remoto → Crea branch temporal → Push seguro → PR con metadata
 
-### `/cleanproject` - Limpieza integral
+### 🧽 `/cleanproject` - Limpieza integral
 ```bash
 /cleanproject
 ```
 **Qué hace**: Limpia dead code, optimiza imports, remueve archivos innecesarios.
 **Cuándo usarlo**: Antes de releases o periódicamente para mantener el proyecto limpio.
 
-### `/findings-to-issues` - Hallazgos a issues GitHub
+### 🎯 `/findings-to-issues` - Hallazgos a issues GitHub
 ```bash
 /findings-to-issues
 ```
 **Qué hace**: Convierte hallazgos de PR reviews en issues GitHub trackeable con categorización inteligente.
 **Cuándo usarlo**: Después de reviews importantes para gestionar deuda técnica y seguimiento.
+
+### `/issues-to-solved` - Resolver issues de PR automáticamente
+```bash
+/issues-to-solved <pr_number>
+```
+**Qué hace**: Extrae issues asociados a PR, analiza prioridades, genera plan de implementación y ejecuta fixes seguros automáticamente.
+**Cuándo usarlo**: Después de crear issues con findings-to-issues, para planificar y resolver sistemáticamente.
+**Flujo**: Extrae issues → Prioriza (CRITICAL/HIGH/MEDIUM/LOW) → Plan estructurado → Ejecución opcional
 
 ---
 
@@ -221,9 +230,10 @@
 4. /test                         # Validar funcionamiento  
 5. /review                       # Revisar calidad
 6. /security-scan                # Verificar seguridad
-7. /docs                         # Actualizar documentación
-8. /commit                       # Commit limpio
+7-10. Seguir workflow AI-First    # Ver: ai-firts-workflow.md
 ```
+
+> 📚 **Para workflow completo de PR + findings + issues:** Ver `ai-firts-workflow.md`
 
 ### Bug Fix Urgente
 ```bash
@@ -264,5 +274,3 @@
 - **Documenta cambios**: Usa /docs para mantener documentación actualizada
 - **Análisis profundo**: Usa /deep para decisiones arquitectónicas críticas
 - **Gestión de deuda**: Convierte TODOs en issues con /todos-to-issues
-
-*Esta guía cubre los 26 comandos disponibles organizados por frecuencia de uso y complejidad.*

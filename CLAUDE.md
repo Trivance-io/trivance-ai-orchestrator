@@ -1,4 +1,4 @@
-# Trivance-dev-config: Master configutarion repo for Trivance Platform 
+# Trivance-dev-config: Master configuration repo for Trivance Platform 
 <!-- repo: trivance-dev-config | role: master_orchestrator | scope: enterprise_ecosystem -->
 
 ## MUST BE USED 🔧 SIMPLE-ENOUGH™ OPERATING PROTOCOL

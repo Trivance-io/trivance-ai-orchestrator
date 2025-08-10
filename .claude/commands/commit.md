@@ -75,3 +75,12 @@ The commit message will be concise, meaningful, and follow your project's conven
 - Use emojis in commits, PRs, or git-related content
 
 The commit will use only your existing git user configuration, maintaining full ownership and authenticity of your commits.
+
+## Commit Summary
+
+After creating commits, I'll show a summary of commits created in this session.
+
+This displays commits from this session with:
+- Commit hash and message  
+- Files modified in each commit
+- Only commits created during implementation
