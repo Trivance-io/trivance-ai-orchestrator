@@ -1,141 +1,71 @@
+---
+allowed-tools: Bash(git *), mcp__github__*
+description: Crea PR automáticamente desde rama actual hacia target branch
+---
+
 # Pull Request
 
-Crea o actualiza PR automáticamente usando branch actual, con target branch requerido.
+Crea PR automáticamente usando branch actual hacia el target branch especificado.
 
 ## Uso
-
 ```bash
-/pr <target_branch>  # Argumento MANDATORY. Sin target branch bloquear proceso hasta que se indique
+/pr <target_branch>  # Argumento obligatorio
 ```
 
 ## Ejemplos
-
 ```bash
-/pr develop     # Auto-crea o actualiza PR hacia develop
-/pr main        # Auto-crea o actualiza PR hacia main  
-/pr qa          # Auto-crea o actualiza PR hacia qa
+/pr develop     # Crea PR hacia develop
+/pr main        # Crea PR hacia main  
+/pr qa          # Crea PR hacia qa
 ```
 
-**Ejecución automática:**
-- Siempre crea rama temporal con nomenclatura: pr-{consecutivo}-{timestamp}
-- Crea PR automáticamente con template minimalista
-- Sin prompts de usuario, sin interrupciones
+## Ejecución
 
-## Flujo de Ejecución
+Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 
-```bash
-/pr develop
-├─ 1. Valida que 'develop' existe en remoto
-├─ 2. Obtiene consecutivo próximo PR + timestamp
-├─ 3. Crea rama temporal MANDATORY: pr-{consecutivo}-{timestamp}
-├─ 4. Crea PR con template minimalista
-└─ 5. Log resultado + mostrar URL
-```
+### 1. Validación del target branch
+- Si no se proporciona argumento, mostrar error: "❌ Error: Target branch requerido. Uso: /pr <target_branch>"
+- Ejecutar `git fetch origin` para actualizar referencias remotas
+- Verificar que el branch objetivo existe en remoto con `git branch -r | grep origin/<target_branch>`
+- Si no existe, mostrar error y terminar
 
-## Implementación
+### 2. Obtener información para el nuevo PR
+- Usar herramienta MCP GitHub para listar todos los PRs del repositorio
+- Obtener el número máximo de PR existente (o 0 si no hay PRs)
+- Calcular próximo número: max_pr + 1
+- Generar timestamp con formato HHMMSS
+- Construir nombre de rama: `pr-{número}-{timestamp}`
 
-```bash
-#!/bin/bash
-set -euo pipefail
+### 3. Crear rama temporal
+- Ejecutar `git checkout -b pr-{número}-{timestamp}`
+- Ejecutar `git push origin pr-{número}-{timestamp} --set-upstream`
+- Si algún comando falla, mostrar error y terminar
 
-# Cleanup function for failed operations
-cleanup() {
-    if [[ -n "${new_branch:-}" ]] && git show-ref --verify --quiet "refs/heads/$new_branch" 2>/dev/null; then
-        echo "🧹 Cleaning up failed branch creation..."
-        git checkout - 2>/dev/null || true
-        git branch -D "$new_branch" 2>/dev/null || true
-    fi
-    # Clean up temp files
-    if [[ -n "${pr_body_file:-}" ]] && [[ -f "$pr_body_file" ]]; then
-        rm -f "$pr_body_file" "$pr_body_file.bak" 2>/dev/null || true
-    fi
-}
-trap cleanup EXIT ERR
+### 4. Preparar contenido del PR
+- Obtener título del último commit con `git log -1 --pretty=format:"%s"`
+- Obtener lista de commits con `git log --oneline origin/{target_branch}..HEAD`
+- Construir body del PR:
+  ```
+  ## Changes
+  - [lista de commits máximo 3]
+  
+  ## Testing
+  - [ ] Tests pass
+  - [ ] No breaking changes
+  ```
 
-# [1] Validación target_branch
-target_branch="${1:-}"
-[ -z "$target_branch" ] && { 
-    echo "❌ Error: Target branch requerida"
-    echo "Uso: /pr <target_branch>" 
-    exit 1 
-}
+### 5. Crear el PR
+- Usar herramienta MCP GitHub create_pull_request con:
+  - base: target_branch
+  - head: nueva rama creada
+  - title: mensaje del último commit
+  - body: contenido preparado
 
-# Input sanitization
-if ! echo "$target_branch" | grep -q '^[a-zA-Z0-9][a-zA-Z0-9/_.-]*$'; then
-    echo "❌ Error: Branch name contiene caracteres inválidos"
-    exit 1
-fi
+### 6. Mostrar resultado
+- Mostrar URL del PR creado
+- Confirmar: "✅ PR creado: {rama} → {target}"
 
-# Verificar target existe en remoto
-if ! git fetch origin 2>/dev/null; then
-    echo "❌ Error conectando a remoto"
-    exit 1
-fi
-
-if ! git show-ref --verify --quiet "refs/remotes/origin/$target_branch"; then
-    echo "❌ Target '$target_branch' no existe en remoto"
-    exit 1
-fi
-
-# [2] CORRECCIÓN CRÍTICA: Obtener máximo número PR histórico
-if ! next_pr_raw=$(gh pr list --state all --json number --jq 'if length == 0 then 0 else map(.number) | max end' 2>/dev/null); then
-    echo "❌ Error obteniendo información de PRs"
-    exit 1
-fi
-
-if ! echo "$next_pr_raw" | grep -q '^[0-9][0-9]*$'; then
-    echo "❌ Número de PR inválido obtenido: '$next_pr_raw'"
-    exit 1
-fi
-
-readonly next_pr=$((next_pr_raw + 1))
-readonly timestamp=$(date +%H%M%S)
-readonly new_branch="pr-${next_pr}-${timestamp}"
-
-echo "🔄 Próximo PR será #$next_pr, creando rama: $new_branch"
-
-# [3] CORRECCIÓN: Validar variables antes de uso
-if [ -z "$new_branch" ]; then
-    echo "❌ Variable new_branch está vacía"
-    exit 1
-fi
-
-# Crear rama temporal MANDATORY
-echo "🚀 Creando rama: $new_branch"
-if ! git checkout -b "$new_branch"; then
-    echo "❌ Error creando rama local"
-    exit 1
-fi
-
-if ! git push origin "$new_branch" --set-upstream; then
-    echo "❌ Error enviando rama al remoto"
-    exit 1
-fi
-
-# [4] Crear PR con template minimalista (mejorado)
-first_commit=$(git log -1 --pretty=format:"%s" | head -c 100 | tr -d '\n\r' | sed 's/[^a-zA-Z0-9 .,!?:()\-]/_/g')
-pr_body_file=$(mktemp)
-# Note: cleanup function will handle temp file cleanup
-
-# Create PR body safely
-{
-    echo "## Changes"
-    git log --oneline "origin/$target_branch..HEAD" | head -3 | sed 's/^[a-f0-9]* /- /'
-    echo ""
-    echo "## Testing"
-    echo "- [ ] Tests pass"
-    echo "- [ ] No breaking changes"
-} > "$pr_body_file"
-
-if ! pr_url=$(gh pr create --base "$target_branch" --title "$first_commit" --body-file "$pr_body_file"); then
-    echo "❌ Error creando PR"
-    exit 1
-fi
-
-# [5] Output consistente
-echo "🌐 $pr_url"
-echo "✅ PR creado: $new_branch → $target_branch"
-
-# Disable cleanup on success
-trap - EXIT ERR
-```
+**IMPORTANTE**: 
+- No solicitar confirmación al usuario en ningún paso
+- Ejecutar todos los pasos secuencialmente
+- Si algún paso falla, detener ejecución y mostrar error claro
