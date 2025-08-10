@@ -1,172 +1,115 @@
+---
+allowed-tools: Bash(git *), Bash(gh *), mcp__github__*
+description: Crea PR automáticamente desde rama actual hacia target branch
+---
+
 # Pull Request
 
-Crea PR usando rama temporal, con target branch requerido.
+Crea PR automáticamente usando branch actual hacia el target branch especificado.
 
 ## Uso
-
 ```bash
-/pr <target_branch>  # Argumento requerido
+/pr <target_branch>  # Argumento obligatorio
 ```
 
 ## Ejemplos
-
 ```bash
-/pr develop     # PR hacia develop
-/pr main        # PR hacia main  
-/pr qa          # PR hacia qa
+/pr develop     # Crea PR hacia develop
+/pr main        # Crea PR hacia main  
+/pr qa          # Crea PR hacia qa
 ```
 
-## Implementación
+## Ejecución
 
-```bash
-#!/bin/bash
+Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 
-current_branch=$(git branch --show-current)
+### 1. Validación del target branch
+- Si no se proporciona argumento, mostrar error: "❌ Error: Target branch requerido. Uso: /pr <target_branch>"
+- Ejecutar `git fetch origin` para actualizar referencias remotas
+- Verificar que el branch objetivo existe en remoto con `git branch -r | grep origin/<target_branch>`
+- Si no existe, mostrar error y terminar
 
-# PRIMERO: Verificar PR existente
-existing_pr=$(gh pr list --head "$current_branch" --json number --jq '.[0].number // ""' 2>/dev/null)
-if [ -n "$existing_pr" ]; then
-    echo "PR #$existing_pr existe. ¿Actualizar existente (u) o crear nuevo (n)?"
-    read -r response
-    if [[ "$response" =~ ^[Uu]$ ]]; then
-        git push origin "$current_branch"
-        gh pr view --web
-        exit 0
-    fi
-fi
+### 2. Validar PR existente en rama actual
+- Ejecutar `gh pr view --json number,state,title,url 2>/dev/null` para detectar PR asociado a rama actual
+- Si el comando devuelve datos JSON válidos y `state: "open"`:
+  - Mostrar: "⚠️  Esta rama ya tiene un PR abierto (#{number}): {title}"
+  - Mostrar: "¿Quieres actualizar el PR existente o crear uno nuevo?"
+  - Mostrar: "[1] Actualizar PR #{number} [ENTER]"
+  - Mostrar: "[2] Crear nuevo PR"
+  - Leer input del usuario (default: "1" si presiona ENTER)
+  - Si elige "1": 
+    - Ejecutar `git push origin HEAD` para actualizar PR
+    - **Log operación**: Agregar entrada JSONL a `.claude/logs/$(date +%Y-%m-%d)/pr_operations.jsonl`
+    - Mostrar: "✅ PR actualizado: {url}"
+    - Terminar ejecución exitosa
+  - Si elige "2": continuar con paso 3 (flujo normal)
+- Si no existe PR o está cerrado: continuar con paso 3 (flujo normal)
 
-# SEGUNDO: Validar target branch (MANDATORIO)
-target_branch="${1:-$ARGUMENTS}"
-if [ -z "$target_branch" ]; then
-    echo "❌ Error: Target branch requerida"
-    echo "Uso: /pr <target_branch>"
-    echo "Ejemplo: /pr develop"
-    exit 1
-fi
+### 3. Generar nombre de rama semántico
+- Obtener título del último commit con `git log -1 --pretty=format:"%s"`
+- Extraer tipo de commit del título (feat/fix/refactor/docs/style/test/chore/merge)
+- Si no hay tipo explícito, usar "update" como default
+- Generar slug descriptivo: primeras 2-3 palabras significativas, máximo 15 chars, lowercase, guiones
+- Generar timestamp con formato HHMMSS
+- Construir nombre de rama: `{tipo}-{slug}-{timestamp}`
 
-# Verificar que target branch existe en remoto
-echo "🔄 Actualizando información del branch remoto..."
-git fetch origin "$target_branch" 2>/dev/null || git fetch origin 2>/dev/null
-if ! git show-ref --verify --quiet "refs/remotes/origin/$target_branch"; then
-    echo "❌ Target branch '$target_branch' no existe en remoto"
-    echo "💡 Branches disponibles: $(git branch -r | grep -v HEAD | sed 's/origin\///' | tr '\n' ' ')"
-    exit 1
-fi
+### 4. Crear rama temporal
+- Ejecutar `git checkout -b {tipo}-{slug}-{timestamp}`
+- Ejecutar `git push origin {tipo}-{slug}-{timestamp} --set-upstream`
+- **Log operación**: Agregar entrada JSONL a `.claude/logs/$(date +%Y-%m-%d)/pr_operations.jsonl` 
+- Si algún comando falla, mostrar error y terminar
 
-# Obtener próximo número de PR para naming predictivo
-next_pr_number=$(gh pr list --limit 1 --json number --jq '.[0].number // 0' 2>/dev/null || echo "0")
-next_pr_number=$((next_pr_number + 1))
-temporal_branch="pull-${next_pr_number}-${current_branch}-to-${target_branch}"
+### 5. Preparar contenido del PR
+- Obtener título del último commit con `git log -1 --pretty=format:"%s"`
+- Obtener lista de commits con `git log --oneline origin/{target_branch}..HEAD`  
+- Analizar commits para detectar breaking changes (keywords: BREAKING, breaking, deprecated, removed)
+- Construir body del PR con template industry-standard:
+  ```
+  ## What Changed
+  - [resumir cambios principales de commits, máximo 3 puntos descriptivos]
+  
+  ## Test Plan
+  - [ ] Command executes without errors
+  - [ ] Feature works as expected
+  - [ ] No breaking changes
+  
+  ## Breaking Changes
+  [None | Descripción específica si se detectaron]
+  ```
 
-echo "📝 Creando PR: $temporal_branch → $target_branch"
+### 6. Crear el PR
+- Usar herramienta MCP GitHub create_pull_request con:
+  - base: target_branch
+  - head: nueva rama creada
+  - title: mensaje del último commit
+  - body: contenido preparado
+- **Log operación**: Agregar entrada JSONL a `.claude/logs/$(date +%Y-%m-%d)/pr_operations.jsonl`
 
-# Verificar commits justo antes de crear branch (evitar race condition)
-commits_check=$(git log HEAD --not origin/$target_branch --oneline | head -1 2>/dev/null)
-if [ -z "$commits_check" ]; then
-    echo "❌ No hay commits para PR en el momento de ejecución"
-    exit 1
-fi
+### 7. Mostrar resultado
+- Mostrar URL del PR creado
+- Confirmar: "✅ PR creado: {tipo}-{slug}-{timestamp} → {target}"
 
-commits_count=$(git log HEAD --not origin/$target_branch --oneline | wc -l | xargs)
-# Sanitizar first_commit para prevenir command injection
-first_commit_raw=$(git log HEAD --not origin/$target_branch --oneline | head -1 | cut -d' ' -f2-)
-first_commit=$(echo "$first_commit_raw" | sed 's/[\$`"\\]/\\&/g' | tr -d '\n\r')
+## 📊 Logging Format Templates
 
-# Crear rama temporal
-git checkout -b "$temporal_branch" || exit 1
+Para cada operación exitosa, agregar una línea al archivo JSONL correspondiente:
 
-# Push rama temporal
-if ! git push origin "$temporal_branch" --set-upstream; then
-    git checkout "$current_branch" 2>/dev/null
-    git branch -D "$temporal_branch" 2>/dev/null
-    exit 1
-fi
-
-# Generar descripción
-commits_list=$(git log HEAD --not origin/$target_branch --oneline | head -10)
-files_changed=$(git diff --name-only HEAD "origin/$target_branch" | wc -l | xargs)
-
-pr_type="feature"
-if echo "$commits_list" | grep -qi "fix\|bug"; then pr_type="bugfix"; fi
-if echo "$commits_list" | grep -qi "docs"; then pr_type="docs"; fi
-
-pr_description="## Cambios desde $current_branch
-
-**Target:** $target_branch | **Type:** $pr_type | **Commits:** $commits_count | **Files:** $files_changed
-
-### Cambios incluidos:
-\`\`\`
-$commits_list
-\`\`\`
-
-### Related issues:
-- Closes #
-- Relates to #
-
----
-*Temporal branch: $temporal_branch*"
-
-# Crear PR
-if gh pr create --base "$target_branch" --title "$first_commit" --body "$pr_description"; then
-    echo "✅ PR creado exitosamente!"
-    
-    # Logging
-    today=$(date '+%Y-%m-%d')
-    timestamp_iso=$(date '+%Y-%m-%dT%H:%M:%S')
-    logs_dir=".claude/logs/$today"
-    mkdir -p "$logs_dir"
-    
-    # Obtener PR info con retry consolidado
-    pr_url=""
-    pr_number=""
-    pr_info=""
-    for i in {1..3}; do
-        pr_info=$(gh pr view --json url,number 2>/dev/null) && break
-        sleep 1
-    done
-    pr_url=$(echo "$pr_info" | jq -r '.url // ""')
-    pr_number=$(echo "$pr_info" | jq -r '.number // ""')
-    
-    # Log entry - evaluar variables jq por separado para evitar errores de path
-    first_commit_json=""
-    pr_url_json=""
-    if command -v jq >/dev/null 2>&1; then
-        first_commit_json=$(echo "$first_commit" | tr -d '\n\r' | jq -R . 2>/dev/null || echo "\"$(echo "$first_commit" | tr -d '\n\r' | sed 's/"/\\"/g')\"")
-        pr_url_json=$(echo "$pr_url" | tr -d '\n\r' | jq -R . 2>/dev/null || echo "\"$(echo "$pr_url" | tr -d '\n\r' | sed 's/"/\\"/g')\"")
-    else
-        # Fallback sin jq - escapar manualmente
-        first_commit_json="\"$(echo "$first_commit" | tr -d '\n\r' | sed 's/"/\\"/g')\""
-        pr_url_json="\"$(echo "$pr_url" | tr -d '\n\r' | sed 's/"/\\"/g')\""
-    fi
-    
-    # Crear log de forma segura
-    if [ -w "$logs_dir" ] || mkdir -p "$logs_dir" 2>/dev/null; then
-        cat > "$logs_dir/pr_activity.jsonl" << EOF
-{
-  "timestamp": "$timestamp_iso",
-  "event": "temporal_pr_created",
-  "original_branch": "$current_branch", 
-  "temporal_branch": "$temporal_branch",
-  "target_branch": "$target_branch",
-  "pr_type": "$pr_type",
-  "files_changed": $files_changed,
-  "commits_count": $commits_count,
-  "first_commit": $first_commit_json,
-  "pr_number": ${pr_number:-null},
-  "pr_url": $pr_url_json
-}
-EOF
-    else
-        echo "⚠️  Advertencia: No se pudo crear el log de trazabilidad"
-    fi
-    echo "🌐 $pr_url"
-    gh pr view --web
-    
-else
-    echo "❌ Error creando PR - limpiando..."
-    git checkout "$current_branch" 2>/dev/null
-    git branch -D "$temporal_branch" 2>/dev/null
-    git push origin --delete "$temporal_branch" 2>/dev/null
-    exit 1
-fi
+### Branch Creation Log:
+```json
+{"timestamp":"$(date -Iseconds)","operation":"branch_create","branch":"{tipo}-{slug}-{timestamp}","target_branch":"{target_branch}","commit_sha":"$(git rev-parse HEAD)","user":"$(whoami)"}
 ```
+
+### PR Creation Log:
+```json
+{"timestamp":"$(date -Iseconds)","operation":"pr_create","pr_number":{pr_number},"pr_url":"{pr_url}","branch":"{tipo}-{slug}-{timestamp}","target_branch":"{target_branch}","title":"{pr_title}","changes_count":{commit_count}}
+```
+
+### PR Update Log:
+```json
+{"timestamp":"$(date -Iseconds)","operation":"pr_update","pr_number":{pr_number},"pr_url":"{pr_url}","branch":"$(git branch --show-current)","commits_added":{new_commits_count}}
+```
+
+**IMPORTANTE**: 
+- No solicitar confirmación al usuario en ningún paso
+- Ejecutar todos los pasos secuencialmente
+- Si algún paso falla, detener ejecución y mostrar error claro
+- Crear directorio .claude/logs/$(date +%Y-%m-%d)/ si no existe antes de escribir logs
