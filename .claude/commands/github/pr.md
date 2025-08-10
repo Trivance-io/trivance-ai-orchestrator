@@ -5,7 +5,7 @@ Crea o actualiza PR automáticamente usando branch actual, con target branch req
 ## Uso
 
 ```bash
-/pr <target_branch>  # Argumento requerido
+/pr <target_branch>  # Argumento MANDATORY. Sin target branch bloquear proceso hasta que se indique
 ```
 
 ## Ejemplos
