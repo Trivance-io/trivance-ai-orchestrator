@@ -1,6 +1,13 @@
+---
+allowed-tools: Bash(git:*), Bash(gh:*), Bash(jq:*)
+argument-hint: <target_branch>
+description: Crea o actualiza PR automáticamente
+model: sonnet
+---
+
 # Pull Request
 
-Crea PR usando rama temporal, con target branch requerido.
+Crea o actualiza PR automáticamente usando branch actual, con target branch requerido.
 
 ## Uso
 
@@ -11,9 +18,25 @@ Crea PR usando rama temporal, con target branch requerido.
 ## Ejemplos
 
 ```bash
-/pr develop     # PR hacia develop
-/pr main        # PR hacia main  
-/pr qa          # PR hacia qa
+/pr develop     # Auto-crea o actualiza PR hacia develop
+/pr main        # Auto-crea o actualiza PR hacia main  
+/pr qa          # Auto-crea o actualiza PR hacia qa
+```
+
+**Ejecución automática:**
+- Si PR existe desde branch actual → actualiza automáticamente
+- Si no existe → crea nuevo PR
+- Sin prompts de usuario, sin interrupciones
+
+## Flujo de Ejecución
+
+```bash
+/pr develop
+├─ 1. Valida que 'develop' existe en remoto
+├─ 2. Detecta si ya existe PR desde branch actual
+├─ 3a. Si existe → actualiza automáticamente  
+└─ 3b. Si no existe → crea nuevo PR
+   └─ 4. Log resultado + mostrar URL
 ```
 
 ## Implementación
@@ -30,19 +53,30 @@ target_branch="${1:-}"
     exit 1 
 }
 
-# Verificar target existe en remoto
-git fetch origin "$target_branch" 2>/dev/null || git fetch origin 2>/dev/null
+# Input sanitization - Fix command injection
+[[ ! "$target_branch" =~ ^[a-zA-Z0-9/_.-]+$ ]] && {
+    echo "❌ Error: Branch name contiene caracteres inválidos"
+    exit 1
+}
+
+# Verificar target existe en remoto - Fix error suppression
+if ! git fetch origin "$target_branch" 2>&1; then
+    if ! git fetch origin 2>&1; then
+        echo "❌ Error conectando a remoto. Verificar autenticación."
+        exit 1
+    fi
+fi
 git show-ref --verify --quiet "refs/remotes/origin/$target_branch" || {
     echo "❌ Target '$target_branch' no existe en remoto"
     echo "💡 Branches disponibles: $(git branch -r | grep -v HEAD | sed 's/origin\///' | tr '\n' ' ')"
     exit 1
 }
 
-# [2] Auto-detección determinística
+# [2] Auto-detección automática
 current_branch=$(git branch --show-current)
 existing_pr=$(gh pr list --head "$current_branch" --json number,url --jq '.[0] // empty')
 
-# [3] Lógica de acción determinística
+# [3] Lógica de acción automática
 if [ -n "$existing_pr" ]; then
     # Actualizar PR existente automáticamente
     git push origin "$current_branch"
@@ -51,15 +85,16 @@ if [ -n "$existing_pr" ]; then
     action="updated"
     echo "🔄 Actualizando PR existente #$pr_number"
 else
-    # Crear nuevo PR
-    commits_count=$(git log HEAD --not origin/$target_branch --oneline | wc -l | xargs)
+    # Crear nuevo PR - Fix race condition
+    commits_data=$(git log HEAD --not "origin/$target_branch" --oneline)
+    commits_count=$(echo "$commits_data" | wc -l | xargs)
     [ "$commits_count" -eq 0 ] && { 
         echo "❌ No hay commits para PR"
         exit 1 
     }
     
-    first_commit=$(git log HEAD --not origin/$target_branch --oneline | head -1 | cut -d' ' -f2-)
-    commits_list=$(git log HEAD --not origin/$target_branch --oneline | head -5)
+    first_commit=$(echo "$commits_data" | head -1 | cut -d' ' -f2-)
+    commits_list=$(echo "$commits_data" | head -5)
     
     pr_body="**Target:** $target_branch | **Commits:** $commits_count
 
@@ -80,7 +115,7 @@ $commits_list
     echo "✅ Nuevo PR creado #$pr_number"
 fi
 
-# [4] Logging determinístico
+# [4] Logging estructurado
 timestamp_iso=$(date -Iseconds)
 logs_dir=".claude/logs/$(date +%Y-%m-%d)"
 mkdir -p "$logs_dir"
