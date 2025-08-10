@@ -73,18 +73,30 @@ if ! git show-ref --verify --quiet "refs/remotes/origin/$target_branch"; then
     exit 1
 fi
 
-# [2] Obtener consecutivo próximo PR + timestamp (con validación)
-if ! next_pr_raw=$(gh pr list --limit 1 --json number --jq '.[0].number // 0' 2>/dev/null); then
+# [2] CORRECCIÓN CRÍTICA: Obtener máximo número PR histórico
+if ! next_pr_raw=$(gh pr list --state all --json number --jq 'if length == 0 then 0 else map(.number) | max end' 2>/dev/null); then
     echo "❌ Error obteniendo información de PRs"
     exit 1
 fi
 
-[[ "$next_pr_raw" =~ ^[0-9]+$ ]] || next_pr_raw=0
-next_pr=$((next_pr_raw + 1))
-timestamp=$(date +%H%M%S)
-new_branch="pr-${next_pr}-${timestamp}"
+[[ "$next_pr_raw" =~ ^[0-9]+$ ]] || {
+    echo "❌ Número de PR inválido obtenido: '$next_pr_raw'"
+    exit 1
+}
 
-# [3] Crear rama temporal MANDATORY
+readonly next_pr=$((next_pr_raw + 1))
+readonly timestamp=$(date +%H%M%S)
+readonly new_branch="pr-${next_pr}-${timestamp}"
+
+echo "🔄 Próximo PR será #$next_pr, creando rama: $new_branch"
+
+# [3] CORRECCIÓN: Validar variables antes de uso
+[[ -z "$new_branch" ]] && {
+    echo "❌ Variable new_branch está vacía"
+    exit 1
+}
+
+# Crear rama temporal MANDATORY
 echo "🚀 Creando rama: $new_branch"
 if ! git checkout -b "$new_branch"; then
     echo "❌ Error creando rama local"
@@ -96,8 +108,8 @@ if ! git push origin "$new_branch" --set-upstream; then
     exit 1
 fi
 
-# [4] Crear PR con template minimalista (seguro)
-first_commit=$(git log -1 --pretty=format:"%s" | tr -d '\n\r' | sed 's/[^a-zA-Z0-9 .,!?:-]/_/g')
+# [4] Crear PR con template minimalista (mejorado)
+first_commit=$(git log -1 --pretty=format:"%s" | head -c 100 | tr -d '\n\r' | sed 's/[^a-zA-Z0-9 .,!?:()-]/_/g')
 pr_body_file=$(mktemp)
 trap "rm -f $pr_body_file" EXIT
 
