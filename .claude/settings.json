@@ -52,7 +52,19 @@
       "Bash(gh issue create *)",
       "Bash(gh issue list *)",
       "Bash(gh api *)",
-      "mcp__github__*"
+      "mcp__github__get_pull_request",
+      "mcp__github__get_pull_request_comments",
+      "mcp__github__get_issue_comments",
+      "mcp__github__get_me",
+      "mcp__github__get_pull_request_reviews",
+      "mcp__github__search_issues",
+      "mcp__github__search_issues",
+      "mcp__github__search_issues",
+      "mcp__github__search_issues",
+      "mcp__github__create_issue",
+      "mcp__github__update_issue",
+      "mcp__github__update_pull_request",
+      "mcp__github__get_issue"
     ],
     "deny": [
       "Bash(git push origin main)",
