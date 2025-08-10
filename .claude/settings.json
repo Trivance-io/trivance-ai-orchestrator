@@ -68,9 +68,9 @@
       "Bash(git fetch *)",
       "Bash(git branch *)",
       "Bash(git checkout -b *)",
-      "Bash(git branch -D pr/[0-9]*-*-to-*)",
-      "Bash(git branch -D pull-[0-9]*-*-to-*)",
-      "Bash(git branch -D *-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]*)"
+      "Bash(git branch -D pr/*)",
+      "Bash(git branch -D pull-*)",
+      "Bash(git branch -D *-[0-9][0-9][0-9][0-9][0-9][0-9][0-9]*)"
     ],
     "deny": [
       "Bash(git push origin main)",
@@ -79,11 +79,6 @@
       "Bash(git push -f *)",
       "Bash(git reset --hard *)",
       "Bash(git clean -fd *)",
-      "Bash(git branch -D main)",
-      "Bash(git branch -D master)",
-      "Bash(git branch -D develop)",
-      "Bash(git branch -D staging)",
-      "Bash(git branch -D production)",
       "Read(.env)",
       "Read(*.env)",
       "Read(.env.*)",
