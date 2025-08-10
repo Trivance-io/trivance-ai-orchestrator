@@ -113,16 +113,13 @@ first_commit=$(git log -1 --pretty=format:"%s" | head -c 100 | tr -d '\n\r' | se
 pr_body_file=$(mktemp)
 trap "rm -f $pr_body_file" EXIT
 
-cat > "$pr_body_file" << 'EOF'
-## Summary
-Brief description of changes.
-
+cat > "$pr_body_file" << EOF
 ## Changes
-- List key changes here
+$(git log --oneline "origin/$target_branch..HEAD" | head -3 | sed 's/^[a-f0-9]* /- /')
 
 ## Testing
-- [ ] Tested locally
-- [ ] All tests passing
+- [ ] Tests pass
+- [ ] No breaking changes
 EOF
 
 if ! pr_url=$(gh pr create --base "$target_branch" --title "$first_commit" --body-file "$pr_body_file"); then
