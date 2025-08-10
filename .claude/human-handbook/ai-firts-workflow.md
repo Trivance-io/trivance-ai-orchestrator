@@ -16,7 +16,9 @@
 
 **Indispensable**: usar claude command /session-start antes de iniciar sesion de trabajo para asegurar consistencia de las configuraciones personalizadas.
 
-**Recomendado**: usar `/switch main` al iniciar para limpiar workspace y partir desde rama limpia. 
+**Recomendado**: usar `/switch <base_branch>` al iniciar para limpiar workspace y partir desde rama base del proyecto.
+
+**Identificar rama base**: `git branch -r | grep HEAD` o verificar configuración del proyecto (main/develop/staging/qa). 
 
 ### **PASO 1: Crear PR**
 
@@ -166,7 +168,7 @@ git push
 ```
 
 **Casos:**
-- ✅ Aprobado → Merge → `/switch main` (limpiar workspace)
+- ✅ Aprobado → Merge → `/switch <base_branch>` (limpiar workspace)
 - 🔄 Nuevos findings → Repetir 3-6
 - 🚨 Issues persistentes → Pedir autorización
 
@@ -193,7 +195,7 @@ git push
 ## 🎯 Comandos Esenciales
 
 ```bash
-/switch main             # Limpiar workspace y partir limpio
+/switch <base_branch>    # Limpiar workspace y partir limpio (main/develop/qa)
 /pr [target-branch]      # Crear PR (target opcional)
 /findings-to-issues      # Convertir findings a issues
 /issues-to-solved [PR]   # Planificar resolución
