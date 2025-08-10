@@ -1,4 +1,4 @@
-# Workflow AI-Firts
+# Workflow AI-First
 
 *Paso a paso: desde código hasta merge sin fricción*
 
@@ -14,12 +14,10 @@
 
 ## 📋 Flujo Completo
 
-**Indispensable**: usar claude command /session-start antes de iniciar sesion de trabajo para asegurar consistencia de las configuraciones personalizadas.
+**Indispensable**: usar claude command /workflow:session-start antes de iniciar sesion de trabajo para asegurar consistencia de las configuraciones personalizadas.
 
-**Recomendado**: usar `/switch <base_branch>` al iniciar para limpiar workspace y partir desde rama base del proyecto.
-
-**Identificar rama base**: `git branch -r | grep HEAD` o verificar configuración del proyecto (main/develop/staging/qa). 
-
+**Recomendado**: usar `/workflow:switch <base_branch>` al iniciar para limpiar workspace y partir desde rama base del proyecto.
+ 
 ### **PASO 1: Crear PR**
 
 ```bash
@@ -45,7 +43,7 @@ Tipos de findings:
 ### **PASO 3: Convertir Findings en Issues**
 
 ```bash
-/findings-to-issues
+/github:findings-to-issues
 ```
 
 Crea issues organizados por prioridad: CRÍTICO → ALTO → MEDIO → BAJO
@@ -55,7 +53,7 @@ Crea issues organizados por prioridad: CRÍTICO → ALTO → MEDIO → BAJO
 ### **PASO 4: Planificar (Opcional)**
 
 ```bash
-/issues-to-solved <pr_number>
+/github:issues-to-solved <pr_number>
 ```
 
 Genera plan de resolución por prioridades:
@@ -160,7 +158,7 @@ git push
 ```bash
 1. /pr                    # Crear PR
 2. [Review automático]     # Aparecen findings
-3. /findings-to-issues    # Convertir a issues
+3. /github:findings-to-issues    # Convertir a issues
 4. /issues-to-solved [PR] # Planificar (opcional)
 5. Resolver issues        # Manual o automático
 6. /commit + push         # Actualizar PR
@@ -168,7 +166,7 @@ git push
 ```
 
 **Casos:**
-- ✅ Aprobado → Merge → `/switch <base_branch>` (limpiar workspace)
+- ✅ Aprobado → Merge → `/workflow:switch <base_branch>` (limpiar workspace)
 - 🔄 Nuevos findings → Repetir 3-6
 - 🚨 Issues persistentes → Pedir autorización
 
@@ -195,10 +193,10 @@ git push
 ## 🎯 Comandos Esenciales
 
 ```bash
-/switch <base_branch>    # Limpiar workspace y partir limpio (main/develop/qa)
+/workflow:switch <base_branch>    # Limpiar workspace y partir limpio (main/develop/qa)
 /pr [target-branch]      # Crear PR (target opcional)
-/findings-to-issues      # Convertir findings a issues
-/issues-to-solved [PR]   # Planificar resolución
+/github:findings-to-issues      # Convertir findings a issues
+/github:issues-to-solved [PR]   # Planificar resolución
 /commit "fix: Closes #X" # Commit con referencia
 gh pr view [PR]          # Ver estado
 ```
