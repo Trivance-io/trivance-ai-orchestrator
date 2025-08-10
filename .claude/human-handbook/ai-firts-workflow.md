@@ -14,6 +14,10 @@
 
 ## 📋 Flujo Completo
 
+**Indispensable**: usar claude command /session-start antes de iniciar sesion de trabajo para asegurar consistencia de las configuraciones personalizadas.
+
+**Recomendado**: usar `/switch main` al iniciar para limpiar workspace y partir desde rama limpia. 
+
 ### **PASO 1: Crear PR**
 
 ```bash
@@ -162,7 +166,7 @@ git push
 ```
 
 **Casos:**
-- ✅ Aprobado → Merge
+- ✅ Aprobado → Merge → `/switch main` (limpiar workspace)
 - 🔄 Nuevos findings → Repetir 3-6
 - 🚨 Issues persistentes → Pedir autorización
 
@@ -189,7 +193,8 @@ git push
 ## 🎯 Comandos Esenciales
 
 ```bash
-/pr [target-branch]       # Crear PR (target opcional)
+/switch main             # Limpiar workspace y partir limpio
+/pr [target-branch]      # Crear PR (target opcional)
 /findings-to-issues      # Convertir findings a issues
 /issues-to-solved [PR]   # Planificar resolución
 /commit "fix: Closes #X" # Commit con referencia

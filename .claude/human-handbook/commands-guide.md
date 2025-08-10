@@ -71,6 +71,14 @@
 **Qué hace**: Limpia comentarios redundantes preservando los que añaden valor real.
 **Cuándo usarlo**: Para limpiar código con exceso de comentarios obvios o redundantes.
 
+### 🔄 `/switch` - Cambio seguro de rama con limpieza
+```bash
+/switch <target_branch>
+```
+**Qué hace**: Cambia a rama objetivo, actualiza desde remoto y elimina ramas temporales de PR con confirmación.
+**Cuándo usarlo**: Al finalizar PRs para cambiar a main/develop y limpiar workspace.
+**Flujo**: Validación seguridad → Checkout/actualización → Limpieza temporal confirmada
+
 ---
 
 ## 🔍 Comandos de Análisis
