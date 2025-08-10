@@ -26,10 +26,12 @@ Crea o actualiza PR automáticamente usando branch actual, con target branch req
 ```bash
 /pr develop
 ├─ 1. Valida que 'develop' existe en remoto
-├─ 2. Detecta si ya existe PR desde branch actual
-├─ 3a. Si existe → actualiza automáticamente  
-└─ 3b. Si no existe → crea nuevo PR
-   └─ 4. Log resultado + mostrar URL
+├─ 2. Detecta rama actual
+├─ 2.1. Si rama actual == target → crea rama temporal automática
+├─ 3. Detecta si ya existe PR desde branch actual
+├─ 4a. Si existe → actualiza automáticamente  
+└─ 4b. Si no existe → crea nuevo PR
+   └─ 5. Log resultado + mostrar URL
 ```
 
 ## Implementación
@@ -65,9 +67,44 @@ git show-ref --verify --quiet "refs/remotes/origin/$target_branch" || {
     exit 1
 }
 
-# [2] Auto-detección automática
+# [2] Auto-detección automática + Smart Branch Creation
 current_branch=$(git branch --show-current)
-existing_pr=$(gh pr list --head "$current_branch" --json number,url --jq '.[0] // empty')
+
+# [2.1] Same-branch prevention + Auto-branch creation
+[ "$current_branch" = "$target_branch" ] && {
+    # Auto-create feature branch from current commits
+    timestamp=$(date +%Y%m%d-%H%M%S)
+    suffix=$(head -c 6 /dev/urandom 2>/dev/null | base64 | tr -d '+/=' | tr '[:upper:]' '[:lower:]' || echo "$(date +%N)")
+    new_branch="feature/auto-pr-${timestamp}-${suffix}"
+    
+    # Verificar que no existe
+    if git show-ref --verify --quiet "refs/remotes/origin/$new_branch" 2>/dev/null; then
+        new_branch="feature/auto-pr-${timestamp}-$(date +%N)"
+    fi
+    
+    echo "🔀 Detectado $current_branch → $target_branch (mismo branch)"
+    echo "🚀 Creando rama temporal: $new_branch"
+    
+    # Check if there are uncommitted changes
+    if ! git diff-index --quiet HEAD --; then
+        echo "⚠️  Tienes cambios sin commit. ¿Proceder con stash? [y/N]"
+        read -r response
+        [[ "$response" =~ ^[Yy]$ ]] || { echo "❌ Operación cancelada"; exit 1; }
+        git stash push -m "Auto-stash antes de crear PR branch"
+    fi
+    
+    # Create new branch and switch to it
+    git checkout -b "$new_branch"
+    git push origin "$new_branch" --set-upstream
+    current_branch="$new_branch"
+    echo "✅ Movido a: $current_branch"
+}
+
+existing_pr=$(gh pr list --head "$current_branch" --json number,url 2>/dev/null | jq '.[0] // empty' 2>/dev/null || echo "")
+if [ "$?" -ne 0 ]; then
+    echo "❌ Error consultando PRs existentes"
+    exit 1
+fi
 
 # [3] Lógica de acción automática
 if [ -n "$existing_pr" ]; then
@@ -79,7 +116,10 @@ if [ -n "$existing_pr" ]; then
     echo "🔄 Actualizando PR existente #$pr_number"
 else
     # Crear nuevo PR - Fix race condition
-    commits_data=$(git log HEAD --not "origin/$target_branch" --oneline)
+    commits_data=$(git rev-list --oneline "HEAD" "^origin/$target_branch" 2>/dev/null || {
+        echo "❌ Error: No se pueden comparar commits con $target_branch"
+        exit 1
+    })
     commits_count=$(echo "$commits_data" | wc -l | xargs)
     [ "$commits_count" -eq 0 ] && { 
         echo "❌ No hay commits para PR"
