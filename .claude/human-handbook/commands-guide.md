@@ -71,6 +71,14 @@
 **Qué hace**: Limpia comentarios redundantes preservando los que añaden valor real.
 **Cuándo usarlo**: Para limpiar código con exceso de comentarios obvios o redundantes.
 
+### 🔄 `/switch` - Cambio seguro de rama con limpieza
+```bash
+/switch <target_branch>
+```
+**Qué hace**: Cambia a rama objetivo, actualiza desde remoto y elimina ramas temporales de PR con confirmación.
+**Cuándo usarlo**: Al finalizar PRs para cambiar a main/develop y limpiar workspace.
+**Flujo**: Validación seguridad → Checkout/actualización → Limpieza temporal confirmada
+
 ---
 
 ## 🔍 Comandos de Análisis
@@ -133,15 +141,35 @@
 
 ---
 
-## 🗂️ Comandos de Workflow
+## 📝 Comandos de Gestión
 
-### 🔄 `/switch` - Cambio seguro de rama con limpieza
+### `/create-todos` - Crear TODOs contextuales
 ```bash
-/switch <target_branch>
+/create-todos
 ```
-**Qué hace**: Cambia a rama objetivo, actualiza desde remoto y elimina ramas temporales de PR con confirmación.
-**Cuándo usarlo**: Al finalizar PRs para cambiar a main/develop y limpiar workspace.
-**Flujo**: Validación seguridad → Checkout/actualización → Limpieza temporal confirmada
+**Qué hace**: Convierte hallazgos de análisis en TODOs específicos en el código.
+**Cuándo usarlo**: Después de security-scan, review o cuando encuentras issues que no puedes arreglar inmediatamente.
+
+### `/fix-todos` - Resolver TODOs
+```bash
+/fix-todos
+```
+**Qué hace**: Encuentra y resuelve TODOs existentes de forma sistemática.
+**Cuándo usarlo**: Cuando quieres limpiar deuda técnica acumulada.
+
+### `/find-todos` - Buscar TODOs existentes
+```bash
+/find-todos
+```
+**Qué hace**: Escanea y categoriza todos los TODOs/FIXMEs del proyecto.
+**Cuándo usarlo**: Para auditoría de deuda técnica o planificación de sprints.
+
+### `/todos-to-issues` - TODOs a issues GitHub
+```bash
+/todos-to-issues
+```
+**Qué hace**: Escanea TODOs en código y crea issues profesionales en GitHub automáticamente.
+**Cuándo usarlo**: Para convertir deuda técnica en trabajo trackeable y organizado.
 
 ### `/session-start` - Iniciar sesión documentada
 ```bash
@@ -159,81 +187,43 @@
 
 ---
 
-## 📋 Gestión de TODOs
+## 🏢 Comandos Enterprise
 
-### `/todos:create` - Crear TODOs contextuales
+### `/contributing` - Preparar contribuciones
 ```bash
-/todos:create
+/contributing
 ```
-**Qué hace**: Convierte hallazgos de análisis en TODOs específicos en el código.
-**Cuándo usarlo**: Después de security-scan, review o cuando encuentras issues que no puedes arreglar inmediatamente.
+**Qué hace**: Prepara PRs completos con análisis de issues, tests y documentación.
+**Cuándo usarlo**: Antes de contribuir a repos, especialmente open source.
 
-### `/todos:find` - Buscar TODOs existentes
+### 🔄 `/pr` - PRs enterprise-grade
 ```bash
-/todos:find
+/pr [target-branch]
 ```
-**Qué hace**: Escanea y categoriza todos los TODOs/FIXMEs del proyecto.
-**Cuándo usarlo**: Para auditoría de deuda técnica o planificación de sprints.
+**Qué hace**: Crea PRs siguiendo estándares enterprise con branch validation automática, security hardening y retry logic optimizado.
+**Cuándo usarlo**: Para crear PRs profesionales que facilitan review y cumplan standards enterprise.
+**Flujo**: Valida target branch → Pre-fetch remoto → Crea branch temporal → Push seguro → PR con metadata
 
-### `/todos:fix` - Resolver TODOs
+### 🧽 `/cleanproject` - Limpieza integral
 ```bash
-/todos:fix
-```
-**Qué hace**: Encuentra y resuelve TODOs existentes de forma sistemática.
-**Cuándo usarlo**: Cuando quieres limpiar deuda técnica acumulada.
-
-### `/todos:to-issues` - TODOs a issues GitHub
-```bash
-/todos:to-issues
-```
-**Qué hace**: Escanea TODOs en código y crea issues profesionales en GitHub automáticamente.
-**Cuándo usarlo**: Para convertir deuda técnica en trabajo trackeable y organizado.
-
----
-
-## 🧹 Comandos de Mantenimiento
-
-### 🧽 `/mantenimiento:cleanproject` - Limpieza integral
-```bash
-/mantenimiento:cleanproject
+/cleanproject
 ```
 **Qué hace**: Limpia dead code, optimiza imports, remueve archivos innecesarios.
 **Cuándo usarlo**: Antes de releases o periódicamente para mantener el proyecto limpio.
 
----
-
-## 🔗 Comandos GitHub
-
-### `/github:to-contributing` - Estrategia completa de contribución
+### 🎯 `/findings-to-issues` - Hallazgos a issues GitHub
 ```bash
-/github:to-contributing
-```
-**Qué hace**: Análisis contextual completo para contribuciones - detecta tu trabajo, escanea issues remotos, crea PRs profesionales.
-**Cuándo usarlo**: Para contribuciones a cualquier repo con máxima probabilidad de aceptación.
-**Flujo**: Análisis contexto → Pre-flight checks → Escaneo remoto → Linking issues → PR optimizado
-
-### 🔄 `/pr` - Crear pull requests
-```bash
-/pr [target-branch]
-```
-**Qué hace**: Crea PRs con validación automática de branch, push seguro y metadata completa.
-**Cuándo usarlo**: Para crear PRs que faciliten review y mantengan estándares de calidad.
-**Flujo**: Valida target branch → Pre-fetch remoto → Crea branch temporal → Push seguro → PR con metadata
-
-
-### 🎯 `/github:findings-to-issues` - Hallazgos a issues GitHub
-```bash
-/github:findings-to-issues
+/findings-to-issues
 ```
 **Qué hace**: Convierte hallazgos de PR reviews en issues GitHub trackeable con categorización inteligente.
 **Cuándo usarlo**: Después de reviews importantes para gestionar deuda técnica y seguimiento.
 
-### `/github:issues-to-solved` - Resolver issues de PR automáticamente
+### `/issues-to-solved` - Resolver issues de PR automáticamente
 ```bash
-/github:issues-to-solved <pr_number>
+/issues-to-solved <pr_number>
 ```
 **Qué hace**: Extrae issues asociados a PR, analiza prioridades, genera plan de implementación y ejecuta fixes seguros automáticamente.
-**Cuándo usarlo**: Después de crear issues con github:findings-to-issues, para planificar y resolver sistemáticamente.
+**Cuándo usarlo**: Después de crear issues con findings-to-issues, para planificar y resolver sistemáticamente.
 **Flujo**: Extrae issues → Prioriza (CRITICAL/HIGH/MEDIUM/LOW) → Plan estructurado → Ejecución opcional
 
 ---
@@ -248,10 +238,10 @@
 4. /test                         # Validar funcionamiento  
 5. /review                       # Revisar calidad
 6. /security-scan                # Verificar seguridad
-7-10. Seguir workflow AI-First    # Ver: ai-first-workflow.md
+7-10. Seguir workflow AI-First    # Ver: ai-firts-workflow.md
 ```
 
-> 📚 **Para workflow completo de PR + findings + issues:** Ver `ai-first-workflow.md`
+> 📚 **Para workflow completo de PR + findings + issues:** Ver `ai-firts-workflow.md`
 
 ### Bug Fix Urgente
 ```bash
@@ -263,22 +253,22 @@
 
 ### Limpieza de Código
 ```bash
-1. /todos:find                  # Ver deuda técnica
-2. /todos:fix                   # Resolver pendientes
-3. /mantenimiento:cleanproject  # Limpiar proyecto
-4. /desarrollo:make-it-pretty   # Mejorar legibilidad
+1. /find-todos                  # Ver deuda técnica
+2. /fix-todos                   # Resolver pendientes
+3. /cleanproject               # Limpiar proyecto
+4. /make-it-pretty             # Mejorar legibilidad
 5. /format                     # Formatear todo
 6. /commit "chore: cleanup"    # Documentar limpieza
 ```
 
 ### Análisis Estratégico Completo
 ```bash
-1. /analisis:deep "problema arquitectónico"  # Razonamiento profundo
-2. /analisis:e-team "challenge complejo"     # Análisis multi-experto
+1. /deep "problema arquitectónico"  # Razonamiento profundo
+2. /e-team "challenge complejo"     # Análisis multi-experto
 3. /understand                      # Mapear codebase
 4. /review                         # Revisar estado actual
 5. Implementar solución
-6. /documentacion:docs             # Documentar decisiones
+6. /docs                           # Documentar decisiones
 ```
 
 ---
@@ -287,8 +277,8 @@
 
 - **Combina comandos**: Usa flujos secuenciales para máximo valor
 - **Iterativo**: Los comandos recuerdan contexto entre ejecuciones
-- **Seguridad primero**: Siempre usa /analisis:security-scan antes de production
+- **Seguridad primero**: Siempre usa security-scan antes de production
 - **Test frecuente**: Ejecuta /test después de cambios significativos
-- **Documenta cambios**: Usa /documentacion:docs para mantener documentación actualizada
-- **Análisis profundo**: Usa /analisis:deep para decisiones arquitectónicas críticas
-- **Gestión de deuda**: Convierte TODOs en issues con /todos:to-issues
+- **Documenta cambios**: Usa /docs para mantener documentación actualizada
+- **Análisis profundo**: Usa /deep para decisiones arquitectónicas críticas
+- **Gestión de deuda**: Convierte TODOs en issues con /todos-to-issues
