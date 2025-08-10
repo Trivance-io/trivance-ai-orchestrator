@@ -21,7 +21,21 @@ Crea PR usando rama temporal, con target branch requerido.
 ```bash
 #!/bin/bash
 
-# Validar target branch
+current_branch=$(git branch --show-current)
+
+# PRIMERO: Verificar PR existente
+existing_pr=$(gh pr list --head "$current_branch" --json number --jq '.[0].number // ""' 2>/dev/null)
+if [ -n "$existing_pr" ]; then
+    echo "PR #$existing_pr existe. ¿Actualizar existente (u) o crear nuevo (n)?"
+    read -r response
+    if [[ "$response" =~ ^[Uu]$ ]]; then
+        git push origin "$current_branch"
+        gh pr view --web
+        exit 0
+    fi
+fi
+
+# SEGUNDO: Validar target branch (MANDATORIO)
 target_branch="${1:-$ARGUMENTS}"
 if [ -z "$target_branch" ]; then
     echo "❌ Error: Target branch requerida"
@@ -37,21 +51,6 @@ if ! git show-ref --verify --quiet "refs/remotes/origin/$target_branch"; then
     echo "❌ Target branch '$target_branch' no existe en remoto"
     echo "💡 Branches disponibles: $(git branch -r | grep -v HEAD | sed 's/origin\///' | tr '\n' ' ')"
     exit 1
-fi
-
-# Variables básicas
-current_branch=$(git branch --show-current)
-
-# CRÍTICO: Verificar si ya existe PR para la rama actual
-existing_pr=$(gh pr list --head "$current_branch" --json number --jq '.[0].number // ""' 2>/dev/null)
-if [ -n "$existing_pr" ]; then
-    echo "⚠️  Ya existe PR #$existing_pr para la rama $current_branch"
-    echo "🔄 Actualizando PR existente en lugar de crear nuevo..."
-    git push origin "$current_branch"
-    pr_url=$(gh pr view "$existing_pr" --json url --jq '.url' 2>/dev/null)
-    echo "🌐 $pr_url"
-    gh pr view --web 2>/dev/null
-    exit 0
 fi
 
 # Obtener próximo número de PR para naming predictivo
