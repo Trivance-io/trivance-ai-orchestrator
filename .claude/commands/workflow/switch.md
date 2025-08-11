@@ -28,27 +28,38 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 - Capturar target_branch del argumento
 - Mostrar: "Switching from temporal branch to: <target_branch>"
 
-### 2. Captura de rama temporal actual
+### 2. Validación de cambios pendientes
+- Ejecutar: `git status --porcelain` para verificar cambios sin commitear
+- Si hay output (cambios pendientes):
+  - Mostrar error: "❌ Error: Hay cambios sin commitear. El switch está bloqueado."
+  - Mostrar: "Debes resolver los cambios primero:"
+  - Mostrar: "  • git add . && git commit -m 'mensaje'  (para guardar cambios)"
+  - Mostrar: "  • git stash  (para guardar temporalmente)"
+  - Mostrar: "  • git checkout -- .  (para descartar cambios)"
+  - TERMINAR proceso completamente
+- Si no hay cambios, mostrar: "✓ Working directory clean, proceeding..."
+
+### 3. Captura de rama temporal actual
 - Ejecutar: `git branch --show-current` para obtener rama temporal actual
 - Capturar nombre de la rama temporal (de donde venimos)
 - Mostrar: "Leaving temporal branch: <temporal_branch>"
 
-### 3. Switch a rama objetivo
+### 4. Switch a rama objetivo
 - Ejecutar: `git checkout "$target_branch"`
 - Si el comando falla, mostrar error: "❌ Error: No se pudo cambiar a '$target_branch'" y terminar
 - Confirmar: "Switched to: <target_branch>"
 
-### 4. Actualización desde remoto
+### 5. Actualización desde remoto
 - Ejecutar: `git pull` para actualizar rama objetivo
 - Si pull falla, mostrar warning: "⚠️ No se pudo actualizar desde remoto" pero continuar
 - Si pull exitoso, mostrar: "Updated from remote"
 
-### 5. Eliminación de rama temporal
-- Ejecutar: `git branch -D "<temporal_branch>"` para eliminar rama temporal local (usando nombre capturado en paso 2)
+### 6. Eliminación de rama temporal
+- Ejecutar: `git branch -D "<temporal_branch>"` para eliminar rama temporal local (usando nombre capturado en paso 3)
 - Si eliminación exitosa, mostrar: "🗑️ Deleted temporal branch: <temporal_branch>"
 - Si falla, mostrar: "⚠️ Could not delete temporal branch: <temporal_branch>"
 
-### 6. Status final
+### 7. Status final
 - Verificar branch actual: `git branch --show-current`
 - Mostrar estado final:
   ```
