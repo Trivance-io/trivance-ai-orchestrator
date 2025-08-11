@@ -33,9 +33,11 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 - Mostrar: "Extracting review findings..."
 - Usar `mcp__github__get_pull_request_reviews` para obtener todas las reviews del PR
 - Usar `mcp__github__get_pull_request_comments` para obtener todos los comentarios del PR
-- Contar reviews y comentarios obtenidos
-- Mostrar: "Found <X> reviews and <Y> comments"
-- Usar `mcp__github__get_me` para obtener usuario actual (para contexto)
+- Usar `mcp__github__get_issue_comments` para obtener comentarios de conversación del PR
+- Analizar body del PR (obtenido en paso 1) para detectar contenido actionable de Claude Code Review
+- Contar reviews, comentarios, issue comments y contenido del PR body
+- Mostrar: "Found <X> reviews, <Y> comments, <Z> issue comments and PR body analysis"
+- Usar `mcp__github__get_me` para obtener usuario actual y capturar username para asignación automática
 
 ### 3. Filtrado inteligente de reviews
 - Para cada review obtenida, analizar:
@@ -47,12 +49,22 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
   - **Capturar contexto**: reviewer + review body completo
   - Agregar a lista de findings: "Actionable review from <reviewer>: <body>"
 
-### 4. Filtrado inteligente de comentarios
+### 4. Filtrado inteligente de comentarios y PR body
 - Para cada comentario obtenido, analizar:
   - **Filtrar ruido**: Skip si body vacío o contiene solo: LGTM, 👍, ✅, Good, Great, Thanks
   - **Detectar contenido actionable**: Si body contiene keywords: should, must, need, fix, error, issue, problem, security, performance, test, suggestion, recommend
   - **Capturar contexto**: commenter + comment body completo
   - Agregar a lista de findings: "Actionable comment from <commenter>: <body>"
+- Para cada issue comment obtenido, analizar:
+  - **Detectar Claude Code Review**: Priorizar comentarios de Claude bot con análisis detallado
+  - **Detectar contenido actionable**: Si body contiene keywords: should, must, need, fix, error, issue, problem, security, performance, test, suggestion, recommend, consider, enhancement
+  - **Capturar contexto**: commenter + issue comment body completo
+  - Agregar a lista de findings: "Actionable issue comment from <commenter>: <body>"
+- Para el body del PR obtenido, analizar:
+  - **Detectar análisis de Claude Code Review**: Buscar secciones con findings, recomendaciones, o issues identificados
+  - **Detectar contenido actionable**: Si contiene keywords de mejora o problemas técnicos identificados
+  - **Capturar contexto**: Claude Code Review analysis completo
+  - Agregar a lista de findings: "PR body analysis: <content>"
 
 ### 5. Categorización automática
 - Para cada finding actionable, determinar categoría basado en keywords:
@@ -88,7 +100,7 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 
 ### 7. Creación de issues
 - Para cada issue estructurado:
-  - Usar `mcp__github__create_issue` con título, body y labels
+  - Usar `mcp__github__create_issue` con título, body, labels y assignees=[username_actual]
   - Capturar número del issue creado
   - Mostrar progreso: "Created issue #<number>: <title>"
   - Mantener lista de issues creados exitosamente
@@ -116,7 +128,7 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 - Generar timestamp: `date '+%Y-%m-%dT%H:%M:%S'`
 - Crear entrada JSONL con:
   - timestamp, pr_number, issues creados
-  - conteos: issues_created, reviews_analyzed, comments_analyzed
+  - conteos: issues_created, reviews_analyzed, comments_analyzed, issue_comments_analyzed
 - Append a archivo: `.claude/logs/<fecha>/findings_activity.jsonl`
 
 ### 10. Reporte final
@@ -124,7 +136,7 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
   ```
   Summary:
   - PR analyzed: #<number>
-  - Reviews: <count> | Comments: <count>
+  - Reviews: <count> | Comments: <count> | Issue Comments: <count>
   - Issues created: <count>
   - Issues: <lista_números>
   - Log: <ruta_log>
@@ -133,7 +145,7 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 ## 📊 Logging Format Template
 
 ```json
-{"timestamp":"<ISO_timestamp>","pr_number":<number>,"issues":"<space_separated_numbers>","issues_created":<count>,"reviews_analyzed":<count>,"comments_analyzed":<count>}
+{"timestamp":"<ISO_timestamp>","pr_number":<number>,"issues":"<space_separated_numbers>","issues_created":<count>,"reviews_analyzed":<count>,"comments_analyzed":<count>,"issue_comments_analyzed":<count>}
 ```
 
 **IMPORTANTE**: 
