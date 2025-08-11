@@ -1,208 +1,157 @@
+---
+allowed-tools: mcp__github__*, Bash(mkdir *), Bash(date *), Bash(echo *)
+description: Convierte findings de PR reviews en GitHub issues categorizados automáticamente
+---
+
 # Findings to GitHub Issues
 
-Convierte findings del PR en GitHub issues.
+Analiza reviews y comentarios de un PR, filtra contenido actionable y crea issues categorizados automáticamente.
 
 ## Uso
-
 ```bash
-/findings-to-issues <pr_number>
+/findings-to-issues <pr_number>  # Argumento obligatorio
 ```
 
 ## Ejemplos
-
 ```bash
-/findings-to-issues 96     # PR #96
-/findings-to-issues 123    # PR #123
+/findings-to-issues 96     # Analizar PR #96
+/findings-to-issues 123    # Analizar PR #123
 ```
 
-## Prerequisites
+## Ejecución
 
-```bash
-claude mcp list | grep -q "github" || echo "⚠️ GitHub MCP Server not configured"
+Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
+
+### 1. Validación de entrada
+- Si no se proporciona argumento, mostrar error: "❌ Error: PR number requerido. Uso: /findings-to-issues <pr_number>"
+- Validar que el argumento sea un número positivo válido entre 1-999999
+- Usar `mcp__github__get_pull_request` para verificar que el PR existe
+- Si no existe, mostrar error "❌ PR #<number> no existe" y terminar
+- Obtener y mostrar información básica: "PR #<number>: <title>"
+
+### 2. Extracción de datos
+- Mostrar: "Extracting review findings..."
+- Usar `mcp__github__get_pull_request_reviews` para obtener todas las reviews del PR
+- Usar `mcp__github__get_pull_request_comments` para obtener todos los comentarios del PR
+- Usar `mcp__github__get_issue_comments` para obtener comentarios de conversación del PR
+- Analizar body del PR (obtenido en paso 1) para detectar contenido actionable de Claude Code Review
+- Contar reviews, comentarios, issue comments y contenido del PR body
+- Mostrar: "Found <X> reviews, <Y> comments, <Z> issue comments and PR body analysis"
+- Usar `mcp__github__get_me` para obtener usuario actual y capturar username para asignación automática
+
+### 3. Filtrado inteligente de reviews
+- Para cada review obtenida, analizar:
+  - **Filtrar ruido automáticamente**: Skip si estado es "APPROVED" Y no tiene body útil
+  - **Filtrar contenido genérico**: Skip si body contiene solo: LGTM, 👍, ✅, Good, Great
+  - **Detectar contenido actionable**:
+    - Si estado es "CHANGES_REQUESTED" = automáticamente actionable
+    - Si body contiene keywords: should, must, need, fix, error, issue, problem, security, performance, test
+  - **Capturar contexto**: reviewer + review body completo
+  - Agregar a lista de findings: "Actionable review from <reviewer>: <body>"
+
+### 4. Filtrado inteligente de comentarios y PR body
+- Para cada comentario obtenido, analizar:
+  - **Filtrar ruido**: Skip si body vacío o contiene solo: LGTM, 👍, ✅, Good, Great, Thanks
+  - **Detectar contenido actionable**: Si body contiene keywords: should, must, need, fix, error, issue, problem, security, performance, test, suggestion, recommend
+  - **Capturar contexto**: commenter + comment body completo
+  - Agregar a lista de findings: "Actionable comment from <commenter>: <body>"
+- Para cada issue comment obtenido, analizar:
+  - **Detectar Claude Code Review**: Priorizar comentarios de Claude bot con análisis detallado
+  - **Detectar contenido actionable**: Si body contiene keywords: should, must, need, fix, error, issue, problem, security, performance, test, suggestion, recommend, consider, enhancement
+  - **Capturar contexto**: commenter + issue comment body completo
+  - Agregar a lista de findings: "Actionable issue comment from <commenter>: <body>"
+- Para el body del PR obtenido, analizar:
+  - **Detectar análisis de Claude Code Review**: Buscar secciones con findings, recomendaciones, o issues identificados
+  - **Detectar contenido actionable**: Si contiene keywords de mejora o problemas técnicos identificados
+  - **Capturar contexto**: Claude Code Review analysis completo
+  - Agregar a lista de findings: "PR body analysis: <content>"
+
+### 5. Categorización automática
+- Para cada finding actionable, determinar categoría basado en keywords:
+  - **Security**: Si contiene security, vulnerability, injection → labels="security"
+  - **Performance**: Si contiene performance, slow, optimize → labels="performance"  
+  - **Testing**: Si contiene test, coverage → labels="testing"
+  - **Documentation**: Si contiene documentation, readme, docs → labels="documentation"
+  - **Refactor**: Si contiene refactor, restructure, simplify → labels="refactor"
+  - **Accessibility**: Si contiene accessibility, a11y, aria, screen reader → labels="accessibility"
+  - **Bug**: Categoría default → labels="bug"
+- Generar título del issue: "[<Category>] <texto_relevante>"
+- Extraer texto relevante (primeros 50 caracteres después de ":")
+- Si texto vacío, usar "Review finding" como fallback
+
+### 6. Generación de issues estructurados
+- Para cada finding categorizado, construir issue body usando template:
+  ```
+  ## Finding from PR #<pr_number>
+  
+  **Source**: <finding_completo>
+  
+  **Context**: 
+  - **PR**: #<pr_number> - <pr_title>
+  - **Type**: Review Finding
+  - **Category**: <category>
+  
+  ## Suggested Solution
+  Address the concern mentioned in the review comment.
+  
+  ## Acceptance Criteria
+  - [ ] Issue addressed according to review feedback
+  - [ ] Tests added/updated if needed
+  - [ ] No similar issues remain in codebase
+  ```
+
+### 7. Creación de issues
+- Para cada issue estructurado:
+  - Usar `mcp__github__create_issue` con título, body, labels y assignees=[username_actual]
+  - Capturar número del issue creado
+  - Mostrar progreso: "Created issue #<number>: <title>"
+  - Mantener lista de issues creados exitosamente
+- Si no hay findings actionable, mostrar: "No actionable findings found"
+
+### 8. Auto-vinculación con PR
+- Si se crearon issues:
+  - Obtener body actual del PR usando `mcp__github__get_pull_request`
+  - Construir sección AUTO-CLOSE:
+    ```
+    <!-- AUTO-CLOSE:START -->
+    ## Associated Issues from Findings
+    
+    - Fixes #<issue1> - <title1>
+    - Fixes #<issue2> - <title2>
+    <!-- AUTO-CLOSE:END -->
+    ```
+  - **Actualización idempotente**: Si sección AUTO-CLOSE ya existe, reemplazarla
+  - Si no existe, agregarla al final del PR body
+  - Usar `mcp__github__update_pull_request` para actualizar el PR
+  - Confirmar: "Issues associated to PR #<number>"
+
+### 9. Logging estructurado
+- Crear directorio de logs: `mkdir -p .claude/logs/$(date +%Y-%m-%d)`
+- Generar timestamp: `date '+%Y-%m-%dT%H:%M:%S'`
+- Crear entrada JSONL con:
+  - timestamp, pr_number, issues creados, author (de get_me), findings_count, categories_detected
+  - conteos: issues_created, reviews_analyzed, comments_analyzed, issue_comments_analyzed
+- Append a archivo: `.claude/logs/<fecha>/findings_activity.jsonl`
+
+### 10. Reporte final
+- Mostrar resumen completo:
+  ```
+  Summary:
+  - PR analyzed: #<number>
+  - Reviews: <count> | Comments: <count> | Issue Comments: <count>
+  - Issues created: <count>
+  - Issues: <lista_números>
+  - Log: <ruta_log>
+  ```
+
+## 📊 Logging Format Template
+
+```json
+{"timestamp":"<ISO_timestamp>","pr_number":<number>,"issues":"<space_separated_numbers>","issues_created":<count>,"author":"<username>","findings_count":<count>,"categories_detected":"<space_separated>","reviews_analyzed":<count>,"comments_analyzed":<count>,"issue_comments_analyzed":<count>}
 ```
 
-## Implementación
-
-```bash
-#!/bin/bash
-set -euo pipefail
-
-pr_number="${1:-$ARGUMENTS}"
-if [[ -z "$pr_number" || ! "$pr_number" =~ ^[1-9][0-9]*$ ]]; then
-    echo "❌ Error: PR number requerido"
-    echo "Uso: /findings-to-issues <pr_number>"
-    echo "Ejemplo: /findings-to-issues 96"
-    exit 1
-fi
-
-if ! gh pr view "$pr_number" >/dev/null 2>&1; then
-    echo "❌ PR #$pr_number no existe"
-    exit 1
-fi
-
-pr_info=$(gh pr view "$pr_number" --json title,state)
-pr_title=$(echo "$pr_info" | jq -r '.title')
-echo "PR #$pr_number: $pr_title"
-
-echo "Extracting review findings..."
-reviews=$(mcp__github__get_pull_request_reviews "$pr_number" 2>/dev/null || echo "[]")
-comments=$(mcp__github__get_pull_request_comments "$pr_number" 2>/dev/null || echo "[]")
-
-review_count=$(echo "$reviews" | jq length)
-comment_count=$(echo "$comments" | jq length)
-echo "Found $review_count reviews and $comment_count comments"
-
-current_user=$(mcp__github__get_me | jq -r '.login' 2>/dev/null || echo "")
-
-# Usar arrays para evitar problemas de scope
-declare -a actionable_findings
-
-# Procesar reviews usando process substitution
-while IFS= read -r review; do
-    review_state=$(echo "$review" | jq -r '.state')
-    review_body=$(echo "$review" | jq -r '.body // ""')
-    reviewer=$(echo "$review" | jq -r '.user.login')
-    
-    if [[ "$review_state" == "APPROVED" || -z "$review_body" || "$review_body" =~ ^(LGTM|👍|✅|Good|Great)$ ]]; then
-        continue
-    fi
-    
-    if [[ "$review_state" == "CHANGES_REQUESTED" || "$review_body" =~ (should|must|need|fix|error|issue|problem|security|performance|test) ]]; then
-        actionable_findings+=("Actionable review from $reviewer: $review_body")
-    fi
-done < <(echo "$reviews" | jq -c '.[]')
-
-# Procesar comentarios usando process substitution
-while IFS= read -r comment; do
-    comment_body=$(echo "$comment" | jq -r '.body // ""')
-    commenter=$(echo "$comment" | jq -r '.user.login')
-    
-    if [[ -z "$comment_body" || "$comment_body" =~ ^(LGTM|👍|✅|Good|Great|Thanks)$ ]]; then
-        continue
-    fi
-    
-    if [[ "$comment_body" =~ (should|must|need|fix|error|issue|problem|security|performance|test|suggestion|recommend) ]]; then
-        actionable_findings+=("Actionable comment from $commenter: $comment_body")
-    fi
-done < <(echo "$comments" | jq -c '.[]')
-
-created_issues=""
-issue_count=0
-
-# Procesar findings desde array (skip si no hay findings)
-if [[ ${#actionable_findings[@]} -eq 0 ]]; then
-    echo "No actionable findings found"
-fi
-
-for finding in "${actionable_findings[@]}"; do
-    category="Bug"
-    labels="bug"
-    
-    if [[ "$finding" =~ (security|vulnerability|injection) ]]; then
-        category="Security"
-        labels="security"
-    elif [[ "$finding" =~ (performance|slow|optimize) ]]; then
-        category="Performance" 
-        labels="performance"
-    elif [[ "$finding" =~ (test|coverage) ]]; then
-        category="Testing"
-        labels="testing"
-    elif [[ "$finding" =~ (documentation|readme|docs) ]]; then
-        category="Documentation"
-        labels="documentation"
-    fi
-    
-    title_text=$(echo "$finding" | cut -c1-50 | sed 's/.*: //')
-    # Validar que title_text no esté vacío
-    [[ -z "$title_text" ]] && title_text="Review finding"
-    issue_title="[$category] $title_text"
-    
-    issue_body="## Finding from PR #$pr_number
-
-**Source**: $finding
-
-**Context**: 
-- **PR**: #$pr_number - $pr_title
-- **Type**: Review Finding
-- **Category**: $category
-
-## Suggested Solution
-Address the concern mentioned in the review comment.
-
-## Acceptance Criteria
-- [ ] Issue addressed according to review feedback
-- [ ] Tests added/updated if needed
-- [ ] No similar issues remain in codebase"
-
-    # Crear issue via MCP function
-    issue_response=$(mcp__github__create_issue "$issue_title" "$issue_body" "$labels" 2>/dev/null || echo '{"number": ""}')
-    issue_number=$(echo "$issue_response" | jq -r '.number // ""')
-    
-    if [[ -n "$issue_number" && "$issue_number" != "null" ]]; then
-        created_issues="$created_issues $issue_number"
-        issue_count=$((issue_count + 1))
-        echo "Created issue #$issue_number: $issue_title"
-    fi
-done
-
-# Limpiar espacios en blanco de created_issues
-created_issues="${created_issues## }"
-created_issues="${created_issues%% }"
-
-if [[ -n "$created_issues" ]]; then
-    pr_body=$(gh pr view "$pr_number" --json body --jq '.body // ""')
-    
-    # Construir sección AUTO-CLOSE sin subshell
-    auto_close_content=""
-    for num in $created_issues; do
-        if [[ -n "$num" ]]; then
-            issue_info=$(gh issue view "$num" --json title --jq '.title' 2>/dev/null || echo "Issue")
-            auto_close_content+="- Fixes #$num - $issue_info"$'\n'
-        fi
-    done
-    
-    auto_close_section="<!-- AUTO-CLOSE:START -->
-## Associated Issues from Findings
-
-$auto_close_content<!-- AUTO-CLOSE:END -->"
-    
-    if echo "$pr_body" | grep -q "<!-- AUTO-CLOSE:START -->"; then
-        new_pr_body=$(echo "$pr_body" | sed '/<!-- AUTO-CLOSE:START -->/,/<!-- AUTO-CLOSE:END -->/d')
-        new_pr_body="$new_pr_body
-
-$auto_close_section"
-    else
-        new_pr_body="$pr_body
-
-$auto_close_section"
-    fi
-    
-    gh pr edit "$pr_number" --body "$new_pr_body"
-    echo "Issues associated to PR #$pr_number"
-fi
-
-timestamp=$(date '+%Y-%m-%dT%H:%M:%S')
-today=$(date '+%Y-%m-%d')
-logs_dir=".claude/logs/$today"
-mkdir -p "$logs_dir"
-
-jq -n \
-    --arg timestamp "$timestamp" \
-    --argjson pr "$pr_number" \
-    --arg issues "$created_issues" \
-    --argjson count "$issue_count" \
-    --argjson review_count "$review_count" \
-    --argjson comment_count "$comment_count" \
-    '{timestamp: $timestamp, pr_number: $pr, issues: $issues, issues_created: $count, reviews_analyzed: $review_count, comments_analyzed: $comment_count}' \
-    >> "$logs_dir/findings_activity.jsonl"
-
-echo ""
-echo "Summary:"
-echo "- PR analyzed: #$pr_number"
-echo "- Reviews: $review_count | Comments: $comment_count" 
-echo "- Issues created: $issue_count"
-if [[ -n "$created_issues" ]]; then
-    echo "- Issues: $created_issues"
-fi
-echo "- Log: $logs_dir/findings_activity.jsonl"
-```
+**IMPORTANTE**: 
+- No solicitar confirmación al usuario en ningún paso
+- Ejecutar todos los pasos secuencialmente
+- Si algún paso falla, detener ejecución y mostrar error claro
+- Manejar gracefully casos donde no hay findings actionable
