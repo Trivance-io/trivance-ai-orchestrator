@@ -24,7 +24,7 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 
 ### 1. Validación de entrada
 - Si no se proporciona argumento, mostrar error: "❌ Error: PR number requerido. Uso: /findings-to-issues <pr_number>"
-- Validar que el argumento sea un número positivo válido
+- Validar que el argumento sea un número positivo válido entre 1-999999
 - Usar `mcp__github__get_pull_request` para verificar que el PR existe
 - Si no existe, mostrar error "❌ PR #<number> no existe" y terminar
 - Obtener y mostrar información básica: "PR #<number>: <title>"
@@ -72,6 +72,8 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
   - **Performance**: Si contiene performance, slow, optimize → labels="performance"  
   - **Testing**: Si contiene test, coverage → labels="testing"
   - **Documentation**: Si contiene documentation, readme, docs → labels="documentation"
+  - **Refactor**: Si contiene refactor, restructure, simplify → labels="refactor"
+  - **Accessibility**: Si contiene accessibility, a11y, aria, screen reader → labels="accessibility"
   - **Bug**: Categoría default → labels="bug"
 - Generar título del issue: "[<Category>] <texto_relevante>"
 - Extraer texto relevante (primeros 50 caracteres después de ":")
@@ -127,7 +129,7 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 - Crear directorio de logs: `mkdir -p .claude/logs/$(date +%Y-%m-%d)`
 - Generar timestamp: `date '+%Y-%m-%dT%H:%M:%S'`
 - Crear entrada JSONL con:
-  - timestamp, pr_number, issues creados
+  - timestamp, pr_number, issues creados, author (de get_me), findings_count, categories_detected
   - conteos: issues_created, reviews_analyzed, comments_analyzed, issue_comments_analyzed
 - Append a archivo: `.claude/logs/<fecha>/findings_activity.jsonl`
 
@@ -145,7 +147,7 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 ## 📊 Logging Format Template
 
 ```json
-{"timestamp":"<ISO_timestamp>","pr_number":<number>,"issues":"<space_separated_numbers>","issues_created":<count>,"reviews_analyzed":<count>,"comments_analyzed":<count>,"issue_comments_analyzed":<count>}
+{"timestamp":"<ISO_timestamp>","pr_number":<number>,"issues":"<space_separated_numbers>","issues_created":<count>,"author":"<username>","findings_count":<count>,"categories_detected":"<space_separated>","reviews_analyzed":<count>,"comments_analyzed":<count>,"issue_comments_analyzed":<count>}
 ```
 
 **IMPORTANTE**: 

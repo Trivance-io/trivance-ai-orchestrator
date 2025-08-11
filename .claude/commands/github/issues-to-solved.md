@@ -1,5 +1,5 @@
 ---
-allowed-tools: mcp__github__*, Bash(mkdir *), Bash(date *), Bash(echo *)
+allowed-tools: mcp__github__*, Bash(mkdir *), Bash(date *), Bash(echo *), Task
 description: Analiza issues asociados a un PR y genera plan priorizado de implementación
 ---
 
@@ -30,107 +30,105 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 - Obtener y mostrar información básica: "PR #<number>: <title>"
 
 ### 2. Extracción de issues asociados
-- Mostrar: "Extracting associated issues..."
+- Mostrar: "Extrayendo issues asociados..."
 - Analizar body del PR (obtenido en paso 1) para detectar issues asociados
 - Buscar patterns: "(Fixes|Closes|Resolves) #[0-9]+" en el PR body
 - Extraer números de issues únicos y ordenarlos
 - Si no hay issues asociados, mostrar: "❌ No issues asociados al PR #<number>. Ejecuta /findings-to-issues primero" y terminar
-- Mostrar: "Found <count> associated issues: <lista_números>"
+- Mostrar: "Encontrados <count> issues asociados: <lista_números>"
 - Usar `mcp__github__get_me` para obtener usuario actual y capturar username para asignación
 
-### 3. Recolección de datos detallados
-- Para cada issue asociado:
-  - Usar `mcp__github__get_issue` para obtener título, body, estado, labels, assignees
-  - **Extraer prioridad del título**: Buscar [Security] → CRITICAL, [Bug] → HIGH, [Testing] → LOW, [Documentation] → MEDIUM
-  - **Extraer información de archivos**: Buscar patterns "**File**: <path>", "**Lines**: <range>" en body
-  - **Detectar categoría principal**: Basado en labels y keywords en título/body
-  - **Validar accesibilidad**: Si issue no accesible, log y continuar con siguiente
-- Contar issues exitosamente procesados vs total
-- Mostrar: "Processed <processed>/<total> issues successfully"
+### 3. Análisis técnico completo por code-reviewer
+- **OBLIGATORIO**: Usar herramienta `Task` para delegar análisis técnico completo al sub-agent `code-reviewer`
+- **OPTIMIZACIÓN**: code-reviewer consulta GitHub directamente - elimina redundancia
+- Proporcionar al code-reviewer:
+  - Contexto del PR #<number> y su propósito
+  - Lista de números de issues asociados: <lista_números>
+  - Solicitar que consulte cada issue usando `mcp__github__get_issue` directamente
+  - Solicitar análisis de: prioridad técnica, complejidad, riesgos, dependencias, **archivos específicos a modificar**
+- El code-reviewer debe retornar:
+  - Categorización y priorización inteligente CRÍTICO/ALTO/MEDIO/BAJO
+  - Recomendaciones específicas de implementación
+  - Estimación de esfuerzo basada en análisis técnico (horas)
+  - Identificación de riesgos y dependencias entre issues
+  - **CRÍTICO**: Lista específica de archivos y líneas a modificar por cada issue
+- Capturar resultados del análisis técnico para usar en pasos siguientes
 
-### 4. Categorización y priorización inteligente
-- Para cada issue procesado, determinar:
-  - **Prioridad**: CRITICAL (Security) > HIGH (Bug) > MEDIUM (Documentation/Enhancement) > LOW (Testing/Cleanup)
-  - **Complejidad estimada**: Basada en cantidad de archivos mencionados y keywords de alcance
-  - **Dependencias**: Detectar si issues relacionados por archivos comunes o referencias cruzadas
-  - **Orden de implementación**: Prioridad + dependencias + complejidad
-- Agrupar issues por prioridad para reporte estructurado
-- Generar recomendaciones de orden de ejecución
+### 4. Análisis de impacto y recursos (basado en resultados del code-reviewer)
+- **Impacto por categoría** (usando análisis técnico del code-reviewer):
+  - CRÍTICO: "Acción inmediata requerida - Riesgo de seguridad"
+  - ALTO: "Dentro de 24h - Afecta funcionalidad central"
+  - MEDIO: "Próximo sprint - Mejora/Documentación"
+  - BAJO: "Backlog - Limpieza de deuda técnica"
+- **Estimación de esfuerzo**: Usar estimaciones del code-reviewer basadas en análisis técnico
+- **Recursos necesarios**: Desarrollador + QA + tiempo según code-reviewer
+- **Evaluación de riesgos**: Issues que pueden bloquear otros o crear regresiones según code-reviewer
 
-### 5. Análisis de impacto y recursos
-- **Impacto por categoría**:
-  - CRITICAL: "Immediate action required - Security risk"
-  - HIGH: "Within 24h - Affects core functionality"
-  - MEDIUM: "Next sprint - Enhancement/Documentation"
-  - LOW: "Backlog - Technical debt cleanup"
-- **Estimación de esfuerzo**: Basada en complejidad detectada y número de archivos
-- **Recursos necesarios**: Desarrollador + QA + tiempo estimado
-- **Risk assessment**: Issues que pueden bloquear otros o crear regresiones
-
-### 6. Generación de plan enterprise-ready
-- Crear directorio de logs: `mkdir -p .claude/logs/$(date +%Y-%m-%d)`
-- Generar filename: `.claude/logs/<fecha>/implementation-plan-pr<number>.md`
+### 5. Generación de plan enterprise-ready
+- Crear directorio de planes: `mkdir -p .claude/issues-review`
+- Generar filename: `.claude/issues-review/$(date +%Y-%m-%d)-pr<number>-plan.md`
 - Usar template enterprise con secciones:
   ```
-  # 🎯 Implementation Plan - PR #<pr_number> (<timestamp>)
+  # 🎯 Plan de Implementación - PR #<pr_number> (<timestamp>)
   
-  ## 📊 Executive Summary
-  - **Total Issues**: <count>
-  - **Priority Breakdown**: <critical_count> Critical, <high_count> High, <medium_count> Medium, <low_count> Low
-  - **Estimated Effort**: <total_estimation>
-  - **Completion Target**: <suggested_timeline>
+  ## 📊 Resumen Ejecutivo
+  - **Total de Issues**: <count>
+  - **Distribución de Prioridad**: <critico_count> Críticos, <alto_count> Altos, <medio_count> Medios, <bajo_count> Bajos
+  - **Esfuerzo Estimado**: <total_estimation>
+  - **Meta de Finalización**: <suggested_timeline>
   
-  ## 🔥 Priority Matrix
-  [Details per issue with priority, files, estimation]
+  ## 🔥 Matriz de Prioridades
+  [Detalles por issue con: prioridad, archivos específicos con rutas completas, líneas, estimación horas]
   
-  ## 📋 Implementation Roadmap
-  ### Phase 1: CRITICAL (Immediate)
-  ### Phase 2: HIGH (24h)
-  ### Phase 3: MEDIUM (Sprint)
-  ### Phase 4: LOW (Backlog)
+  ## 📋 Hoja de Ruta de Implementación
+  ### Fase 1: CRÍTICOS (Inmediato)
+  ### Fase 2: ALTOS (24h)
+  ### Fase 3: MEDIOS (Sprint)
+  ### Fase 4: BAJOS (Backlog)
   
-  ## ✅ Acceptance Criteria
-  [Checklist per issue for completion validation]
+  ## ✅ Criterios de Aceptación
+  [Checklist por issue para validación de completitud]
   
-  ## 🎯 Next Actions
-  [Specific actionable items for developer]
+  ## 🎯 Próximas Acciones
+  [Items específicos accionables para el desarrollador]
   ```
 
-### 7. Auto-asignación y actualización
-- Para cada issue procesado:
+### 6. Auto-asignación y actualización
+- Para cada issue analizado por el code-reviewer:
   - Si issue no tiene assignee, usar `mcp__github__update_issue` para asignar a username_actual
   - Agregar comment con link al plan de implementación generado
   - Mantener log de issues actualizados vs errores
-- Mostrar progreso: "Updated assignment for <count> issues"
+- Mostrar progreso: "Asignación actualizada para <count> issues"
 
-### 8. Logging estructurado empresarial
+### 7. Logging estructurado empresarial
+- Crear directorio de logs: `mkdir -p .claude/logs/$(date +%Y-%m-%d)`
 - Generar timestamp: `date '+%Y-%m-%dT%H:%M:%S'`
 - Crear entrada JSONL con:
-  - timestamp, pr_number, issues procesados, conteos por prioridad
-  - plan_file generado, issues_assigned, processing_errors
+  - timestamp, pr_number, issues analizados por code-reviewer, conteos por prioridad
+  - plan_file generado, issues_assigned, analysis_errors
 - Append a archivo: `.claude/logs/<fecha>/issues_analysis.jsonl`
 
-### 9. Reporte de resultados
+### 8. Reporte de resultados
 - Mostrar resumen ejecutivo:
   ```
-  Summary:
-  - PR analyzed: #<number>
-  - Issues found: <total> (<critical> Critical, <high> High, <medium> Medium, <low> Low)
-  - Plan generated: <plan_file>
-  - Issues assigned: <assigned_count>
-  - Next action: Review plan and start Phase 1 (Critical issues)
+  Resumen:
+  - PR analizado: #<number>
+  - Issues encontrados: <total> (distribución según code-reviewer: <critico_count> Críticos, <alto_count> Altos, <medio_count> Medios, <bajo_count> Bajos)
+  - Plan generado: <plan_file>
+  - Issues asignados: <assigned_count>
+  - Próxima acción: Revisar plan y comenzar con issues de mayor prioridad
   ```
 
-### 10. Entrega de plan y próximos pasos
+### 9. Entrega de plan y próximos pasos
 - Mostrar contenido completo del plan generado
 - Proporcionar path del archivo para referencia futura
 - Listar próximos pasos accionables priorizados
-- Confirmar: "Implementation plan ready for execution"
+- Confirmar: "Plan de implementación listo para ejecución"
 
 ## 📊 Logging Format Template
 
 ```json
-{"timestamp":"<ISO_timestamp>","pr_number":<number>,"issues_found":<count>,"issues_processed":<count>,"priority_breakdown":{"critical":<count>,"high":<count>,"medium":<count>,"low":<count>},"plan_file":"<path>","issues_assigned":<count>,"processing_errors":<count>}
+{"timestamp":"<ISO_timestamp>","pr_number":<number>,"issues_found":<count>,"issues_analyzed":<count>,"priority_breakdown":{"critico":<count>,"alto":<count>,"medio":<count>,"bajo":<count>},"plan_file":"<path>","issues_assigned":<count>,"analysis_errors":<count>}
 ```
 
 **IMPORTANTE**:
