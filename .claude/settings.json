@@ -106,68 +106,10 @@
     ]
   },
   "statusLine": {
-    "type": "command",
-    "command": "input=$(cat); model=$(echo \"$input\" | jq -r '.model.display_name'); workspace=$(echo \"$input\" | jq -r '.workspace.current_dir' | sed 's|.*/||'); branch=$(cd \"$(echo \"$input\" | jq -r '.workspace.project_dir')\" 2>/dev/null && git branch --show-current 2>/dev/null || echo \"no-git\"); printf \"\\033[36m%s\\033[0m \\033[32m%s\\033[0m \\033[33m[%s]\\033[0m\" \"$model\" \"$workspace\" \"$branch\""
+    "type": "command", 
+    "command": "$CLAUDE_PROJECT_DIR/.claude/scripts/utils/statusline.sh"
   },
   "cleanupPeriodDays": 7,
   "enableAllProjectMcpServers": true,
-  "hooks": {
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/prompt_router.py\"",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "Write|Edit|MultiEdit|Bash|WebFetch|WebSearch|Task",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/pretool_guard.py\"",
-            "timeout": 30
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/architecture_enforcer.py\"",
-            "timeout": 15
-          }
-        ]
-      } 
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/on_stop.py\" main",
-            "timeout": 20
-          }
-        ]
-      }
-    ],
-    "SubagentStop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/on_stop.py\" subagent",
-            "timeout": 20
-          }
-        ]
-      }
-    ]
-  }
+  "hooks": {}
 }
