@@ -40,18 +40,27 @@ class HookConfig:
     CONTENT_HASH_LENGTH = 16
 
 def _project_dir() -> str:
-    """Returns the project root directory - SIMPLIFIED."""
+    """Returns the project root directory - CORRECTED."""
     # Claude Code always provides CLAUDE_PROJECT_DIR
     project_dir = os.environ.get("CLAUDE_PROJECT_DIR")
     if project_dir:
         return project_dir
     
-    # Simple fallback: navigate up from hooks directory 
+    # Corrected fallback: navigate up from correct hooks directory structure
     current = os.getcwd()
-    if current.endswith('.claude/hooks'):
+    
+    # Handle .claude/scripts/hooks structure
+    if current.endswith('.claude/scripts/hooks'):
+        # Go up 3 levels: hooks -> scripts -> .claude -> project_root
+        return os.path.dirname(os.path.dirname(os.path.dirname(current)))
+    elif current.endswith('.claude/hooks'):
+        # Go up 2 levels: hooks -> .claude -> project_root  
         return os.path.dirname(os.path.dirname(current))
     elif current.endswith('.claude'):
+        # Go up 1 level: .claude -> project_root
         return os.path.dirname(current)
+    
+    # Last resort: assume we're already in project root
     return current
 
 def _logs_dir() -> str:
