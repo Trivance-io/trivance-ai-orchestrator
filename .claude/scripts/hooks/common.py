@@ -18,24 +18,19 @@ from contextlib import contextmanager
 from typing import Optional, Dict, Any, Callable
 from collections import OrderedDict
 
-# Configuration constants - solo las realmente usadas
-class HookConfig:
-    # Cache settings
-    CACHE_TTL_SEC = 3600
-    CACHE_MAX_ENTRIES = 1000
-    CACHE_MAX_MEMORY_MB = 50
-    CACHE_CLEANUP_INTERVAL_SEC = 300.0
-    
-    # Performance thresholds
-    PERFORMANCE_THRESHOLD_MS = 100.0
-    FAST_HASH_CONTENT_SIZE_LIMIT = 1000
-    
-    # Hash settings
-    USER_HASH_LENGTH = 8
-    CONTENT_HASH_LENGTH = 16
-    
-    # Input limits for security
-    MAX_STDIN_SIZE = 10485760  # 10MB max stdin
+try:
+    import psutil
+except ImportError:
+    psutil = None
+
+# Configuration constants
+CACHE_TTL_SEC = 3600
+CACHE_MAX_ENTRIES = 1000
+CACHE_MAX_MEMORY_MB = 50
+CACHE_CLEANUP_INTERVAL_SEC = 300.0
+PERFORMANCE_THRESHOLD_MS = 100.0
+CONTENT_HASH_LENGTH = 16
+MAX_STDIN_SIZE = 10485760  # 10MB max stdin
 
 def _project_dir() -> str:
     """Returns the project root directory with validation."""
@@ -74,8 +69,12 @@ def _logs_dir() -> str:
     logs_path = os.path.realpath(os.path.join(project_root, ".claude", "logs", today))
     
     # Security: ensure logs path is within project directory
-    if not logs_path.startswith(project_root):
-        raise ValueError(f"Invalid logs path outside project: {logs_path}")
+    try:
+        common_path = os.path.commonpath([logs_path, project_root])
+        if os.path.realpath(common_path) != os.path.realpath(project_root):
+            raise ValueError("Path traversal detected")
+    except ValueError:
+        raise ValueError("Invalid logs path")
     
     os.makedirs(logs_path, exist_ok=True)
     return logs_path
@@ -112,7 +111,6 @@ def log_event(filename: str, payload: dict):
     payload.setdefault("session_id", _session_context["session_id"])
     payload.setdefault("correlation_id", _session_context["correlation_id"])
     payload.setdefault("pid", os.getpid())
-    payload.setdefault("hostname", os.uname().nodename)
     
     try:
         with open(path, "a", encoding="utf-8") as f:
@@ -123,24 +121,28 @@ def log_event(filename: str, payload: dict):
 def read_stdin_json():
     """Lee stdin y parsea JSON con límite de seguridad."""
     try:
-        # Leer con límite para prevenir DoS
-        raw = sys.stdin.read(HookConfig.MAX_STDIN_SIZE)
+        # Leer con límite real para prevenir DoS
+        if hasattr(sys.stdin, 'buffer'):
+            raw = sys.stdin.buffer.read(MAX_STDIN_SIZE).decode('utf-8')
+        else:
+            # Fallback for testing or text mode
+            raw = sys.stdin.read(MAX_STDIN_SIZE)
+        
         if not raw:
             return {}
         return json.loads(raw)
-    except json.JSONDecodeError as e:
-        # En caso de error, devolver diagnóstico limitado
-        return {"_raw": raw[:1000] if raw else "", "_json_error": str(e)}
-    except Exception as e:
-        return {"_error": str(e)}
+    except json.JSONDecodeError:
+        return {"_json_error": "Invalid JSON format"}
+    except Exception:
+        return {"_error": "Input processing failed"}
 
 # Cache optimizado sin BatchLogger
 class OptimizedAnalysisCache:
     """Cache optimizado con memory management simplificado."""
     
-    def __init__(self, ttl: int = HookConfig.CACHE_TTL_SEC, 
-                 max_entries: int = HookConfig.CACHE_MAX_ENTRIES, 
-                 max_memory_mb: int = HookConfig.CACHE_MAX_MEMORY_MB):
+    def __init__(self, ttl: int = CACHE_TTL_SEC, 
+                 max_entries: int = CACHE_MAX_ENTRIES, 
+                 max_memory_mb: int = CACHE_MAX_MEMORY_MB):
         self.ttl = ttl
         self.max_entries = max_entries
         self.max_memory_bytes = max_memory_mb * 1024 * 1024
@@ -161,7 +163,7 @@ class OptimizedAnalysisCache:
         if self._cleanup_timer:
             self._cleanup_timer.cancel()
         
-        self._cleanup_timer = threading.Timer(HookConfig.CACHE_CLEANUP_INTERVAL_SEC, self._cleanup_expired)
+        self._cleanup_timer = threading.Timer(CACHE_CLEANUP_INTERVAL_SEC, self._cleanup_expired)
         self._cleanup_timer.daemon = True
         self._cleanup_timer.start()
     
@@ -180,8 +182,12 @@ class OptimizedAnalysisCache:
                     entry = self.cache.pop(key, None)
                     if entry:
                         self.memory_bytes -= entry.get("memory_size", 0)
-        except Exception:
-            pass  # Silent fail en cleanup
+        except Exception as e:
+            # Log cleanup errors for debugging
+            try:
+                log_event("errors.jsonl", {"event": "cache_cleanup_error", "error": str(e)})
+            except:
+                pass
         finally:
             self._start_cleanup_timer()
     
@@ -262,11 +268,8 @@ class OptimizedAnalysisCache:
     
     def get_or_analyze(self, content: str, analyzer: Callable) -> Dict[str, Any]:
         """Método principal optimizado para obtener o analizar contenido."""
-        # Usar hash más rápido para contenido pequeño
-        if len(content) < HookConfig.FAST_HASH_CONTENT_SIZE_LIMIT:
-            content_hash = str(hash(content) & 0x7FFFFFFF)  # Hash rápido para contenido pequeño
-        else:
-            content_hash = hashlib.sha256(content.encode()).hexdigest()[:HookConfig.CONTENT_HASH_LENGTH]
+        # Usar hash seguro siempre
+        content_hash = hashlib.sha256(content.encode()).hexdigest()[:CONTENT_HASH_LENGTH]
         
         # Intentar cache primero
         cached = self.get(content_hash)
@@ -315,9 +318,9 @@ def _get_global_cache():
     with _cache_lock:
         if _global_cache is None:
             _global_cache = OptimizedAnalysisCache(
-                ttl=HookConfig.CACHE_TTL_SEC, 
-                max_entries=HookConfig.CACHE_MAX_ENTRIES, 
-                max_memory_mb=HookConfig.CACHE_MAX_MEMORY_MB
+                ttl=CACHE_TTL_SEC, 
+                max_entries=CACHE_MAX_ENTRIES, 
+                max_memory_mb=CACHE_MAX_MEMORY_MB
             )
         return _global_cache
 
@@ -328,12 +331,11 @@ def track_performance(operation_name: str, **context):
     start_time = time.perf_counter()
     start_memory = 0
     
-    try:
-        # Intentar obtener uso de memoria si psutil está disponible
-        import psutil
-        start_memory = psutil.Process().memory_info().rss / 1024 / 1024
-    except ImportError:
-        pass
+    if psutil:
+        try:
+            start_memory = psutil.Process().memory_info().rss / 1024 / 1024
+        except:
+            pass
     
     correlation_id = str(uuid.uuid4())[:8]
     
@@ -344,11 +346,11 @@ def track_performance(operation_name: str, **context):
         duration_ms = (end_time - start_time) * 1000
         
         end_memory = 0
-        try:
-            import psutil
-            end_memory = psutil.Process().memory_info().rss / 1024 / 1024
-        except (ImportError, NameError):
-            pass
+        if psutil:
+            try:
+                end_memory = psutil.Process().memory_info().rss / 1024 / 1024
+            except:
+                pass
         
         metrics = {
             "event": "performance_track",
@@ -362,10 +364,10 @@ def track_performance(operation_name: str, **context):
         log_event("performance.jsonl", metrics)
         
         # Alertar si el hook toma más del threshold configurado
-        if duration_ms > HookConfig.PERFORMANCE_THRESHOLD_MS:
+        if duration_ms > PERFORMANCE_THRESHOLD_MS:
             log_event("alerts.jsonl", {
                 "level": "warning",
-                "message": f"Hook '{operation_name}' took {duration_ms:.2f}ms (>{HookConfig.PERFORMANCE_THRESHOLD_MS}ms threshold)",
+                "message": f"Hook '{operation_name}' took {duration_ms:.2f}ms (>{PERFORMANCE_THRESHOLD_MS}ms threshold)",
                 "operation": operation_name,
                 "duration_ms": duration_ms
             })
@@ -378,13 +380,8 @@ def get_cached_analysis(content: str, analyzer: Callable) -> Dict[str, Any]:
 # Función simple para logging de decisiones AI
 def log_decision(decision: str, reason: str, confidence: str = "high"):
     """Log simple de decisiones AI - minimalista y efectivo."""
-    # Anonimizar usuario con hash para privacidad
-    user = os.environ.get("USER", "unknown")
-    user_hash = hashlib.sha256(user.encode('utf-8')).hexdigest()[:HookConfig.USER_HASH_LENGTH]
-    
     log_event("decisions.jsonl", {
         "decision": decision,
         "reason": reason,
-        "confidence": confidence,
-        "user_context_hash": user_hash
+        "confidence": confidence
     })
