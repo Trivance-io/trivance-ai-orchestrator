@@ -25,7 +25,9 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 ### 1. Validación de entrada
 - Si no se proporciona argumento, mostrar error: "❌ Error: PR number requerido. Uso: /findings-to-issues <pr_number>"
 - Validar que el argumento sea un número positivo válido entre 1-999999
-- Usar `mcp__github__get_pull_request` para verificar que el PR existe
+- **Auto-detectar repositorio**: Usar `gh repo view --json owner,name` para obtener owner y repo actual del workspace
+- Si falla detección, mostrar error "❌ No se pudo detectar repositorio GitHub" y terminar  
+- Usar `mcp__github__get_pull_request` con owner/repo detectados para verificar que el PR existe
 - Si no existe, mostrar error "❌ PR #<number> no existe" y terminar
 - Obtener y mostrar información básica: "PR #<number>: <title>"
 
