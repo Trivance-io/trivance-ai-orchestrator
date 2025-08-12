@@ -146,7 +146,21 @@ class ClaudePromptTracker:
         session_id = data.get('session_id')
         message = data.get('message', '')
         
-        if 'waiting for your input' in message.lower():
+        # Extended patterns for blocking situations
+        blocked_patterns = [
+            'waiting for your input',
+            'requires authorization', 
+            'permission required',
+            'blocked by',
+            'access denied',
+            'tool requires approval',
+            'requires confirmation',
+            'waiting for approval',
+            'needs permission'
+        ]
+        
+        message_lower = message.lower()
+        if any(pattern in message_lower for pattern in blocked_patterns):
             cwd = data.get('cwd', '')
             
             with sqlite3.connect(self.db_path) as conn:
@@ -154,19 +168,30 @@ class ClaudePromptTracker:
                 conn.execute("""
                     UPDATE prompt 
                     SET lastWaitUserAt = CURRENT_TIMESTAMP
-                    WHERE session_id = ?
-                    ORDER BY created_at DESC
-                    LIMIT 1
+                    WHERE id = (
+                        SELECT id FROM prompt 
+                        WHERE session_id = ? 
+                        ORDER BY created_at DESC 
+                        LIMIT 1
+                    )
                 """, (session_id,))
                 conn.commit()
             
+            # Determine notification subtitle based on message content
+            if 'waiting for your input' in message_lower:
+                subtitle = "Waiting for input"
+            elif any(perm in message_lower for perm in ['permission', 'authorization', 'approval']):
+                subtitle = "Permission required"
+            else:
+                subtitle = "Action needed"
+            
             self.send_notification(
                 title=os.path.basename(cwd) if cwd else 'Claude Task',
-                subtitle="Waiting for input",
+                subtitle=subtitle,
                 cwd=cwd
             )
             
-            logging.info(f"Waiting notification sent for session {session_id}")
+            logging.info(f"Block notification sent for session {session_id}: {subtitle}")
     
     def calculate_duration_from_db(self, record_id):
         """Calculate duration for a completed record"""
