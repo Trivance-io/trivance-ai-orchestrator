@@ -1,23 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Utilidades comunes para hooks de Claude Code - Enterprise Optimized + Quick Wins.
+Utilidades comunes para hooks de Claude Code - Optimizado y Simplificado.
 
-- Logging estructurado JSONL con contexto rico (session_id, correlation_id)
-- Cache inteligente de análisis con TTL configurable
-- Performance tracking con métricas automáticas
-- Lectura robusta de stdin como JSON
-- ResponseFactory para JSON responses consistentes
-- Helpers varios optimizados
+Funciones core usadas por los hooks:
+- read_stdin_json: Lee y parsea JSON de stdin
+- log_event: Logging estructurado JSONL  
+- log_decision: Log de decisiones AI
+- init_session_context: Inicializa contexto de sesión
+- track_performance: Tracking de performance
+- get_cached_analysis: Cache inteligente para análisis
 
 Claude Code expone CLAUDE_PROJECT_DIR al ejecutar hooks.
-Doc: Hooks receive JSON via stdin; environment and paths are available. 
 """
 import os, json, sys, datetime, hashlib, uuid, time, threading
 from contextlib import contextmanager
 from typing import Optional, Dict, Any, Callable
+from collections import OrderedDict
 
-# Configuration constants
+# Configuration constants - solo las realmente usadas
 class HookConfig:
     # Cache settings
     CACHE_TTL_SEC = 3600
@@ -29,25 +30,26 @@ class HookConfig:
     PERFORMANCE_THRESHOLD_MS = 100.0
     FAST_HASH_CONTENT_SIZE_LIMIT = 1000
     
-    # Logging settings
-    LOG_BATCH_FLUSH_THRESHOLD = 10
-    LOG_BATCH_FLUSH_INTERVAL_SEC = 5.0
-    LOG_TEXT_TRUNCATE_LENGTH = 4000
-    LOG_COMMAND_MAX_LENGTH = 100
-    
     # Hash settings
     USER_HASH_LENGTH = 8
     CONTENT_HASH_LENGTH = 16
+    
+    # Input limits for security
+    MAX_STDIN_SIZE = 10485760  # 10MB max stdin
 
 def _project_dir() -> str:
-    """Returns the project root directory - CORRECTED."""
+    """Returns the project root directory with validation."""
     # Claude Code always provides CLAUDE_PROJECT_DIR
     project_dir = os.environ.get("CLAUDE_PROJECT_DIR")
-    if project_dir:
-        return project_dir
+    if project_dir and os.path.isdir(project_dir):
+        return os.path.realpath(project_dir)
     
-    # Corrected fallback: navigate up from correct hooks directory structure
-    current = os.getcwd()
+    # Fallback: navigate up from hooks directory structure
+    current = os.path.realpath(os.getcwd())
+    
+    # Security: limit path length
+    if len(current) > 4096:
+        current = os.getcwd()
     
     # Handle .claude/scripts/hooks structure
     if current.endswith('.claude/scripts/hooks'):
@@ -60,7 +62,7 @@ def _project_dir() -> str:
         # Go up 1 level: .claude -> project_root
         return os.path.dirname(current)
     
-    # Last resort: assume we're already in project root
+    # Last resort: assume we're in project root
     return current
 
 def _logs_dir() -> str:
@@ -119,58 +121,22 @@ def log_event(filename: str, payload: dict):
         sys.stderr.write(f"[hooks][log_event] error escribiendo log: {e}\n")
 
 def read_stdin_json():
-    """Lee stdin y parsea JSON; si falla, devuelve diagnóstico."""
-    raw = sys.stdin.read()
+    """Lee stdin y parsea JSON con límite de seguridad."""
     try:
-        return json.loads(raw) if raw else {}
+        # Leer con límite para prevenir DoS
+        raw = sys.stdin.read(HookConfig.MAX_STDIN_SIZE)
+        if not raw:
+            return {}
+        return json.loads(raw)
     except json.JSONDecodeError as e:
-        return {"_raw": raw, "_json_error": str(e)}
+        # En caso de error, devolver diagnóstico limitado
+        return {"_raw": raw[:1000] if raw else "", "_json_error": str(e)}
+    except Exception as e:
+        return {"_error": str(e)}
 
-def sha256(text: str) -> str:
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()
-
-def short(text: str, n: int = HookConfig.LOG_TEXT_TRUNCATE_LENGTH) -> str:
-    return text if len(text) <= n else (text[:n] + f"... [truncated {len(text)-n} chars]")
-
-# Efficient batch logger to reduce threading overhead
-class BatchLogger:
-    """Logger optimizado que acumula eventos y hace flush periódico."""
-    
-    def __init__(self, flush_threshold: int = HookConfig.LOG_BATCH_FLUSH_THRESHOLD, 
-                 flush_interval: float = HookConfig.LOG_BATCH_FLUSH_INTERVAL_SEC):
-        self.queue = []
-        self.flush_threshold = flush_threshold
-        self.last_flush = time.time()
-        self.flush_interval = flush_interval
-        self._lock = threading.Lock()
-    
-    def log_async(self, filename: str, event_data: dict):
-        """Acumula evento para logging asíncrono."""
-        with self._lock:
-            self.queue.append((filename, event_data))
-            # Flush si alcanzamos threshold o tiempo límite
-            if (len(self.queue) >= self.flush_threshold or 
-                time.time() - self.last_flush >= self.flush_interval):
-                self._flush()
-    
-    def _flush(self):
-        """Flush todos los eventos acumulados."""
-        if not self.queue:
-            return
-        
-        # Procesar todos los eventos en la cola
-        for filename, event_data in self.queue:
-            log_event(filename, event_data)
-        
-        self.queue.clear()
-        self.last_flush = time.time()
-
-# Global batch logger instance
-_batch_logger = BatchLogger()
-
-# Enterprise-grade optimized cache with memory management
+# Cache optimizado sin BatchLogger
 class OptimizedAnalysisCache:
-    """Cache optimizado enterprise con memory pooling y cleanup automático."""
+    """Cache optimizado con memory management simplificado."""
     
     def __init__(self, ttl: int = HookConfig.CACHE_TTL_SEC, 
                  max_entries: int = HookConfig.CACHE_MAX_ENTRIES, 
@@ -178,21 +144,13 @@ class OptimizedAnalysisCache:
         self.ttl = ttl
         self.max_entries = max_entries
         self.max_memory_bytes = max_memory_mb * 1024 * 1024
-        
-        # Usar dict ordenado para LRU behavior eficiente
-        from collections import OrderedDict
-        self.cache: OrderedDict[str, Dict[str, Any]] = OrderedDict()
-        
-        # RWLock simulado con threading.RLock para mejor performance
+        self.cache = OrderedDict()
         self._lock = threading.RLock()
         
-        # Estadísticas de performance
-        self.stats = {
-            "hits": 0,
-            "misses": 0,
-            "evictions": 0,
-            "memory_bytes": 0
-        }
+        # Estadísticas simplificadas
+        self.hits = 0
+        self.misses = 0
+        self.memory_bytes = 0
         
         # Cleanup timer
         self._cleanup_timer = None
@@ -203,13 +161,12 @@ class OptimizedAnalysisCache:
         if self._cleanup_timer:
             self._cleanup_timer.cancel()
         
-        # Cleanup periódico configurado
         self._cleanup_timer = threading.Timer(HookConfig.CACHE_CLEANUP_INTERVAL_SEC, self._cleanup_expired)
         self._cleanup_timer.daemon = True
         self._cleanup_timer.start()
     
     def _cleanup_expired(self):
-        """Cleanup de entradas expiradas (ejecuta en background)."""
+        """Cleanup de entradas expiradas."""
         try:
             with self._lock:
                 current_time = time.time()
@@ -222,42 +179,33 @@ class OptimizedAnalysisCache:
                 for key in expired_keys:
                     entry = self.cache.pop(key, None)
                     if entry:
-                        self.stats["memory_bytes"] -= entry.get("memory_size", 0)
-                        self.stats["evictions"] += 1
-                
-                if expired_keys:
-                    log_event("cache_cleanup.jsonl", {
-                        "event": "expired_cleanup",
-                        "expired_count": len(expired_keys),
-                        "remaining_count": len(self.cache),
-                        "memory_bytes": self.stats["memory_bytes"]
-                    })
-        except Exception as e:
-            log_event("cache_cleanup.jsonl", {
-                "event": "cleanup_error",
-                "error": str(e)
-            })
+                        self.memory_bytes -= entry.get("memory_size", 0)
+        except Exception:
+            pass  # Silent fail en cleanup
         finally:
-            # Programar siguiente cleanup
             self._start_cleanup_timer()
     
     def _estimate_memory_size(self, obj: Any) -> int:
-        """Estima tamaño en memoria de objeto (optimizado)."""
-        # Estimación rápida basada en tipo
-        if isinstance(obj, str):
-            return len(obj.encode('utf-8'))
-        elif isinstance(obj, dict):
-            # Estimación conservadora para dict
-            return sum(len(str(k)) + len(str(v)) for k, v in obj.items()) * 2
-        elif isinstance(obj, list):
-            return sum(len(str(item)) for item in obj) * 2
-        else:
-            return len(str(obj)) * 2
+        """Estima tamaño en memoria de objeto (optimizado con sys.getsizeof)."""
+        try:
+            # Use Python's built-in memory size calculation
+            size = sys.getsizeof(obj)
+            
+            # For containers, add size of contained objects (with recursion limit)
+            if isinstance(obj, dict) and len(obj) < 100:  # Limit recursion for large dicts
+                size += sum(sys.getsizeof(k) + sys.getsizeof(v) for k, v in obj.items())
+            elif isinstance(obj, (list, tuple)) and len(obj) < 100:  # Limit recursion for large lists
+                size += sum(sys.getsizeof(item) for item in obj)
+                
+            return size
+        except (TypeError, RecursionError):
+            # Fallback for objects that don't support getsizeof
+            return len(str(obj)) if obj else 0
     
     def _enforce_memory_limit(self):
         """Fuerza límites de memoria eliminando entradas LRU."""
         while (len(self.cache) > self.max_entries or 
-               self.stats["memory_bytes"] > self.max_memory_bytes):
+               self.memory_bytes > self.max_memory_bytes):
             
             if not self.cache:
                 break
@@ -265,11 +213,10 @@ class OptimizedAnalysisCache:
             # Eliminar entrada más antigua (LRU)
             oldest_key = next(iter(self.cache))
             entry = self.cache.pop(oldest_key)
-            self.stats["memory_bytes"] -= entry.get("memory_size", 0)
-            self.stats["evictions"] += 1
+            self.memory_bytes -= entry.get("memory_size", 0)
     
     def get(self, content_hash: str) -> Optional[Dict[str, Any]]:
-        """Obtiene entrada del cache con performance optimizada."""
+        """Obtiene entrada del cache."""
         with self._lock:
             if content_hash not in self.cache:
                 return None
@@ -280,17 +227,17 @@ class OptimizedAnalysisCache:
             # Verificar expiración
             if current_time - entry["cached_at"] >= self.ttl:
                 self.cache.pop(content_hash)
-                self.stats["memory_bytes"] -= entry.get("memory_size", 0)
+                self.memory_bytes -= entry.get("memory_size", 0)
                 return None
             
             # Mover al final para LRU (touch)
             self.cache.move_to_end(content_hash)
             
-            self.stats["hits"] += 1
+            self.hits += 1
             return entry["result"]
     
     def set(self, content_hash: str, result: Dict[str, Any]):
-        """Almacena resultado en cache con memory management."""
+        """Almacena resultado en cache."""
         with self._lock:
             # Calcular tamaño en memoria
             memory_size = self._estimate_memory_size(result)
@@ -298,7 +245,7 @@ class OptimizedAnalysisCache:
             # Si ya existe, remover entrada anterior
             if content_hash in self.cache:
                 old_entry = self.cache.pop(content_hash)
-                self.stats["memory_bytes"] -= old_entry.get("memory_size", 0)
+                self.memory_bytes -= old_entry.get("memory_size", 0)
             
             # Crear nueva entrada
             entry = {
@@ -308,7 +255,7 @@ class OptimizedAnalysisCache:
             }
             
             self.cache[content_hash] = entry
-            self.stats["memory_bytes"] += memory_size
+            self.memory_bytes += memory_size
             
             # Enforcer límites
             self._enforce_memory_limit()
@@ -324,12 +271,12 @@ class OptimizedAnalysisCache:
         # Intentar cache primero
         cached = self.get(content_hash)
         if cached is not None:
-            # Log cache hit usando batch logger - no threading overhead
-            _batch_logger.log_async("performance.jsonl", {
+            # Log cache hit directamente
+            log_event("performance.jsonl", {
                 "event": "cache_hit",
                 "content_hash": content_hash,
                 "content_size": len(content),
-                "hit_rate": self.get_hit_rate()
+                "hit_rate": (self.hits / (self.hits + self.misses) * 100) if (self.hits + self.misses) > 0 else 0
             })
             return cached
         
@@ -340,44 +287,18 @@ class OptimizedAnalysisCache:
         
         # Almacenar en cache
         self.set(content_hash, result)
-        self.stats["misses"] += 1
+        self.misses += 1
         
-        # Log cache miss usando batch logger - no threading overhead
-        _batch_logger.log_async("performance.jsonl", {
+        # Log cache miss directamente
+        log_event("performance.jsonl", {
             "event": "cache_miss",
             "content_hash": content_hash,
             "content_size": len(content),
             "analysis_time_ms": analysis_time_ms,
-            "hit_rate": self.get_hit_rate()
+            "hit_rate": (self.hits / (self.hits + self.misses) * 100) if (self.hits + self.misses) > 0 else 0
         })
         
         return result
-    
-    def get_hit_rate(self) -> float:
-        """Calcula hit rate actual del cache."""
-        total = self.stats["hits"] + self.stats["misses"]
-        return (self.stats["hits"] / total * 100) if total > 0 else 0.0
-    
-    def get_stats(self) -> Dict[str, Any]:
-        """Obtiene estadísticas completas del cache."""
-        with self._lock:
-            return {
-                **self.stats,
-                "entries_count": len(self.cache),
-                "hit_rate_percent": self.get_hit_rate(),
-                "memory_mb": self.stats["memory_bytes"] / 1024 / 1024,
-                "memory_utilization_percent": (self.stats["memory_bytes"] / self.max_memory_bytes) * 100
-            }
-    
-    def clear(self):
-        """Limpia todo el cache."""
-        with self._lock:
-            self.cache.clear()
-            self.stats["memory_bytes"] = 0
-            log_event("cache_operation.jsonl", {
-                "event": "cache_cleared",
-                "timestamp": time.time()
-            })
     
     def __del__(self):
         """Cleanup cuando se destruye el cache."""
@@ -400,7 +321,7 @@ def _get_global_cache():
             )
         return _global_cache
 
-# Quick Win: Performance tracking
+# Performance tracking
 @contextmanager
 def track_performance(operation_name: str, **context):
     """Context manager para tracking automático de performance."""
@@ -424,6 +345,7 @@ def track_performance(operation_name: str, **context):
         
         end_memory = 0
         try:
+            import psutil
             end_memory = psutil.Process().memory_info().rss / 1024 / 1024
         except (ImportError, NameError):
             pass
@@ -447,29 +369,6 @@ def track_performance(operation_name: str, **context):
                 "operation": operation_name,
                 "duration_ms": duration_ms
             })
-
-def sanitize_for_log(cmd: str, max_len: int = HookConfig.LOG_COMMAND_MAX_LENGTH) -> str:
-    """Sanitiza comandos para logging seguro - previene exposición de datos sensibles."""
-    # Primero truncar por longitud
-    if len(cmd) > max_len:
-        cmd = cmd[:max_len] + f"... [truncated {len(cmd)-max_len} chars]"
-    
-    # Enmascarar posibles secrets o tokens en comandos
-    import re
-    # Patrones para detectar y enmascarar información sensible
-    patterns = [
-        (r'(--?token[=\s]+)([^\s]+)', r'\1***'),
-        (r'(--?key[=\s]+)([^\s]+)', r'\1***'),
-        (r'(--?password[=\s]+)([^\s]+)', r'\1***'),
-        (r'(--?secret[=\s]+)([^\s]+)', r'\1***'),
-        (r'(-p\s+)([^\s]+)', r'\1***'),  # -p password
-        (r'(Bearer\s+)([^\s]+)', r'\1***'),  # Bearer tokens
-    ]
-    
-    for pattern, replacement in patterns:
-        cmd = re.sub(pattern, replacement, cmd, flags=re.IGNORECASE)
-    
-    return cmd
 
 # Función de conveniencia para usar el cache global
 def get_cached_analysis(content: str, analyzer: Callable) -> Dict[str, Any]:
