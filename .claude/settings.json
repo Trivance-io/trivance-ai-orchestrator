@@ -106,10 +106,60 @@
     ]
   },
   "statusLine": {
-    "type": "command", 
+    "type": "command",
     "command": "$CLAUDE_PROJECT_DIR/.claude/scripts/utils/statusline.sh"
   },
   "cleanupPeriodDays": 7,
   "enableAllProjectMcpServers": true,
-  "hooks": {}
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/scripts/hooks/ccnotify.py UserPromptSubmit"
+          },
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/scripts/hooks/minimal_thinking.py"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/scripts/hooks/ccnotify.py Stop"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/scripts/hooks/ccnotify.py Notification"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/scripts/hooks/security_guard.py"
+          },
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/scripts/hooks/clean_code.py"
+          }
+        ]
+      }
+    ]
+  }
 }
