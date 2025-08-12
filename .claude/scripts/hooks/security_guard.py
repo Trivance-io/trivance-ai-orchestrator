@@ -17,41 +17,42 @@ FUNCTION_START_PATTERNS = [
     re.compile(r'^const\s+\w+\s*=\s*\(')
 ]
 
+# Precompiled patterns with ReDoS protection
 CRITICAL_ANTIPATTERNS = [
-    # Security vulnerabilities
+    # Security vulnerabilities - simplified patterns
     {
-        "pattern": r"(password|secret|token|key)\s*=\s*['\"][^'\"]*['\"]",
+        "pattern": re.compile(r"(password|secret|token|key)\s*=\s*['\"][^'\"]{1,100}['\"]", re.IGNORECASE),
         "message": "🔒 CRÍTICO: Credencial hardcodeada detectada",
         "severity": "blocking"
     },
     {
-        "pattern": r"eval\s*\(",
+        "pattern": re.compile(r"eval\s*\(", re.IGNORECASE),
         "message": "⚠️ SEGURIDAD: eval() es peligroso",
         "severity": "blocking"  
     },
     
-    # Injection attacks
+    # Injection attacks - safer patterns
     {
-        "pattern": r'f["\'].*SELECT.*FROM.*\{.*\}.*["\']',
+        "pattern": re.compile(r'f["\'].{0,50}SELECT.{0,50}FROM.{0,50}\{.{0,20}\}', re.IGNORECASE),
         "message": "🚨 SQL INJECTION: f-string en query SQL detectado",
         "severity": "blocking"
     },
     {
-        "pattern": r'subprocess\.(run|call|Popen)\s*\([^)]*\{.*\}',
+        "pattern": re.compile(r'subprocess\.(run|call|Popen)\s*\([^)]{0,200}\{.{0,50}\}', re.IGNORECASE),
         "message": "🚨 COMMAND INJECTION: subprocess con input dinámico",
         "severity": "blocking"
     },
     
     # Code quality
     {
-        "pattern": r"\bany\b",
+        "pattern": re.compile(r"\bany\b", re.IGNORECASE),
         "message": "📝 TYPESCRIPT: Evitar tipo 'any', usar tipos específicos",
         "severity": "warning"
     },
     
     # XSS risks
     {
-        "pattern": r"dangerouslySetInnerHTML",
+        "pattern": re.compile(r"dangerouslySetInnerHTML", re.IGNORECASE),
         "message": "🛡️ XSS RISK: Validar contenido HTML",
         "severity": "warning"
     }
@@ -60,8 +61,11 @@ CRITICAL_ANTIPATTERNS = [
 def analyze_code_content(content: str) -> list:
     """Analyze code for critical security anti-patterns."""
     issues = []
+    # Limit content length to prevent DoS
+    content = content[:50000] if len(content) > 50000 else content
+    
     for antipattern in CRITICAL_ANTIPATTERNS:
-        if re.search(antipattern["pattern"], content, re.IGNORECASE):
+        if antipattern["pattern"].search(content):
             issues.append({
                 "severity": antipattern["severity"],
                 "message": antipattern["message"]

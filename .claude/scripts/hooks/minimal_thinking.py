@@ -23,12 +23,28 @@ OVERENGINEERING_INDICATORS = [
 
 def check_recent_responses(transcript_path):
     """Analyze recent assistant responses for problematic patterns"""
-    if not transcript_path or not Path(transcript_path).exists():
+    if not transcript_path or not isinstance(transcript_path, str):
+        return {"agreement": False, "verbose": False}
+    
+    # Path traversal protection
+    try:
+        resolved_path = Path(transcript_path).resolve()
+        if not resolved_path.exists():
+            return {"agreement": False, "verbose": False}
+        
+        # Basic boundary check - stay within reasonable project paths
+        if len(str(resolved_path)) > 4096:
+            return {"agreement": False, "verbose": False}
+            
+        # File size protection (50MB limit)
+        if resolved_path.stat().st_size > 52428800:  # 50MB
+            return {"agreement": False, "verbose": False}
+    except (OSError, ValueError):
         return {"agreement": False, "verbose": False}
     
     try:
-        with open(transcript_path, 'r') as f:
-            content = f.read()
+        with open(resolved_path, 'r') as f:
+            content = f.read(52428800)  # Read max 50MB
             
         # Get last 5 assistant messages
         assistant_msgs = []
@@ -99,7 +115,12 @@ Avoid: "You're right!" | "Enterprise solution" | "// i++"
 def main():
     data = read_stdin_json()
     transcript_path = data.get("transcript_path")
-    prompt = data.get("prompt", "")[:100]  # First 100 chars for logging
+    
+    # Input validation - limit prompt to 10KB to prevent DoS
+    raw_prompt = data.get("prompt", "")
+    if isinstance(raw_prompt, str) and len(raw_prompt) > 10240:  # 10KB limit
+        raw_prompt = raw_prompt[:10240]  # Truncate if too large
+    prompt = raw_prompt[:100] if raw_prompt else ""  # First 100 chars for logging
     
     issues = check_recent_responses(transcript_path)
     

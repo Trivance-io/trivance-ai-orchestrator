@@ -6,7 +6,7 @@ Applies universal clean code rules without subjective numerical limits.
 Processes JS/TS files with prettier + eslint. Never blocks Claude workflow.
 """
 
-import sys, json, subprocess, shlex, os, time
+import sys, json, subprocess, os, time
 from pathlib import Path
 from common import read_stdin_json, log_decision, init_session_context
 
@@ -135,7 +135,7 @@ def count_file_changes(content_before, content_after):
 def run_prettier(file_path):
     """Format file with prettier"""
     project_root = find_project_root(file_path)
-    command = ['npx', 'prettier', '--write', shlex.quote(file_path)]
+    command = ['npx', 'prettier', '--write', file_path]
     
     success = execute_command(command, project_root)
     return success
@@ -150,7 +150,7 @@ def run_eslint(file_path):
 
 def build_eslint_command(file_path):
     """Build ESLint command with universal clean code rules"""
-    return ['npx', 'eslint', shlex.quote(file_path), '--fix']
+    return ['npx', 'eslint', file_path, '--fix']
 
 def execute_command(command, working_directory):
     """Execute shell command with enhanced security"""
