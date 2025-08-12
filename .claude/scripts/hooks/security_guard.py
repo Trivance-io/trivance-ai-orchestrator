@@ -1,167 +1,150 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Architecture Enforcer
+"""Security Guard Hook"""
+import sys, json, os, re
+from datetime import datetime
+from pathlib import Path
 
-Detects critical security vulnerabilities and blocks unsafe code patterns.
-"""
-import re, json, sys
-from common import log_event, read_stdin_json, track_performance, get_cached_analysis, init_session_context, log_decision
+def find_project_root():
+    """Find project root by searching upward for .claude directory"""
+    path = Path(__file__).resolve()
+    while path.parent != path:
+        if (path / '.claude').exists():
+            return path
+        path = path.parent
+    raise RuntimeError("Project root with .claude directory not found")
 
-FUNCTION_COMPLEXITY_THRESHOLD = 50
-
-# Safe precompiled regex patterns - ReDoS resistant
-FUNCTION_START_PATTERNS = [
-    re.compile(r'^def\s+\w+\s*\('),
-    re.compile(r'^function\s+\w+\s*\('),
-    re.compile(r'^const\s+\w+\s*=\s*\(')
-]
-
-# Precompiled patterns with ReDoS protection
-CRITICAL_ANTIPATTERNS = [
-    # Security vulnerabilities - simplified patterns
+# Security patterns
+PATTERNS = [
+    # Credentials (blocking)
     {
-        "pattern": re.compile(r"(password|secret|token|key)\s*=\s*['\"][^'\"]{1,100}['\"]", re.IGNORECASE),
-        "message": "🔒 CRÍTICO: Credencial hardcodeada detectada",
+        "regex": re.compile(r"(password|secret|token|key)\s*=\s*['\"][^'\"]{1,100}['\"]", re.I),
+        "message": "CRITICAL: Hardcoded credential detected",
         "severity": "blocking"
     },
+    # Dangerous eval (blocking)
     {
-        "pattern": re.compile(r"eval\s*\(", re.IGNORECASE),
-        "message": "⚠️ SEGURIDAD: eval() es peligroso",
-        "severity": "blocking"  
-    },
-    
-    # Injection attacks - safer patterns
-    {
-        "pattern": re.compile(r'f["\'].{0,50}SELECT.{0,50}FROM.{0,50}\{.{0,20}\}', re.IGNORECASE),
-        "message": "🚨 SQL INJECTION: f-string en query SQL detectado",
+        "regex": re.compile(r"eval\s*\(", re.I),
+        "message": "SECURITY: eval() is dangerous",
         "severity": "blocking"
     },
+    # SQL injection risk (blocking)
     {
-        "pattern": re.compile(r'subprocess\.(run|call|Popen)\s*\([^)]{0,200}\{.{0,50}\}', re.IGNORECASE),
-        "message": "🚨 COMMAND INJECTION: subprocess con input dinámico",
+        "regex": re.compile(r'f["\'].{0,50}SELECT.{0,50}FROM.{0,50}\{', re.I),
+        "message": "SQL INJECTION: f-string in SQL query",
         "severity": "blocking"
     },
-    
-    # Code quality
+    # Command injection risk (blocking)
     {
-        "pattern": re.compile(r"\bany\b", re.IGNORECASE),
-        "message": "📝 TYPESCRIPT: Evitar tipo 'any', usar tipos específicos",
+        "regex": re.compile(r'subprocess\.(run|call|Popen)\s*\([^)]{0,200}\{', re.I),
+        "message": "COMMAND INJECTION: subprocess with dynamic input",
+        "severity": "blocking"
+    },
+    # TypeScript any (warning)
+    {
+        "regex": re.compile(r"\bany\b", re.I),
+        "message": "TYPESCRIPT: Avoid 'any', use specific types",
         "severity": "warning"
     },
-    
-    # XSS risks
+    # TODO/FIXME (warning)
     {
-        "pattern": re.compile(r"dangerouslySetInnerHTML", re.IGNORECASE),
-        "message": "🛡️ XSS RISK: Validar contenido HTML",
+        "regex": re.compile(r"(TODO|FIXME|HACK|XXX):", re.I),
+        "message": "CODE QUALITY: Unresolved TODO/FIXME",
         "severity": "warning"
+    },
+    # Console.log (warning)
+    {
+        "regex": re.compile(r"console\.(log|error|warn|info)", re.I),
+        "message": "DEBUG: Remove console statements",
+        "severity": "warning"
+    },
+    # Long functions (warning)
+    {
+        "regex": re.compile(r"^(def|function|const\s+\w+\s*=\s*\()", re.M),
+        "message": "COMPLEXITY: Consider splitting large functions",
+        "severity": "complexity_check"
     }
 ]
 
-def analyze_code_content(content: str) -> list:
-    """Analyze code for critical security anti-patterns."""
+def analyze(content):
+    """Analyze content against security patterns"""
     issues = []
-    # Limit content length to prevent DoS
-    content = content[:50000] if len(content) > 50000 else content
-    
-    for antipattern in CRITICAL_ANTIPATTERNS:
-        if antipattern["pattern"].search(content):
-            issues.append({
-                "severity": antipattern["severity"],
-                "message": antipattern["message"]
-            })
-    
-    # Function complexity analysis
-    if content.strip():
-        lines = content.split('\n')
-        in_function = False
-        function_lines = 0
-        function_name = ""
-        
-        def is_function_start(line_text):
-            """Safe function detection using precompiled patterns."""
-            return any(pattern.match(line_text) for pattern in FUNCTION_START_PATTERNS)
-        
-        for line in lines:
-            line = line.strip()
-            if is_function_start(line):
-                if in_function and function_lines > FUNCTION_COMPLEXITY_THRESHOLD:
+    for pattern in PATTERNS:
+        if pattern["severity"] == "complexity_check":
+            # Simple line count between function definitions
+            lines = content.split('\n')
+            func_starts = [i for i, line in enumerate(lines) if pattern["regex"].match(line)]
+            # Check each function including the last one
+            for i, start in enumerate(func_starts):
+                # Calculate end: next function or end of file
+                end = func_starts[i+1] if i+1 < len(func_starts) else len(lines)
+                func_length = end - start
+                if func_length > 50:
                     issues.append({
-                        "severity": "warning",
-                        "message": f"📏 COMPLEJIDAD: Función '{function_name}' tiene {function_lines} líneas (>{FUNCTION_COMPLEXITY_THRESHOLD})"
+                        "line": start + 1,
+                        "message": f"Function too long ({func_length} lines)",
+                        "severity": "warning"
                     })
-                in_function = True
-                function_lines = 1
-                # Safe name extraction
-                parts = line.split('(')[0].split()
-                function_name = parts[-1] if parts else "unknown"
-                function_name = function_name[:20]  # Limit length
-            elif in_function:
-                if line and not line.startswith('#') and not line.startswith('//'):
-                    function_lines += 1
-                elif line == '' or is_function_start(line):
-                    if function_lines > FUNCTION_COMPLEXITY_THRESHOLD:
-                        issues.append({
-                            "severity": "warning", 
-                            "message": f"📏 COMPLEJIDAD: Función '{function_name}' tiene {function_lines} líneas (>{FUNCTION_COMPLEXITY_THRESHOLD})"
-                        })
-                    in_function = False
-    
+        else:
+            matches = pattern["regex"].finditer(content)
+            for match in matches:
+                line_num = content[:match.start()].count('\n') + 1
+                issues.append({
+                    "line": line_num,
+                    "message": pattern["message"],
+                    "severity": pattern["severity"],
+                    "match": match.group()[:50]  # Truncate for security
+                })
     return issues
 
 def main():
-    data = read_stdin_json()
+    try:
+        # Read input (max 1MB)
+        raw = sys.stdin.read(1048576)
+        data = json.loads(raw) if raw else {}
+    except (json.JSONDecodeError, MemoryError):
+        print(json.dumps({"error": "Invalid input"}))
+        sys.exit(2)
     
-    # Initialize session context for logging
-    session_id = data.get("session_id") or data.get("correlation_id")
-    init_session_context(session_id)
-    
-    tool = data.get("tool_name")
-    tin = data.get("tool_input", {})
-    
-    if tool not in ("Write", "Edit", "MultiEdit"):
-        return
-    
-    file_path = tin.get("file_path", "")
-    content = tin.get("new_string", "") or tin.get("content", "")
-    
-    if not any(file_path.endswith(ext) for ext in ['.ts', '.tsx', '.js', '.jsx', '.py']):
-        return
-    
+    content = data.get("content", "")
     if not content:
-        return
+        print(json.dumps({"status": "success", "issues": []}))
+        sys.exit(0)
     
-    # Analyze for critical patterns with performance tracking and cache
-    with track_performance("architecture_analysis", file_path=file_path, content_size=len(content)) as correlation_id:
-        issues = get_cached_analysis(content, analyze_code_content)
+    # Analyze content
+    issues = analyze(content)
     
-    # Log analysis with enriched context
-    log_event("architecture_analysis.jsonl", {
-        "hook_event_name": "PostToolUse", 
-        "file_path": file_path,
-        "issues_count": len(issues),
-        "has_blocking": any(i["severity"] == "blocking" for i in issues),
-        "content_size": len(content),
-        "analysis_correlation_id": correlation_id
-    })
+    # Check for blocking issues
+    blocking = [i for i in issues if i["severity"] == "blocking"]
     
-    blocking_issues = [i for i in issues if i["severity"] == "blocking"]
-    if blocking_issues:
-        reasons = [issue["message"] for issue in blocking_issues]
-        log_decision(
-            decision="block_code_change",
-            reason=f"Security issues detected: {len(blocking_issues)} critical",
-            confidence="high"
-        )
-        
-        print(json.dumps({
-            "hookSpecificOutput": {
-                "hookEventName": "PostToolUse",
-                "additionalContext": f"🚨 Issues críticos detectados:\n" + "\n".join(f"• {r}" for r in reasons)
-            },
-            "suppressOutput": True
-        }, ensure_ascii=False))
-        sys.exit(1)
+    # Logging
+    try:
+        # Find project root
+        project_root = find_project_root()
+        log_dir = Path(project_root) / '.claude' / 'logs' / datetime.now().strftime('%Y-%m-%d')
+        log_dir.mkdir(parents=True, exist_ok=True)
+        with open(log_dir / 'security.jsonl', 'a') as f:
+            f.write(json.dumps({
+                "timestamp": datetime.now().isoformat(),
+                "content_size": len(content),
+                "issues": len(issues),
+                "blocking": len(blocking)
+            }) + '\n')
+    except:
+        pass  # Silent fail for logging
+    
+    # Output result
+    result = {
+        "status": "blocked" if blocking else "success",
+        "issues": issues[:20],  # Limit output size
+        "summary": {
+            "total": len(issues),
+            "blocking": len(blocking),
+            "warnings": len([i for i in issues if i["severity"] == "warning"])
+        }
+    }
+    
+    print(json.dumps(result))
+    sys.exit(2 if blocking else 0)
 
 if __name__ == "__main__":
     main()

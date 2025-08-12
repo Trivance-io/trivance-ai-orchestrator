@@ -1,151 +1,58 @@
 #!/usr/bin/env python3
-"""
-Minimal Thinking Enhancer - Prevents superficial agreement and over-engineering
-"""
-import json
-import re
+"""Minimal Thinking Hook - Proactive behavioral guidelines injection"""
+import sys, json
 from pathlib import Path
-from common import read_stdin_json, log_event
+from datetime import datetime
 
-# Detection patterns
-AGREEMENT_PATTERNS = [
-    r"(?i)\byou('re|'re|'s|r|re)?\s+(right|correct|absolutely)",
-    r"(?i)\byou\s+are\s+(right|correct|absolutely)",
-    r"(?i)\btienes?\s+razón",
-    r"(?i)\b(exacto|correcto|así es)\b"
-]
-
-OVERENGINEERING_INDICATORS = [
-    r"(?i)\b(enterprise|scalable|robust|powerful|optimized)\b",
-    r"(?i)\b(state-of-the-art|production-ready|battle-tested)\b",
-    r"🚀{2,}|✨{2,}|💡{2,}"  # Excessive emojis
-]
-
-def check_recent_responses(transcript_path):
-    """Analyze recent assistant responses for problematic patterns"""
-    if not transcript_path or not isinstance(transcript_path, str):
-        return {"agreement": False, "verbose": False}
+def find_claude_root():
+    """Find .claude directory going up from this script"""
+    current = Path(__file__).parent
+    max_levels = 20  # Prevent infinite loops from circular symlinks
     
-    # Path traversal protection
+    for _ in range(max_levels):
+        if (current / '.claude').exists():
+            return current / '.claude'
+        if current == current.parent:
+            break
+        current = current.parent
+    return None
+
+def log_result():
+    """Log behavioral guidelines activation"""
     try:
-        resolved_path = Path(transcript_path).resolve()
-        if not resolved_path.exists():
-            return {"agreement": False, "verbose": False}
+        claude_root = find_claude_root()
+        if not claude_root:
+            return
         
-        # Basic boundary check - stay within reasonable project paths
-        if len(str(resolved_path)) > 4096:
-            return {"agreement": False, "verbose": False}
-            
-        # File size protection (50MB limit)
-        if resolved_path.stat().st_size > 52428800:  # 50MB
-            return {"agreement": False, "verbose": False}
-    except (OSError, ValueError):
-        return {"agreement": False, "verbose": False}
-    
-    try:
-        with open(resolved_path, 'r') as f:
-            content = f.read(52428800)  # Read max 50MB
-            
-        # Get last 5 assistant messages
-        assistant_msgs = []
-        for line in content.split('\n'):
-            if '"role":"assistant"' in line and line.strip():
-                try:
-                    msg = json.loads(line)
-                    # Handle different message formats
-                    if msg.get('type') == 'text':
-                        assistant_msgs.append(msg.get('text', ''))
-                    elif 'message' in msg and 'content' in msg['message']:
-                        # Claude transcript format
-                        content_item = msg['message']['content'][0] if isinstance(msg['message']['content'], list) else msg['message']['content']
-                        if isinstance(content_item, dict) and content_item.get('type') == 'text':
-                            assistant_msgs.append(content_item.get('text', ''))
-                except:
-                    continue
+        log_dir = claude_root / 'logs' / datetime.now().strftime('%Y-%m-%d')
+        log_dir.mkdir(parents=True, exist_ok=True)
         
-        recent = assistant_msgs[-5:] if assistant_msgs else []
-        
-        # Check for agreement patterns
-        agreement = any(
-            re.search(pattern, text[:200]) 
-            for text in recent 
-            for pattern in AGREEMENT_PATTERNS
-        )
-        
-        # Check for verbosity/marketing
-        verbose = any(
-            len(re.findall(pattern, text)) > 2
-            for text in recent
-            for pattern in OVERENGINEERING_INDICATORS
-        )
-        
-        return {"agreement": agreement, "verbose": verbose}
+        with open(log_dir / 'minimal_thinking.jsonl', 'a') as f:
+            f.write(json.dumps({
+                "timestamp": datetime.now().isoformat(),
+                "guidelines_injected": True
+            }) + '\n')
     except:
-        return {"agreement": False, "verbose": False}
-
-def generate_reminder(issues):
-    """Generate contextual reminder based on detected issues"""
-    # ALWAYS include minimal philosophy
-    base_reminder = """
-PHILOSOPHY: Minimal, simple, deep
-- Simplest working solution > complex abstractions
-- Comments only for non-obvious logic  
-- No marketing language or excessive emojis
-- Direct technical responses, no empty agreement"""
-    
-    additional = []
-    
-    if issues["agreement"]:
-        additional.append("⚠️ Recent 'you're right' detected - provide technical analysis instead")
-    
-    if issues["verbose"]:
-        additional.append("⚠️ Recent over-engineering detected - simplify approach")
-    
-    # Always return philosophy, with warnings if issues detected
-    extras = "\n".join(additional) if additional else ""
-        
-    return f"""<system-reminder>
-{base_reminder}
-{extras}
-
-Good: "Map avoids O(n²)" | "Null check for edge case"
-Avoid: "You're right!" | "Enterprise solution" | "// i++"
-</system-reminder>"""
+        pass  # Silent fail
 
 def main():
-    data = read_stdin_json()
-    transcript_path = data.get("transcript_path")
+    try:
+        data = json.loads(sys.stdin.read(1048576))  # 1MB limit
+    except (json.JSONDecodeError, MemoryError):
+        sys.exit(0)  # Silent fail, don't block Claude
     
-    # Input validation - limit prompt to 10KB to prevent DoS
-    raw_prompt = data.get("prompt", "")
-    if isinstance(raw_prompt, str) and len(raw_prompt) > 10240:  # 10KB limit
-        raw_prompt = raw_prompt[:10240]  # Truncate if too large
-    prompt = raw_prompt[:100] if raw_prompt else ""  # First 100 chars for logging
-    
-    issues = check_recent_responses(transcript_path)
-    
-    # ALWAYS generate reminder (philosophy + warnings if needed)
-    reminder = generate_reminder(issues)
-    
-    # Log what we detected and applied
-    log_event("minimal_thinking.jsonl", {
-        "hook_event_name": "UserPromptSubmit",
-        "prompt_preview": prompt,
-        "issues_detected": issues,
-        "reminder_applied": "minimal_philosophy",
-        "warnings_added": {
-            "agreement": issues.get("agreement", False),
-            "verbose": issues.get("verbose", False)
-        }
-    })
-    
-    print(json.dumps({
-        "suppressOutput": True,
-        "hookSpecificOutput": {
-            "hookEventName": "UserPromptSubmit",
-            "additionalContext": reminder
-        }
-    }, ensure_ascii=False))
+    # Inject behavioral guidelines before Claude processes the prompt
+    guidelines = """EXPERT BEHAVIORAL GUIDELINES ACTIVATED:
+
+1. OBJECTIVITY: Provide expert analysis. Challenge assumptions. No condescending agreement.
+2. MINIMALISM: Choose simplest solution that works excellently. Avoid overengineering.
+3. CLARITY: Clear, relevant language only. No promotional/redundant comments.
+4. VALIDATION: Verify syntax and logic before responding.
+
+Proceed with response following these guidelines."""
+
+    print(guidelines)
+    log_result()
 
 if __name__ == "__main__":
     main()

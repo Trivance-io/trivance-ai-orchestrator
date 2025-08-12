@@ -9,7 +9,7 @@ import json
 import sqlite3
 import subprocess
 import logging
-from datetime import datetime, timezone
+from datetime import datetime
 
 
 class ClaudePromptTracker:
@@ -146,17 +146,51 @@ class ClaudePromptTracker:
         session_id = data.get('session_id')
         message = data.get('message', '')
         
-        # Extended patterns for blocking situations
+        # Comprehensive patterns for all blocking situations requiring user action
         blocked_patterns = [
+            # Direct input requests
             'waiting for your input',
-            'requires authorization', 
+            'please provide',
+            'need your input',
+            'enter your',
+            'type your',
+            
+            # Permission and authorization
+            'requires authorization',
             'permission required',
-            'blocked by',
-            'access denied',
+            'needs your permission',          # ✅ PATRÓN CRÍTICO AÑADIDO
+            'needs permission',
             'tool requires approval',
             'requires confirmation',
             'waiting for approval',
-            'needs permission'
+            'permission to use',              # ✅ PATRÓN ADICIONAL
+            'grant permission',
+            'allow access',
+            'authorize this',
+            
+            # Blocking situations
+            'blocked by',
+            'access denied',
+            'cannot proceed',
+            'unable to continue',
+            'stopped waiting',
+            'requires user confirmation',
+            
+            # Claude Code specific messages
+            'ask the user',
+            'user approval',
+            'confirm this action',
+            'do you want to',
+            'should i proceed',
+            'proceed with',
+            'continue with',
+            
+            # Tool-specific blocks
+            'bash tool',
+            'file operation',
+            'potentially dangerous',
+            'security check',
+            'verify this'
         ]
         
         message_lower = message.lower()
@@ -177,13 +211,17 @@ class ClaudePromptTracker:
                 """, (session_id,))
                 conn.commit()
             
-            # Determine notification subtitle based on message content
-            if 'waiting for your input' in message_lower:
-                subtitle = "Waiting for input"
-            elif any(perm in message_lower for perm in ['permission', 'authorization', 'approval']):
-                subtitle = "Permission required"
+            # Enhanced notification subtitle with more specific categorization
+            if any(wait in message_lower for wait in ['waiting for your input', 'need your input', 'please provide']):
+                subtitle = "🔴 Waiting for input"
+            elif any(perm in message_lower for perm in ['permission', 'authorization', 'approval', 'confirm', 'allow']):
+                subtitle = "🔒 Permission required"
+            elif any(block in message_lower for block in ['blocked by', 'access denied', 'cannot proceed']):
+                subtitle = "⚠️ Action blocked"
+            elif any(tool in message_lower for tool in ['bash tool', 'file operation', 'dangerous']):
+                subtitle = "🛠️ Tool approval needed"
             else:
-                subtitle = "Action needed"
+                subtitle = "❗ Action needed"
             
             self.send_notification(
                 title=os.path.basename(cwd) if cwd else 'Claude Task',
@@ -250,18 +288,28 @@ class ClaudePromptTracker:
         current_time = datetime.now().strftime("%B %d, %Y at %H:%M")
         
         try:
+            # Enhanced notification with critical priority and persistent alert
             cmd = [
                 'terminal-notifier',
-                '-sound', 'default',
+                '-sound', 'Sosumi',  # More noticeable sound
                 '-title', title,
-                '-subtitle', f"{subtitle}\n{current_time}"
+                '-subtitle', f"{subtitle}\n{current_time}",
+                '-timeout', '30',  # Stay visible longer
+                '-sender', 'com.apple.Terminal'  # Ensure proper app identification
             ]
+            
+            # For permission/approval notifications, make them more persistent
+            if 'permission' in subtitle.lower() or 'approval' in subtitle.lower() or 'waiting' in subtitle.lower():
+                cmd.extend([
+                    '-ignoreDnD',  # Ignore Do Not Disturb
+                    '-sticky'  # Stay until dismissed
+                ])
             
             if cwd:
                 cmd.extend(['-execute', f'/usr/local/bin/code "{cwd}"'])
             
             subprocess.run(cmd, check=False, capture_output=True)
-            logging.info(f"Notification sent: {title} - {subtitle}")
+            logging.info(f"Enhanced notification sent: {title} - {subtitle}")
         except FileNotFoundError:
             logging.warning("terminal-notifier not found, notification skipped")
         except Exception as e:
@@ -273,7 +321,7 @@ def validate_input_data(data, expected_event_name):
     required_fields = {
         'UserPromptSubmit': ['session_id', 'prompt', 'cwd', 'hook_event_name'],
         'Stop': ['session_id', 'hook_event_name'],
-        'Notification': ['session_id', 'message', 'hook_event_name']
+        'Notification': ['session_id', 'message', 'hook_event_name', 'transcript_path', 'cwd']
     }
     
     if expected_event_name not in required_fields:
@@ -283,14 +331,20 @@ def validate_input_data(data, expected_event_name):
     if data.get('hook_event_name') != expected_event_name:
         raise ValueError(f"Event name mismatch: expected {expected_event_name}, got {data.get('hook_event_name')}")
     
-    # Check required fields
+    # Check core required fields (some fields may be optional depending on context)
+    core_fields = {
+        'UserPromptSubmit': ['session_id', 'hook_event_name'],
+        'Stop': ['session_id', 'hook_event_name'], 
+        'Notification': ['session_id', 'hook_event_name']  # message might be empty, paths optional
+    }
+    
     missing_fields = []
-    for field in required_fields[expected_event_name]:
+    for field in core_fields[expected_event_name]:
         if field not in data or data[field] is None:
             missing_fields.append(field)
     
     if missing_fields:
-        raise ValueError(f"Missing required fields for {expected_event_name}: {missing_fields}")
+        raise ValueError(f"Missing core required fields for {expected_event_name}: {missing_fields}")
     
     return True
 
