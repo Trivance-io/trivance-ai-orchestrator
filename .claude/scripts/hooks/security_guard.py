@@ -1,28 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-AI-First Architecture Advisor - Enterprise Optimized (60 lines)
-• Universal anti-patterns only
-• Trust Claude's architectural knowledge  
-• Zero false positives
-• Business impact focus
+Architecture Enforcer
+
+Detects critical security vulnerabilities and blocks unsafe code patterns.
 """
 import re, json, sys
 from common import log_event, read_stdin_json, track_performance, get_cached_analysis, init_session_context, log_decision
 
-# Configuration constants
 FUNCTION_COMPLEXITY_THRESHOLD = 50
 
 # Safe precompiled regex patterns - ReDoS resistant
 FUNCTION_START_PATTERNS = [
-    re.compile(r'^def\s+\w+\s*\('),     # Python function
-    re.compile(r'^function\s+\w+\s*\('), # JavaScript function 
-    re.compile(r'^const\s+\w+\s*=\s*\(') # Arrow function
+    re.compile(r'^def\s+\w+\s*\('),
+    re.compile(r'^function\s+\w+\s*\('),
+    re.compile(r'^const\s+\w+\s*=\s*\(')
 ]
 
-# Universal enterprise anti-patterns - Fase 1 esencial integrada
 CRITICAL_ANTIPATTERNS = [
-    # Seguridad crítica (original)
+    # Security vulnerabilities
     {
         "pattern": r"(password|secret|token|key)\s*=\s*['\"][^'\"]*['\"]",
         "message": "🔒 CRÍTICO: Credencial hardcodeada detectada",
@@ -34,7 +30,7 @@ CRITICAL_ANTIPATTERNS = [
         "severity": "blocking"  
     },
     
-    # Fase 1 esencial: Injection attacks
+    # Injection attacks
     {
         "pattern": r'f["\'].*SELECT.*FROM.*\{.*\}.*["\']',
         "message": "🚨 SQL INJECTION: f-string en query SQL detectado",
@@ -46,14 +42,14 @@ CRITICAL_ANTIPATTERNS = [
         "severity": "blocking"
     },
     
-    # Fase 1 esencial: Code quality
+    # Code quality
     {
         "pattern": r"\bany\b",
         "message": "📝 TYPESCRIPT: Evitar tipo 'any', usar tipos específicos",
         "severity": "warning"
     },
     
-    # XSS (original)
+    # XSS risks
     {
         "pattern": r"dangerouslySetInnerHTML",
         "message": "🛡️ XSS RISK: Validar contenido HTML",
@@ -62,10 +58,8 @@ CRITICAL_ANTIPATTERNS = [
 ]
 
 def analyze_code_content(content: str) -> list:
-    """Analyze code for universal enterprise anti-patterns + Fase 1 esencial."""
+    """Analyze code for critical security anti-patterns."""
     issues = []
-    
-    # Check regex patterns
     for antipattern in CRITICAL_ANTIPATTERNS:
         if re.search(antipattern["pattern"], content, re.IGNORECASE):
             issues.append({
@@ -73,7 +67,7 @@ def analyze_code_content(content: str) -> list:
                 "message": antipattern["message"]
             })
     
-    # Fase 1 esencial: Function complexity (safe pattern matching)
+    # Function complexity analysis
     if content.strip():
         lines = content.split('\n')
         in_function = False
@@ -114,32 +108,30 @@ def analyze_code_content(content: str) -> list:
 def main():
     data = read_stdin_json()
     
-    # Inicializar contexto de sesión para logging rico
+    # Initialize session context for logging
     session_id = data.get("session_id") or data.get("correlation_id")
     init_session_context(session_id)
     
     tool = data.get("tool_name")
     tin = data.get("tool_input", {})
     
-    # Only analyze code changes
     if tool not in ("Write", "Edit", "MultiEdit"):
         return
     
     file_path = tin.get("file_path", "")
     content = tin.get("new_string", "") or tin.get("content", "")
     
-    # Only analyze code files
     if not any(file_path.endswith(ext) for ext in ['.ts', '.tsx', '.js', '.jsx', '.py']):
         return
     
     if not content:
         return
     
-    # Analyze for critical patterns with performance tracking y cache
+    # Analyze for critical patterns with performance tracking and cache
     with track_performance("architecture_analysis", file_path=file_path, content_size=len(content)) as correlation_id:
         issues = get_cached_analysis(content, analyze_code_content)
     
-    # Log analysis con contexto enriquecido
+    # Log analysis with enriched context
     log_event("architecture_analysis.jsonl", {
         "hook_event_name": "PostToolUse", 
         "file_path": file_path,
@@ -149,12 +141,9 @@ def main():
         "analysis_correlation_id": correlation_id
     })
     
-    # Block only critical issues with proper PostToolUse format
     blocking_issues = [i for i in issues if i["severity"] == "blocking"]
     if blocking_issues:
         reasons = [issue["message"] for issue in blocking_issues]
-        
-        # Log decisión AI con contexto simple
         log_decision(
             decision="block_code_change",
             reason=f"Security issues detected: {len(blocking_issues)} critical",
@@ -168,7 +157,7 @@ def main():
             },
             "suppressOutput": True
         }, ensure_ascii=False))
-        sys.exit(1)  # Exit with error code to signal blocking
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
