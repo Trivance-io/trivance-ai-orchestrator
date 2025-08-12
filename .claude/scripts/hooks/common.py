@@ -29,8 +29,9 @@ CACHE_MAX_ENTRIES = 1000
 CACHE_MAX_MEMORY_MB = 50
 CACHE_CLEANUP_INTERVAL_SEC = 300.0
 PERFORMANCE_THRESHOLD_MS = 100.0
-CONTENT_HASH_LENGTH = 16
-MAX_STDIN_SIZE = 10485760  # 10MB max stdin
+CONTENT_HASH_LENGTH = 32
+MAX_STDIN_SIZE = 1048576  # 1MB max stdin
+JSON_MAX_DEPTH = 20  # Max nesting for JSON
 
 def _project_dir() -> str:
     """Returns the project root directory with validation."""
@@ -118,20 +119,41 @@ def log_event(filename: str, payload: dict):
     except OSError as e:
         sys.stderr.write(f"[hooks][log_event] error escribiendo log: {e}\n")
 
+def _safe_json_loads(raw: str, max_depth: int = JSON_MAX_DEPTH):
+    """JSON parser with depth limit to prevent DoS."""
+    class DepthLimitingDecoder(json.JSONDecoder):
+        def __init__(self, max_depth):
+            super().__init__()
+            self.max_depth = max_depth
+            self.current_depth = 0
+        
+        def decode(self, s):
+            return self._decode_with_depth(json.JSONDecoder.decode(self, s))
+        
+        def _decode_with_depth(self, obj, depth=0):
+            if depth > self.max_depth:
+                raise ValueError("JSON nesting too deep")
+            
+            if isinstance(obj, dict):
+                return {k: self._decode_with_depth(v, depth + 1) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [self._decode_with_depth(item, depth + 1) for item in obj]
+            return obj
+    
+    return DepthLimitingDecoder(max_depth).decode(raw)
+
 def read_stdin_json():
     """Lee stdin y parsea JSON con límite de seguridad."""
     try:
-        # Leer con límite real para prevenir DoS
         if hasattr(sys.stdin, 'buffer'):
             raw = sys.stdin.buffer.read(MAX_STDIN_SIZE).decode('utf-8')
         else:
-            # Fallback for testing or text mode
             raw = sys.stdin.read(MAX_STDIN_SIZE)
         
         if not raw:
             return {}
-        return json.loads(raw)
-    except json.JSONDecodeError:
+        return _safe_json_loads(raw)
+    except (json.JSONDecodeError, ValueError):
         return {"_json_error": "Invalid JSON format"}
     except Exception:
         return {"_error": "Input processing failed"}
@@ -191,21 +213,25 @@ class OptimizedAnalysisCache:
         finally:
             self._start_cleanup_timer()
     
-    def _estimate_memory_size(self, obj: Any) -> int:
-        """Estima tamaño en memoria de objeto (optimizado con sys.getsizeof)."""
+    def _estimate_memory_size(self, obj: Any, depth: int = 0, max_depth: int = 5) -> int:
+        """Estima tamaño en memoria con límite de recursión."""
+        if depth > max_depth:
+            return 0
+            
         try:
-            # Use Python's built-in memory size calculation
             size = sys.getsizeof(obj)
             
-            # For containers, add size of contained objects (with recursion limit)
-            if isinstance(obj, dict) and len(obj) < 100:  # Limit recursion for large dicts
-                size += sum(sys.getsizeof(k) + sys.getsizeof(v) for k, v in obj.items())
-            elif isinstance(obj, (list, tuple)) and len(obj) < 100:  # Limit recursion for large lists
-                size += sum(sys.getsizeof(item) for item in obj)
+            # Recursive size estimation with depth control
+            if isinstance(obj, dict) and len(obj) < 50:
+                size += sum(self._estimate_memory_size(k, depth + 1, max_depth) + 
+                           self._estimate_memory_size(v, depth + 1, max_depth) 
+                           for k, v in obj.items())
+            elif isinstance(obj, (list, tuple)) and len(obj) < 50:
+                size += sum(self._estimate_memory_size(item, depth + 1, max_depth) 
+                           for item in obj)
                 
             return size
         except (TypeError, RecursionError):
-            # Fallback for objects that don't support getsizeof
             return len(str(obj)) if obj else 0
     
     def _enforce_memory_limit(self):
@@ -334,7 +360,7 @@ def track_performance(operation_name: str, **context):
     if psutil:
         try:
             start_memory = psutil.Process().memory_info().rss / 1024 / 1024
-        except:
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
             pass
     
     correlation_id = str(uuid.uuid4())[:8]
@@ -349,7 +375,7 @@ def track_performance(operation_name: str, **context):
         if psutil:
             try:
                 end_memory = psutil.Process().memory_info().rss / 1024 / 1024
-            except:
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
                 pass
         
         metrics = {

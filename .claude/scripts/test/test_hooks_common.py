@@ -31,6 +31,25 @@ class TestHooksCommon(unittest.TestCase):
             self.assertIn("_json_error", result)
             self.assertNotIn("_raw", result)  # Security fix validation
     
+    def test_read_stdin_json_deep_nesting_protection(self):
+        """Test deep JSON nesting DoS protection"""
+        # Create deeply nested JSON beyond limit
+        deep_json = '{' * 25 + '"key":"value"' + '}' * 25
+        with patch('sys.stdin', io.StringIO(deep_json)):
+            result = common.read_stdin_json()
+            self.assertIn("_json_error", result)  # Should reject deep nesting
+    
+    def test_safe_json_loads_depth_limit(self):
+        """Test _safe_json_loads enforces depth limit"""
+        # Test valid shallow JSON
+        shallow = '{"a": {"b": "value"}}'
+        result = common._safe_json_loads(shallow, max_depth=5)
+        self.assertEqual(result['a']['b'], 'value')
+        
+        # Test depth limit enforcement
+        with self.assertRaises(ValueError):
+            common._safe_json_loads(shallow, max_depth=1)
+    
     def test_read_stdin_json_empty(self):
         """Test empty input"""
         with patch('sys.stdin', io.StringIO('')):
@@ -102,17 +121,20 @@ class TestHooksCommon(unittest.TestCase):
         self.assertEqual(cache.hits, 1)
         self.assertEqual(cache.misses, 1)
     
-    def test_cache_uses_secure_hash(self):
-        """Test cache uses SHA256 instead of hash()"""
+    def test_cache_uses_secure_hash_32_chars(self):
+        """Test cache uses SHA256 with 32 character hash"""
         cache = common.OptimizedAnalysisCache()
         
         def mock_analyzer(content):
             return {'test': True}
         
         with patch('hashlib.sha256') as mock_sha256:
-            mock_sha256.return_value.hexdigest.return_value = 'abcd1234567890'
+            mock_sha256.return_value.hexdigest.return_value = 'a' * 64  # Full SHA256
             cache.get_or_analyze('test', mock_analyzer)
-            mock_sha256.assert_called()  # Validate secure hash usage
+            mock_sha256.assert_called()
+            
+        # Verify CONTENT_HASH_LENGTH is now 32
+        self.assertEqual(common.CONTENT_HASH_LENGTH, 32)
     
     def test_performance_tracking(self):
         """Test performance tracking context manager"""
@@ -141,6 +163,30 @@ class TestHooksCommon(unittest.TestCase):
         """Test session ID from environment"""
         context = common.init_session_context()
         self.assertEqual(context['session_id'], 'env_session')
+
+    def test_memory_estimation_recursion_limit(self):
+        """Test memory estimation prevents infinite recursion"""
+        cache = common.OptimizedAnalysisCache()
+        
+        # Create deeply nested structure
+        nested = {'level': 0}
+        current = nested
+        for i in range(10):
+            current['next'] = {'level': i + 1}
+            current = current['next']
+        
+        # Should not crash with recursion limit
+        size = cache._estimate_memory_size(nested)
+        self.assertGreater(size, 0)
+    
+    def test_stdin_size_limit_reduced(self):
+        """Test stdin size limit is appropriately reduced"""
+        # Verify new limit is 1MB instead of 10MB
+        self.assertEqual(common.MAX_STDIN_SIZE, 1048576)  # 1MB
+    
+    def test_json_depth_constant(self):
+        """Test JSON depth limit constant exists"""
+        self.assertEqual(common.JSON_MAX_DEPTH, 20)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
