@@ -2,6 +2,7 @@
   "env": {
     "TRIVANCE_ENV": "local"
   },
+  "model": "opusplan",
   "permissions": {
     "defaultMode": "acceptEdits",
     "allow": [
@@ -159,7 +160,40 @@
       "Bash(launchctl *)",
       "Bash(crontab *)",
       "Bash(at *)",
-      "Bash(batch *)"
+      "Bash(batch *)",
+      "Bash(python* -c *)",
+      "Bash(node -e *)",
+      "Bash(perl -e *)",
+      "Bash(ruby -e *)",
+      "Bash(php -r *)",
+      "Bash(docker run * -v /Users:* *)",
+      "Bash(docker run * -v /System:* *)",
+      "Bash(docker run * -v /Library:* *)",
+      "Bash(docker run * -v /Applications:* *)",
+      "Bash(*$(sudo *)*)",
+      "Bash(*$(rm *)*)",
+      "Bash(*$(dd *)*)",
+      "Bash(*$(kill *)*)",
+      "Bash(*`sudo *`*)",
+      "Bash(*`rm *`*)",
+      "Bash(function * *)",
+      "Bash(alias * *)",
+      "Bash(env * *)",
+      "Bash(* > /etc/*)",
+      "Bash(* > /System/*)",
+      "Bash(* > /Library/*)",
+      "Bash(* > /bin/*)",
+      "Bash(* > /usr/bin/*)",
+      "Bash(curl * -o * && *)",
+      "Bash(wget * -o * && *)",
+      "Bash(curl * > * && *)",
+      "Bash(find * -exec shred *)",
+      "Bash(find * -exec dd *)",
+      "Bash(tar --overwrite *)",
+      "Bash(ln -s* *)",
+      "Bash(kill -* *)",
+      "Bash(r?m *)",
+      "Bash(??rm *)"
     ]
   },
   "statusLine": {
