@@ -42,6 +42,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+ccnotify.db
+ccnotify.log
 
 # Claude Code hooks logs (generados automáticamente)
 .claude/logs/
