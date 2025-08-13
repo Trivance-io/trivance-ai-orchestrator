@@ -17,7 +17,7 @@
       "mcp__github__*",
       "mcp__ide__*",
       "WebFetch(*)",
-      "WebSearch(*)",
+      "WebSearch",
       "Task(*)",
       "TodoWrite(*)",
       "NotebookEdit(*)",

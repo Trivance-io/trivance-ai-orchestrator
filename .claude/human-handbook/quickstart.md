@@ -62,10 +62,10 @@ echo "test" > test.txt && claude "/commit"
 
 ## 📚 Siguiente: Workflows
 
-#### 🔥 [`ai-first-workflow.md`](.claude/human-handbook/ai-first-workflow.md)
+#### 🔥 [`ai-first-workflow.md`](ai-first-workflow.md)
 Flujo completo: PR → Review → Issues → Resolución → Merge
 
-#### ⚡ [`commands-guide.md`](.claude/human-handbook/commands-guide.md)  
+#### ⚡ [`commands-guide.md`](commands-guide.md)  
 30+ comandos: `/implement`, `/pr`, `/security-scan`, etc.
 
 
