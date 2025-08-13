@@ -1,28 +1,60 @@
-# Start Coding Session
+# AI-First Session Auto-Configuration
 
-I'll begin a documented coding session using Claude Code CLI's memory system.
+I will automatically configure the workspace according to project specifications.
 
-I'll integrate with the native memory system by updating CLAUDE.md:
-- Session timestamp and context
-- Current git state and branch
-- Session goals and objectives
-- Progress tracking throughout our work
+## 🔍 Automatic Context Analysis
 
-Let me check for existing memory files and update them appropriately:
-- Project memory (./CLAUDE.md) for team-shared context
-- User memory (~/.claude/CLAUDE.md) for personal session tracking
+Reading project configuration...
 
-Please tell me:
-1. What are we working on today?
-2. What specific goals do you want to accomplish?
-3. Any context I should know about?
+I will automatically read:
+- CLAUDE.md and all its references
+- Current git state (branch, changes, commits)
+- Project structure and dependencies  
+- Previous session history
 
-I'll add this session context to your memory system using the `/memory` command functionality, ensuring our progress is tracked and can be resumed later. This integrates seamlessly with Claude Code CLI's native memory management rather than creating a separate system.
+## 🚀 Intelligent Workspace Configuration
 
-**Important**: I will NEVER:
-- Add "Co-authored-by" or any Claude signatures
-- Include "Generated with Claude Code" or similar messages
-- Modify git config or user credentials
-- Add any AI/assistant attribution to the commit
+Based on detected context, I will automatically activate:
+- **project-analyst**: If unknown tech stack or structural changes detected
+- **team-configurator**: If CLAUDE.md needs AI configuration updates
+- **tech-lead-orchestrator**: Development orchestrator - delegates ANY task (feature, bug, scope) to specialized agents in parallel
 
-The session context will be preserved in the appropriate CLAUDE.md file for future reference and continuation.
+## 🎯 Contextual Next Steps
+
+Based on current project state, most likely options are:
+
+**If work in progress:**
+- `/pr` - Continue with existing PR
+- `git status` - Review pending changes
+- `/commit` - Commit completed work
+
+**If new session:**
+- `/workflow:switch <branch>` - Switch to clean working branch
+- Check pending issues with `gh issue list`
+- Start new functionality
+
+**AI-first workflow commands available:**
+```bash
+/workflow:switch <branch>     # Clean workspace and switch branch
+/pr [target]                  # Create/update PR
+/github:findings-to-issues    # Convert findings to issues
+/commit "message"             # Semantic commit with validations
+gh issue list                 # View pending issues
+```
+
+## 🔧 Applied Configurations
+
+- **SIMPLE-ENOUGH™ Protocol**: Activated (value/complexity ≥ 2)
+- **Interaction language**: Spanish (per CLAUDE.md)
+- **Production Standards**: Stable code with measurable impact
+- **AI-first Workflow**: Configured per ai-first-workflow.md
+
+**Applied commit restrictions:**
+- NEVER add "Co-authored-by" or Claude signatures
+- NEVER include "Generated with Claude Code" 
+- NEVER modify git config or credentials
+- NEVER use emojis in commits or PRs
+
+---
+
+**Workspace is ready. What is your objective for this session?**

@@ -153,7 +153,7 @@ Based on the detected context, I'll choose the optimal approach:
 - After `/test` failures → `/create-todos` to track fixes
 - Complex failures → `/explain-like-senior` for deep analysis
 - Test improvements → `/review` for quality check
-- Session testing → `/session-end` includes test summary
+- Session testing → Use `git status` and `gh pr view` for current state
 
 **Important**: I will NEVER:
 - Modify tests to pass incorrectly

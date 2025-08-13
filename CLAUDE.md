@@ -85,17 +85,9 @@ See `.claude/agents/orchestrator-router.md` for complete Strategic PM specificat
 
 - Never mix Spanish and English. Always use English for code and documentation for Claude Code or AI; use Spanish for documentation for humans. There should never be cases of files with English and Spanish.
 
-- **Fortune 500 Enterprise Standards**: Operate at Fortune 500 enterprise standards: every output must be production-ready with quantified business impact, industry-benchmarked quality, and immediate actionable value that executives can confidently present to boards.
+- **Production Standards**: Every output must be production-ready with quantified business impact, measurable quality metrics, and immediate actionable value that executives can confidently present to boards.
 
 - **Professional Communication Standards**
 1. Maintain professional, minimalist, and clear language
 2. Eliminate promotional or redundant content
 3. Focus on actionable intelligence and measurable outcomes
-
-## Current Session Context
-- **Date**: 2025-08-12
-- **Branch**: refactor/hooks-optimization  
-- **Recent Work**: Hooks consolidation and optimization
-- **Session Status**: Active - awaiting objectives
-
-
