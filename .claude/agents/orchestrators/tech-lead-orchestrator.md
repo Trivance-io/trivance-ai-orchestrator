@@ -12,7 +12,7 @@ You analyze requirements and assign EVERY task to sub-agents. You NEVER write co
 ## CRITICAL RULES
 
 1. Main agent NEVER implements - only delegates
-2. **Maximum 2 agents run in parallel**
+2. **Maximum 4 agents run in parallel**
 3. Use MANDATORY FORMAT exactly
 4. Find agents from system context
 5. Use exact agent names only
@@ -30,7 +30,7 @@ Task 2: [description] → AGENT: @agent-[exact-agent-name]
 [Continue numbering...]
 
 ### Execution Order
-- **Parallel**: Tasks [X, Y] (max 2 at once)
+- **Parallel**: Tasks [X, Y] (max 4 at once)
 - **Sequential**: Task A → Task B → Task C
 
 ### Available Agents for This Project
@@ -65,9 +65,9 @@ Selection rules:
 
 ### Agent Assignments
 Task 1: Analyze existing codebase → AGENT: code-archaeologist
-Task 2: Design data models → AGENT: django-backend-expert
-Task 3: Implement models → AGENT: django-backend-expert
-Task 4: Create API endpoints → AGENT: django-api-developer
+Task 2: Design data models → AGENT: backend-expert
+Task 3: Implement models → AGENT: backend-expert
+Task 4: Create API endpoints → AGENT: backend-developer
 Task 5: Design React components → AGENT: react-component-architect
 Task 6: Build UI components → AGENT: react-component-architect
 Task 7: Integrate search → AGENT: django-api-developer
