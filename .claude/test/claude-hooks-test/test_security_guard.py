@@ -47,7 +47,7 @@ def test_critical_patterns_blocking():
     print("🧪 Testing critical blocking patterns...")
     
     # Test hardcoded credentials
-    credential_content = 'password = "secret123"'
+    credential_content = 'password = "FAKE_TEST_SECRET"'
     result = run_security_guard_hook(credential_content)
     assert result.returncode == 2, "Credentials should block"
     output = json.loads(result.stdout)
@@ -138,7 +138,7 @@ def test_logging():
     if log_dir.exists():
         shutil.rmtree(log_dir)
     
-    test_content = 'password = "test123"'  # Should trigger blocking
+    test_content = 'password = "TEST_FAKE_PASSWORD"'  # Should trigger blocking
     result = run_security_guard_hook(test_content)
     
     assert result.returncode == 2, f"Hook should block: {result.stderr}"
@@ -205,7 +205,7 @@ def test_output_limiting():
     print("🧪 Testing output limiting...")
     
     # Create content with many issues (more than 20)
-    many_issues = "\n".join([f'password = "secret{i}"' for i in range(25)])
+    many_issues = "\n".join([f'password = "TEST_FAKE_{i}"' for i in range(25)])
     
     result = run_security_guard_hook(many_issues)
     
