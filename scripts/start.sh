@@ -426,7 +426,7 @@ execute_option() {
             echo "  📖 README principal: ${WORKSPACE_DIR}/README.md"
             echo "  🤖 Claude Config: Ejecuta manualmente /init después del setup"
             echo "  🎛️  Environments: ${WORKSPACE_DIR}/envs/ENVIRONMENTS.md"
-            echo "  🚀 Comandos: ${CONFIG_DIR}/docs/COMMANDS.md"
+            echo "  🚀 Comandos: Use /help en Claude Code para ver comandos disponibles"
             echo "  🐳 Docker: ${CONFIG_DIR}/docs/DOCKER.md"
             echo
             ;;

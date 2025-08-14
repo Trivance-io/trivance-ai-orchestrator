@@ -1,5 +1,5 @@
-# Trivance-dev-config: Master configuration repo for Trivance Platform 
-<!-- repo: trivance-dev-config | role: master_orchestrator | scope: enterprise_ecosystem -->
+# Trivance-AI-Orchestrator: Master configuration repo for Trivance Platform 
+<!-- repo: trivance-ai-orchestrator | role: master_orchestrator | scope: enterprise_ecosystem -->
 
 ## MUST BE USED 🔧 SIMPLE-ENOUGH™ OPERATING PROTOCOL
 "Everything should be made as simple as possible, but not simpler.”
@@ -24,7 +24,7 @@ Choose the highest ROI; tie-break toward the simpler one.
  - **Reuse first** — list reused components/functions.  
  - **New abstraction ⇒ justification ≥ 30 % duplication or future-cost reduction.**  
  - **TDD loop** — red → green → refactor.  
- - **Self-audit** — confirm §2 metrics are met.
+ - **Self-audit** — confirm §3 metrics are met.
 
 6. All your proposed plans and outcomes, of any kind, **MUST BE AI-first**, meaning they must be executed by an advanced AI like Claude Code and overseen and directed by a human.
 
@@ -49,10 +49,10 @@ Choose the highest ROI; tie-break toward the simpler one.
 ## Strategic Platform Context
 
 **Trivance Platform** delivers competitive advantage through:
-- **4-service hybrid architecture** enabling 99.9% uptime enterprise scalability
-- **Sub-2-second hot-reload development** cycle (3x faster than industry standard)
-- **Zero-downtime deployment** pipeline with automated rollback capability
-- **Multi-tenant security** with auto-generated unique secrets per installation
+- **4-service hybrid architecture** enabling optimized local development environment
+- **Sub-2-second hot-reload development** cycle with guaranteed performance
+- **Hot-reload development cycle** with automated workspace management
+- **Development security** with auto-generated unique secrets per workspace
 - **Real-time observability** with centralized logging and performance monitoring
 
 ## Master Orchestrator Responsibilities
@@ -62,40 +62,42 @@ Choose the highest ROI; tie-break toward the simpler one.
 2. **Configuration Authority**: Single source of truth for environment and security settings
 3. **Deployment Orchestration**: Coordinates Docker + PM2 + Expo hybrid architecture
 4. **Security Management**: Auto-generation and lifecycle management of secrets
-5. **Development Workflow**: Unified interface via ./start.sh command center
+5. **Development Workflow**: Unified interface via scripts/start.sh command center
 6. **Documentation Hub**: Centralized technical documentation and operational procedures
 
 ### Operational Constraints
-- **Critical operations**: Require explicit confirmation (orchestrator.sh, clean-workspace.sh, environment switches)
+- **Critical operations**: Require explicit confirmation (scripts/core/orchestrator.sh, scripts/utils/clean-workspace.sh, environment switches)
 - **Safe operations**: Status checks, documentation access, log monitoring
 - **Automated validation**: Pre-commit security scanning, configuration integrity checks
 
 ### **Quality Assurance Integration**
 
-The orchestrator-router serves as:
+The tech-lead-orchestrator serves as:
 - **Single source of truth** for all workflow decisions
 - **Automatic quality gate** ensuring specialist expertise usage
 - **Strategic intelligence layer** preventing technical debt
 - **Mandatory planning phase** for all complexity levels
 
 ### **Implementation Reference**
-See `.claude/agents/orchestrator-router.md` for complete Strategic PM specifications and XML response formats. 
+See `.claude/agents/orchestrators/tech-lead-orchestrator.md` for complete Strategic PM specifications and XML response formats. 
+
+## AI-First Workflow Reference
+
+@.claude/human-handbook/ai-first-workflow.md
+
+Complete workflow from implementation to merge:
+- PR creation with Claude Code  
+- Converting findings into issues
+- Iterative resolution within same PR
+- Authorization criteria after 4-5 iterations
 
 ## Claude Code Memories
 
 - Never mix Spanish and English. Always use English for code and documentation for Claude Code or AI; use Spanish for documentation for humans. There should never be cases of files with English and Spanish.
 
-- **Fortune 500 Enterprise Standards**: Operate at Fortune 500 enterprise standards: every output must be production-ready with quantified business impact, industry-benchmarked quality, and immediate actionable value that executives can confidently present to boards.
+- **Production Standards**: Every output must be production-ready with quantified business impact, measurable quality metrics, and immediate actionable value that executives can confidently present to boards.
 
 - **Professional Communication Standards**
 1. Maintain professional, minimalist, and clear language
 2. Eliminate promotional or redundant content
 3. Focus on actionable intelligence and measurable outcomes
-
-## Current Session Context
-- **Date**: 2025-08-12
-- **Branch**: refactor/hooks-optimization  
-- **Recent Work**: Hooks consolidation and optimization
-- **Session Status**: Active - awaiting objectives
-
-

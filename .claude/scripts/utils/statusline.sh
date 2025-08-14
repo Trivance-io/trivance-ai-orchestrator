@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Enhanced StatusLine with Better UX/UI
+# Enhanced StatusLine with OpusPlan Dynamic Detection
 input=$(cat)
 
 # Extract JSON fields
@@ -13,8 +13,8 @@ project_dir=$(echo "$input" | jq -r '.workspace.project_dir')
 # Git branch detection
 branch=$(cd "$project_dir" 2>/dev/null && git branch --show-current 2>/dev/null || echo "no-git")
 
-# Dynamic model display with visual differentiation
-if [[ "$model_id" == *"opus"* ]] || [[ "$model" == *"opusplan"* ]]; then
+# Display based on active model (not config file)
+if [[ "$model_id" == *"opus"* ]]; then
   printf "\\033[1;33m⚡ %s\\033[0m \\033[0;90m(%s)\\033[0m\\n" "$model" "$model_id"
 else
   printf "\\033[1;34m🔷 %s\\033[0m \\033[0;90m(%s)\\033[0m\\n" "$model" "$model_id"

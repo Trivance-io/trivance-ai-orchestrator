@@ -121,7 +121,6 @@ npx prisma migrate dev && npx prisma generate
 ### Workspace Context
 @./README.md
 @./trivance-dev-config/docs/ARCHITECTURE.md
-@./trivance-dev-config/docs/COMMANDS.md
 @./trivance-dev-config/docs/DEPLOYMENT.md
 @./trivance-dev-config/docs/DOCKER.md
 @./trivance-dev-config/docs/DOZZLE.md
@@ -152,7 +151,6 @@ npx prisma migrate dev && npx prisma generate
 
 @./README.md - Guía general del workspace
 @./trivance-dev-config/docs/ARCHITECTURE.md - Arquitectura técnica detallada
-@./trivance-dev-config/docs/COMMANDS.md - Referencia completa de comandos
 @./trivance-dev-config/docs/DOCKER.md - Configuración Docker avanzada
 @./trivance-dev-config/docs/ENVIRONMENTS.md - Sistema de environments
 @./trivance-dev-config/docs/TROUBLESHOOTING.md - Solución de problemas

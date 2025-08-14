@@ -78,7 +78,7 @@ main() {
     create_claude_md_final
     # Documentación Claude se creará automáticamente al final
     info "📖 Documentación Environments: ${WORKSPACE_DIR}/envs/ENVIRONMENTS.md"
-    info "🚀 Referencia de comandos: ${WORKSPACE_DIR}/trivance-dev-config/docs/COMMANDS.md"
+    info "🚀 Comandos disponibles: Use /help en Claude Code para ver comandos disponibles"
     echo
     info "🔧 Para comenzar:"
     echo "   ./start.sh"

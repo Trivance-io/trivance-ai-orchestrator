@@ -150,12 +150,6 @@
 **Qué hace**: Inicia sesión de código documentada con objetivos claros y tracking.
 **Cuándo usarlo**: Al comenzar trabajo significativo para mantener continuidad.
 
-### `/session-end` - Cerrar sesión documentada
-```bash
-/session-end
-```
-**Qué hace**: Cierra sesión con summary completo y handoff para futuras sesiones.
-**Cuándo usarlo**: Al finalizar trabajo para documentar progreso y facilitar continuidad.
 
 ---
 
