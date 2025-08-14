@@ -81,6 +81,16 @@ The orchestrator-router serves as:
 ### **Implementation Reference**
 See `.claude/agents/orchestrator-router.md` for complete Strategic PM specifications and XML response formats. 
 
+## AI-First Workflow Reference
+
+@.claude/human-handbook/ai-first-workflow.md
+
+Workflow completo desde implementación hasta merge:
+- Creación de PR con Claude Code  
+- Conversión de findings en issues
+- Resolución iterativa en mismo PR
+- Criterios de autorización después de 4-5 iteraciones
+
 ## Claude Code Memories
 
 - Never mix Spanish and English. Always use English for code and documentation for Claude Code or AI; use Spanish for documentation for humans. There should never be cases of files with English and Spanish.
