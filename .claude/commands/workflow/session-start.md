@@ -15,8 +15,7 @@ I will automatically read:
 ## 🚀 Intelligent Workspace Configuration
 
 Based on detected context, I will automatically activate:
-- **project-analyst**: If unknown tech stack or structural changes detected
-- **team-configurator**: If CLAUDE.md needs AI configuration updates
+- **code-archaeologist**: If unknown tech stack or structural changes detected
 - **tech-lead-orchestrator**: Development orchestrator - delegates ANY task (feature, bug, scope) to specialized agents in parallel
 
 ## 🎯 Contextual Next Steps
