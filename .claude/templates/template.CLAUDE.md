@@ -40,14 +40,14 @@
 
 ### **Quality Assurance Integration**
 
-The orchestrator-router serves as:
+The tech-lead-orchestrator serves as:
 - **Single source of truth** for all workflow decisions
 - **Automatic quality gate** ensuring specialist expertise usage
 - **Strategic intelligence layer** preventing technical debt
 - **Mandatory planning phase** for all complexity levels
 
 ### **Implementation Reference**
-See `.claude/agents/orchestrator-router.md` for complete Strategic PM specifications and XML response formats. 
+See `.claude/agents/orchestrators/tech-lead-orchestrator.md` for complete Strategic PM specifications and XML response formats. 
 
 ## Claude Code Memories
 
