@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(git *), Bash(cp *), Bash(test *), Bash(mkdir *), Bash(date *), Bash(whoami), Bash(echo *), Bash(tr *), Bash(sed *)
+allowed-tools: Bash(git *), Bash(test *), Bash(mkdir *), Bash(date *), Bash(whoami), Bash(echo *), Bash(tr *), Bash(sed *)
 description: Crea worktree con rama consistente en directorio sibling
 ---
 
@@ -83,12 +83,7 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 - Si falla, mostrar error: "❌ Error: Failed to create remote branch" pero NO terminar
 - Si exitoso, mostrar: "✅ Remote branch created: origin/$branch_name"
 
-### 9. Copiar configuración Claude
-- Ejecutar `(cd "$worktree_path" && cp -r "../$(basename "$(git rev-parse --show-toplevel)")/.claude" ./.claude)` para copiar configuración
-- Si falla, mostrar warning: "⚠️ Could not copy Claude configuration" pero continuar
-- Si exitoso, mostrar: "✅ Claude configuration copied"
-
-### 10. Logging y resultado final
+### 9. Logging y resultado final
 - **Log operación**: Crear directorio `.claude/logs/$(date +%Y-%m-%d)/` si no existe con `mkdir -p .claude/logs/$(date +%Y-%m-%d)/`
 - Agregar entrada JSONL a `.claude/logs/$(date +%Y-%m-%d)/worktree_operations.jsonl` usando el template
 - Mostrar estado exitoso:
