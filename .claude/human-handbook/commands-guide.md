@@ -135,17 +135,17 @@
 
 ## 🗂️ Comandos de Workflow
 
-### 🔄 `/switch` - Cambio seguro de rama con limpieza
+### 🔄 `/workflow:switch` - Cambio seguro de rama con changelog automático
 ```bash
-/switch <target_branch>
+/workflow:switch <target_branch>
 ```
-**Qué hace**: Cambia a rama objetivo, actualiza desde remoto y elimina ramas temporales de PR con confirmación.
-**Cuándo usarlo**: Al finalizar PRs para cambiar a main/develop y limpiar workspace.
-**Flujo**: Validación seguridad → Checkout/actualización → Limpieza temporal confirmada
+**Qué hace**: Valida PR mergeado, actualiza CHANGELOG.md automáticamente, cambia a rama objetivo y limpia workspace.
+**Cuándo usarlo**: Al finalizar PRs mergeados para cambiar a main/develop con cleanup completo.
+**Flujo**: Bloquea si PR no mergeado → Actualiza changelog (solo main) → Switch seguro → Limpieza
 
-### `/session-start` - Iniciar sesión documentada
+### `/workflow:session-start` - Iniciar sesión documentada
 ```bash
-/session-start
+/workflow:session-start
 ```
 **Qué hace**: Inicia sesión de código documentada con objetivos claros y tracking.
 **Cuándo usarlo**: Al comenzar trabajo significativo para mantener continuidad.
@@ -236,7 +236,7 @@
 
 ### Desarrollo de Feature Nueva
 ```bash
-1. /session-start                 # Documentar objetivos
+1. /workflow:session-start        # Documentar objetivos
 2. /understand                    # Entender contexto
 3. /implement "nueva feature"     # Implementar
 4. /test                         # Validar funcionamiento  
