@@ -9,14 +9,14 @@ Actualiza CHANGELOG.md con PRs mergeados siguiendo formato [Keep a Changelog](ht
 
 ## Uso
 ```bash
-/changelog --pr <pr_number>              # Single PR
-/changelog --prs <pr1,pr2,pr3>          # Multiple PRs batch
+/changelog <pr_number>                   # Single PR
+/changelog <pr1,pr2,pr3>                # Multiple PRs batch
 ```
 
 ## Ejemplos
 ```bash
-/changelog --pr 130                      # Agregar PR #130
-/changelog --prs 128,129,130            # Agregar múltiples PRs
+/changelog 130                           # Agregar PR #130
+/changelog 128,129,130                  # Agregar múltiples PRs
 ```
 
 ## Ejecución
@@ -24,21 +24,18 @@ Actualiza CHANGELOG.md con PRs mergeados siguiendo formato [Keep a Changelog](ht
 Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 
 ### 1. Validación de entrada y herramientas
-- Si no se proporciona argumento, mostrar error: "❌ Error: Debe especificar --pr <number> o --prs <n1,n2,n3>"
+- Si no se proporciona argumento, mostrar error: "❌ Error: Debe especificar número de PR o lista separada por comas"
 - Ejecutar: `command -v gh >/dev/null 2>&1` - si falla, mostrar error: "❌ Error: gh CLI requerido" y terminar
 - Ejecutar: `command -v jq >/dev/null 2>&1` - si falla, mostrar error: "❌ Error: jq requerido" y terminar
 - Validar que CHANGELOG.md existe, si no existe mostrar error: "❌ Error: CHANGELOG.md no encontrado" y terminar
 
 ### 2. Parsing de argumentos
-- Si argumento contiene "--pr ":
-  - Extraer número: `pr_number=$(echo "$ARGUMENTS" | sed 's/--pr //')`
-  - Validar que es número: `[[ "$pr_number" =~ ^[0-9]+$ ]]` - si falla, mostrar error y terminar
-  - Crear array: `pr_list=("$pr_number")`
-- Si argumento contiene "--prs ":
-  - Extraer números: `pr_numbers=$(echo "$ARGUMENTS" | sed 's/--prs //')`
-  - Convertir a array: `IFS=',' read -ra pr_list <<< "$pr_numbers"`
+- Si argumento contiene coma:
+  - Convertir a array: `IFS=',' read -ra pr_list <<< "$ARGUMENTS"`
   - Validar cada número en array: `[[ "$pr" =~ ^[0-9]+$ ]]` - si alguno falla, mostrar error y terminar
-- Si no coincide ningún patrón, mostrar error de uso y terminar
+- Si argumento NO contiene coma:
+  - Validar que es número: `[[ "$ARGUMENTS" =~ ^[0-9]+$ ]]` - si falla, mostrar error y terminar
+  - Crear array: `pr_list=("$ARGUMENTS")`
 - Mostrar: "Procesando PR(s): ${pr_list[*]}"
 
 ### 3. Validación de PRs en GitHub
