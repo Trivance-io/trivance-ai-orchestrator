@@ -135,13 +135,13 @@
 
 ## 🗂️ Comandos de Workflow
 
-### 🔄 `/switch` - Cambio seguro de rama con limpieza
+### 🔄 `/switch` - Cambio seguro de rama con changelog automático
 ```bash
 /switch <target_branch>
 ```
-**Qué hace**: Cambia a rama objetivo, actualiza desde remoto y elimina ramas temporales de PR con confirmación.
-**Cuándo usarlo**: Al finalizar PRs para cambiar a main/develop y limpiar workspace.
-**Flujo**: Validación seguridad → Checkout/actualización → Limpieza temporal confirmada
+**Qué hace**: Valida PR mergeado, actualiza CHANGELOG.md automáticamente, cambia a rama objetivo y limpia workspace.
+**Cuándo usarlo**: Al finalizar PRs mergeados para cambiar a main/develop con cleanup completo.
+**Flujo**: Bloquea si PR no mergeado → Actualiza changelog (solo main) → Switch seguro → Limpieza
 
 ### `/session-start` - Iniciar sesión documentada
 ```bash

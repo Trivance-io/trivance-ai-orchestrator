@@ -44,6 +44,32 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 - Capturar nombre de la rama temporal (de donde venimos)
 - Mostrar: "Leaving temporal branch: <temporal_branch>"
 
+### 3.5 Validación de PR asociado (si existe)
+- Ejecutar: `command -v gh >/dev/null 2>&1` - si falla, continuar al paso 4
+- Ejecutar: `command -v jq >/dev/null 2>&1` - si falla, continuar al paso 4
+- Ejecutar: `pr_data=$(gh pr list --head "<temporal_branch>" --state all --json number,state,title 2>/dev/null)`
+- Si pr_data está vacío o es "[]", continuar al paso 4
+- Si pr_data contiene datos JSON:
+  - Ejecutar: `pr_number=$(echo "$pr_data" | jq -r '.[0].number')`
+  - Ejecutar: `pr_state=$(echo "$pr_data" | jq -r '.[0].state')`
+  - Ejecutar: `pr_title=$(echo "$pr_data" | jq -r '.[0].title')`
+  - Si pr_state != "merged":
+    - Mostrar error: "❌ Error: PR asociado a esta rama no está mergeado. El switch está bloqueado."
+    - Mostrar: "PR encontrado: #$pr_number - $pr_title"
+    - Mostrar: "Estado actual: $pr_state"
+    - Mostrar: "El PR debe ser mergeado primero en GitHub antes de hacer switch."
+    - TERMINAR proceso completamente
+  - Si pr_state == "merged" AND target_branch == "main":
+    - Mostrar: "✓ PR mergeado detectado, actualizando changelog..."
+    - Ejecutar: `grep -q "PR #$pr_number" CHANGELOG.md` - si encuentra match, continuar al paso 4
+    - Ejecutar: `sed -i '' '/## \[Unreleased\]/a\
+\
+### Changed\
+- '"$pr_title"' (PR #'"$pr_number"')' CHANGELOG.md`
+    - Mostrar: "✅ Changelog actualizado con PR #$pr_number"
+  - Si pr_state == "merged" AND target_branch != "main":
+    - Mostrar: "✓ PR mergeado verificado, continuando switch..."
+
 ### 4. Switch a rama objetivo
 - Ejecutar: `git checkout "$target_branch"`
 - Si el comando falla, mostrar error: "❌ Error: No se pudo cambiar a '$target_branch'" y terminar
