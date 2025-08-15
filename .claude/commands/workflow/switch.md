@@ -1,11 +1,11 @@
 ---
 allowed-tools: Bash(git *)
-description: Cambia de rama temporal a rama objetivo y elimina rama temporal
+description: Cambia de rama temporal a rama objetivo validando PR mergeado
 ---
 
 # Switch Branch
 
-Cambia de rama temporal a rama objetivo y elimina la rama temporal local.
+Cambia de rama temporal a rama objetivo, valida que PR asociado esté mergeado y elimina la rama temporal local.
 
 ## Uso
 ```bash
@@ -59,15 +59,7 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
     - Mostrar: "Estado actual: $pr_state"
     - Mostrar: "El PR debe ser mergeado primero en GitHub antes de hacer switch."
     - TERMINAR proceso completamente
-  - Si pr_state == "merged" AND target_branch == "main":
-    - Mostrar: "✓ PR mergeado detectado, actualizando changelog..."
-    - Ejecutar: `grep -q "(PR #$pr_number)" CHANGELOG.md` - si encuentra match, continuar al paso 4
-    - Ejecutar: `sed '/## \[Unreleased\]/a\
-\
-### Changed\
-- '"$pr_title"' (PR #'"$pr_number"')' CHANGELOG.md > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md`
-    - Mostrar: "✅ Changelog actualizado con PR #$pr_number"
-  - Si pr_state == "merged" AND target_branch != "main":
+  - Si pr_state == "merged":
     - Mostrar: "✓ PR mergeado verificado, continuando switch..."
 
 ### 4. Switch a rama objetivo
@@ -99,3 +91,4 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 - Ejecutar todos los pasos secuencialmente
 - Si algún paso crítico falla, detener ejecución y mostrar error claro
 - Comando optimizado para workflow: temporal → objetivo → cleanup
+- Para actualizar CHANGELOG.md usar: `/workflow:changelog --pr <number>`

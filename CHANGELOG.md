@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- docs: update workflow documentation and add CHANGELOG (PR #130)
+
 ## [1.0.0] - 2025-01-14
 
 ### Added
