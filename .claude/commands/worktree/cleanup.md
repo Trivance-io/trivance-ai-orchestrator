@@ -1,143 +1,113 @@
 ---
-allowed-tools: Bash(git *), Bash(test *), Bash(mkdir *), Bash(date *), Bash(whoami), Bash(echo *), Bash(read *), Bash([[ ]])
-description: Eliminación segura de worktrees y ramas temporales post-merge
+allowed-tools: Bash(git *), Bash(test *), Bash(mkdir *), Bash(date *), Bash(whoami), Bash(echo *), Bash([[ ]])
+description: Eliminación segura de worktrees específicos con validación de ownership
 ---
 
 # Worktree Cleanup
 
-Eliminación segura de worktrees y ramas temporales siguiendo filosofía de trabajo temporal.
+Eliminación segura de worktrees específicos con validación de ownership.
 
 ## Uso
 ```bash
-/worktree:cleanup <target>         # Cleanup específico
-/worktree:cleanup --auto           # Cleanup automático (todos worktree-*)
-/worktree:cleanup <target> --force # Sin confirmación
+/worktree:cleanup <worktree1> [worktree2] [worktree3] [...]  # Argumentos obligatorios
 ```
 
 ## Ejemplos
 ```bash
-/worktree:cleanup worktree-feature-auth    # Eliminar worktree específico
-/worktree:cleanup --auto                   # Limpiar todos los temporales
-/worktree:cleanup worktree-hotfix --force  # Eliminar sin confirmar
+/worktree:cleanup worktree-feature-auth                      # Eliminar uno específico
+/worktree:cleanup worktree-hotfix worktree-refactor         # Eliminar múltiples
+/worktree:cleanup worktree-feature-payment worktree-bug-fix # Cleanup batch
 ```
+
+## Restricciones
+- Solo elimina worktrees y ramas creados por ti
+- Nunca toca ramas protegidas (main, develop, qa, staging, master)
+- Requiere estado limpio (sin cambios uncommitted o unpushed)
 
 ## Ejecución
 
 Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 
-### 1. Validación y parsing de argumentos
-- Contar argumentos en `$ARGUMENTS` usando expansión de array
-- Si no hay argumentos, mostrar error: "❌ Error: Se requiere al menos 1 argumento. Uso: /worktree:cleanup <target|--auto> [--force]"
-- Detectar modo de operación:
-  - Si primer argumento es `--auto`: `mode="auto"`
-  - Si contiene `--force`: `force_mode=true`
-  - Sino: `mode="specific"` y `target_name=primer_argumento`
-- Mostrar: "Cleanup mode: $mode" y si aplica "Target: $target_name"
+### 1. Validación de argumentos
+- Si no hay argumentos: error y terminar
+- Crear array `target_worktrees` con argumentos
+- Validar nombres seguros: `[[ "$worktree" =~ ^[a-zA-Z0-9][a-zA-Z0-9_-]*$ ]]`
+- Si nombre inválido: error y terminar
+- Mostrar targets solicitados
 
-### 2. Definir ramas protegidas
-- Crear array de ramas oficiales: `protected_branches=("main" "develop" "qa" "staging" "master")`
-- Mostrar: "Protected branches: ${protected_branches[*]}"
+### 2. Verificar ramas protegidas
+- Array: `protected_branches=("main" "develop" "qa" "staging" "master")`
+- Para cada target: verificar que NO está protegida
+- Si protegida: error y terminar
 
-### 3. Identificar targets para cleanup
-**Modo específico:**
-- Validar nombre seguro: `[[ "$target_name" =~ ^[a-zA-Z0-9/_-]+$ ]]`
-- Si nombre inválido, mostrar error: "❌ Error: Invalid target name. Use only alphanumeric, /, _, - characters" y terminar
-- Verificar que `$target_name` NO está en `protected_branches`
-- Si está protegida: mostrar error "❌ Error: Cannot cleanup protected branch $target_name" y terminar
-- Crear lista: `cleanup_targets=("$target_name")`
+### 3. Validaciones de ownership (CRÍTICO)
+Para cada worktree en `target_worktrees`:
 
-**Modo automático:**
-- Ejecutar `git worktree list --porcelain | grep worktree | awk '{print $1}' | xargs -I {} basename {}`
-- Filtrar solo los que empiecen con "worktree-"
-- Crear array `cleanup_targets` con resultados filtrados
-- Si array vacío: mostrar "ℹ️ No worktree-* temporales encontrados" y terminar exitosamente
+**3a. Verificar existencia y ownership:**
+- Obtener path: `worktree_path=$(git worktree list --porcelain | grep -A1 "worktree.*$worktree$" | tail -1)`
+- Si no existe: agregar a `nonexistent_targets`
+- Verificar ownership real: `path_owner=$(stat -c %U "$worktree_path" 2>/dev/null)`
+- Si `$path_owner != $(whoami)`: agregar a `unauthorized_targets`
 
-Mostrar: "Targets identified: ${#cleanup_targets[@]} worktrees/branches"
+**3b. Validar ownership de rama:**
+- Si rama remota existe: `git ls-remote origin "refs/heads/$worktree" >/dev/null 2>&1`
+- Obtener commit SHA: `branch_sha=$(git rev-parse "origin/$worktree" 2>/dev/null)`
+- Verificar autor principal: `git log --format='%ae' "$branch_sha" | head -1`
+- Si autor != `$(git config user.email)`: agregar a `unauthorized_branches`
 
-### 4. Validar estado de cada target
-Para cada target en `cleanup_targets`:
-- **Verificar worktree existe:** `git worktree list | grep "$target"`
-- **Si worktree existe:**
-  - Obtener path: `worktree_path=$(git worktree list --porcelain | grep -A1 "worktree.*$target" | tail -1)`
-  - Si path válido, ejecutar `(cd "$worktree_path" && git status --porcelain)`
-  - Si hay cambios sin commitear: agregar a `dirty_targets` array
-  - Ejecutar `git log --format='%H' "origin/$target"..HEAD 2>/dev/null | wc -l`
-  - Si hay commits sin pushear: agregar a `unpushed_targets` array
-- **Verificar rama local:** `git show-ref --verify --quiet refs/heads/$target`
-- **Verificar rama remota:** `git show-ref --verify --quiet refs/remotes/origin/$target`
+**3c. Terminar si hay errores de ownership:**
+- Si `unauthorized_targets` o `unauthorized_branches` no vacíos: mostrar errores y terminar
 
-### 5. Validaciones de seguridad
-- Si `dirty_targets` no está vacío:
-  - Mostrar error: "❌ Error: Los siguientes targets tienen cambios sin commitear:"
-  - Listar cada target en `dirty_targets`
-  - Mostrar: "Commitea o stash cambios antes de cleanup"
-  - TERMINAR proceso completamente
-- Si `unpushed_targets` no está vacío y `force_mode=false`:
-  - Mostrar warning: "⚠️ Los siguientes targets tienen commits sin pushear:"
-  - Listar cada target en `unpushed_targets`
-  - Mostrar: "Usa --force para proceder o pushea cambios primero"
-  - TERMINAR proceso completamente
+### 4. Validaciones de seguridad
+Para cada worktree válido y autorizado:
 
-### 6. Confirmación (si no force mode)
-Si `force_mode=false`:
-- Mostrar resumen: "Se eliminarán los siguientes targets:"
-- Para cada target, mostrar: "  • Worktree: $target"
-- Mostrar: "Esta operación es IRREVERSIBLE. ¿Continuar? (y/N):"
-- Ejecutar `read -r confirmation`
-- Si `$confirmation` no es "y" o "Y": mostrar "Operación cancelada" y terminar
-- Si confirmado, mostrar: "✓ Confirmación recibida, procediendo..."
+**4a. Verificar estado limpio:**
+- Cambios uncommitted: `(cd "$worktree_path" && git status --porcelain 2>/dev/null)`
+- Commits unpushed: `git rev-list --count "origin/$worktree".."$worktree" 2>/dev/null`
+- Si hay cambios dirty o unpushed: agregar a arrays correspondientes
 
-### 7. Ejecutar cleanup para cada target
+**4b. Terminar si no está limpio:**
+- Si `dirty_targets` o `unpushed_targets` no vacíos: mostrar errores y terminar
+
+### 5. Confirmación del usuario
+- Crear lista final `cleanup_targets` solo con worktrees válidos, autorizados y limpios
+- Si `cleanup_targets` está vacío:
+  - Mostrar: "ℹ️ No hay worktrees válidos para eliminar"
+  - TERMINAR exitosamente
+- Mostrar resumen de targets válidos
+- Solicitar confirmación: "Escribir 'ELIMINAR' para confirmar:"
+- Leer respuesta: `read -r confirmation`
+- Si `$confirmation != "ELIMINAR"`: cancelar y terminar
+
+### 6. Cleanup triple y logging
 Para cada target en `cleanup_targets`:
 
-**7a. Remover worktree si existe:**
-- Si `git worktree list | grep -q "$target"`:
-  - Ejecutar `git worktree remove "$target" 2>/dev/null || git worktree remove --force "$target"`
-  - Si exitoso: mostrar "✅ Worktree removed: $target"
-  - Si falla: mostrar "⚠️ Could not remove worktree: $target"
+**6a. Eliminar worktree:**
+- `git worktree remove "$target" 2>/dev/null`
+- Si falla: reportar error, continuar con siguiente
 
-**7b. Eliminar rama local si existe:**
-- Ejecutar `git branch -D "$target" 2>/dev/null`
-- Si exitoso: mostrar "✅ Local branch removed: $target"
-- Si falla: mostrar "ℹ️ Local branch $target not found"
+**6b. Eliminar rama local:**
+- `git branch -D "$target" 2>/dev/null`
 
-**7c. Eliminar rama remota si existe:**
-- Ejecutar `git push origin --delete "$target" 2>/dev/null`
-- Si exitoso: mostrar "✅ Remote branch removed: origin/$target"
-- Si falla: mostrar "ℹ️ Remote branch origin/$target not found"
+**6c. Eliminar rama remota (si existe y es del usuario):**
+- Verificar existencia: `git ls-remote origin "refs/heads/$target"`
+- Si existe: `git push origin --delete "$target" 2>/dev/null`
 
-### 8. Limpieza adicional
-- Ejecutar `git remote prune origin` para limpiar referencias obsoletas
-- Ejecutar `git gc --prune=now` para cleanup del repositorio
-- Mostrar: "✅ Repository cleanup completed"
-
-### 9. Logging y resultado final
-- **Log operación**: Crear directorio `.claude/logs/$(date +%Y-%m-%d)/` si no existe con `mkdir -p .claude/logs/$(date +%Y-%m-%d)/`
-- Para cada target eliminado, agregar entrada JSONL usando el template
-- Mostrar resultado final:
-  ```
-  ✅ Cleanup completed successfully:
-  - Mode: $mode
-  - Targets processed: ${#cleanup_targets[@]}
-  - Worktrees removed: [count]
-  - Local branches removed: [count]
-  - Remote branches removed: [count]
-
-  Repository is now clean of temporal branches.
-  ```
+**6d. Logging y limpieza:**
+- Log JSONL de operación
+- `git remote prune origin`
+- Reporte final de resultados
 
 ## 📊 Logging Format Template
 
-Para cada target eliminado, agregar línea al archivo JSONL:
+Para cada target procesado, agregar línea al archivo JSONL:
 
 ### Cleanup Log:
 ```json
-{"timestamp":"$(date -Iseconds)","operation":"worktree_cleanup","target":"$target","mode":"$mode","force_mode":"$force_mode","user":"$(whoami)","commit_sha":"$(git rev-parse HEAD)"}
+{"timestamp":"$(date -Iseconds)","operation":"worktree_cleanup","target":"$target","user":"$(whoami)","my_email":"$(git config user.email)","worktree_removed":"$worktree_removed","local_removed":"$local_removed","remote_removed":"$remote_removed","commit_sha":"$(git rev-parse HEAD)"}
 ```
 
-**IMPORTANTE**:
-- NUNCA eliminar ramas protegidas (main, develop, qa, staging, master)
-- NUNCA proceder con cambios uncommitted sin --force
-- Solicitar confirmación explícita excepto en --force mode
-- Crear directorio de logs antes de escribir
-- Cleanup completo: worktree + local + remote + repository gc
+**PRINCIPIOS**:
+- Solo eliminar elementos propios del usuario
+- Nunca tocar ramas protegidas
+- Siempre requerir confirmación y estado limpio

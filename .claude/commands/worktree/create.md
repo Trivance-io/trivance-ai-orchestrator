@@ -27,13 +27,13 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 - Contar argumentos en `$ARGUMENTS` usando expansión de array
 - Si no hay exactamente 2 argumentos, mostrar error: "❌ Error: Se requieren 2 argumentos. Uso: /worktree:create <purpose> <parent-branch>"
 - Capturar primer argumento como `purpose` y segundo como `parent_branch`
-- Mostrar: "Creating worktree: <purpose> from parent: <parent_branch>"
+- Mostrar: "Creando worktree: <purpose> desde rama padre: <parent_branch>"
 
 ### 2. Validación de working directory
-- Ejecutar `git status --porcelain` para verificar cambios pendientes
+- Ejecutar `status_output=$(git status --porcelain)` para capturar cambios pendientes
 - Si hay output (cambios sin commitear):
   - Mostrar error: "❌ Error: Working directory no está limpio. Commitea o stash cambios primero"
-  - Ejecutar `git status --short` para mostrar cambios pendientes
+  - Mostrar contenido: `echo "$status_output"`
   - TERMINAR proceso completamente
 - Si no hay cambios, mostrar: "✓ Working directory clean, proceeding..."
 
@@ -47,8 +47,8 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 - Si existe, mostrar: "✓ Parent branch '$parent_branch' verified"
 
 ### 4. Generar nombres consistentes
-- Convertir `purpose` a slug válido usando transformaciones:
-  - Ejecutar `echo "$purpose" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g'`
+- Convertir `purpose` a slug válido usando transformación optimizada:
+  - Ejecutar `echo "$purpose" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g; s/--*/-/g; s/^-\|-$//g'`
   - Capturar resultado como `purpose_slug`
 - Construir `worktree_name` como: "worktree-$purpose_slug"
 - Construir `branch_name` idéntico a `worktree_name`
@@ -84,8 +84,9 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 - Si exitoso, mostrar: "✅ Remote branch created: origin/$branch_name"
 
 ### 9. Logging y resultado final
-- **Log operación**: Crear directorio `.claude/logs/$(date +%Y-%m-%d)/` si no existe con `mkdir -p .claude/logs/$(date +%Y-%m-%d)/`
-- Agregar entrada JSONL a `.claude/logs/$(date +%Y-%m-%d)/worktree_operations.jsonl` usando el template
+- **Log operación**: Crear directorio de logs con `log_dir=".claude/logs/$(date +%Y-%m-%d)" && mkdir -p "$log_dir"`
+- Si falla creación de directorio: mostrar warning pero continuar
+- Agregar entrada JSONL a `"$log_dir/worktree_operations.jsonl"` usando el template
 - Mostrar estado exitoso:
   ```
   ✅ Worktree created successfully:
@@ -93,9 +94,18 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
   - Branch: $branch_name (tracking origin/$branch_name)
   - Parent: $parent_branch
 
-  Next steps:
+  ⚠️  CRÍTICO: Debes cambiar al worktree para trabajar correctamente:
+
+  PASO 1 - Cambiar directorio:
     cd $worktree_path
+    
+  PASO 2 - Iniciar nueva sesión Claude Code:
     claude /workflow:session-start
+    
+  ❌ SI NO HACES ESTO: Claude seguirá trabajando en el directorio 
+     anterior y NO funcionará correctamente el worktree.
+     
+  ✅ SOLO así tendrás sesiones Claude Code paralelas funcionando.
   ```
 
 ## 📊 Logging Format Template
