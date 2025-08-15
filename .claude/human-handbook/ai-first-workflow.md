@@ -16,7 +16,7 @@
 
 **Indispensable**: usar claude command /workflow:session-start antes de iniciar sesion de trabajo para asegurar consistencia de las configuraciones personalizadas.
 
-**Recomendado**: usar `/workflow:switch <base_branch>` al iniciar para limpiar workspace y partir desde rama base del proyecto. Al finalizar PRs mergeados, actualiza CHANGELOG.md automáticamente.
+**Recomendado**: usar `/workflow:switch <base_branch>` al iniciar para limpiar workspace y partir desde rama base del proyecto. Usar `/workflow:changelog --pr <number>` para actualizar CHANGELOG.md después de merge.
  
 ### **PASO 1: Crear PR**
 
@@ -166,7 +166,7 @@ git push
 ```
 
 **Casos:**
-- ✅ Aprobado → Merge → `/workflow:switch <base_branch>` (actualiza CHANGELOG.md + limpiar workspace)
+- ✅ Aprobado → Merge → `/workflow:changelog --pr <number>` + `/workflow:switch <base_branch>` (documentar + limpiar workspace)
 - 🔄 Nuevos findings → Repetir 3-6
 - 🚨 Issues persistentes → Pedir autorización
 
@@ -193,7 +193,8 @@ git push
 ## 🎯 Comandos Esenciales
 
 ```bash
-/workflow:switch <base_branch>    # Actualizar CHANGELOG.md + limpiar workspace (main/develop/qa)
+/workflow:switch <base_branch>    # Limpiar workspace (main/develop/qa)
+/workflow:changelog --pr <number> # Actualizar CHANGELOG.md con PR específico
 /pr [target-branch]      # Crear PR (target opcional)
 /github:findings-to-issues      # Convertir findings a issues
 /github:issues-to-solved [PR]   # Planificar resolución

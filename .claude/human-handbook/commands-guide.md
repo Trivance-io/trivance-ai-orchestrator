@@ -135,13 +135,22 @@
 
 ## 🗂️ Comandos de Workflow
 
-### 🔄 `/workflow:switch` - Cambio seguro de rama con changelog automático
+### 🔄 `/workflow:switch` - Cambio seguro de rama validando PR
 ```bash
 /workflow:switch <target_branch>
 ```
-**Qué hace**: Valida PR mergeado, actualiza CHANGELOG.md automáticamente, cambia a rama objetivo y limpia workspace.
+**Qué hace**: Valida PR mergeado, cambia a rama objetivo y limpia workspace temporal.
 **Cuándo usarlo**: Al finalizar PRs mergeados para cambiar a main/develop con cleanup completo.
-**Flujo**: Bloquea si PR no mergeado → Actualiza changelog (solo main) → Switch seguro → Limpieza
+**Flujo**: Bloquea si PR no mergeado → Switch seguro → Limpieza
+
+### 📝 `/workflow:changelog` - Actualización inteligente de changelog
+```bash
+/workflow:changelog --pr <number>       # Single PR
+/workflow:changelog --prs <n1,n2,n3>   # Multiple PRs
+```
+**Qué hace**: Actualiza CHANGELOG.md con PRs mergeados, detecta duplicados automáticamente.
+**Cuándo usarlo**: Después de merge para documentar cambios en proyecto.
+**Flujo**: Valida PRs mergeados → Detecta duplicados → Actualización atómica con backup
 
 ### `/workflow:session-start` - Iniciar sesión documentada
 ```bash
