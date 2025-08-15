@@ -61,11 +61,11 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
     - TERMINAR proceso completamente
   - Si pr_state == "merged" AND target_branch == "main":
     - Mostrar: "✓ PR mergeado detectado, actualizando changelog..."
-    - Ejecutar: `grep -q "PR #$pr_number" CHANGELOG.md` - si encuentra match, continuar al paso 4
-    - Ejecutar: `sed -i '' '/## \[Unreleased\]/a\
+    - Ejecutar: `grep -q "(PR #$pr_number)" CHANGELOG.md` - si encuentra match, continuar al paso 4
+    - Ejecutar: `sed '/## \[Unreleased\]/a\
 \
 ### Changed\
-- '"$pr_title"' (PR #'"$pr_number"')' CHANGELOG.md`
+- '"$pr_title"' (PR #'"$pr_number"')' CHANGELOG.md > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md`
     - Mostrar: "✅ Changelog actualizado con PR #$pr_number"
   - Si pr_state == "merged" AND target_branch != "main":
     - Mostrar: "✓ PR mergeado verificado, continuando switch..."
