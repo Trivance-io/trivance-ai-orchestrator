@@ -25,9 +25,13 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 
 ### 1. Validación de entrada y herramientas
 - Si no se proporciona argumento, mostrar error: "❌ Error: Debe especificar número de PR o lista separada por comas"
-- Ejecutar: `command -v gh >/dev/null 2>&1` - si falla, mostrar error: "❌ Error: gh CLI requerido" y terminar
-- Ejecutar: `command -v jq >/dev/null 2>&1` - si falla, mostrar error: "❌ Error: jq requerido" y terminar
-- Validar que CHANGELOG.md existe, si no existe mostrar error: "❌ Error: CHANGELOG.md no encontrado" y terminar
+- Validar herramientas requeridas con comando combinado:
+  ```bash
+  for tool in gh jq; do
+    command -v "$tool" >/dev/null 2>&1 || { echo "❌ Error: $tool requerido"; exit 1; }
+  done
+  ```
+- Validar que CHANGELOG.md existe: `[[ -f CHANGELOG.md ]] || { echo "❌ Error: CHANGELOG.md no encontrado"; exit 1; }`
 
 ### 2. Parsing de argumentos
 - Si argumento contiene coma:
@@ -52,19 +56,25 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
   - Mostrar: "✓ PR #$pr validado: $pr_title"
 
 ### 4. Detección de duplicados en CHANGELOG
-- Para cada PR en pr_list:
-  - Ejecutar: `grep -q "(PR #$pr)" CHANGELOG.md`
-  - Si encuentra match:
-    - Mostrar warning: "⚠️  PR #$pr ya existe en CHANGELOG.md, omitiendo"
-    - Remover PR de pr_list para procesamiento
-- Si pr_list queda vacío después de filtrado:
-  - Mostrar: "ℹ️  Todos los PRs ya están en CHANGELOG.md, nada que actualizar"
-  - TERMINAR proceso exitosamente
+- Filtrar PRs duplicados en una sola pasada:
+  ```bash
+  filtered_prs=()
+  for pr in "${pr_list[@]}"; do
+    if grep -q "(PR #$pr)" CHANGELOG.md; then
+      echo "⚠️  PR #$pr ya existe en CHANGELOG.md, omitiendo"
+    else
+      filtered_prs+=("$pr")
+    fi
+  done
+  pr_list=("${filtered_prs[@]}")
+  ```
+- Si pr_list vacío: mostrar mensaje y terminar exitosamente
 - Mostrar: "PRs a agregar: ${pr_list[*]}"
 
 ### 5. Actualización de CHANGELOG (Keep a Changelog format)
 - Para cada PR en pr_list:
-  - Obtener título: `pr_title=$(gh pr view "$pr" --json title --jq '.title')`
+  - Obtener datos completos: `pr_data=$(gh pr view "$pr" --json title,url --jq '{title, url}')`
+  - Extraer título: `pr_title=$(echo "$pr_data" | jq -r '.title')`
   - Detectar sección por tipo de commit:
     ```bash
     case "$pr_title" in
@@ -73,28 +83,25 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
       *) section="Changed" ;;  # docs, refactor, perf, style, test, chore
     esac
     ```
-  - Verificar si sección existe bajo `## [Unreleased]`:
+  - Actualizar CHANGELOG con orden correcto (más recientes primero):
     ```bash
     if grep -q "^### $section" CHANGELOG.md; then
-      # Agregar a sección existente
-      sed "/^### $section/a\\
-- $pr_title (PR #$pr)" CHANGELOG.md > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md
+      # Agregar a sección existente (inmediatamente después del header)
+      sed "/^### $section$/a\\\n- $pr_title (PR #$pr)" CHANGELOG.md > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md
     else
       # Crear nueva sección después de [Unreleased]
-      sed "/^## \[Unreleased\]/a\\
-\\
-### $section\\
-- $pr_title (PR #$pr)" CHANGELOG.md > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md
+      sed "/^## \[Unreleased\]$/a\\\n\\\n### $section\\\n- $pr_title (PR #$pr)" CHANGELOG.md > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md
     fi
     ```
   - Si sed falla, mostrar error: "❌ Error: Falló actualización para PR #$pr" y terminar
 
 ### 7. Validación post-actualización
-- Para cada PR en pr_list:
-  - Ejecutar: `grep -q "(PR #$pr)" CHANGELOG.md`
-  - Si no encuentra match:
-    - Mostrar error: "❌ Error: Validación falló para PR #$pr"
-    - TERMINAR proceso completamente
+- Validar inserción exitosa en una sola pasada:
+  ```bash
+  for pr in "${pr_list[@]}"; do
+    grep -q "(PR #$pr)" CHANGELOG.md || { echo "❌ Error: Validación falló para PR #$pr"; exit 1; }
+  done
+  ```
 
 ### 8. Resultado final
 - Mostrar: "✅ CHANGELOG.md actualizado exitosamente"
