@@ -145,8 +145,8 @@
 
 ### 📝 `/workflow:changelog` - Actualización inteligente de changelog
 ```bash
-/workflow:changelog --pr <number>       # Single PR
-/workflow:changelog --prs <n1,n2,n3>   # Multiple PRs
+/workflow:changelog <pr_number>         # Single PR
+/workflow:changelog <pr1,pr2,pr3>       # Multiple PRs
 ```
 **Qué hace**: Actualiza CHANGELOG.md con PRs mergeados, detecta duplicados automáticamente.
 **Cuándo usarlo**: Después de merge para documentar cambios en proyecto.
@@ -196,9 +196,9 @@
 
 ## 🧹 Comandos de Mantenimiento
 
-### 🧽 `/mantenimiento:cleanproject` - Limpieza integral
+### 🧽 `/cleanproject` - Limpieza integral
 ```bash
-/mantenimiento:cleanproject
+/cleanproject
 ```
 **Qué hace**: Limpia dead code, optimiza imports, remueve archivos innecesarios.
 **Cuándo usarlo**: Antes de releases o periódicamente para mantener el proyecto limpio.
@@ -299,20 +299,20 @@
 ```bash
 1. /todos:find                  # Ver deuda técnica
 2. /todos:fix                   # Resolver pendientes
-3. /mantenimiento:cleanproject  # Limpiar proyecto
-4. /desarrollo:make-it-pretty   # Mejorar legibilidad
+3. /cleanproject  # Limpiar proyecto
+4. /make-it-pretty             # Mejorar legibilidad
 5. /format                     # Formatear todo
 6. /commit "chore: cleanup"    # Documentar limpieza
 ```
 
 ### Análisis Estratégico Completo
 ```bash
-1. /analisis:deep "problema arquitectónico"  # Razonamiento profundo
-2. /analisis:e-team "challenge complejo"     # Análisis multi-experto
+1. /deep "problema arquitectónico"           # Razonamiento profundo
+2. /e-team "challenge complejo"              # Análisis multi-experto
 3. /understand                      # Mapear codebase
 4. /review                         # Revisar estado actual
 5. Implementar solución
-6. /documentacion:docs             # Documentar decisiones
+6. /docs                          # Documentar decisiones
 ```
 
 ---
@@ -321,8 +321,8 @@
 
 - **Combina comandos**: Usa flujos secuenciales para máximo valor
 - **Iterativo**: Los comandos recuerdan contexto entre ejecuciones
-- **Seguridad primero**: Siempre usa /analisis:security-scan antes de production
+- **Seguridad primero**: Siempre usa /security-scan antes de production
 - **Test frecuente**: Ejecuta /test después de cambios significativos
-- **Documenta cambios**: Usa /documentacion:docs para mantener documentación actualizada
-- **Análisis profundo**: Usa /analisis:deep para decisiones arquitectónicas críticas
+- **Documenta cambios**: Usa /docs para mantener documentación actualizada
+- **Análisis profundo**: Usa /deep para decisiones arquitectónicas críticas
 - **Gestión de deuda**: Convierte TODOs en issues con /todos:to-issues
