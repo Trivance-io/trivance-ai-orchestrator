@@ -159,7 +159,7 @@ git push
 1. /pr                    # Crear PR
 2. [Review automático]     # Aparecen findings
 3. /github:findings-to-issues    # Convertir a issues
-4. /issues-to-solved [PR] # Planificar (opcional)
+4. /github:issues-to-solved <pr_number> # Planificar (opcional)
 5. Resolver issues        # Manual o automático
 6. /commit + push         # Actualizar PR
 7. Re-review              # Validación final
@@ -194,10 +194,10 @@ git push
 
 ```bash
 /workflow:switch <base_branch>    # Limpiar workspace (main/develop/qa)
-/workflow:changelog <number>      # Actualizar CHANGELOG.md con PR específico
+/workflow:changelog <pr_number>   # Actualizar CHANGELOG.md con PR específico
 /pr [target-branch]      # Crear PR (target opcional)
 /github:findings-to-issues      # Convertir findings a issues
-/github:issues-to-solved [PR]   # Planificar resolución
+/github:issues-to-solved <pr_number>   # Planificar resolución
 /commit "fix: Closes #X" # Commit con referencia
 gh pr view [PR]          # Ver estado
 ```

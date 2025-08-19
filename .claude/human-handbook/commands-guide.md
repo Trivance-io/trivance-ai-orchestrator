@@ -145,8 +145,8 @@
 
 ### 📝 `/workflow:changelog` - Actualización inteligente de changelog
 ```bash
-/workflow:changelog --pr <number>       # Single PR
-/workflow:changelog --prs <n1,n2,n3>   # Multiple PRs
+/workflow:changelog <pr_number>         # Single PR
+/workflow:changelog <pr1,pr2,pr3>       # Multiple PRs
 ```
 **Qué hace**: Actualiza CHANGELOG.md con PRs mergeados, detecta duplicados automáticamente.
 **Cuándo usarlo**: Después de merge para documentar cambios en proyecto.
@@ -196,9 +196,9 @@
 
 ## 🧹 Comandos de Mantenimiento
 
-### 🧽 `/mantenimiento:cleanproject` - Limpieza integral
+### 🧽 `/cleanproject` - Limpieza integral
 ```bash
-/mantenimiento:cleanproject
+/cleanproject
 ```
 **Qué hace**: Limpia dead code, optimiza imports, remueve archivos innecesarios.
 **Cuándo usarlo**: Antes de releases o periódicamente para mantener el proyecto limpio.
@@ -241,47 +241,78 @@
 
 ---
 
+## 🌳 Comandos Worktree
+
+### `/worktree:create` - Crear worktree aislado
+```bash
+/worktree:create <purpose> <parent-branch>
+```
+**Qué hace**: Crea worktree en directorio sibling con rama nueva y upstream remoto.
+**Cuándo usarlo**: SIEMPRE para desarrollo (features, bugs, refactoring).
+**Flujo**: Valida argumentos → Verifica parent branch → Crea worktree → Configura upstream → Guía para cambio de directorio
+
+### `/worktree:cleanup` - Limpiar worktrees
+```bash
+/worktree:cleanup <worktree1> [worktree2] [...]
+```
+**Qué hace**: Elimina worktrees específicos con validación de ownership y estado limpio.
+**Cuándo usarlo**: Después de mergear PRs o cuando worktrees ya no se necesiten.
+**Flujo**: Valida ownership → Verifica estado limpio → Confirmación → Triple cleanup (worktree/local/remote)
+
+**Estándar del equipo:**
+- Todo desarrollo se hace en worktrees aislados
+- Mantiene workspace principal siempre limpio  
+- Permite sesiones Claude Code paralelas
+- Rollback instantáneo sin conflictos
+
+---
+
 ## 🎯 Flujos Típicos
 
 ### Desarrollo de Feature Nueva
 ```bash
-1. /workflow:session-start        # Documentar objetivos
-2. /understand                    # Entender contexto
-3. /implement "nueva feature"     # Implementar
-4. /test                         # Validar funcionamiento  
-5. /review                       # Revisar calidad
-6. /security-scan                # Verificar seguridad
-7-10. Seguir workflow AI-First    # Ver: ai-first-workflow.md
+1. /worktree:create feature-name develop  # Crear worktree aislado
+2. cd ../worktree-feature-name            # Cambiar al worktree
+3. claude /workflow:session-start         # Nueva sesión en worktree
+4. /understand                            # Entender contexto
+5. /implement "nueva feature"             # Implementar
+6. /test                                 # Validar funcionamiento  
+7. /review                               # Revisar calidad
+8. /security-scan                        # Verificar seguridad
+9-12. Seguir workflow AI-First           # Ver: ai-first-workflow.md
 ```
 
 > 📚 **Para workflow completo de PR + findings + issues:** Ver `ai-first-workflow.md`
 
 ### Bug Fix Urgente
 ```bash
-1. /understand                   # Entender el problema
-2. Arreglar el código
-3. /test                        # Validar fix
-4. /commit "fix: descripción"   # Commit inmediato
+1. /worktree:create fix-bug-name main     # Worktree desde main
+2. cd ../worktree-fix-bug-name            # Cambiar al worktree
+3. claude /workflow:session-start         # Nueva sesión en worktree
+4. /understand                            # Entender el problema
+5. Arreglar el código
+6. /test                                 # Validar fix
+7. /commit "fix: descripción"            # Commit inmediato
 ```
 
 ### Limpieza de Código
 ```bash
 1. /todos:find                  # Ver deuda técnica
 2. /todos:fix                   # Resolver pendientes
-3. /mantenimiento:cleanproject  # Limpiar proyecto
-4. /desarrollo:make-it-pretty   # Mejorar legibilidad
+3. /cleanproject  # Limpiar proyecto
+4. /make-it-pretty             # Mejorar legibilidad
 5. /format                     # Formatear todo
 6. /commit "chore: cleanup"    # Documentar limpieza
 ```
 
 ### Análisis Estratégico Completo
 ```bash
-1. /analisis:deep "problema arquitectónico"  # Razonamiento profundo
-2. /analisis:e-team "challenge complejo"     # Análisis multi-experto
+1. /deep "problema arquitectónico"           # Razonamiento profundo
+2. /e-team "challenge complejo"              # Análisis multi-experto
 3. /understand                      # Mapear codebase
 4. /review                         # Revisar estado actual
 5. Implementar solución
-6. /documentacion:docs             # Documentar decisiones
+6. /docs                          # Documentar decisiones
 ```
 
 ---
@@ -290,8 +321,8 @@
 
 - **Combina comandos**: Usa flujos secuenciales para máximo valor
 - **Iterativo**: Los comandos recuerdan contexto entre ejecuciones
-- **Seguridad primero**: Siempre usa /analisis:security-scan antes de production
+- **Seguridad primero**: Siempre usa /security-scan antes de production
 - **Test frecuente**: Ejecuta /test después de cambios significativos
-- **Documenta cambios**: Usa /documentacion:docs para mantener documentación actualizada
-- **Análisis profundo**: Usa /analisis:deep para decisiones arquitectónicas críticas
+- **Documenta cambios**: Usa /docs para mantener documentación actualizada
+- **Análisis profundo**: Usa /deep para decisiones arquitectónicas críticas
 - **Gestión de deuda**: Convierte TODOs en issues con /todos:to-issues
