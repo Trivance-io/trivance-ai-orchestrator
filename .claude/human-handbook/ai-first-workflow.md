@@ -4,6 +4,7 @@
 
 ## 🎯 Qué aprenderás
 
+- **Prerequisito**: Worktree activo via `/workflow:session-start`
 - Crear PR con Claude Code
 - Convertir findings en issues
 - Resolver issues en el mismo PR
@@ -14,11 +15,15 @@
 
 ## 📋 Flujo Completo
 
-**Indispensable**: usar claude command /workflow:session-start antes de iniciar sesion de trabajo para asegurar consistencia de las configuraciones personalizadas.
+**Prerequisito**: usar `/workflow:session-start` → seleccionar "Desarrollo con código" → crear worktree automáticamente para tu feature.
 
-**Recomendado**: usar `/workflow:switch <base_branch>` al iniciar para limpiar workspace y partir desde rama base del proyecto. Usar `/workflow:changelog <number>` para actualizar CHANGELOG.md después de merge.
+**Contexto**: Los siguientes comandos se ejecutan desde tu worktree (NO desde main). Si no tienes worktree activo, regresa a session-start primero.
+
+**Recomendado**: al finalizar usar `/workflow:switch <base_branch>` (cambiar contexto) + `/worktree:cleanup <worktree-name>` (eliminar worktree). Usar `/workflow:changelog <number>` para actualizar CHANGELOG.md después de merge.
  
 ### **PASO 1: Crear PR**
+
+💡 **Confirmación**: Estás en tu worktree de feature (NO en main)
 
 ```bash
 # Implementar funcionalidad
@@ -156,7 +161,8 @@ git push
 ## 🔄 Flujo Resumido
 
 ```bash
-1. /pr                    # Crear PR
+0. /workflow:session-start → "Desarrollo" → worktree  # Setup inicial
+1. /pr                    # Crear PR (desde worktree)
 2. [Review automático]     # Aparecen findings
 3. /github:findings-to-issues    # Convertir a issues
 4. /github:issues-to-solved <pr_number> # Planificar (opcional)
@@ -166,7 +172,7 @@ git push
 ```
 
 **Casos:**
-- ✅ Aprobado → Merge → `/workflow:changelog <number>` + `/workflow:switch <base_branch>` (documentar + limpiar workspace)
+- ✅ Aprobado → Merge → `/workflow:changelog <number>` + `/workflow:switch <base_branch>` + `/worktree:cleanup <worktree-name>` (documentar + cambiar contexto + eliminar worktree)
 - 🔄 Nuevos findings → Repetir 3-6
 - 🚨 Issues persistentes → Pedir autorización
 
@@ -192,13 +198,33 @@ git push
 
 ## 🎯 Comandos Esenciales
 
+### **Por Contexto de Trabajo:**
+
+**Desde main (inicio de sesión):**
 ```bash
-/workflow:switch <base_branch>    # Limpiar workspace (main/develop/qa)
-/workflow:changelog <pr_number>   # Actualizar CHANGELOG.md con PR específico
-/pr [target-branch]      # Crear PR (target opcional)
-/github:findings-to-issues      # Convertir findings a issues
-/github:issues-to-solved <pr_number>   # Planificar resolución
-/commit "fix: Closes #X" # Commit con referencia
-gh pr view [PR]          # Ver estado
+/workflow:session-start          # Configurar workspace
 ```
+
+**Desde worktree (desarrollo activo):**
+```bash
+/pr [target-branch]              # Crear PR
+/commit "fix: Closes #X"         # Commit con referencia  
+/github:findings-to-issues       # Convertir findings
+/github:issues-to-solved <pr>    # Planificar resolución
+```
+
+**Desde cualquier ubicación:**
+```bash
+/workflow:switch <base_branch>   # Cambiar contexto (regresa a main/develop)
+/worktree:cleanup <worktree>     # Eliminar worktree específico completamente
+/workflow:changelog <pr_number>  # Actualizar CHANGELOG
+gh pr view [PR]                  # Ver estado
+```
+
+### **Cleanup: Cuándo usar cada comando:**
+
+| Comando | Propósito | Cuándo usar |
+|---------|----------|--------------|
+| `/workflow:switch main` | Cambiar contexto de trabajo | Después de merge, para regresar a rama base |
+| `/worktree:cleanup <name>` | Eliminar worktree obsoleto | Cuando ya no necesitas el worktree (requiere confirmación) |
 
