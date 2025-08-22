@@ -5,11 +5,10 @@ Conecta Claude Code con GitHub para gestionar repos, issues, y PRs directamente.
 ## Instalación
 
 ```bash
-cd trivance-dev-config
 ./.claude/mcp-servers/github/setup.sh
 ```
 
-**⚠️ DESPUÉS DE LA INSTALACIÓN: Configurar Token de GitHub**
+**Configurar Token de GitHub**
 
 El script te pedirá un GitHub Personal Access Token. Para generarlo:
 
@@ -18,12 +17,12 @@ El script te pedirá un GitHub Personal Access Token. Para generarlo:
 2. Click **'Generate new token (classic)'**
 3. En **Note**: `Claude MCP - [tu-nombre]`
 4. **Expiration**: `90 days` (recomendado)
-5. Selecciona estos **scopes**:
-   - ✅ `repo` (Full control of private repositories)
-   - ✅ `read:org` (Read org and team membership)  
-   - ✅ `read:user` (Read user profile data)
+5. Selecciona estos scopes:
+   - `repo`
+   - `read:org`
+   - `read:user`
 6. Click **'Generate token'**
-7. **⚠️ COPIA EL TOKEN INMEDIATAMENTE** (solo se muestra una vez)
+7. Copia el token (solo se muestra una vez)
 8. Pégalo cuando el script lo solicite
 
 **Nota**: Usar token **Classic** (no Fine-grained) para compatibilidad completa con MCP.
@@ -41,6 +40,10 @@ En Claude Code:
 /mcp               # Debe mostrar conexión activa
 ```
 
+## Configuración
+
+Toolsets habilitados: `context`, `issues`, `pull_requests`
+
 ## Ejemplos de uso
 
 ```
@@ -52,13 +55,12 @@ En Claude Code:
 
 ## Configuración Manual
 
-**Template de configuración:** Ver `.claude/mcp-servers/.mcp.example.json` para estructura completa de MCP servers (GitHub + otros futuros).
-
-**Si el script falla o no configura el token automáticamente:**
+Si el script falla:
 
 ```bash
-# Configurar token manualmente
+# Configurar token y toolsets manualmente
 claude mcp update github -e GITHUB_PERSONAL_ACCESS_TOKEN="tu_token_aquí"
+claude mcp update github -e GITHUB_TOOLSETS="context,issues,pull_requests"
 
 # Verificar que esté configurado
 claude mcp list
@@ -75,4 +77,5 @@ cat .mcp.json  # Debe mostrar GITHUB_PERSONAL_ACCESS_TOKEN en env
 **"No MCP servers configured"** → Usar `/mcp` en Claude Code  
 **"Permission denied"** → Verificar permisos del token  
 **"Authentication failed"** → Reconfigurar token: `claude mcp update github -e GITHUB_PERSONAL_ACCESS_TOKEN="tu_nuevo_token"`  
+**"Missing toolset functionality"** → Verificar GITHUB_TOOLSETS: `cat .mcp.json | grep TOOLSETS`  
 **Docker no responde** → Iniciar Docker Desktop
