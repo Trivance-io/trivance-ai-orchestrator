@@ -49,7 +49,8 @@ def main():
 3. CLARITY: Clear, relevant language only. No promotional/redundant comments.
 4. VALIDATION: Verify syntax and logic before responding.
 5. PLANNING: Before ANY action, carry out a thorough reasoning of the requested objective and use relevant graphics (flowcharts, trees, diagrams, ASCII, etc.) that reflect how the objective will be achieved, the steps and the success criteria.
-6. VISUAL COMMUNICATION: Express complex information graphically for maximum clarity."""
+6. VISUAL COMMUNICATION: Express complex information graphically for maximum clarity.
+7. EXHAUSTIVE DISCOVERY: Complete validation of ALL data before implementation. No assumptions - verify every pattern against reality."""
 
     print(guidelines)
     log_result()

@@ -8,6 +8,7 @@
 - Crear PR con Claude Code
 - Convertir findings en issues
 - Resolver issues en el mismo PR
+- 💡 **Cuándo usar agentes especialistas** para acelerar resolución
 - Gestionar iteraciones hasta validación
 - Cuándo pedir autorización
 
@@ -15,15 +16,15 @@
 
 ## 📋 Flujo Completo
 
-**Prerequisito**: usar `/workflow:session-start` → seleccionar "Desarrollo con código" → crear worktree automáticamente para tu feature.
+**Prerequisito**: usar `/workflow:session-start` → si tu flujo de trabajo sera desarollo/bugs/refactor → crear worktree automáticamente para tu feature con `/worktree:create`.
 
 **Contexto**: Los siguientes comandos se ejecutan desde tu worktree (NO desde main). Si no tienes worktree activo, regresa a session-start primero.
 
-**Recomendado**: al finalizar usar `/workflow:switch <base_branch>` (cambiar contexto) + `/worktree:cleanup <worktree-name>` (eliminar worktree). Usar `/workflow:changelog <number>` para actualizar CHANGELOG.md después de merge.
+**Importante**: al finalizar usar `/workflow:switch <base_branch>` (cambiar contexto) + `/worktree:cleanup <worktree-name>` (eliminar worktree). Usar `/workflow:changelog <number>` para actualizar CHANGELOG.md después de merge.
  
 ### **PASO 1: Crear PR**
 
-💡 **Confirmación**: Estás en tu worktree de feature (NO en main)
+💡 **Confirmación**: Estás en tu worktree de feature (NO en main/develop, etc...)
 
 ```bash
 # Implementar funcionalidad
@@ -34,12 +35,22 @@
 /pr        # Crea pull request automáticamente
 ```
 
+💡 **Challenge Detection**: Para tasks complejos considera usar agentes especialistas:
+- **Multi-step development** → `tech-lead-orchestrator` → `/agent:tech-lead-orchestrator`
+- **Security-sensitive features** → `code-reviewer` → `/agent:code-reviewer --security-focus`
+- **Performance-critical code** → `performance-optimizer` → `/agent:performance-optimizer`
+
 ---
 
 ### **PASO 2: Review Automático**
-
+*Al momento de generar el PR se realiza un code review automatico en Github, a consideración del equipo lider, se realiza un code review manual tambien*
 Tipos de findings:
 - SECURITY, BUG, TODO, PERFORMANCE
+
+💡 **Smart Delegation**: Findings complejos se benefician de especialistas:
+- **SECURITY findings** → `code-reviewer` → `/agent:code-reviewer --security-audit`
+- **PERFORMANCE issues** → `performance-optimizer` → `/agent:performance-optimizer`
+- **LEGACY code problems** → `code-archaeologist` → `/agent:code-archaeologist`
 
 ⚠️ **Importante:** No crear PR nuevo, usar el mismo
 
@@ -71,10 +82,17 @@ Genera plan de resolución por prioridades:
 
 ⚠️ **Importante:** Usar el mismo PR, no crear uno nuevo.
 
-**3 opciones:**
+**4 opciones:**
 - **A:** Ya resueltos automáticamente (solo commitear)
 - **B:** Seguir plan como guía  
 - **C:** Resolver manualmente
+- **D:** 💡 **Delegar a especialista** para issues complejos
+
+💡 **Specialist Assistance**: Cuando un issue requiere expertise específico:
+- **Complex architecture** → `tech-lead-orchestrator` → `/agent:tech-lead-orchestrator`
+- **Database optimization** → `database-expert` → `/agent:database-expert`
+- **API design** → `api-architect` → `/agent:api-architect`
+- **Framework-specific** → Usar agente especializado del stack
 
 Siempre usar `Closes #77` en commits para trazabilidad.
 
@@ -104,6 +122,11 @@ git push     # Push directo al branch remoto
 - Bloqueos críticos de +48 horas
 - Conflictos técnicos complejos
 - Decisiones que afectan múltiples servicios
+
+💡 **Expert Panel Consultation**: Antes de escalar, considera consultar especialistas:
+- **Technical impact** → `tech-lead-orchestrator` → `/agent:tech-lead-orchestrator --impact-analysis`
+- **Security assessment** → `code-reviewer` → `/agent:code-reviewer --vulnerability-assessment`
+- **Performance implications** → `performance-optimizer` → `/agent:performance-optimizer --cost-analysis`
 
 ### **Template Simple para Autorización**
 
@@ -163,10 +186,12 @@ git push
 ```bash
 0. /workflow:session-start → "Desarrollo" → worktree  # Setup inicial
 1. /pr                    # Crear PR (desde worktree)
+   💡 Challenge complejo? → /agent:tech-lead-orchestrator
 2. [Review automático]     # Aparecen findings
+   💡 SECURITY/PERFORMANCE? → /agent:code-reviewer / /agent:performance-optimizer
 3. /github:findings-to-issues    # Convertir a issues
 4. /github:issues-to-solved <pr_number> # Planificar (opcional)
-5. Resolver issues        # Manual o automático
+5. Resolver issues        # Manual/automático/💡especialista
 6. /commit + push         # Actualizar PR
 7. Re-review              # Validación final
 ```
@@ -227,4 +252,41 @@ gh pr view [PR]                  # Ver estado
 |---------|----------|--------------|
 | `/workflow:switch main` | Cambiar contexto de trabajo | Después de merge, para regresar a rama base |
 | `/worktree:cleanup <name>` | Eliminar worktree obsoleto | Cuando ya no necesitas el worktree (requiere confirmación) |
+
+---
+
+## 🤖 Guía Rápida de Agentes
+
+Los agentes especialistas aceleran la resolución y mejoran la calidad. Son **opcionales** pero **recomendados** para tasks complejos.
+
+### **🎯 Cuándo Usar Agentes**
+
+**Orquestadores** (para coordination):
+- `tech-lead-orchestrator`: Multi-step features, decisiones arquitectónicas, coordination compleja
+
+**Core Specialists** (para quality):
+- `code-reviewer`: Security issues, code quality, vulnerability assessment
+- `performance-optimizer`: Bottlenecks, optimization, cost analysis
+- `code-archaeologist`: Legacy code, complex codebase exploration
+
+**Framework Specialists** (para implementation):
+- `react-component-architect`, `nestjs-backend-expert`, `database-expert`, etc.
+
+### **💡 Pattern de Uso**
+
+```bash
+# Identificar challenge type
+"Claude, implementa OAuth con roles"
+
+# 💡 Suggestion aparece automáticamente
+Challenge: IMPLEMENTATION + Security → usar tech-lead-orchestrator
+
+# One-click activation
+/agent:tech-lead-orchestrator
+
+# Continuar con workflow normal
+/pr
+```
+
+**Tip**: Los agentes se integran naturalmente en el workflow. Las suggestions aparecen contextualmente - simplemente úsalas cuando aporten value.
 

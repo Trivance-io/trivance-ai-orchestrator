@@ -41,7 +41,7 @@ Choose the highest ROI; tie-break toward the simpler one.
 - **Open TODO / backlog items** with assignees and due dates.
 - **Key file or directory paths** referenced in the conversation.
 
-## Omit or condense
+### Omit or condense
 - Casual conversation or small talk.
 - Verbose CLI/test logs or stack traces unless directly required.
 - Duplicate or trivial messages.
@@ -78,6 +78,28 @@ The tech-lead-orchestrator serves as:
 - **Strategic intelligence layer** preventing technical debt
 - **Mandatory planning phase** for all complexity levels
 
+### **Agent Ecosystem Architecture**
+
+**5-tier specialist system** reflecting complete `.claude/agents/` structure:
+
+- **Orquestadores**: `tech-lead-orchestrator` for multi-step coordination and strategic decisions
+
+- **Core Specialists**: `code-reviewer`, `performance-optimizer`, `code-archaeologist`, `documentation-specialist`
+
+- **Design Specialists**: `ui-designer`, `ux-researcher`, `brand-guardian`, `whimsy-injector`, `visual-storyteller`
+
+- **Specialized Framework Experts**: 
+  - **Django**: `django-api-developer`, `django-backend-expert`, `django-orm-expert`
+  - **Laravel**: `laravel-backend-expert`, `laravel-eloquent-expert`  
+  - **Node**: `nestjs-backend-expert`
+  - **Rails**: `rails-activerecord-expert`, `rails-api-developer`, `rails-backend-expert`
+  - **React**: `react-component-architect`, `react-native-expert`, `react-nextjs-expert`
+  - **Vue**: `vue-component-architect`, `vue-nuxt-expert`, `vue-state-manager`
+
+- **Universal Specialists**: `api-architect`, `backend-developer`, `database-expert`, `frontend-developer`, `mobile-developer`, `tailwind-css-expert`
+
+**Selection principle**: Use orquestadores for complexity coordination, specialized for framework-specific tasks, universal for cross-stack challenges.
+
 ### **Implementation Reference**
 See `.claude/agents/orchestrators/tech-lead-orchestrator.md` for complete Strategic PM specifications and XML response formats. 
 
@@ -85,19 +107,26 @@ See `.claude/agents/orchestrators/tech-lead-orchestrator.md` for complete Strate
 
 @.claude/human-handbook/ai-first-workflow.md
 
-Complete workflow from implementation to merge:
-- PR creation with Claude Code  
-- Converting findings into issues
-- Iterative resolution within same PR
-- Authorization criteria after 4-5 iterations
+**Enhanced workflow with agent ecosystem integration**:
+- PR creation with challenge detection and specialist suggestions
+- Converting findings to issues with smart delegation options  
+- Iterative resolution with contextual specialist assistance
+- Expert panel consultation before authorization escalation
+- Authorization criteria after 4-5 iterations with specialist backing
 
 ## Claude Code Memories
 
-- Never mix Spanish and English. Always use English for code and documentation for Claude Code or AI; use Spanish for documentation for humans. There should never be cases of files with English and Spanish.
+### **Project Operations**
+- **Complexity Budget**: Validate against Size S/M/L metrics before exceeding scope.
+- **AI-First Principle**: All plans must be executable by AI with human oversight.
 
-- **Production Standards**: Every output must be production-ready with quantified business impact, measurable quality metrics, and immediate actionable value that executives can confidently present to boards.
+### **Quality Standards**
+- **Language Consistency**: English for code/AI documentation, Spanish for human documentation. Never mix languages in same file.
+- **Communication Style**: Professional, minimalist, clear language. Eliminate promotional content.
+- **Output Quality**: Production-ready with quantified business impact and executive-presentable value.
+- **Quality Gates**: Use code-reviewer proactively for security and performance validation.
 
-- **Professional Communication Standards**
-1. Maintain professional, minimalist, and clear language
-2. Eliminate promotional or redundant content
-3. Focus on actionable intelligence and measurable outcomes
+### **Agent Integration**
+- **Contextual Suggestions**: Suggest specialists based on challenge type, never mandate usage.
+- **Orquestrator Priority**: Use `tech-lead-orchestrator` for multi-step challenges and strategic coordination.
+- **Specialist Selection**: Core specialists for quality, framework specialists for implementation.
