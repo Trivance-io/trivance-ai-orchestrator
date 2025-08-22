@@ -56,54 +56,32 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
   - Mostrar: "✓ PR #$pr validado: $pr_title"
 
 ### 4. Detección de duplicados en CHANGELOG
-- Filtrar PRs duplicados en una sola pasada:
-  ```bash
-  filtered_prs=()
-  for pr in "${pr_list[@]}"; do
-    if grep -q "(PR #$pr)" CHANGELOG.md; then
-      echo "⚠️  PR #$pr ya existe en CHANGELOG.md, omitiendo"
-    else
-      filtered_prs+=("$pr")
-    fi
-  done
-  pr_list=("${filtered_prs[@]}")
-  ```
-- Si pr_list vacío: mostrar mensaje y terminar exitosamente
-- Mostrar: "PRs a agregar: ${pr_list[*]}"
+- Filtrar PRs duplicados verificando si cada PR ya existe en CHANGELOG.md
+- Para PRs que ya existen, mostrar mensaje informativo y omitir
+- Para PRs nuevos, mantener en lista para procesamiento
+- Si no quedan PRs por procesar, mostrar mensaje y terminar exitosamente
+- Mostrar lista final de PRs a agregar
 
 ### 5. Actualización de CHANGELOG (Keep a Changelog format)
 - Para cada PR en pr_list:
   - Obtener datos completos: `pr_data=$(gh pr view "$pr" --json title,url --jq '{title, url}')`
   - Extraer título: `pr_title=$(echo "$pr_data" | jq -r '.title')`
-  - Detectar sección por tipo de commit:
-    ```bash
-    case "$pr_title" in
-      feat:*) section="Added" ;;
-      fix:*) section="Fixed" ;;
-      *) section="Changed" ;;  # docs, refactor, perf, style, test, chore
-    esac
-    ```
+  - Detectar sección por tipo de commit (feat: → Added, fix: → Fixed, otros → Changed)
+  - Obtener fecha actual para organización por fecha
   - Actualizar CHANGELOG con orden correcto (más recientes primero):
-    ```bash
-    if grep -q "^### $section" CHANGELOG.md; then
-      # Agregar a sección existente (inmediatamente después del header)
-      sed "/^### $section$/a\\\n- $pr_title (PR #$pr)" CHANGELOG.md > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md
-    else
-      # Crear nueva sección después de [Unreleased]
-      sed "/^## \[Unreleased\]$/a\\\n\\\n### $section\\\n- $pr_title (PR #$pr)" CHANGELOG.md > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md
-    fi
-    ```
+    - Si fecha actual ya existe en CHANGELOG:
+      - Si sección (Added/Fixed/Changed) existe en esa fecha: agregar entry después del header de sección
+      - Si sección no existe: crear nueva sección en fecha existente
+    - Si fecha actual no existe: crear nueva fecha al inicio con su sección correspondiente
+  - Mantener formato Keep a Changelog con entries como: `- título (PR #número)`
   - Si sed falla, mostrar error: "❌ Error: Falló actualización para PR #$pr" y terminar
 
-### 7. Validación post-actualización
-- Validar inserción exitosa en una sola pasada:
-  ```bash
-  for pr in "${pr_list[@]}"; do
-    grep -q "(PR #$pr)" CHANGELOG.md || { echo "❌ Error: Validación falló para PR #$pr"; exit 1; }
-  done
-  ```
+### 6. Validación post-actualización
+- Validar que cada PR fue insertado correctamente en CHANGELOG.md
+- Para cada PR procesado, verificar que el patrón "(PR #número)" existe en el archivo
+- Si algún PR no se encuentra, mostrar error específico y terminar proceso
 
-### 8. Resultado final
+### 7. Resultado final
 - Mostrar: "✅ CHANGELOG.md actualizado exitosamente"
 - Mostrar: "PRs agregados: ${pr_list[*]}"
 - Mostrar cambios: `git diff --no-index /dev/null CHANGELOG.md | head -20`
