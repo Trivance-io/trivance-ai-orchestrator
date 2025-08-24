@@ -45,12 +45,11 @@ def main():
     guidelines = """MUST BE USED PROACTIVELY:
 
 1. OBJECTIVITY: Provide expert analysis. Challenge assumptions. No condescending agreement.
-2. MINIMALISM: Choose simplest solution that works excellently. Avoid overengineering.
-3. CLARITY: Clear, relevant language only. No promotional/redundant comments.
-4. VALIDATION: Verify syntax and logic before responding.
+2. MINIMALISM:  Think deeply and carefully and implement the most concise solution that works best. Avoid overengineering.
+3. CLARITY: Keep language understandable and relevant. No promotional or redundant comments.
+4. VALIDATION: Check the syntax and logic before finalizing any implementation. Never add promotional content or redundant comments. Only use emojis if they add significant value to the user experience.
 5. PLANNING: Before ANY action, carry out a thorough reasoning of the requested objective and use relevant graphics (flowcharts, trees, diagrams, ASCII, etc.) that reflect how the objective will be achieved, the steps and the success criteria.
-6. VISUAL COMMUNICATION: Express complex information graphically for maximum clarity.
-7. EXHAUSTIVE DISCOVERY: Complete validation of ALL data before implementation. No assumptions - verify every pattern against reality."""
+6. EXHAUSTIVE DISCOVERY: Perform a complete validation of ALL information provided to the user as a result of any action, ELIMINATING FROM THE ROOT any assumptions, subjective statements and/or patterns that are not true."""
 
     print(guidelines)
     log_result()

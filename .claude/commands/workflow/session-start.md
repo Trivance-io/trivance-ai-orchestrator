@@ -33,7 +33,7 @@ Mostrar exactamente este texto:
 - Si comando falla, mostrar: "ℹ️ GitHub CLI no disponible"
 - Si exitoso y hay issues:
   - Mostrar header: "🎯 **Tu situación actual:**"
-  - Agregar: "Tienes [número] issues activos que podrían afectar tu trabajo:"
+  - Agregar: "Tienes [número] issues activos:"
   - Para issues 1-5: mostrar cada uno como "• #[número] [título]"
   - Si hay 6 o más: agregar línea "• Ver todos en: github.com/[owner]/[repo]/issues/assigned"
   - Agregar línea vacía después
@@ -57,11 +57,6 @@ Comandos típicos:
 /worktree:create feature-auth develop     # Feature desde develop
 /worktree:create fix-payment-bug main     # Hotfix desde main  
 /worktree:cleanup worktree-feature-auth   # Limpiar al terminar
-
-**Restricciones automáticas activas:**
-- Sin firmas "Co-authored-by" o "Generated with Claude Code"
-- Sin modificaciones a git config
-- Sin emojis en commits/PRs
 ```
 
 **SI YA estamos en worktree (pwd contiene "worktree-")**, mostrar:
@@ -69,11 +64,6 @@ Comandos típicos:
 ```
 ⚙️ **Protocolo de trabajo:**
 ✓ Ya estás en worktree - listo para desarrollo
-
-**Restricciones automáticas activas:**
-- Sin firmas "Co-authored-by" o "Generated with Claude Code"
-- Sin modificaciones a git config
-- Sin emojis en commits/PRs
 ```
 
 ### 6. Decisión asistida
