@@ -33,7 +33,7 @@ Mostrar exactamente este texto:
 - Si comando falla, mostrar: "ℹ️ GitHub CLI no disponible"
 - Si exitoso y hay issues:
   - Mostrar header: "🎯 **Tu situación actual:**"
-  - Agregar: "Tienes [número] issues activos:"
+  - Agregar: "Tienes [número] Github issues activos:"
   - Para issues 1-5: mostrar cada uno como "• #[número] [título]"
   - Si hay 6 o más: agregar línea "• Ver todos en: github.com/[owner]/[repo]/issues/assigned"
   - Agregar línea vacía después
@@ -46,7 +46,7 @@ Mostrar exactamente este texto:
 **SI NO estamos en worktree (pwd no contiene "worktree-")**, mostrar:
 
 ```
-⚙️ **Protocolo de trabajo:**
+⚙️ **Cómo trabajamos aquí:**
 Para desarrollo/issues con código, usamos worktrees para mantener branches limpias:
 
 1. Crear worktree: /worktree:create <purpose> <parent-branch>
@@ -62,7 +62,6 @@ Comandos típicos:
 **SI YA estamos en worktree (pwd contiene "worktree-")**, mostrar:
 
 ```
-⚙️ **Protocolo de trabajo:**
 ✓ Ya estás en worktree - listo para desarrollo
 ```
 
