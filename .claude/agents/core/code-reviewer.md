@@ -30,12 +30,18 @@ TIER 3 - DATABASE & CACHE:
   - "**/*database*.{yml,yaml}" # DB configurations  
   - "**/*redis*.conf"        # Cache configurations
   - "**/application*.{yml,yaml,properties}" # Framework configs
+
+TIER 4 - CODE QUALITY FOCUS:
+  - "**/{src,lib}/**/*.{js,ts,py,go,java}" # Core application logic
+  - "**/{test,tests,spec}/**/*" # Test files requiring coverage analysis
+  - "**/{build,scripts,tools}/**/*.{js,py,sh}" # Build and automation scripts
 ```
 
 3. **Apply review strategy based on file type:**
-   - **High-risk configs** → Configuration Change Review (CRITICAL FOCUS)
+   - **High-risk configs (TIER 1-3)** → Configuration Change Review (CRITICAL FOCUS)
+   - **Code quality files (TIER 4)** → Enhanced Code Quality Review + Edge Cases Analysis
    - **Standard code files** → Standard Code Review Checklist
-   - **Mixed changes** → Both strategies with config priority
+   - **Mixed changes** → Apply highest priority strategy (config > code quality > standard)
 
 4. Begin review immediately with heightened scrutiny for configuration changes
 
@@ -136,18 +142,150 @@ For EVERY configuration change, require answers to:
 
 ## Standard Code Review Checklist
 
+### Core Code Quality
 - Code is simple and readable
-- Functions and variables are well-named
-- No duplicated code  
+- Functions and variables are well-named  
+- No duplicated code (DRY principle)
+- Single responsibility per function/class
+- Functions are small and focused (<50 lines)
+- Complex logic is broken into smaller functions
+- Magic numbers replaced with named constants
+- Code follows consistent formatting standards
+
+### Error Handling & Resilience
 - Proper error handling with specific error types
+- Exceptions provide meaningful messages
+- Resources are properly cleaned up (try-finally, using statements)
+- Graceful degradation for non-critical failures
+- Retry logic for transient failures where appropriate
+- Circuit breaker patterns for external service calls
+
+### Security Best Practices
 - No exposed secrets, API keys, or credentials
 - Input validation and sanitization implemented
-- Good test coverage including edge cases
-- Performance considerations addressed
-- Security best practices followed
-- Documentation updated for significant changes
+- SQL injection prevention (parameterized queries)
+- XSS prevention (output encoding)
+- Authentication and authorization properly implemented
+- Sensitive data is encrypted at rest and in transit
+- Rate limiting implemented for public APIs
 
-## Review Output Format
+### Performance Considerations
+- No obvious performance anti-patterns (N+1 queries, nested loops)
+- Database queries are optimized with proper indexes
+- Memory usage is reasonable (no memory leaks)
+- CPU-intensive operations are properly handled
+- Caching strategy implemented where beneficial
+- Async/await used appropriately for I/O operations
+
+### Testing & Documentation
+- Good test coverage including edge cases
+- Unit tests are independent and deterministic
+- Integration tests cover critical user paths
+- Test names clearly describe what they validate
+- Documentation updated for significant changes
+- API documentation includes examples and error codes
+
+### Language-Specific Patterns
+
+#### JavaScript/TypeScript
+- Proper async/await usage (avoid callback hell)
+- TypeScript types are properly defined
+- Event listeners are properly removed
+- DOM manipulation follows best practices
+
+#### Python  
+- PEP 8 compliance
+- Proper use of generators vs lists
+- Exception handling follows Python conventions
+- Virtual environment dependencies are locked
+
+#### Java
+- Proper Stream API usage
+- Thread safety considerations
+- Resource management (try-with-resources)
+- Immutable objects where appropriate
+
+#### Go
+- Proper goroutine management (no goroutine leaks)
+- Channel usage follows Go patterns
+- Error handling follows Go conventions
+- Interface segregation principle
+
+### Architecture & Design Principles
+- SOLID principles are followed
+- No circular dependencies between modules
+- Clear separation of concerns
+- God objects/classes are avoided (<300 lines)
+- Tight coupling is minimized
+- Dependency injection used appropriately
+- Database schema changes include migrations
+
+## Edge Cases Detection
+
+For TIER 4 code quality files and complex logic, actively scan for these critical edge case patterns:
+
+### Boundary Conditions
+```
+# HIGH RISK - Common edge case failures:
+- Off-by-one errors in loops and array access
+- Integer overflow/underflow with large numbers
+- Division by zero or negative numbers
+- Null/undefined/None value handling
+- Empty collections (lists, arrays, maps) processing
+- String edge cases (empty, very long, special characters)
+```
+**Questions to ask:**
+- "What happens with minimum/maximum input values?"
+- "How does this behave with empty or null inputs?"
+- "Are array bounds properly checked?"
+- "What if the collection is empty during iteration?"
+
+### Concurrency & Threading Issues
+```
+# CRITICAL - Can cause production deadlocks/races:
+- Race conditions on shared state mutations
+- Deadlock potential with multiple locks
+- Thread safety violations in singleton patterns
+- Improper async/await chaining
+- Resource contention without proper locking
+- State mutations without synchronization
+```
+**Questions to ask:**
+- "Can multiple threads access this simultaneously?"
+- "What happens if two requests modify the same data?"
+- "Are database transactions properly isolated?"
+- "Could this create a deadlock scenario?"
+
+### Error Propagation & Recovery
+```
+# DANGEROUS - Silent failures and data corruption:
+- Silent failures without error reporting
+- Exception swallowing or generic catch-all
+- Incomplete rollback logic on failures
+- Resource cleanup missing in error paths
+- Cascading failures not contained
+- State corruption during partial updates
+```
+**Questions to ask:**
+- "What happens if this operation fails halfway through?"
+- "Are resources properly cleaned up on errors?"
+- "Could this fail silently and corrupt data?"
+- "Is the system left in a consistent state on failure?"
+
+### Integration & External Dependencies
+```
+# FRAGILE - External service failure scenarios:
+- Network timeouts and retries not handled
+- Third-party API rate limiting ignored
+- Database connection pool exhaustion
+- File system operations without error handling
+- Cache misses not gracefully handled
+```
+**Questions to ask:**
+- "What if the external service is unavailable?"
+- "How does this behave under high load?"
+- "Are timeouts and retries properly configured?"
+- "What's the fallback when dependencies fail?"
 
 Always use this structured table format for actionable feedback:
 
