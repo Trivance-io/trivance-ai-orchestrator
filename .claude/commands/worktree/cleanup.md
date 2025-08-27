@@ -1,22 +1,23 @@
 ---
 allowed-tools: Bash(git *), Bash(test *), Bash(mkdir *), Bash(date *), Bash(whoami), Bash(echo *), Bash([[ ]])
-description: Eliminación segura de worktrees específicos con validación de ownership
+description: Eliminación segura de worktrees específicos con validación de ownership y discovery mode
 ---
 
 # Worktree Cleanup
 
-Eliminación segura de worktrees específicos con validación de ownership.
+Eliminación segura de worktrees específicos con validación de ownership y discovery mode.
 
 ## Uso
 ```bash
-/worktree:cleanup <worktree1> [worktree2] [worktree3] [...]  # Argumentos obligatorios
+/worktree:cleanup                                        # Discovery mode: lista worktrees disponibles
+/worktree:cleanup <worktree1> [worktree2] [worktree3]   # Cleanup mode: eliminar específicos
 ```
 
 ## Ejemplos
 ```bash
-/worktree:cleanup worktree-feature-auth                      # Eliminar uno específico
-/worktree:cleanup worktree-hotfix worktree-refactor         # Eliminar múltiples
-/worktree:cleanup worktree-feature-payment worktree-bug-fix # Cleanup batch
+/worktree:cleanup                                        # Lista tus worktrees con comandos sugeridos
+/worktree:cleanup worktree-feature-auth                 # Eliminar uno específico  
+/worktree:cleanup worktree-hotfix worktree-refactor     # Eliminar múltiples
 ```
 
 ## Restricciones
@@ -26,88 +27,107 @@ Eliminación segura de worktrees específicos con validación de ownership.
 
 ## Ejecución
 
-Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
+### Discovery Mode (sin argumentos)
+Si no proporcionas argumentos, el comando lista tus worktrees disponibles con comandos sugeridos.
 
-### 1. Validación de argumentos
-- Si no hay argumentos: error y terminar
-- Crear array `target_worktrees` con argumentos
-- Validar nombres seguros: `[[ "$worktree" =~ ^[a-zA-Z0-9][a-zA-Z0-9_-]*$ ]]`
-- Si nombre inválido: error y terminar
-- Mostrar targets solicitados
+### Cleanup Mode (con argumentos)
+Cuando ejecutes con argumentos específicos, sigue estos pasos:
 
-### 2. Verificar ramas protegidas
-- Array: `protected_branches=("main" "develop" "qa" "staging" "master")`
-- Para cada target: verificar que NO está protegida
-- Si protegida: error y terminar
+### 1. Validación y preparación
+- Validar cada target usando single-pass validation
+- Crear lista de targets válidos (skip inválidos con warnings)
+- Si no hay targets válidos: mostrar "ℹ️ No hay worktrees válidos para eliminar" y terminar
 
-### 3. Validaciones de ownership (CRÍTICO)
-Para cada worktree en `target_worktrees`:
+### 2. Validaciones por target (pasos individuales)
+Para cada worktree target, ejecutar validaciones en orden:
 
-**3a. Verificar existencia y ownership:**
-- Obtener path: `worktree_path=$(git worktree list --porcelain | grep -A1 "worktree.*$worktree$" | tail -1)`
-- Si no existe: agregar a `nonexistent_targets`
-- Verificar ownership real: `path_owner=$(stat -c %U "$worktree_path" 2>/dev/null)`
-- Si `$path_owner != $(whoami)`: agregar a `unauthorized_targets`
+**2a. Validación de formato:**
+- Verificar nombre usando regex: `[[ "$target" =~ ^[a-zA-Z0-9][a-zA-Z0-9_-]*$ ]]`
+- Si falla: skip con mensaje "Formato de nombre inválido"
 
-**3b. Validar ownership de rama:**
-- Si rama remota existe: `git ls-remote origin "refs/heads/$worktree" >/dev/null 2>&1`
-- Obtener commit SHA: `branch_sha=$(git rev-parse "origin/$worktree" 2>/dev/null)`
-- Verificar autor principal: `git log --format='%ae' "$branch_sha" | head -1`
-- Si autor != `$(git config user.email)`: agregar a `unauthorized_branches`
+**2b. Validación de rama protegida:**
+- Verificar que no esté en array: `("main" "develop" "qa" "staging" "master")`
+- Si está protegida: skip con mensaje "Rama protegida"
 
-**3c. Terminar si hay errores de ownership:**
-- Si `unauthorized_targets` o `unauthorized_branches` no vacíos: mostrar errores y terminar
+**2c. Validación de directorio actual:**
+- Ejecutar validación definida en sección 3
+- Si coincide con directorio actual: skip con error específico
 
-### 4. Validaciones de seguridad
-Para cada worktree válido y autorizado:
+**2d. Validación de existencia:**
+- Verificar que existe como worktree usando `git worktree list --porcelain`
+- Si no existe: skip con mensaje "Worktree no encontrado"
 
-**4a. Verificar estado limpio:**
-- Cambios uncommitted: `(cd "$worktree_path" && git status --porcelain 2>/dev/null)`
-- Commits unpushed: `git rev-list --count "origin/$worktree".."$worktree" 2>/dev/null`
-- Si hay cambios dirty o unpushed: agregar a arrays correspondientes
+**2e. Validación de ownership:**
+- Verificar ownership usando lógica cross-platform de sección 4
+- Si no es del usuario: skip con mensaje "No es tu worktree"
 
-**4b. Terminar si no está limpio:**
-- Si `dirty_targets` o `unpushed_targets` no vacíos: mostrar errores y terminar
+**2f. Validación de estado limpio:**
+- Verificar sin cambios uncommitted: `git status --porcelain` en el worktree
+- Verificar sin commits unpushed: `git rev-list --count origin/rama..rama`
+- Si no está limpio: skip con mensaje específico del problema
+
+### 3. Validación de directorio actual (SEGURIDAD CRÍTICA)
+Para cada worktree target, verificar que el usuario no esté intentando eliminar el worktree donde está parado:
+- Obtener canonical path del directorio actual: `current_dir="$(realpath "$(pwd)" 2>/dev/null)"`
+- Si falla obtener path actual: mostrar error "❌ Error: No se pudo resolver directorio actual" y terminar
+- Obtener path del worktree target usando parsing seguro: `git worktree list --porcelain | awk` con validación estricta
+- Si no se encuentra el target: continuar (será manejado por otra validación)
+- Obtener canonical path del target: `target_path="$(realpath "$target_path" 2>/dev/null)"`
+- Si falla obtener path del target: mostrar error "❌ Error: No se pudo resolver path del worktree target" y skip
+- Comparar paths canónicos: si `"$current_dir" == "$target_path"` entonces:
+  - Mostrar error: "❌ Error: No puedes eliminar el worktree donde estás actualmente"
+  - Mostrar ubicación actual y solución específica
+  - Skip este target con warning
+
+### 4. Cross-platform compatibility
+Para verificar ownership de archivos, usar detección automática de OS:
+- Si `"$OSTYPE"` empieza con "darwin": usar comando `stat -f %Su "$path"`
+- Si no (Linux/otros): usar comando `stat -c %U "$path"`
+- Comparar resultado con `$(whoami)` para verificar ownership
+- Si no coincide: skip este target con warning de ownership
 
 ### 5. Confirmación del usuario
-- Crear lista final `cleanup_targets` solo con worktrees válidos, autorizados y limpios
-- Si `cleanup_targets` está vacío:
-  - Mostrar: "ℹ️ No hay worktrees válidos para eliminar"
-  - TERMINAR exitosamente
 - Mostrar resumen de targets válidos
 - Solicitar confirmación: "Escribir 'ELIMINAR' para confirmar:"
-- Leer respuesta: `read -r confirmation`
-- Si `$confirmation != "ELIMINAR"`: cancelar y terminar
+- Si confirmación != "ELIMINAR": cancelar y terminar
 
-### 6. Cleanup triple y logging
-Para cada target en `cleanup_targets`:
+### 6. Cleanup triple atómico
+Para cada target confirmado:
+- Eliminar worktree: `git worktree remove "$target"`
+- Eliminar rama local: `git branch -D "$branch_name"`  
+- Eliminar rama remota (si existe): `git push origin --delete "$branch_name"`
 
-**6a. Eliminar worktree:**
-- `git worktree remove "$target" 2>/dev/null`
-- Si falla: reportar error, continuar con siguiente
+### 7. Logging y limpieza final
+- Registrar operación en formato JSONL
+- Ejecutar `git remote prune origin`
+- Mostrar reporte final de resultados
 
-**6b. Eliminar rama local:**
-- `git branch -D "$target" 2>/dev/null`
+## Implementación del Discovery Mode
 
-**6c. Eliminar rama remota (si existe y es del usuario):**
-- Verificar existencia: `git ls-remote origin "refs/heads/$target"`
-- Si existe: `git push origin --delete "$target" 2>/dev/null`
+Cuando se ejecuta sin argumentos, seguir estos pasos:
+- Mostrar: "🔍 Tus worktrees disponibles para eliminar:"
+- Obtener canonical path del directorio actual: `current_canonical="$(realpath "$(pwd)" 2>/dev/null)"`
+- Si falla obtener path actual: mostrar error y terminar
+- Ejecutar `git worktree list --porcelain` y procesar cada línea:
+  - Para líneas que empiecen con "worktree": extraer path como `worktree_path`
+  - Obtener canonical path del worktree: `worktree_canonical="$(realpath "$worktree_path" 2>/dev/null)"`
+  - Si falla obtener canonical path: skip este worktree
+  - Si `worktree_canonical` es igual a `current_canonical`: skip (es el directorio actual)
+  - Verificar ownership básico usando función cross-platform
+  - Si el owner es el usuario actual: mostrar comando sugerido con formato `"   /worktree:cleanup $worktree_name"`
 
-**6d. Logging y limpieza:**
-- Log JSONL de operación
-- `git remote prune origin`
-- Reporte final de resultados
-
-## 📊 Logging Format Template
+## Logging Format Template
 
 Para cada target procesado, agregar línea al archivo JSONL:
 
-### Cleanup Log:
 ```json
 {"timestamp":"$(date -Iseconds)","operation":"worktree_cleanup","target":"$target","user":"$(whoami)","my_email":"$(git config user.email)","worktree_removed":"$worktree_removed","local_removed":"$local_removed","remote_removed":"$remote_removed","commit_sha":"$(git rev-parse HEAD)"}
 ```
 
-**PRINCIPIOS**:
-- Solo eliminar elementos propios del usuario
-- Nunca tocar ramas protegidas
-- Siempre requerir confirmación y estado limpio
+## Principios de Implementación
+- **Single-pass validation**: Una función, una pasada, graceful degradation
+- **Current-directory protection**: No permite eliminar el worktree donde está parado
+- **Cross-platform**: Auto-detección macOS/Linux
+- **Discovery-first**: Ayuda al usuario a encontrar worktrees
+- **Backward compatibility**: Argumentos existentes funcionan igual
+- **Atomic operations**: Cleanup completo o skip con warning

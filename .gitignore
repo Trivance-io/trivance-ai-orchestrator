@@ -154,6 +154,7 @@ config-backups/
 # Temporary files
 tmp/
 temp/
+implement/
 *.tmp
 
 # Mobile specific
