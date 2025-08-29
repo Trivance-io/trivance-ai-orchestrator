@@ -8,30 +8,30 @@ git add -A
 git commit -m "Pre-review checkpoint" || echo "No changes to commit"
 ```
 
-I'll use specialized sub-agents for comprehensive analysis:
-- **Security sub-agent**: Credential exposure, input validation, vulnerabilities
-- **Performance sub-agent**: Bottlenecks, memory issues, optimization opportunities  
-- **Quality sub-agent**: Code complexity, maintainability, best practices
-- **Architecture sub-agent**: Layer separation, dependency direction, scalability patterns
+I'll delegate comprehensive analysis to specialist reviewers for professional-grade assessment:
 
-I'll examine files using the Read and Grep tools to analyze:
-1. **Security Issues** - credential exposure, input validation
-2. **Logic Problems** - error handling, edge cases  
-3. **Performance Concerns** - inefficient patterns, bottlenecks
-4. **Code Quality** - complexity, maintainability
+**Specialist Review Delegation:**
+I'll delegate analysis to specialized reviewers from `.claude/agents/reviewers/` directory for comprehensive domain-specific assessment.
 
-When I find multiple issues, I'll create a todo list to address them systematically.
+**Available Specialist Reviewers:**
+From `.claude/agents/reviewers/` directory:
+- **code-quality-reviewer**: Code architecture, maintainability, technical debt prevention
+- **config-security-expert**: Security vulnerabilities, configuration risks, production safety
+- **edge-case-detector**: Boundary conditions, integration failures, error handling gaps
 
-For each issue, I'll:
-- Show exact location with file references
-- Explain the problem and potential impact
-- Provide specific remediation steps
-- Prioritize by severity and effort
+**Comprehensive Analysis Process:**
+- Each specialist conducts domain-specific analysis using their expertise
+- Findings are automatically consolidated with severity classification
+- Results stored in `.claude/issues-review/review-[timestamp].md` for traceability
+- Unified report presented with actionable priorities
 
-After review, I'll ask: "Create GitHub issues for critical findings?"
-- Yes: I'll create prioritized issues with detailed descriptions
-- Todos only: I'll maintain local tracking for resolution
-- Summary: I'll provide actionable report
+**Review Results Storage:**
+Findings are stored in `.claude/issues-review/review-[timestamp].md` maintaining traceability without polluting project management.
+
+**Available Actions:**
+- Address findings directly in current development
+- Ask the user if they want to create GitHub issues for items that require formal follow-up. If the review originates from a PR with GitHub issues created, disregard this instruction.
+- Use findings to guide immediate improvements before PR submission
 
 **Important**: I will NEVER:
 - Add "Co-authored-by" or any Claude signatures to commits
@@ -41,4 +41,24 @@ After review, I'll ask: "Create GitHub issues for critical findings?"
 - Add any AI/assistant signatures or watermarks
 - Use emojis in commits, PRs, issues, or git-related content
 
-This focuses on real problems that impact your application's reliability and maintainability.
+**Review Report Format:**
+```
+COMPREHENSIVE CODE REVIEW RESULTS
+├── Code Quality: [PASS/ISSUES] - Architectural soundness and maintainability
+├── Security Audit: [PASS/ISSUES] - Vulnerability assessment and config safety  
+├── Edge Case Coverage: [PASS/ISSUES] - Boundary conditions and failure scenarios
+└── Overall Assessment: [EXCELLENT/GOOD/NEEDS_IMPROVEMENT/CRITICAL]
+
+🚨 CRITICAL FINDINGS:
+[Issues requiring immediate attention]
+
+⚠️ HIGH PRIORITY:
+[Issues that should be addressed soon]
+
+💡 SUGGESTIONS:
+[Improvement opportunities]
+```
+
+**Findings stored in**: `.claude/issues-review/review-[timestamp].md`
+
+This approach focuses on actionable findings that improve code quality while maintaining clean project management separation.
