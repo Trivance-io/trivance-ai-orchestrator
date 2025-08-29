@@ -67,8 +67,8 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 - **Evaluación de riesgos**: Issues que pueden bloquear otros o crear regresiones según code-reviewer
 
 ### 5. Generación de plan enterprise-ready
-- Crear directorio de planes: `mkdir -p .claude/issues-review`
-- Generar filename: `.claude/issues-review/$(date +%Y-%m-%d)-pr<number>-plan.md`
+- Crear directorio de planes: `mkdir -p .claude/reviews`
+- Generar filename: `.claude/reviews/$(date +%Y-%m-%d)-pr<number>-plan.md`
 - Usar template enterprise con secciones:
   ```
   # 🎯 Plan de Implementación - PR #<pr_number> (<timestamp>)
