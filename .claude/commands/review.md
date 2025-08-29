@@ -22,11 +22,11 @@ From `.claude/agents/reviewers/` directory:
 **Comprehensive Analysis Process:**
 - Each specialist conducts domain-specific analysis using their expertise
 - Findings are automatically consolidated with severity classification
-- Results stored in `.claude/issues-review/review-[timestamp].md` for traceability
+- Results stored in `.claude/reviews/review-[timestamp].md` for traceability
 - Unified report presented with actionable priorities
 
 **Review Results Storage:**
-Findings are stored in `.claude/issues-review/review-[timestamp].md` maintaining traceability without polluting project management.
+Findings are stored in `.claude/reviews/review-[timestamp].md` maintaining traceability without polluting project management.
 
 **Available Actions:**
 - Address findings directly in current development
@@ -59,6 +59,6 @@ COMPREHENSIVE CODE REVIEW RESULTS
 [Improvement opportunities]
 ```
 
-**Findings stored in**: `.claude/issues-review/review-[timestamp].md`
+**Findings stored in**: `.claude/reviews/review-[timestamp].md`
 
 This approach focuses on actionable findings that improve code quality while maintaining clean project management separation.

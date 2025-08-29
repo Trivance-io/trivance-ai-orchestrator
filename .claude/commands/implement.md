@@ -9,15 +9,15 @@ Arguments: `$ARGUMENTS` - URLs, paths, or descriptions of what to implement
 I'll check for existing implementation sessions to continue seamlessly:
 
 **Session Files (in current project directory):**
-- `implement/plan.md` - Current implementation plan and progress
-- `implement/state.json` - Session state and checkpoints
+- `.claude/implementations/plan.md` - Current implementation plan and progress
+- `.claude/implementations/state.json` - Session state and checkpoints
 
 **Session Management:**
 - **Auto-resume**: If session files exist, I'll load existing plan and state, show progress summary, continue from last checkpoint
 - **New session**: If no session exists, I'll create new implementation plan and tracking
 - **Commands**: `/implement resume` (explicit), `/implement status` (check progress)
 
-**IMPORTANT:** Session files stored in `implement/` folder in current project root, NOT home directory or parent folders.
+**IMPORTANT:** Session files stored in `.claude/implementations/` folder in current project root, NOT home directory or parent folders.
 
 ## Phase 1: Strategic Planning with Quality Prevention
 
@@ -51,19 +51,19 @@ I'll examine what you've provided and your project structure:
 Based on strategic planning from Phase 1, I'll create implementation infrastructure:
 
 **Session Setup:**
-1. Check if `implement` directory exists in current working directory
+1. Check if `.claude/implementations` directory exists in current working directory
 2. If directory exists, check for session files:
-   - Look for `implement/state.json`
-   - Look for `implement/plan.md` 
+   - Look for `.claude/implementations/state.json`
+   - Look for `.claude/implementations/plan.md` 
    - If found, resume from existing session
 3. If no directory or session exists:
    - Create implementation infrastructure
    - Initialize tracking files with strategic plan
 4. Document the orchestrated strategy received from tech-lead-orchestrator
 
-**Critical:** Use `implement` folder in current directory. Do NOT use `$HOME/implement` or parent directory paths
+**Critical:** Use `.claude/implementations` folder in current directory. Do NOT use `$HOME/.claude/implementations` or parent directory paths
 
-I'll write this enhanced plan to `implement/plan.md`:
+I'll write this enhanced plan to `.claude/implementations/plan.md`:
 
 ```markdown
 # Implementation Plan - [timestamp]
@@ -130,8 +130,8 @@ I'll implement features incrementally:
 5. Validate everything works correctly
 
 **Progress Tracking:**
-- Update `implement/plan.md` as I complete each item
-- Mark checkpoints in `implement/state.json`
+- Update `.claude/implementations/plan.md` as I complete each item
+- Mark checkpoints in `.claude/implementations/state.json`
 - Create meaningful git commits at logical points
 
 ## Phase 5: Implementation Quality Validation
@@ -169,7 +169,7 @@ I'll implement features incrementally:
 **My workflow ALWAYS follows this logical order:**
 
 1. **Strategic planning** - Professional orchestration with quality prevention FIRST
-2. **Plan documentation** - Write comprehensive strategic plan to `implement/plan.md`
+2. **Plan documentation** - Write comprehensive strategic plan to `.claude/implementations/plan.md`
 3. **Setup session** - Create/load state files and infrastructure  
 4. **Show plan** - Present strategic summary before implementing
 5. **Execute systematically** - Follow orchestrated plan with agent coordination
