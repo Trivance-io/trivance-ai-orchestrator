@@ -38,7 +38,28 @@ sudo apt install notify-send libnotify-bin  # Ubuntu/Debian
 sudo dnf install notify-send libnotify      # Fedora
 ```
 
-### 4. ✅ Verificación
+### 4. 🔧 GitHub Workflows
+
+**⚠️ CRÍTICO**: Copiar estos archivos a tu proyecto para activar el ecosistema AI-first completo:
+
+```bash
+# Crear directorio workflows
+mkdir -p .github/workflows
+
+# Copiar configuraciones desde este repo
+cp .github/workflows/claude-code-review.yml tu-proyecto/.github/workflows/
+cp .github/workflows/claude.yml tu-proyecto/.github/workflows/
+cp .github/workflows/security.yml tu-proyecto/.github/workflows/
+```
+
+**Configurar secret**: `CLAUDE_CODE_OAUTH_TOKEN` en GitHub repo settings.
+
+**Resultado**: 
+- 🤖 Review automático en PRs (Opus 4.1)
+- 💬 Interacción `@claude` en issues/comments
+- 🔒 Security scanning automático
+
+### 5. ✅ Verificación
 
 ```bash
 claude --version
@@ -60,7 +81,7 @@ echo "test" > test.txt && claude "/commit"
 **MCP GitHub falla**: `gh auth logout && gh auth login`
 **Sin notificaciones**: Verificar permisos del sistema
 
-## 📚 Siguiente: Workflows
+## 📚 Docs-reference
 
 #### 🔥 [`ai-first-workflow.md`](ai-first-workflow.md)
 Flujo completo: PR → Review → Issues → Resolución → Merge
