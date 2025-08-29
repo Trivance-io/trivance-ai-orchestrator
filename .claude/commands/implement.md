@@ -12,23 +12,18 @@ I'll check for existing implementation sessions to continue seamlessly:
 - `implement/plan.md` - Current implementation plan and progress
 - `implement/state.json` - Session state and checkpoints
 
-**IMPORTANT:** Session files are stored in a `implement` folder in your current project root, NOT in home directory or parent folders. If a session exists, I'll resume from the exact checkpoint. Otherwise, I'll create a new implementation plan and track progress throughout.
+**Session Management:**
+- **Auto-resume**: If session files exist, I'll load existing plan and state, show progress summary, continue from last checkpoint
+- **New session**: If no session exists, I'll create new implementation plan and tracking
+- **Commands**: `/implement resume` (explicit), `/implement status` (check progress)
 
-## Phase 1: Initial Setup & Analysis
+**IMPORTANT:** Session files stored in `implement/` folder in current project root, NOT home directory or parent folders.
 
-**MANDATORY FIRST STEPS:**
-1. Check if `implement` directory exists in current working directory
-2. If directory exists, check for session files:
-   - Look for `implement/state.json`
-   - Look for `implement/plan.md`
-   - If found, resume from existing session
-3. If no directory or session exists:
-   - Create `implement/plan.md`
-   - Initialize `implement/state.json`
-4. Complete full analysis BEFORE any implementation
+## Phase 1: Strategic Planning with Quality Prevention
 
-**Critical:** Use `implement` folder in current directory. Do NOT use `$HOME/implement` or any parent directory paths
+First, I'll establish strategic direction through professional orchestration:
 
+**Source & Context Analysis:**
 I'll examine what you've provided and your project structure:
 
 **Source Detection:**
@@ -43,17 +38,32 @@ I'll examine what you've provided and your project structure:
 - Code conventions and established patterns
 - Testing approach and quality standards
 
-## Phase 2: Strategic Planning
+**Orchestrated Strategic Process:**
+1. **Invoke tech-lead-orchestrator** with source analysis and project context
+2. **Receive comprehensive strategy** including:
+   - Dream Team Assembly with specialist agent assignments
+   - Quality Prevention Strategy from mandatory reviewer consultation
+   - Execution timeline with parallel/sequential coordination
+3. **Establish implementation roadmap** with integrated quality checkpoints
 
-Based on my analysis, I'll create an implementation plan:
+## Phase 2: Plan Documentation & Setup
 
-**Plan Creation:**
-- Map source features to your architecture
-- Identify dependency compatibility
-- Design integration approach
-- Break work into testable chunks
+Based on strategic planning from Phase 1, I'll create implementation infrastructure:
 
-I'll write this plan to `implement/plan.md`:
+**Session Setup:**
+1. Check if `implement` directory exists in current working directory
+2. If directory exists, check for session files:
+   - Look for `implement/state.json`
+   - Look for `implement/plan.md` 
+   - If found, resume from existing session
+3. If no directory or session exists:
+   - Create implementation infrastructure
+   - Initialize tracking files with strategic plan
+4. Document the orchestrated strategy received from tech-lead-orchestrator
+
+**Critical:** Use `implement` folder in current directory. Do NOT use `$HOME/implement` or parent directory paths
+
+I'll write this enhanced plan to `implement/plan.md`:
 
 ```markdown
 # Implementation Plan - [timestamp]
@@ -64,25 +74,25 @@ I'll write this plan to `implement/plan.md`:
 - **Dependencies**: [required libraries/frameworks]
 - **Complexity**: [estimated effort]
 
-## Target Integration
-- **Integration Points**: [where it connects]
-- **Affected Files**: [files to modify/create]
-- **Pattern Matching**: [how to adapt to project style]
+## Strategic Coordination (tech-lead-orchestrator)
+- **Challenge Type**: [ANALYSIS|BUG|REFACTOR|API|IMPLEMENTATION]
+- **Dream Team**: [selected specialist agents]
+- **SubAgent Assignments**: [task delegation with timeline]
+- **Execution Order**: [parallel/sequential coordination]
+
+## Quality Prevention Strategy
+- **Code Quality Risks**: [preventive measures from code-quality-reviewer]
+- **Security Considerations**: [preventive measures from config-security-expert]
+- **Edge Case Mitigation**: [preventive measures from edge-case-detector]
+- **Integrated Checkpoints**: [quality gates during implementation]
 
 ## Implementation Tasks
-[Prioritized checklist with progress tracking]
-
-## Validation Checklist
-- [ ] All features implemented
-- [ ] Tests written and passing
-- [ ] No broken functionality
-- [ ] Documentation updated
-- [ ] Integration points verified
-- [ ] Performance acceptable
+[Prioritized checklist with progress tracking and quality gates]
 
 ## Risk Mitigation
-- **Potential Issues**: [identified risks]
-- **Rollback Strategy**: [git checkpoints]
+- **Technical Risks**: [identified technical issues]
+- **Quality Risks**: [prevention strategy per reviewer domain]
+- **Rollback Strategy**: [git checkpoints and recovery plan]
 ```
 
 ## Phase 3: Intelligent Adaptation
@@ -124,88 +134,14 @@ I'll implement features incrementally:
 - Mark checkpoints in `implement/state.json`
 - Create meaningful git commits at logical points
 
-## Phase 5: Quality Assurance
+## Phase 5: Implementation Quality Validation
 
-I'll ensure the implementation meets your standards:
+**Pre-Certification Validation:**
+- Run existing lint commands and execute test suite
+- Check for type errors and verify integration points
+- Confirm no regressions in existing functionality
 
-**Validation Steps:**
-- Run your existing lint commands
-- Execute test suite
-- Check for type errors
-- Verify integration points
-- Confirm no regressions
 
-## Deep Validation Process (All-in-One)
-
-**ALL validation commands (`finish`, `verify`, `complete`, `enhance`) execute the SAME comprehensive process:**
-
-When you run ANY of these: `/implement finish`, `/implement verify`, `/implement complete`, or `/implement enhance`
-
-**I will AUTOMATICALLY:**
-
-1. **Deep Original Source Analysis**
-   - Thoroughly analyze EVERY aspect of original code/requirements
-   - Study ALL implementation patterns and architectures
-   - Document COMPLETE functionality and business logic
-   - Map entire code structure and dependencies
-   - Create comprehensive analysis in `implement/source-analysis.md`
-
-2. **Requirements Verification**
-   - Compare current implementation with original
-   - Map each original feature to new implementation
-   - Identify any missing features or behaviors
-   - Check edge cases from original code
-
-3. **Comprehensive Testing**
-   - Write tests for ALL new code
-   - Run existing test suite
-   - Create integration tests
-   - Test error scenarios
-   - Verify performance requirements
-
-4. **Deep Code Analysis**
-   - Check for incomplete TODOs
-   - Find hardcoded values to configure
-   - Verify error handling completeness
-   - Analyze security implications
-   - Check accessibility requirements
-
-5. **Automatic Refinement**
-   - Fix any failing tests
-   - Complete partial implementations
-   - Add missing error handling
-   - Optimize performance bottlenecks
-   - Improve code documentation
-
-6. **Integration Analysis**
-   - Analyze integration points thoroughly
-   - Verify API contracts match original
-   - Check database schema compatibility
-   - Validate UI/UX flows match requirements
-   - Ensure backward compatibility maintained
-
-7. **Completeness Report**
-   - Feature coverage: X/Y implemented
-   - Test coverage percentage
-   - Performance benchmarks
-   - Security audit results
-   - Remaining work (if any)
-
-**The result:** 100% complete, tested, and production-ready implementation that matches ALL requirements.
-
-## Context Continuity
-
-**Session Resume:**
-When you return and run `/implement` or `/implement resume`:
-- I'll load the existing plan and state
-- Show progress summary
-- Continue from the last checkpoint
-- Maintain all previous decisions and context
-
-**Smart Detection:**
-- Auto-resume if session files exist
-- Start fresh with `/implement new [source]`
-- Check status with `/implement status`
 
 ## Practical Examples
 
@@ -226,27 +162,18 @@ When you return and run `/implement` or `/implement resume`:
 /implement              # Auto-detects and resumes
 /implement resume       # Explicit resume
 /implement status       # Check progress
-/implement validate     # Validate integration completeness
-```
-
-**Deep Validation Commands:**
-```
-/implement finish       # Complete with exhaustive testing & validation
-/implement verify       # Deep verification against requirements
-/implement complete     # Ensure 100% feature completeness
-/implement enhance      # Refine and optimize implementation
 ```
 
 ## Execution Guarantee
 
-**My workflow ALWAYS follows this order:**
+**My workflow ALWAYS follows this logical order:**
 
-1. **Setup session** - Create/load state files FIRST
-2. **Analyze source & target** - Complete understanding
-3. **Write plan** - Full implementation plan in `implement/plan.md`
-4. **Show plan** - Present summary before implementing
-5. **Execute systematically** - Follow plan with updates
-6. **Validate integration** - Run validation when requested
+1. **Strategic planning** - Professional orchestration with quality prevention FIRST
+2. **Plan documentation** - Write comprehensive strategic plan to `implement/plan.md`
+3. **Setup session** - Create/load state files and infrastructure  
+4. **Show plan** - Present strategic summary before implementing
+5. **Execute systematically** - Follow orchestrated plan with agent coordination
+6. **QA certification** - Final validation through specialist reviewers
 
 **I will NEVER:**
 - Start implementing without a written plan
@@ -255,49 +182,39 @@ When you return and run `/implement` or `/implement resume`:
 - Begin coding before showing the plan
 - Use emojis in commits, PRs, or git-related content
 
-## Phase 6: Implementation Validation
+## Phase 6: QA Certification
 
-When you run `/implement validate` after implementation:
+Final quality certification through specialist reviewer delegation:
 
-**Integration Analysis:**
-1. **Coverage Check** - Verify all planned features implemented
-2. **Integration Points** - Validate all connections work
-3. **Test Coverage** - Ensure new code is tested
-4. **TODO Scan** - Find any leftover TODOs
-5. **Documentation** - Check if docs reflect changes
+**QA Certification Process:**
+1. **Delegate to code-quality-reviewer**: Architectural review, maintainability assessment, technical debt analysis
+2. **Delegate to config-security-expert**: Security audit, configuration safety, production readiness
+3. **Delegate to edge-case-detector**: Boundary condition testing, integration failure scenarios, resilience validation
+4. **Consolidate findings**: Unified quality certification report with severity classification
 
-**Validation Report:**
+**Quality Certification Report:**
 ```
-IMPLEMENTATION VALIDATION
-├── Features Implemented: 12/12 (100%)
-├── Integration Points: 8/10 (2 pending)
-├── Test Coverage: 87%
-├── Build Status: Passing
-└── Documentation: Needs update
+QA CERTIFICATION RESULTS
+├── Code Quality: [PASS/ISSUES] - Architectural soundness and maintainability
+├── Security Audit: [PASS/ISSUES] - Vulnerability assessment and config safety  
+├── Edge Case Coverage: [PASS/ISSUES] - Boundary conditions and failure scenarios
+├── Integration Validation: [PASS/ISSUES] - System integration and compatibility
+└── Production Readiness: [CERTIFIED/CONDITIONAL/BLOCKED]
 
-PENDING ITEMS:
-- API endpoint /users/profile not connected
-- WebSocket integration incomplete
-- Missing tests for error scenarios
-- README needs feature documentation
+CRITICAL FINDINGS:
+[Issues that must be resolved before deployment]
 
-ENHANCEMENT OPPORTUNITIES:
-1. Add error boundary for new components
-2. Implement caching for API calls
-3. Add performance monitoring
-4. Create usage examples
+HIGH PRIORITY:
+[Issues that should be addressed]
+
+SUGGESTIONS:
+[Improvement opportunities for consideration]
 ```
 
-**Validation Actions:**
-- Complete missing integrations
-- Generate comprehensive test suite
-- Update all affected documentation
-- Create migration guide if breaking changes
-
-## Command Suggestions
-
-After implementation milestones, I may suggest:
-- `/test` - To verify the implementation works correctly
-- `/commit` - To save progress at logical checkpoints
+**Certification Actions:**
+- Address all CRITICAL findings before deployment
+- Document HIGH PRIORITY items for next iteration  
+- Implement suggestions based on team priorities
+- Generate final certification status and production readiness assessment
 
 I'll maintain perfect continuity across sessions, always picking up exactly where we left off with full context preservation.
