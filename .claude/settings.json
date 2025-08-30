@@ -43,6 +43,8 @@
       "Bash(mkfs:*)",
       "Bash(fdisk:*)",
       "Bash(kill -9:*)",
+      "Bash(kill:*)",
+      "Bash(killall:*)",
       "Bash(pkill:*)",
       "Bash(eval:*)",
       "Bash(exec:*)",
