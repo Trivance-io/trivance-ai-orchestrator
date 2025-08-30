@@ -4,6 +4,7 @@
   },
   "model": "opusplan",
   "permissions": {
+    "_comment": "Pattern format: Tool(command:arguments) where :* matches any arguments",
     "defaultMode": "acceptEdits",
     "allow": [
       "Bash",
@@ -32,8 +33,6 @@
       "Bash(sudo -:*)",
       "Bash(\\sudo:*)",
       "Bash(rm:*)",
-      "Bash(rm -rf:*)",
-      "Bash(rm -r:*)",
       "Bash(\\rm:*)",
       "Bash(shred:*)",
       "Bash(wipe:*)",
@@ -167,6 +166,11 @@
       "Bash(function:*)",
       "Bash(alias:*)",
       "Bash(env:*)",
+      "Bash(xargs rm:*)",
+      "Bash(xargs kill:*)",
+      "Bash(sh -c:*)",
+      "Bash(bash -c:*)",
+      "Bash(zsh -c:*)",
       "Bash(docker run -v /Users:*)",
       "Bash(docker run -v /System:*)",
       "Bash(docker run -v /Library:*)",
