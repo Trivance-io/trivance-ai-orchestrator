@@ -4,7 +4,6 @@
   },
   "model": "opusplan",
   "permissions": {
-    "_comment": "Pattern format: Tool(command:arguments) where :* matches any arguments",
     "defaultMode": "acceptEdits",
     "allow": [
       "Bash",
