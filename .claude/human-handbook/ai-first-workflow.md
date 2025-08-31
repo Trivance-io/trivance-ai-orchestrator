@@ -59,10 +59,10 @@ Tipos de findings:
 ### **PASO 3: Convertir Findings en Issues**
 
 ```bash
-/github:findings-to-issues
+/review pr <number>
 ```
 
-Crea issues organizados por prioridad: CRÍTICO → ALTO → MEDIO → BAJO
+Analiza findings y genera plan de implementación organizado por prioridad: CRÍTICO → ALTO → MEDIO → BAJO
 
 ---
 
@@ -189,8 +189,8 @@ git push
    💡 Challenge complejo? → /agent:tech-lead-orchestrator
 2. [Review automático]     # Aparecen findings
    💡 SECURITY/PERFORMANCE? → /agent:code-reviewer / /agent:performance-optimizer
-3. /github:findings-to-issues    # Convertir a issues
-4. /github:issues-to-solved <pr_number> # Planificar (opcional)
+3. /review pr <number>           # Analizar findings + plan
+4. [Implementación manual]       # Seguir plan generado
 5. Resolver issues        # Manual/automático/💡especialista
 6. /commit + push         # Actualizar PR
 7. Re-review              # Validación final
@@ -234,8 +234,8 @@ git push
 ```bash
 /pr [target-branch]              # Crear PR
 /commit "fix: Closes #X"         # Commit con referencia  
-/github:findings-to-issues       # Convertir findings
-/github:issues-to-solved <pr>    # Planificar resolución
+/review pr <number>              # Analizar + plan implementación
+/github:issues-to-solved <pr>    # [Solo si hay issues existentes]
 ```
 
 **Desde cualquier ubicación:**

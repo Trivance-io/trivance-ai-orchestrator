@@ -36,7 +36,7 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 - Analizar body del PR (obtenido en paso 1) para detectar issues asociados
 - Buscar patterns: "(Fixes|Closes|Resolves) #[0-9]+" en el PR body
 - Extraer números de issues únicos y ordenarlos
-- Si no hay issues asociados, mostrar: "❌ No issues asociados al PR #<number>. Ejecuta /findings-to-issues primero" y terminar
+- Si no hay issues asociados, mostrar: "❌ No issues asociados al PR #<number>. Para PRs sin issues asociados, usa /review pr <number>" y terminar
 - Mostrar: "Encontrados <count> issues asociados: <lista_números>"
 - Usar `mcp__github__get_me` para obtener usuario actual y capturar username para asignación
 
