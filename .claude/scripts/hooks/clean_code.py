@@ -94,23 +94,44 @@ def log_result(file_path):
 def main():
     try:
         data = json.loads(sys.stdin.read(1048576))  # 1MB limit
-        file_path = data["file_path"]
+        
+        # Extract file_path from Claude Code's PostToolUse JSON structure
+        tool_input = data.get("tool_input", {})
+        file_path = tool_input.get("file_path")
+        
+        if not file_path:
+            # Silent fail - don't block Claude for non-file operations
+            print(json.dumps({"status": "skipped", "reason": "no_file_path"}))
+            sys.exit(0)
+            
     except (json.JSONDecodeError, KeyError, MemoryError):
+        # Silent fail - don't block Claude for invalid input
         print(json.dumps({"status": "error", "reason": "invalid_input"}))
-        sys.exit(1)
+        sys.exit(0)
     
     try:
         file_path = str(Path(file_path).resolve())
         if not Path(file_path).exists() or not Path(file_path).is_file():
-            print(json.dumps({"status": "error", "reason": "invalid_file"}))
-            sys.exit(1)
+            print(json.dumps({"status": "skipped", "reason": "invalid_file"}))
+            sys.exit(0)
     except (OSError, ValueError):
-        print(json.dumps({"status": "error", "reason": "invalid_path"}))
-        sys.exit(1)
+        print(json.dumps({"status": "skipped", "reason": "invalid_path"}))
+        sys.exit(0)
+    
+    # Only process JS/TS files for formatting
+    file_ext = Path(file_path).suffix.lower()
+    supported_exts = {'.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte'}
+    
+    if file_ext not in supported_exts:
+        print(json.dumps({"status": "skipped", "reason": "unsupported_file_type"}))
+        sys.exit(0)
     
     project_root = find_package_json(file_path)
-    ensure_tools_installed(project_root)
+    if not ensure_tools_installed(project_root):
+        print(json.dumps({"status": "skipped", "reason": "tools_unavailable"}))
+        sys.exit(0)
     
+    # Run formatting tools silently
     subprocess.run(['npx', 'prettier', '--write', file_path], cwd=project_root, capture_output=True)
     subprocess.run(['npx', 'eslint', '--fix', file_path], cwd=project_root, capture_output=True)
     
