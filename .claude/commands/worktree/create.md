@@ -9,14 +9,15 @@ Crea worktree desde parent branch especificado con naming consistente.
 
 ## Uso
 ```bash
-/worktree:create <purpose> <parent-branch>  # Ambos argumentos obligatorios
+/worktree:create "<objetivo-descripción>" <parent-branch>  # Ambos argumentos obligatorios
 ```
 
 ## Ejemplos
 ```bash
-/worktree:create implement-auth develop        # Feature desde develop
-/worktree:create fix-payment-bug main          # Hotfix desde main  
-/worktree:create refactor-user-service qa      # Refactor desde qa
+/worktree:create "implementar autenticacion OAuth" main        # → worktree-implementar-autenticacion-oauth
+/worktree:create "fix bug critico en pagos" develop            # → worktree-fix-bug-critico-en-pagos
+/worktree:create "refactor dashboard usuarios" main            # → worktree-refactor-dashboard-usuarios
+/worktree:create "add API endpoints v2" qa                     # → worktree-add-api-endpoints-v2
 ```
 
 ## Ejecución
@@ -25,9 +26,9 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 
 ### 1. Validación de argumentos
 - Contar argumentos en `$ARGUMENTS` usando expansión de array
-- Si no hay exactamente 2 argumentos, mostrar error: "❌ Error: Se requieren 2 argumentos. Uso: /worktree:create <purpose> <parent-branch>"
-- Capturar primer argumento como `purpose` y segundo como `parent_branch`
-- Mostrar: "Creando worktree: <purpose> desde rama padre: <parent_branch>"
+- Si no hay exactamente 2 argumentos, mostrar error: "❌ Error: Se requieren 2 argumentos. Uso: /worktree:create \"<objetivo>\" <parent-branch>"
+- Capturar primer argumento como `objetivo_descripcion` y segundo como `parent_branch`
+- Mostrar: "Creando worktree para: <objetivo_descripcion> desde rama padre: <parent_branch>"
 
 ### 2. Validación de working directory
 - Ejecutar `status_output=$(git status --porcelain)` para capturar cambios pendientes
@@ -47,13 +48,13 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 - Si existe, mostrar: "✓ Parent branch '$parent_branch' verified"
 
 ### 4. Generar nombres consistentes
-- Convertir `purpose` a slug válido usando transformación optimizada:
-  - Ejecutar `echo "$purpose" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g; s/--*/-/g; s/^-\|-$//g'`
-  - Capturar resultado como `purpose_slug`
-- Construir `worktree_name` como: "worktree-$purpose_slug"
+- Convertir `objetivo_descripcion` a slug válido usando transformación optimizada:
+  - Ejecutar `echo "$objetivo_descripcion" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g; s/--*/-/g; s/^-\|-$//g'`
+  - Capturar resultado como `objetivo_slug`
+- Construir `worktree_name` como: "worktree-$objetivo_slug"
 - Construir `branch_name` idéntico a `worktree_name`
 - Construir `worktree_path` como: "../$worktree_name"
-- Mostrar: "Generated names - Directory: $worktree_path, Branch: $branch_name"
+- Mostrar: "Generated names from objetivo: '$objetivo_descripcion' → Directory: $worktree_path, Branch: $branch_name"
 
 ### 5. Verificar colisiones
 - Ejecutar `test -d "$worktree_path"` para verificar si directorio existe
@@ -83,7 +84,16 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 - Si falla, mostrar error: "❌ Error: Failed to create remote branch" pero NO terminar
 - Si exitoso, mostrar: "✅ Remote branch created: origin/$branch_name"
 
-### 9. Logging y resultado final
+### 9. Abrir IDE automáticamente
+- Detectar IDE disponible ejecutando comandos en orden:
+  - `which code > /dev/null 2>&1` para VS Code
+  - `which cursor > /dev/null 2>&1` para Cursor
+- Si se encuentra IDE, ejecutar `(cd "$worktree_path" && [IDE_COMMAND] . --new-window)` donde [IDE_COMMAND] es `code` o `cursor`
+- Si IDE se abre exitosamente, mostrar: "✅ IDE abierto en nueva ventana: $worktree_path"
+- Si no se encuentra IDE disponible, mostrar: "⚠️ No se encontró IDE compatible. Abre manualmente: [IDE] $worktree_path"
+- Si falla abrir IDE, mostrar warning: "⚠️ No se pudo abrir IDE automáticamente" pero continuar
+
+### 10. Logging y resultado final
 - **Log operación**: Crear directorio de logs con `log_dir=".claude/logs/$(date +%Y-%m-%d)" && mkdir -p "$log_dir"`
 - Si falla creación de directorio: mostrar warning pero continuar
 - Agregar entrada JSONL a `"$log_dir/worktree_operations.jsonl"` usando el template
@@ -94,12 +104,15 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
   - Branch: $branch_name (tracking origin/$branch_name)
   - Parent: $parent_branch
 
-  ⚠️  CRÍTICO: Debes cambiar al worktree para trabajar correctamente:
+  ⚠️  CRÍTICO: IDE abierto automáticamente, pero debes:
 
-  PASO 1 - Cambiar directorio:
-    cd $worktree_path
+  PASO 1 - En la nueva ventana del IDE:
+    Abrir Terminal integrado (Cmd+` o View → Terminal)
     
-  PASO 2 - Iniciar nueva sesión Claude Code:
+  PASO 2 - Verificar directorio correcto:
+    pwd  # Debe mostrar: $worktree_path
+    
+  PASO 3 - Iniciar nueva sesión Claude Code:
     claude /workflow:session-start
     
   ❌ SI NO HACES ESTO: Claude seguirá trabajando en el directorio 
@@ -114,7 +127,7 @@ Para operación exitosa, agregar línea al archivo JSONL:
 
 ### Worktree Creation Log:
 ```json
-{"timestamp":"$(date -Iseconds)","operation":"worktree_create","purpose":"$purpose","parent_branch":"$parent_branch","worktree_path":"$worktree_path","branch_name":"$branch_name","user":"$(whoami)","commit_sha":"$(git rev-parse HEAD)"}
+{"timestamp":"$(date -Iseconds)","operation":"worktree_create","objetivo_descripcion":"$objetivo_descripcion","parent_branch":"$parent_branch","worktree_path":"$worktree_path","branch_name":"$branch_name","user":"$(whoami)","commit_sha":"$(git rev-parse HEAD)"}
 ```
 
 **IMPORTANTE**:
