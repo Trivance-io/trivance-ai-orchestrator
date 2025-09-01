@@ -11,7 +11,7 @@ I'll intelligently review your code using specialized agents - analyzing the com
 ```bash
 /review                  # Complete codebase review with 3 specialists
 /review pr <number>      # PR-specific review + implementation plan  
-/review help             # Show usage instructions
+/review $ARGUMENTS       # review user-specific request with 3 specialists
 ```
 
 ## Examples
