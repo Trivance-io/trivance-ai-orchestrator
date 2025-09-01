@@ -1,6 +1,6 @@
 {
   "environments": {
-    "ms_trivance_auth": {
+    "trivance_auth": {
       "PORT": "3001",
       "DB_MONGO": "mongodb://localhost:27017/trivance_auth_development",
       "JWTSECRET": "__GENERATE_SECURE__",
@@ -14,7 +14,7 @@
       "TWILIO_AUTH_TOKEN": "__OPTIONAL__",
       "VERIFY_SERVICE_SID": "__OPTIONAL__"
     },
-    "ms_level_up_management": {
+    "trivance_management": {
       "PORT": "3000",
       "DATABASE_URL": "postgresql://trivance_dev:trivance_dev_pass@localhost:5432/trivance_development",
       "JWTSECRET": "__GENERATE_SECURE__",
@@ -51,7 +51,7 @@
       "FIREBASE_PRIVATE_KEY": "PLACEHOLDER_WILL_BE_REPLACED_BY_POST_SETUP_FIX",
       "FIREBASE_CLIENT_EMAIL": "firebase-dev@trivance-dev.iam.gserviceaccount.com"
     },
-    "level_up_backoffice": {
+    "trivance_backoffice": {
       "VITE_API_URL": "http://localhost:3000",
       "VITE_AUTH_API_URL": "http://localhost:3001",
       "VITE_GRAPHQL_URL": "http://localhost:3000/graphql",

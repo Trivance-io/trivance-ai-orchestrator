@@ -64,7 +64,7 @@ services:
   # ================================
   ms_level_up_management:
     build:
-      context: ../../ms_level_up_management
+      context: ../../trivance_management
       target: development
     container_name: trivance_mgmt_dev
     restart: unless-stopped
@@ -85,9 +85,9 @@ services:
       - LOG_LEVEL=debug
     volumes:
       # HOT RELOAD MAGIC (only source files)
-      - ../../ms_level_up_management/src:/app/src:cached
-      - ../../ms_level_up_management/prisma:/app/prisma:cached
-      - ../../ms_level_up_management/test:/app/test:cached
+      - ../../trivance_management/src:/app/src:cached
+      - ../../trivance_management/prisma:/app/prisma:cached
+      - ../../trivance_management/test:/app/test:cached
       # Logs for observability
       - ../../logs:/app/logs
     ports:
@@ -114,7 +114,7 @@ services:
 
   ms_trivance_auth:
     build:
-      context: ../../ms_trivance_auth
+      context: ../../trivance_auth
       target: development
     container_name: trivance_auth_dev
     restart: unless-stopped
@@ -136,8 +136,8 @@ services:
       - LOG_LEVEL=debug
     volumes:
       # HOT RELOAD MAGIC (only source files)
-      - ../../ms_trivance_auth/src:/app/src:cached
-      - ../../ms_trivance_auth/test:/app/test:cached
+      - ../../trivance_auth/src:/app/src:cached
+      - ../../trivance_auth/test:/app/test:cached
       # Logs for observability
       - ../../logs:/app/logs
     ports:
@@ -173,7 +173,7 @@ services:
   # ================================
   log-viewer:
     build:
-      context: ../../trivance-dev-config/tools/log-viewer
+      context: ../../trivance-ai-orchestrator/tools/log-viewer
     container_name: trivance_log_viewer_dev
     restart: unless-stopped
     ports:

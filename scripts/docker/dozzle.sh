@@ -5,7 +5,7 @@
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-DOCKER_DIR="$PROJECT_ROOT/trivance-dev-config/docker"
+DOCKER_DIR="$PROJECT_ROOT/trivance-ai-orchestrator/docker"
 
 # Colores para output
 RED='\033[0;31m'

@@ -78,10 +78,10 @@ Si `docker ps` da error, primero inicia Docker Desktop.
 ```bash
 # 1. Obtener el repositorio de configuración:
 # Si no existe:
-git clone https://github.com/GLab-Projects/trivance-dev-config.git
+git clone https://github.com/Trivance-io/trivance-ai-orchestrator.git
 
 # Si ya existe, omitir clonado y usar directorio existente
-cd trivance-dev-config
+cd trivance-ai-orchestrator
 
 # 2. Ejecutar setup (toma 1 - 3 minutos):
 ./setup.sh
@@ -224,11 +224,11 @@ tu-workspace/
 
 ```bash
 # Smart Docker Manager (recomendado para debugging)
-cd trivance-dev-config/scripts/utils
+cd trivance-ai-orchestrator/scripts/utils
 ./smart-docker-manager.sh dev ../../docker/docker-compose.dev.yml   # Con hot-reload
 
 # Docker directo
-cd trivance-dev-config/docker
+cd trivance-ai-orchestrator/docker
 docker compose -f docker-compose.dev.yml logs -f        # Ver logs
 docker compose -f docker-compose.dev.yml down           # Detener contenedores
 ```
@@ -325,8 +325,8 @@ Testing, linting, base de datos, resolución de problemas: [`docs/DEVELOPMENT.md
 
 ```bash
 # 1. Instalación única (5-10 min)
-git clone https://github.com/GLab-Projects/trivance-dev-config.git
-cd trivance-dev-config && ./setup.sh
+git clone https://github.com/Trivance-io/trivance-ai-orchestrator.git
+cd trivance-ai-orchestrator && ./setup.sh
 
 # 2. Inicio diario 
 cd .. && ./start.sh    # Docker + PM2 + hot-reload

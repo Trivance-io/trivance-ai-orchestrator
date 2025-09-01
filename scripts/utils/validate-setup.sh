@@ -14,7 +14,7 @@ TESTS_FAILED=0
 # Test functions
 test_repositories_exist() {
     echo -n "Testing: All repositories cloned... "
-    local repos=("ms_trivance_auth" "ms_level_up_management" "level_up_backoffice" "trivance-mobile")
+    local repos=("trivance_auth" "trivance_management" "trivance_backoffice" "trivance-mobile")
     local all_exist=true
     
     for repo in "${repos[@]}"; do
@@ -35,7 +35,7 @@ test_repositories_exist() {
 
 test_env_files_exist() {
     echo -n "Testing: Environment files created... "
-    local repos=("ms_trivance_auth" "ms_level_up_management" "level_up_backoffice" "trivance-mobile")
+    local repos=("trivance_auth" "trivance_management" "trivance_backoffice" "trivance-mobile")
     local all_exist=true
     
     for repo in "${repos[@]}"; do
@@ -56,7 +56,7 @@ test_env_files_exist() {
 
 test_dependencies_installed() {
     echo -n "Testing: Dependencies installed... "
-    local repos=("ms_trivance_auth" "ms_level_up_management" "level_up_backoffice" "trivance-mobile")
+    local repos=("trivance_auth" "trivance_management" "trivance_backoffice" "trivance-mobile")
     local all_installed=true
     
     for repo in "${repos[@]}"; do
@@ -77,7 +77,7 @@ test_dependencies_installed() {
 
 test_secrets_generated() {
     echo -n "Testing: Secrets file generated... "
-    # Secrets ahora están en config/ del repo trivance-dev-config
+    # Secrets ahora están en config/ del repo trivance-ai-orchestrator
     if [[ -f "$SCRIPT_DIR/../../config/.trivance-secrets" ]]; then
         success "PASS"
         ((TESTS_PASSED++))
@@ -142,16 +142,16 @@ test_compilation() {
     local compile_success=true
     
     # Test auth service
-    if [[ -d "$WORKSPACE_DIR/ms_trivance_auth" ]]; then
-        cd "$WORKSPACE_DIR/ms_trivance_auth"
+    if [[ -d "$WORKSPACE_DIR/trivance_auth" ]]; then
+        cd "$WORKSPACE_DIR/trivance_auth"
         if ! npm run build &>/dev/null; then
             compile_success=false
         fi
     fi
     
     # Test management service
-    if [[ -d "$WORKSPACE_DIR/ms_level_up_management" ]] && $compile_success; then
-        cd "$WORKSPACE_DIR/ms_level_up_management"
+    if [[ -d "$WORKSPACE_DIR/trivance_management" ]] && $compile_success; then
+        cd "$WORKSPACE_DIR/trivance_management"
         if ! npm run build &>/dev/null; then
             compile_success=false
         fi

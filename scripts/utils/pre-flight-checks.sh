@@ -93,7 +93,7 @@ check_env_files() {
     for env_file in "${env_files[@]}"; do
         if [[ ! -f "${WORKSPACE_DIR}/$env_file" ]]; then
             log_error "Falta archivo: $env_file"
-            log_fix "Ejecuta: ./trivance-dev-config/scripts/envs.sh switch local"
+            log_fix "Ejecuta: ./trivance-ai-orchestrator/scripts/envs.sh switch local"
         else
             log_ok "$env_file existe"
         fi
@@ -109,7 +109,7 @@ check_env_files() {
 check_docker_contexts() {
     log_check "Dockerfiles y build contexts"
     
-    local services=("ms_level_up_management" "ms_trivance_auth")
+    local services=("trivance_management" "trivance_auth")
     
     for service in "${services[@]}"; do
         local dockerfile="${WORKSPACE_DIR}/${service}/Dockerfile"
@@ -161,7 +161,7 @@ check_docker_images() {
     log_check "Imágenes Docker existentes"
     
     local images_exist=false
-    if docker images | grep -q "docker-ms_level_up_management\|docker-ms_trivance_auth"; then
+    if docker images | grep -q "docker-trivance_management\|docker-trivance_auth"; then
         images_exist=true
         log_ok "Imágenes ya construidas - inicio será rápido"
     else

@@ -74,7 +74,7 @@ detect_all_issues() {
 }
 
 detect_sentry_issue() {
-    local repo_path="${WORKSPACE_DIR}/ms_level_up_management"
+    local repo_path="${WORKSPACE_DIR}/trivance_management"
     
     if [[ -d "$repo_path" ]] && [[ -f "${repo_path}/package.json" ]]; then
         if ! grep -q '"build:dev"' "${repo_path}/package.json"; then
@@ -87,7 +87,7 @@ detect_sentry_issue() {
 }
 
 detect_firebase_issue() {
-    local env_file="${WORKSPACE_DIR}/ms_level_up_management/.env"
+    local env_file="${WORKSPACE_DIR}/trivance_management/.env"
     
     if [[ -f "$env_file" ]]; then
         if grep -q "PLACEHOLDER_WILL_BE_REPLACED_BY_POST_SETUP_FIX" "$env_file"; then
@@ -248,14 +248,14 @@ show_fix_details() {
                 echo "🔧 FIX DE SENTRY:"
                 echo "  - Agrega script 'build:dev' sin dependencia de Sentry"
                 echo "  - Permite compilar en desarrollo sin credenciales"
-                echo "  - Cambio: package.json en ms_level_up_management"
+                echo "  - Cambio: package.json en trivance_management"
                 echo
                 ;;
             "firebase")
                 echo "🔧 FIX DE FIREBASE:"
                 echo "  - Reemplaza placeholders con valores de desarrollo"
                 echo "  - Elimina warnings molestos en logs"
-                echo "  - Cambio: .env en ms_level_up_management"
+                echo "  - Cambio: .env en trivance_management"
                 echo
                 ;;
             "ports")
@@ -276,27 +276,27 @@ show_fix_details() {
     done
 }
 
-# Fix para ms_level_up_management: Sentry opcional en desarrollo
+# Fix para trivance_management: Sentry opcional en desarrollo
 fix_sentry_build_command() {
-    local repo_path="${WORKSPACE_DIR}/ms_level_up_management"
+    local repo_path="${WORKSPACE_DIR}/trivance_management"
     
     if [[ ! -d "$repo_path" ]]; then
-        warn "⚠️  ms_level_up_management no encontrado, omitiendo fix de Sentry"
+        warn "⚠️  trivance_management no encontrado, omitiendo fix de Sentry"
         return 0
     fi
     
     local package_json="${repo_path}/package.json"
     
     if [[ ! -f "$package_json" ]]; then
-        warn "⚠️  package.json no encontrado en ms_level_up_management"
+        warn "⚠️  package.json no encontrado en trivance_management"
         return 0
     fi
     
-    info "🔧 Aplicando fix de Sentry para ms_level_up_management..."
+    info "🔧 Aplicando fix de Sentry para trivance_management..."
     
     # Verificar si ya tiene build:dev
     if grep -q '"build:dev"' "$package_json"; then
-        success "✅ build:dev ya existe en ms_level_up_management"
+        success "✅ build:dev ya existe en trivance_management"
         return 0
     fi
     
@@ -306,7 +306,7 @@ fix_sentry_build_command() {
     # Aplicar fix usando sed para agregar build:dev después de build
     if sed -i '' 's/"build": "nest build && npm run sentry:sourcemaps",/"build": "nest build \&\& npm run sentry:sourcemaps",\
     "build:dev": "nest build",/' "$package_json"; then
-        success "✅ Fix de Sentry aplicado a ms_level_up_management"
+        success "✅ Fix de Sentry aplicado a trivance_management"
         info "   • Agregado script build:dev sin Sentry para desarrollo"
         return 0
     else
@@ -319,21 +319,21 @@ fix_sentry_build_command() {
 
 # Fix para Firebase: Generar claves válidas para desarrollo
 fix_firebase_credentials() {
-    local repo_path="${WORKSPACE_DIR}/ms_level_up_management"
+    local repo_path="${WORKSPACE_DIR}/trivance_management"
     
     if [[ ! -d "$repo_path" ]]; then
-        warn "⚠️  ms_level_up_management no encontrado, omitiendo fix de Firebase"
+        warn "⚠️  trivance_management no encontrado, omitiendo fix de Firebase"
         return 0
     fi
     
     local env_file="${repo_path}/.env"
     
     if [[ ! -f "$env_file" ]]; then
-        warn "⚠️  .env no encontrado en ms_level_up_management"
+        warn "⚠️  .env no encontrado en trivance_management"
         return 0
     fi
     
-    info "🔧 Aplicando fix de Firebase para ms_level_up_management..."
+    info "🔧 Aplicando fix de Firebase para trivance_management..."
     
     # Verificar si ya tiene credenciales Firebase válidas
     if grep -q "FIREBASE_PRIVATE_KEY.*BEGIN PRIVATE KEY" "$env_file"; then
@@ -372,14 +372,14 @@ fix_firebase_credentials() {
 fix_development_env_values() {
     info "🔧 Verificando valores de variables de entorno para desarrollo..."
     
-    local repos=("ms_trivance_auth" "ms_level_up_management" "level_up_backoffice" "trivance-mobile")
+    local repos=("trivance_auth" "trivance_management" "trivance_backoffice" "trivance-mobile")
     
     for repo in "${repos[@]}"; do
         local env_file="${WORKSPACE_DIR}/${repo}/.env"
         
         if [[ -f "$env_file" ]]; then
             # Verificar que Firebase esté configurado para desarrollo
-            if [[ "$repo" == "ms_level_up_management" ]]; then
+            if [[ "$repo" == "trivance_management" ]]; then
                 if grep -q "FIREBASE_PROJECT_ID=development-project" "$env_file"; then
                     success "✅ ${repo}: Variables Firebase configuradas para desarrollo"
                 else
