@@ -1,6 +1,45 @@
 # Guía Práctica de Comandos Claude Code
 
-## 🚀 Comandos Básicos
+*Comandos organizados por importancia y impact en productividad*
+
+## ⚡ Comandos de Alto Valor (ESENCIALES)
+
+### 🎯 `/understand` - Context Mapping
+```bash
+/understand
+```
+**Qué hace**: Analiza todo el codebase y explica arquitectura, patrones y funcionamiento completo.
+**Cuándo usarlo**: SIEMPRE antes de implementar. Primera acción en cualquier proyecto.
+**ROI**: 30 min ahorran 3+ horas de refactoring por inconsistencias.
+
+### 🚀 `/implement` - Motor de Implementación Automática
+```bash
+/implement "nueva feature de dashboard con notificaciones"
+```
+**Qué hace**: Motor central - planifica e implementa features completas con especialistas automáticos.
+**Cuándo usarlo**: Para cualquier implementación nueva. Reemplaza desarrollo manual.
+**Flujo**: Planning (tech-lead-orchestrator) → Coding (specialists) → Testing → Documentation
+**ROI**: Reduce 4+ horas desarrollo manual a 20-30 minutos.
+
+### 🔍 `/review` - Quality Assurance Multi-Especialista
+```bash
+/review
+```
+**Qué hace**: Análisis simultáneo de security, performance, code quality con múltiples especialistas.
+**Cuándo usarlo**: Después de cualquier implementación, ANTES de hacer PR.
+**ROI**: 5 min previenen 2+ horas de fixes post-merge.
+
+### ✅ `/test` - Validation Engine
+```bash
+/test
+```
+**Qué hace**: Ejecuta todos los tests, detecta fallos y sugiere/aplica fixes automáticos.
+**Cuándo usarlo**: Después de cambios significativos, antes de commits importantes.
+**ROI**: Debugging de horas a minutos.
+
+---
+
+## 🚀 Comandos Fundamentales
 
 ### 💾 `/commit` - Commits inteligentes
 ```bash
@@ -270,18 +309,26 @@
 
 ## 🎯 Flujos Típicos
 
-### Desarrollo de Feature Nueva
+### **🏆 Workflow de Alto Impacto: Feature Nueva**
 ```bash
-1. /worktree:create feature-name develop  # Crear worktree aislado
-2. cd ../worktree-feature-name            # Cambiar al worktree
-3. claude /workflow:session-start         # Nueva sesión en worktree
-4. /understand                            # Entender contexto
-5. /implement "nueva feature"             # Implementar
-6. /test                                 # Validar funcionamiento  
-7. /review                               # Revisar calidad
-8. /security-scan                        # Verificar seguridad
-9-12. Seguir workflow AI-First           # Ver: ai-first-workflow.md
+# SETUP (desde main/develop)
+1. /workflow:session-start               # Configurar workspace  
+2. /worktree:create feature-name develop # Crear worktree aislado
+3. cd ../worktree-feature-name           # Cambiar al worktree
+
+# COMANDOS DE ALTO VALOR (el 80% del impacto)
+4. /understand                           # 🎯 Context mapping completo
+5. /implement "nueva feature"            # 🚀 Implementation engine
+6. /review                              # 🔍 Multi-specialist quality check
+7. /pr                                  # Crear PR automático
+
+# ITERACIÓN (si hay findings)
+8. /review pr <number>                  # Plan para resolver findings
+9. [Resolver según plan]                # Manual o con especialistas
+10. Merge + /workflow:changelog + cleanup
 ```
+
+**⚡ Tiempo total con comandos de alto valor: 15-30 minutos** (vs 2-4 horas manual)
 
 > 📚 **Para workflow completo de PR + findings + issues:** Ver `ai-first-workflow.md`
 

@@ -8,16 +8,30 @@
 
 Cuando experimentas por primera vez un flujo AI-first real, algo cambia fundamentalmente en tu manera de trabajar. No es solo "usar herramientas AI" - es redefinir completamente cómo abordas los problemas de desarrollo.
 
-**La revelación típica** llega así: En lugar de pensar "necesito implementar autenticación OAuth" y abrir tu editor, tu primera reacción se convierte en "Claude, necesito autenticación OAuth". Lo que sigue es una orquestación automática donde especialistas analizan, planifican, implementan y revisan - mientras tú mantienes el control estratégico.
+**La revelación típica** llega así: En lugar de pensar "necesito implementar autenticación OAuth" y abrir tu editor, tu primera reacción se convierte en `/understand → /implement "OAuth"`. Lo que sigue es una orquestación automática donde especialistas analizan, planifican, implementan y revisan - mientras tú mantienes el control estratégico.
+
+> 📚 **Ver**: [Comandos de Alto Valor](ai-first-workflow.md#comandos-de-alto-valor) para entender el poder de `/understand`, `/implement`, `/review`, `/test`
 
 ### Pro-Tip #1: El Test de la Primera Reacción
 
 Cuando te llega una nueva feature request, observa tu primera reacción mental:
 - **Novato**: "¿Por dónde empiezo?"
 - **Competente**: "Primero necesito entender el contexto" 
-- **Experto**: "Claude, analicemos esto"
+- **Experto**: `/understand → /implement "feature X"`
 
-La diferencia no es el conocimiento técnico - es la instinctiva delegación inteligente.
+La diferencia no es el conocimiento técnico - es la **instinctiva automatización**. Los expertos van directo a los [comandos de alto valor](ai-first-workflow.md#comandos-de-alto-valor) que transforman horas en minutos.
+
+### 🚀 El Workflow Revelador
+
+```bash
+# El momento "Aha!" del AI-first development:
+/understand     # 3 min: Contexto completo vs horas de exploración manual
+/implement      # 20 min: Feature completa vs días de desarrollo
+/review         # 5 min: Multi-specialist analysis vs horas de debugging
+/pr            # 2 min: PR completo vs 30 min de setup manual
+```
+
+**Total: 30 minutos para feature production-ready** vs el approach tradicional de días.
 
 ---
 
