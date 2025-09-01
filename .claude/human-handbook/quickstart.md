@@ -126,7 +126,7 @@ echo "test" > test.txt && claude "/commit"
 
 #### 🔥 [`ai-first-workflow.md`](ai-first-workflow.md) - **ESENCIAL**
 **Workflow completo**: PR → Review → Issues → Resolución → Merge  
-**Incluye**: [Comandos de Alto Valor](ai-first-workflow.md#comandos-de-alto-valor) - la clave de productividad 10x
+**Incluye**: [Comandos de Alto Valor](ai-first-workflow.md#-comandos-de-alto-valor) - la clave de productividad 10x
 
 #### ⚡ [`commands-guide.md`](commands-guide.md) - **REFERENCIA COMPLETA**  
 **30+ comandos organizados por impacto**: `/understand`, `/implement`, `/review`, `/test` + todos los demás

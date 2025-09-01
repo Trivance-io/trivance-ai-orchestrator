@@ -128,7 +128,7 @@ git push     # Push directo al branch remoto
 
 **Casos posibles:**
 - ✅ Todo limpio → Merge automático
-- 🔄 Nuevos findings → Repetir pasos 3-6  
+- 🔄 Nuevos findings → Repetir pasos 4-7  
 - 🚨 Issues persistentes (4-5 iteraciones) → Pedir autorización
 
 ---
@@ -207,18 +207,19 @@ git push
 0. /workflow:session-start → "Desarrollo" → worktree  # Setup inicial
 1. /understand            # Mapear contexto COMPLETO (ESENCIAL)
 2. /implement "feature"   # MOTOR CENTRAL - Planning → Coding → Testing → Docs
-3. /review                # Análisis multi-especialista (CRÍTICO)
-4. /pr                    # Crear PR con metadata completa
-5. [Review automático]    # Findings aparecen en GitHub
-6. /review pr <number>    # Analizar findings + plan implementación
-7. Resolver issues        # Manual o con especialistas
-8. /commit + push         # Actualizar PR
-9. Re-review              # Validación final
+3. /test                  # Validación de funcionamiento (FUNDAMENTAL)
+4. /review                # Análisis multi-especialista (CRÍTICO)
+5. /pr                    # Crear PR con metadata completa
+6. [Review automático]    # Findings aparecen en GitHub
+7. /review pr <number>    # Analizar findings + plan implementación
+8. Resolver issues        # Manual o con especialistas
+9. /commit + push         # Actualizar PR
+10. Re-review             # Validación final
 ```
 
 **Casos:**
 - ✅ Aprobado → Merge → `/workflow:changelog <number>` + `/workflow:switch <base_branch>` + `/worktree:cleanup <worktree-name>` (documentar + cambiar contexto + eliminar worktree)
-- 🔄 Nuevos findings → Repetir 3-6
+- 🔄 Nuevos findings → Repetir 4-7
 - 🚨 Issues persistentes → Pedir autorización
 
 ---
