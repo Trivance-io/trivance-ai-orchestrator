@@ -20,3 +20,12 @@ jobs:
         with:
           comment-pr: true
           claude-api-key: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          
+          # Use Claude Opus 4.1 for maximum security analysis precision
+          claude-model: "claude-opus-4-1-20250805"
+          
+          # Exclude common non-security directories to reduce noise
+          exclude-directories: "node_modules,.git,dist,build,.next"
+          
+          # Optimize timeout for comprehensive analysis
+          claudecode-timeout: 15
