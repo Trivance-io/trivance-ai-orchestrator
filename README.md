@@ -9,6 +9,7 @@ Configura automáticamente el entorno completo de desarrollo de Trivance en minu
 - Genera configuraciones seguras únicas
 - Configura Docker para 2 backends y 2 bases de datos
 - Prepara hot-reload instantáneo para desarrollo
+- **Configura automáticamente Claude Code workspace con 29 agentes AI**
 
 ## 🏗️ Arquitectura del Sistema
 
@@ -86,12 +87,13 @@ cd trivance-ai-orchestrator
 # 2. Ejecutar setup (toma 1 - 3 minutos):
 ./setup.sh
 
-# 3. Cuando termine, iniciar servicios ( toma 3 - 6 minutos dependara de factores como tu maquina, internet, etc):
+# 3. Cuando termine, iniciar servicios ( toma 3 - 6 minutos dependera de factores como tu maquina, internet, etc):
 cd ..  # Volver al directorio workspace (padre de trivance-dev-config)
 ./start.sh
 ```
- ### IMPRESCINDIBLE: copia la carpeta .claude dentro del repo (trivance-dev-config) en la raiz de tu workspace para usar el stack de claude code configurado. 
- 
+
+**✅ Claude Code se configura automáticamente**: La carpeta `.claude/` se copia automáticamente al workspace durante el setup, incluyendo 29 agentes AI especializados.
+
 El sistema está listo cuando veas el menú principal.
 
 ## URLs del Sistema
@@ -166,36 +168,48 @@ Cuándo: Verificar consistencia, actualizar documentación automáticamente
 
 ## 🤖 Configuración Claude Code
 
-**IMPRESCINDIBLE**: Copia la carpeta `.claude/` a la raíz de tu workspace para usar el stack AI configurado.
+**✅ Configuración Automática**: La carpeta `.claude/` se copia automáticamente al workspace durante el setup.
 
-```bash
-# Copiar configuración Claude Code al workspace
-cp -r trivance-dev-config/.claude /workspace-principal/
-```
+La configuración incluye:
+- **29 agentes especializados** para todos los frameworks y tareas
+- **23 comandos automáticos** de desarrollo y workflow
+- **4 hooks de seguridad** que validan código automáticamente
+- **Configuración workspace-wide** lista para usar
 
 **Workflows AI-First**: Consulta `.claude/human-handbook/` para flujos completos de desarrollo con IA.
+
+### Manual Override (solo si necesario)
+```bash
+# Solo si necesitas reconfigurar manualmente
+cp -r trivance-ai-orchestrator/.claude .
+```
 
 ## 📁 Estructura Post-Instalación
 
 ```
 tu-workspace/
-├── 🔧 trivance-dev-config/          # Este repositorio (configuración)
-│   ├── scripts/                     # Scripts de automatización
-│   ├── docker/                      # Configuración Docker
-│   ├── config/                      # Variables y secrets
-│   ├── docs/                        # Documentación especializada
-│   ├── .claude/                     # Configuración Claude Code proyecto
-│   └── tools/                       # Herramientas especializadas
-├── 🏢 ms_level_up_management/       # Management API (NestJS + GraphQL)
-├── 🔐 ms_trivance_auth/             # Auth Service (NestJS + REST)
-├── 🖥️ level_up_backoffice/          # Frontend admin (React + Vite)
-├── 📱 trivance-mobile/              # App móvil (React Native + Expo)
-├── 🎛️ envs/                         # Configuración de environments
-│   ├── local.*.env                  # Configs automáticas locales
-│   ├── *.env.template              # Templates para QA/Prod
-│   └── ENVIRONMENTS.md → docs/     # Documentación (symlink)
-├── 🚀 start.sh → trivance-dev-config/scripts/start.sh  # Comando maestro
-└── 📖 CLAUDE.md                     # Guía para Claude Code AI
+├── 🔧 trivance-ai-orchestrator/        # Este repositorio (configuración)
+│   ├── scripts/                       # Scripts de automatización
+│   ├── docker/                        # Configuración Docker
+│   ├── config/                        # Variables y secrets
+│   ├── docs/                          # Documentación especializada
+│   ├── .claude/                       # Configuración Claude Code proyecto
+│   └── tools/                         # Herramientas especializadas
+├── 🏢 ms_level_up_management/         # Management API (NestJS + GraphQL)
+├── 🔐 ms_trivance_auth/               # Auth Service (NestJS + REST)
+├── 🖥️ level_up_backoffice/            # Frontend admin (React + Vite)
+├── 📱 trivance-mobile/                # App móvil (React Native + Expo)
+├── 🎛️ envs/                           # Configuración de environments
+│   ├── local.*.env                    # Configs automáticas locales
+│   ├── *.env.template                # Templates para QA/Prod
+│   └── ENVIRONMENTS.md → docs/       # Documentación (symlink)
+├── 🤖 .claude/                        # Claude Code workspace (copiado automáticamente)
+│   ├── agents/                        # 29 agentes especializados
+│   ├── commands/                      # 23 comandos automáticos
+│   ├── human-handbook/               # Workflows AI-First
+│   └── scripts/hooks/                # 4 hooks de seguridad
+├── 🚀 start.sh → trivance-ai-orchestrator/scripts/start.sh  # Comando maestro
+└── 📖 CLAUDE.md                       # Guía para Claude Code AI
 ```
 
 ## Comandos principales
@@ -211,13 +225,13 @@ tu-workspace/
 
 ```bash
 # Ver actual
-./trivance-dev-config/scripts/envs.sh status
+./trivance-ai-orchestrator/scripts/envs.sh status
 
 # Cambiar a QA
-./trivance-dev-config/scripts/envs.sh switch qa
+./trivance-ai-orchestrator/scripts/envs.sh switch qa
 
 # Volver a local
-./trivance-dev-config/scripts/envs.sh switch local
+./trivance-ai-orchestrator/scripts/envs.sh switch local
 ```
 
 ## 🐳 Docker Avanzado
@@ -253,11 +267,11 @@ APP_ENV=development   # ← Lógica de aplicación (development|qa|production)
 
 ```bash
 # Cambiar a QA
-./trivance-dev-config/scripts/envs.sh switch qa
+./trivance-ai-orchestrator/scripts/envs.sh switch qa
 # → Cambia TODOS los .env + Docker configs + Mobile TypeScript
 
 # Cambiar a local
-./trivance-dev-config/scripts/envs.sh switch local  
+./trivance-ai-orchestrator/scripts/envs.sh switch local  
 # → Vuelve a desarrollo local automáticamente
 ```
 
@@ -340,5 +354,5 @@ cd trivance-mobile && npm run start:docker
 # Mobile: trivance-mobile/src → hot-reload ≤1s
 
 # 5. Switch environments cuando necesario
-./trivance-dev-config/scripts/envs.sh switch qa|local
+./trivance-ai-orchestrator/scripts/envs.sh switch qa|local
 ```

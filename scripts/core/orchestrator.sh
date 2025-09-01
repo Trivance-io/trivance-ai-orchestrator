@@ -647,6 +647,66 @@ setup_monitoring_tools() {
     info "   💡 Inicia los servicios con: ./start.sh"
 }
 
+setup_claude_workspace() {
+    log "🤖 Configurando workspace de Claude Code..."
+    
+    local source_claude="${SCRIPT_DIR}/../../.claude"
+    local target_claude="${WORKSPACE_DIR}/.claude"
+    
+    # Validar que el directorio fuente existe
+    if [[ ! -d "$source_claude" ]]; then
+        warn "⚠️  Directorio .claude no encontrado en config repo"
+        return 0
+    fi
+    
+    # Verificar si .claude ya existe en workspace
+    if [[ -d "$target_claude" ]]; then
+        info "📁 .claude ya existe en workspace, no se sobrescribirá"
+        info "   Para actualizar manualmente: rm -rf ${target_claude} && reexecute setup"
+        return 0
+    fi
+    
+    # Copiar .claude al workspace root
+    info "📋 Copiando configuración Claude Code al workspace..."
+    if cp -r "$source_claude" "$target_claude"; then
+        success "✅ Claude Code workspace configurado exitosamente"
+        info "   🤖 29 agentes especializados disponibles"
+        info "   ⚡ 23 comandos de desarrollo automatizado"
+        info "   🔐 4 hooks de seguridad y calidad activos"
+        info "   ⚙️  Configuración lista para uso workspace-wide"
+    else
+        error "❌ Error al configurar Claude Code workspace"
+        warn "⚠️  Puedes copiarlo manualmente: cp -r trivance-ai-orchestrator/.claude ."
+        return 1
+    fi
+    
+    # Validar estructura copiada
+    local expected_dirs=("agents" "commands" "human-handbook" "scripts")
+    local validation_failed=false
+    
+    for dir in "${expected_dirs[@]}"; do
+        if [[ ! -d "${target_claude}/${dir}" ]]; then
+            warn "⚠️  Directorio ${dir} no encontrado en .claude copiado"
+            validation_failed=true
+        fi
+    done
+    
+    if [[ "$validation_failed" == "true" ]]; then
+        warn "⚠️  Estructura .claude incompleta, algunas funcionalidades pueden no estar disponibles"
+    else
+        success "✅ Estructura .claude validada correctamente"
+    fi
+    
+    # Información sobre uso
+    echo
+    info "📖 Para usar Claude Code efectivamente:"
+    info "   1. Abre Claude Code en este directorio workspace"
+    info "   2. Usa /help para ver comandos disponibles"
+    info "   3. Consulta .claude/human-handbook/ para workflows AI-First"
+    
+    return 0
+}
+
 create_claude_md_final() {
     info "🤖 Configuración completa exitosa"
     
@@ -689,12 +749,17 @@ create_claude_md_final() {
     else
         info "📝 CLAUDE.md ya existe, no se sobrescribirá"
     fi
+    
+    # NUEVA FUNCIONALIDAD: Setup automático del workspace .claude/
+    setup_claude_workspace
+    
     echo
-    echo -e "${GREEN}💡 Beneficios del CLAUDE.md:${NC}"
+    echo -e "${GREEN}💡 Beneficios del setup Claude Code completo:${NC}"
     echo -e "${GREEN}   ✅ Claude entiende mejor la arquitectura del proyecto${NC}"
     echo -e "${GREEN}   ✅ Respuestas más precisas y contextuales${NC}"
     echo -e "${GREEN}   ✅ Mejor manejo de comandos y workflows${NC}"
     echo -e "${GREEN}   ✅ Integración optimizada con Docker + PM2${NC}"
+    echo -e "${GREEN}   ✅ Stack completo de agentes y comandos disponible${NC}"
     echo
 }
 
