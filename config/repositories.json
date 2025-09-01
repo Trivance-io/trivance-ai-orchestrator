@@ -17,7 +17,7 @@
     {
       "name": "trivance_auth",
       "url": "git@github.com:Trivance-io/trivance_auth.git",
-      "branch": "experiments", 
+      "branch": "experiments",
       "type": "backend",
       "technology": "nestjs",
       "port": 3001,
@@ -29,7 +29,7 @@
       "name": "trivance_backoffice",
       "url": "git@github.com:Trivance-io/trivance_backoffice.git",
       "branch": "experiments",
-      "type": "frontend", 
+      "type": "frontend",
       "technology": "react-vite",
       "port": 5173,
       "has_env": true,
@@ -38,7 +38,7 @@
     {
       "name": "trivance-mobile",
       "url": "git@github.com:Trivance-io/trivance-mobile.git",
-      "branch": "experiments",
+      "branch": "main",
       "type": "mobile",
       "technology": "react-native-expo",
       "has_env": true,
