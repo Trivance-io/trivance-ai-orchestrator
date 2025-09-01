@@ -224,20 +224,21 @@
 **Flujo**: Valida target branch → Pre-fetch remoto → Crea branch temporal → Push seguro → PR con metadata
 
 
-### 🎯 `/github:findings-to-issues` - Hallazgos a issues GitHub
+### 🎯 `/review pr` - Smart PR Review & Implementation Plan
 ```bash
-/github:findings-to-issues
+/review pr <number>
 ```
-**Qué hace**: Convierte hallazgos de PR reviews en issues GitHub trackeable con categorización inteligente.
-**Cuándo usarlo**: Después de reviews importantes para gestionar deuda técnica y seguimiento.
+**Qué hace**: Analiza findings de PR reviews con especialistas AI y genera plan técnico detallado para implementación manual.
+**Cuándo usarlo**: Para revisar PRs y obtener plan priorizado sin crear issues masivos en GitHub.
 
-### `/github:issues-to-solved` - Resolver issues de PR automáticamente
+### `/issue-manager` - Gestionar y analizar issues de GitHub
 ```bash
-/github:issues-to-solved <pr_number>
+/issue-manager                 # Resumen de issues activos asignados
+/issue-manager <issue_number>  # Análisis profundo de issue específico
 ```
-**Qué hace**: Extrae issues asociados a PR, analiza prioridades, genera plan de implementación y ejecuta fixes seguros automáticamente.
-**Cuándo usarlo**: Después de crear issues con github:findings-to-issues, para planificar y resolver sistemáticamente.
-**Flujo**: Extrae issues → Prioriza (CRITICAL/HIGH/MEDIUM/LOW) → Plan estructurado → Ejecución opcional
+**Qué hace**: Proporciona resumen inteligente de tus issues activos o análisis detallado de un issue individual con contexto, complejidad y próximos pasos.
+**Cuándo usarlo**: Para obtener visión general de workload o analizar issue específico antes de implementar.
+**Funcionalidades**: Dashboard con priorización inteligente, detección de issues stale, estimación de complejidad, archivos afectados
 
 ---
 
