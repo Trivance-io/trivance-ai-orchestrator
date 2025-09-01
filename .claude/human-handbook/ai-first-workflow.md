@@ -66,19 +66,7 @@ Analiza findings y genera plan de implementación organizado por prioridad: CRÍ
 
 ---
 
-### **PASO 4: Planificar (Opcional)**
-
-```bash
-/github:issues-to-solved <pr_number>
-```
-
-Genera plan de resolución por prioridades:
-- **"Y"**: Ejecución automática 
-- **"N"**: Usar como guía manual
-
----
-
-### **PASO 5: Resolver Issues**
+### **PASO 4: Resolver Issues**
 
 ⚠️ **Importante:** Usar el mismo PR, no crear uno nuevo.
 
@@ -98,7 +86,7 @@ Siempre usar `Closes #77` en commits para trazabilidad.
 
 ---
 
-### **PASO 6: Push y Re-Review**
+### **PASO 5: Push y Re-Review**
 
 ```bash
 git push     # Push directo al branch remoto
@@ -235,7 +223,6 @@ git push
 /pr [target-branch]              # Crear PR
 /commit "fix: Closes #X"         # Commit con referencia  
 /review pr <number>              # Analizar + plan implementación
-/github:issues-to-solved <pr>    # [Solo si hay issues existentes]
 ```
 
 **Desde cualquier ubicación:**
