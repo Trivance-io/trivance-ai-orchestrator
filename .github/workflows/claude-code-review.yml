@@ -12,16 +12,16 @@ on:
 
 jobs:
   claude-review:
-    # Optional: Filter by PR author
-    # if: |
-    #   github.event.pull_request.user.login == 'external-contributor' ||
-    #   github.event.pull_request.user.login == 'new-developer' ||
-    #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
-    
     runs-on: ubuntu-latest
+    
+    # Skip review for drafts and certain conditions
+    if: |
+      !contains(github.event.pull_request.title, '[skip-review]') &&
+      !contains(github.event.pull_request.title, '[WIP]') &&
+      !github.event.pull_request.draft
     permissions:
       contents: read
-      pull-requests: read
+      pull-requests: write  # Required for sticky comments
       issues: read
       id-token: write
     
@@ -29,26 +29,79 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0  # Full history for better context analysis
 
       - name: Run Claude Code Review
         id: claude-review
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          prompt: |
-            Please review this pull request and provide feedback on:
-            - Code quality and best practices
-            - Potential bugs or issues
-            - Performance considerations
-            - Security concerns
-            - Test coverage
-            
-            Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
 
-            Use `gh pr comment` with your Bash tool to leave your review as a comment on the PR.
+          # Enterprise-grade code review prompt based on clean code principles
+          prompt: |
+            You are conducting a comprehensive code review as a senior software architect. Apply industry-standard best practices and clean code principles universally.
+
+            ## REVIEW METHODOLOGY
+
+            **1. AUTOMATED VALIDATION FIRST**
+            Execute available tests, linters, and build tools:
+            - Run test suites and analyze failures with root cause analysis
+            - Execute static analysis tools and report violations with context
+            - Validate builds and compilation across different environments
+            - Check for security vulnerabilities and compliance gaps
+
+            **2. ARCHITECTURAL ASSESSMENT**
+            Evaluate code structure and design decisions:
+            - **Single Responsibility**: Each component has one clear purpose
+            - **Open/Closed**: Code is extensible without modification
+            - **Dependency Inversion**: Abstractions don't depend on details
+            - **Separation of Concerns**: Clear boundaries between different aspects
+            - **Consistency**: Patterns and conventions applied uniformly
+
+            **3. CODE QUALITY ANALYSIS**
+            Apply clean code principles rigorously:
+            - **Readability**: Code communicates intent clearly to humans
+            - **Simplicity**: Solutions are as simple as possible, not simpler
+            - **DRY**: No unnecessary duplication or repetition
+            - **YAGNI**: Implementations driven by actual requirements
+            - **Error Handling**: Robust, predictable failure management
+
+            **4. SECURITY & PERFORMANCE**
+            Focus on production-ready standards:
+            - **Security**: Input validation, output encoding, secure defaults
+            - **Performance**: Efficient algorithms, proper resource management
+            - **Maintainability**: Clear abstractions, testable design
+            - **Scalability**: Handles growth in users, data, and complexity
+            - **Observability**: Proper logging, monitoring, debugging support
+
+            ## OUTPUT FORMAT
+
+            **🔍 AUTOMATED VALIDATION RESULTS**
+            Report on executed tests, linters, and tools with specific findings.
+
+            **🏗️ ARCHITECTURAL REVIEW** 
+            Assess design patterns, structure, and adherence to SOLID principles.
+
+            **✨ CODE QUALITY ASSESSMENT**
+            Evaluate readability, maintainability, and clean code compliance.
+
+            **🔒 SECURITY & PERFORMANCE**
+            Identify vulnerabilities, bottlenecks, and optimization opportunities.
+
+            **📝 ACTIONABLE RECOMMENDATIONS**
+            For each issue provide:
+            - **Severity**: Critical/High/Medium/Low with business impact
+            - **Problem**: What's wrong and why it matters
+            - **Solution**: Specific fix with code examples
+            - **Prevention**: Strategy to avoid similar issues
+
+            Be thorough, practical, and educational. Execute with precision while focusing on teaching and improving code quality.
+
+          # Enable sticky comments for clean PR conversations
+          use_sticky_comment: true
           
-          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
-          # or https://docs.anthropic.com/en/docs/claude-code/sdk#command-line for available options
-          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
+          # Advanced configuration using claude_args (v1.0 format)
+          claude_args: |
+            --model claude-opus-4-1-20250805
+            --allowedTools "Read,Write,Edit,Bash(git:*),Bash(ls:*),Bash(find:*),Bash(grep:*),Bash(npm test:*),Bash(npm run test:*),Bash(npm run build:*),Bash(npm run lint:*),Bash(npm run typecheck:*),Bash(pytest:*),Bash(python -m pytest:*),Bash(python -m flake8:*),Bash(python -m black --check:*),Bash(mypy:*),Bash(go test:*),Bash(go vet:*),Bash(go fmt -l:*),Bash(golangci-lint:*),Bash(cargo test:*),Bash(cargo clippy:*),Bash(cargo fmt --check:*),Bash(docker build:*),Bash(docker-compose config:*),Bash(hadolint:*),Bash(terraform validate:*),Bash(terraform fmt -check:*),Bash(shellcheck:*),Bash(yamllint:*),Bash(eslint:*),Bash(tsc --noEmit:*)"
 
