@@ -1,133 +1,131 @@
 ---
 allowed-tools: Bash(git *), Bash(test *), Bash(mkdir *), Bash(date *), Bash(whoami), Bash(echo *), Bash([[ ]])
-description: Eliminación segura de worktrees específicos con validación de ownership y discovery mode
+description: Safe removal of specific worktrees with ownership validation and discovery mode
 ---
 
 # Worktree Cleanup
 
-Eliminación segura de worktrees específicos con validación de ownership y discovery mode.
+Safe removal of specific worktrees with ownership validation and discovery mode.
 
-## Uso
+## Usage
 ```bash
 /worktree:cleanup                                        # Discovery mode: lista worktrees disponibles
 /worktree:cleanup <worktree1> [worktree2] [worktree3]   # Cleanup mode: eliminar específicos
 ```
 
-## Ejemplos
+## Examples
 ```bash
 /worktree:cleanup                                        # Lista tus worktrees con comandos sugeridos
 /worktree:cleanup worktree-feature-auth                 # Eliminar uno específico  
 /worktree:cleanup worktree-hotfix worktree-refactor     # Eliminar múltiples
 ```
 
-## Restricciones
-- Solo elimina worktrees y ramas creados por ti
-- Nunca toca ramas protegidas (main, develop, qa, staging, master)
-- Requiere estado limpio (sin cambios uncommitted o unpushed)
+## Restrictions
+- Only removes worktrees and branches created by you
+- Never touches protected branches (main, develop, qa, staging, master)
+- Requires clean state (no uncommitted changes)
 
-## Ejecución
+## Execution
 
-### Discovery Mode (sin argumentos)
-Si no proporcionas argumentos, el comando lista tus worktrees disponibles con comandos sugeridos.
+### Discovery Mode (no arguments)
+If no arguments are provided, the command lists your available worktrees with suggested commands.
 
-### Cleanup Mode (con argumentos)
-Cuando ejecutes con argumentos específicos, sigue estos pasos:
+### Cleanup Mode (with arguments)
+When executing with specific arguments, follow these steps:
 
-### 1. Validación y preparación
-- Validar cada target usando single-pass validation
-- Crear lista de targets válidos (skip inválidos con warnings)
-- Si no hay targets válidos: mostrar "ℹ️ No hay worktrees válidos para eliminar" y terminar
+### 1. Validation and preparation
+- Validate each target using single-pass validation
+- Create list of valid targets (skip invalid ones with warnings)
+- If no valid targets: show "ℹ️ No hay worktrees válidos para eliminar" and terminate
 
-### 2. Validaciones por target (pasos individuales)
-Para cada worktree target, ejecutar validaciones en orden:
+### 2. Per-target validations (individual steps)
+For each worktree target, execute validations in order:
 
-**2a. Validación de formato:**
-- Verificar nombre usando regex: `[[ "$target" =~ ^[a-zA-Z0-9][a-zA-Z0-9_-]*$ ]]`
-- Si falla: skip con mensaje "Formato de nombre inválido"
+**2a. Format validation:**
+- Verify name using regex: `[[ "$target" =~ ^[a-zA-Z0-9][a-zA-Z0-9_-]*$ ]]`
+- If fails: skip with message "Formato de nombre inválido"
 
-**2b. Validación de rama protegida:**
-- Verificar que no esté en array: `("main" "develop" "qa" "staging" "master")`
-- Si está protegida: skip con mensaje "Rama protegida"
+**2b. Protected branch validation:**
+- Verify it's not in array: `("main" "develop" "qa" "staging" "master")`
+- If protected: skip with message "Rama protegida"
 
-**2c. Validación de directorio actual:**
-- Ejecutar validación definida en sección 3
-- Si coincide con directorio actual: skip con error específico
+**2c. Current directory validation:**
+- Execute validation defined in section 3
+- If matches current directory: skip with specific error
 
-**2d. Validación de existencia:**
-- Verificar que existe como worktree usando `git worktree list --porcelain`
-- Si no existe: skip con mensaje "Worktree no encontrado"
+**2d. Existence validation:**
+- Verify it exists as worktree using `git worktree list --porcelain`
+- If doesn't exist: skip with message "Worktree no encontrado"
 
-**2e. Validación de ownership:**
-- Verificar ownership usando lógica cross-platform de sección 4
-- Si no es del usuario: skip con mensaje "No es tu worktree"
+**2e. Ownership validation:**
+- Verify ownership using cross-platform logic from section 4
+- If not user's: skip with message "No es tu worktree"
 
-**2f. Validación de estado limpio:**
-- Verificar sin cambios uncommitted: `git status --porcelain` en el worktree
-- Verificar sin commits unpushed: `git rev-list --count origin/rama..rama`
-- Si no está limpio: skip con mensaje específico del problema
+**2f. Clean state validation:**
+- Verify no uncommitted changes: `git status --porcelain` in the worktree
+- If not clean: skip with specific problem message
 
-### 3. Validación de directorio actual (SEGURIDAD CRÍTICA)
-Para cada worktree target, verificar que el usuario no esté intentando eliminar el worktree donde está parado:
-- Obtener canonical path del directorio actual: `current_dir="$(realpath "$(pwd)" 2>/dev/null)"`
+### 3. Current directory validation (CRITICAL SECURITY)
+For each worktree target, verify the user is not trying to delete the worktree they are standing in:
+- Get canonical path of current directory: `current_dir="$(realpath "$(pwd)" 2>/dev/null)"`
 - Si falla obtener path actual: mostrar error "❌ Error: No se pudo resolver directorio actual" y terminar
-- Obtener path del worktree target usando parsing seguro: `git worktree list --porcelain | awk` con validación estricta
-- Si no se encuentra el target: continuar (será manejado por otra validación)
-- Obtener canonical path del target: `target_path="$(realpath "$target_path" 2>/dev/null)"`
+- Get worktree target path using safe parsing: `git worktree list --porcelain | awk` with strict validation
+- If target not found: continue (will be handled by another validation)
+- Get canonical path of target: `target_path="$(realpath "$target_path" 2>/dev/null)"`
 - Si falla obtener path del target: mostrar error "❌ Error: No se pudo resolver path del worktree target" y skip
-- Comparar paths canónicos: si `"$current_dir" == "$target_path"` entonces:
+- Compare canonical paths: if `"$current_dir" == "$target_path"` then:
   - Mostrar error: "❌ Error: No puedes eliminar el worktree donde estás actualmente"
-  - Mostrar ubicación actual y solución específica
-  - Skip este target con warning
+  - Show current location and specific solution
+  - Skip this target with warning
 
 ### 4. Cross-platform compatibility
-Para verificar ownership de archivos, usar detección automática de OS:
-- Si `"$OSTYPE"` empieza con "darwin": usar comando `stat -f %Su "$path"`
-- Si no (Linux/otros): usar comando `stat -c %U "$path"`
-- Comparar resultado con `$(whoami)` para verificar ownership
-- Si no coincide: skip este target con warning de ownership
+To verify file ownership, use automatic OS detection:
+- If `"$OSTYPE"` starts with "darwin": use command `stat -f %Su "$path"`
+- If not (Linux/others): use command `stat -c %U "$path"`
+- Compare result with `$(whoami)` to verify ownership
+- If doesn't match: skip this target with ownership warning
 
-### 5. Confirmación del usuario
-- Mostrar resumen de targets válidos
-- Solicitar confirmación: "Escribir 'ELIMINAR' para confirmar:"
-- Si confirmación != "ELIMINAR": cancelar y terminar
+### 5. User confirmation
+- Show summary of valid targets
+- Request confirmation: "Escribir 'ELIMINAR' para confirmar:"
+- If confirmation != "ELIMINAR": cancel and terminate
 
-### 6. Cleanup triple atómico
-Para cada target confirmado:
-- Eliminar worktree: `git worktree remove "$target"`
-- Eliminar rama local: `git branch -D "$branch_name"`  
-- Eliminar rama remota (si existe): `git push origin --delete "$branch_name"`
+### 6. Dual atomic cleanup
+For each confirmed target:
+- Remove worktree: `git worktree remove "$target"`
+- Remove local branch: `git branch -D "$branch_name"`
 
-### 7. Logging y limpieza final
-- Registrar operación en formato JSONL
-- Ejecutar `git remote prune origin`
-- Mostrar reporte final de resultados
+### 7. Logging and final cleanup
+- Log operation in JSONL format
+- Execute `git remote prune origin`
+- Show final results report
 
-## Implementación del Discovery Mode
+## Discovery Mode Implementation
 
-Cuando se ejecuta sin argumentos, seguir estos pasos:
+When executed without arguments, follow these steps:
 - Mostrar: "🔍 Tus worktrees disponibles para eliminar:"
-- Obtener canonical path del directorio actual: `current_canonical="$(realpath "$(pwd)" 2>/dev/null)"`
-- Si falla obtener path actual: mostrar error y terminar
-- Ejecutar `git worktree list --porcelain` y procesar cada línea:
-  - Para líneas que empiecen con "worktree": extraer path como `worktree_path`
-  - Obtener canonical path del worktree: `worktree_canonical="$(realpath "$worktree_path" 2>/dev/null)"`
-  - Si falla obtener canonical path: skip este worktree
-  - Si `worktree_canonical` es igual a `current_canonical`: skip (es el directorio actual)
-  - Verificar ownership básico usando función cross-platform
-  - Si el owner es el usuario actual: mostrar comando sugerido con formato `"   /worktree:cleanup $worktree_name"`
+- Get canonical path of current directory: `current_canonical="$(realpath "$(pwd)" 2>/dev/null)"`
+- If fails to get current path: show error and terminate
+- Execute `git worktree list --porcelain` and process each line:
+  - For lines starting with "worktree": extract path as `worktree_path`
+  - Get canonical path of worktree: `worktree_canonical="$(realpath "$worktree_path" 2>/dev/null)"`
+  - If fails to get canonical path: skip this worktree
+  - If `worktree_canonical` equals `current_canonical`: skip (it's current directory)
+  - Verify basic ownership using cross-platform function
+  - If owner is current user: show suggested command with format `"   /worktree:cleanup $worktree_name"`
 
 ## Logging Format Template
 
-Para cada target procesado, agregar línea al archivo JSONL:
+For each processed target, add line to JSONL file:
 
 ```json
-{"timestamp":"$(date -Iseconds)","operation":"worktree_cleanup","target":"$target","user":"$(whoami)","my_email":"$(git config user.email)","worktree_removed":"$worktree_removed","local_removed":"$local_removed","remote_removed":"$remote_removed","commit_sha":"$(git rev-parse HEAD)"}
+{"timestamp":"$(date -Iseconds)","operation":"worktree_cleanup","target":"$target","user":"$(whoami)","my_email":"$(git config user.email)","worktree_removed":"$worktree_removed","local_removed":"$local_removed","local_only":true,"commit_sha":"$(git rev-parse HEAD)"}
 ```
 
-## Principios de Implementación
-- **Single-pass validation**: Una función, una pasada, graceful degradation
-- **Current-directory protection**: No permite eliminar el worktree donde está parado
-- **Cross-platform**: Auto-detección macOS/Linux
-- **Discovery-first**: Ayuda al usuario a encontrar worktrees
-- **Backward compatibility**: Argumentos existentes funcionan igual
-- **Atomic operations**: Cleanup completo o skip con warning
+## Implementation Principles
+- **Single-pass validation**: One function, one pass, graceful degradation
+- **Current-directory protection**: Does not allow deleting the worktree you are standing in
+- **Cross-platform**: Auto-detection macOS/Linux
+- **Discovery-first**: Helps user find worktrees
+- **Backward compatibility**: Existing arguments work the same
+- **Atomic operations**: Complete cleanup or skip with warning

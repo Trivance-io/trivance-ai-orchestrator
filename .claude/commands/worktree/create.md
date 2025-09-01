@@ -1,18 +1,18 @@
 ---
 allowed-tools: Bash(git *), Bash(test *), Bash(mkdir *), Bash(date *), Bash(whoami), Bash(echo *), Bash(tr *), Bash(sed *)
-description: Crea worktree con rama consistente en directorio sibling
+description: Creates worktree with consistent branch in sibling directory
 ---
 
 # Worktree Create
 
-Crea worktree desde parent branch especificado con naming consistente.
+Creates worktree from specified parent branch with consistent naming.
 
-## Uso
+## Usage
 ```bash
 /worktree:create "<objetivo-descripción>" <parent-branch>  # Ambos argumentos obligatorios
 ```
 
-## Ejemplos
+## Examples
 ```bash
 /worktree:create "implementar autenticacion OAuth" main        # → worktree-implementar-autenticacion-oauth
 /worktree:create "fix bug critico en pagos" develop            # → worktree-fix-bug-critico-en-pagos
@@ -20,89 +20,84 @@ Crea worktree desde parent branch especificado con naming consistente.
 /worktree:create "add API endpoints v2" qa                     # → worktree-add-api-endpoints-v2
 ```
 
-## Ejecución
+## Execution
 
-Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
+When executing this command with `$ARGUMENTS`, follow these steps:
 
-### 1. Validación de argumentos
-- Contar argumentos en `$ARGUMENTS` usando expansión de array
+### 1. Argument validation
+- Count arguments in `$ARGUMENTS` using array expansion
 - Si no hay exactamente 2 argumentos, mostrar error: "❌ Error: Se requieren 2 argumentos. Uso: /worktree:create \"<objetivo>\" <parent-branch>"
-- Capturar primer argumento como `objetivo_descripcion` y segundo como `parent_branch`
+- Capture first argument as `objetivo_descripcion` and second as `parent_branch`
 - Mostrar: "Creando worktree para: <objetivo_descripcion> desde rama padre: <parent_branch>"
 
-### 2. Validación de working directory
-- Ejecutar `status_output=$(git status --porcelain)` para capturar cambios pendientes
-- Si hay output (cambios sin commitear):
-  - Mostrar error: "❌ Error: Working directory no está limpio. Commitea o stash cambios primero"
+### 2. Working directory validation
+- Execute `status_output=$(git status --porcelain)` to capture pending changes
+- If there is output (uncommitted changes):
+  - Mostrar error: "❌ Error: Directorio de trabajo no está limpio. Commitea o stash cambios primero"
   - Mostrar contenido: `echo "$status_output"`
-  - TERMINAR proceso completamente
-- Si no hay cambios, mostrar: "✓ Working directory clean, proceeding..."
+  - TERMINATE process completely
+- Si no hay cambios, mostrar: "✓ Directorio de trabajo limpio, continuando..."
 
-### 3. Validación de parent branch
-- Ejecutar `git show-ref --verify --quiet refs/heads/$parent_branch` para verificar que existe localmente
-- Si el comando falla (exit code != 0):
+### 3. Parent branch validation
+- Execute `git show-ref --verify --quiet refs/heads/$parent_branch` to verify it exists locally
+- If command fails (exit code != 0):
   - Mostrar error: "❌ Error: Branch '$parent_branch' no existe localmente"
   - Mostrar: "Branches disponibles:"
   - Ejecutar `git branch --list`
-  - TERMINAR proceso completamente
-- Si existe, mostrar: "✓ Parent branch '$parent_branch' verified"
+  - TERMINATE process completely
+- Si existe, mostrar: "✓ Rama padre '$parent_branch' verificada"
 
-### 4. Generar nombres consistentes
-- Convertir `objetivo_descripcion` a slug válido usando transformación optimizada:
-  - Ejecutar `echo "$objetivo_descripcion" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g; s/--*/-/g; s/^-\|-$//g'`
-  - Capturar resultado como `objetivo_slug`
-- Construir `worktree_name` como: "worktree-$objetivo_slug"
-- Construir `branch_name` idéntico a `worktree_name`
-- Construir `worktree_path` como: "../$worktree_name"
-- Mostrar: "Generated names from objetivo: '$objetivo_descripcion' → Directory: $worktree_path, Branch: $branch_name"
+### 4. Generate consistent names
+- Convert `objetivo_descripcion` to valid slug using optimized transformation:
+  - Execute `echo "$objetivo_descripcion" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g; s/--*/-/g; s/^-\|-$//g'`
+  - Capture result as `objetivo_slug`
+- Build `worktree_name` as: "worktree-$objetivo_slug"
+- Build `branch_name` identical to `worktree_name`
+- Build `worktree_path` as: "../$worktree_name"
+- Mostrar: "Nombres generados desde objetivo: '$objetivo_descripcion' → Directorio: $worktree_path, Rama: $branch_name"
 
-### 5. Verificar colisiones
-- Ejecutar `test -d "$worktree_path"` para verificar si directorio existe
-- Si existe (exit code 0):
+### 5. Check for collisions
+- Execute `test -d "$worktree_path"` to verify if directory exists
+- If exists (exit code 0):
   - Mostrar error: "❌ Error: Directory $worktree_path ya existe"
-  - TERMINAR proceso completamente
-- Ejecutar `git show-ref --verify --quiet refs/heads/$branch_name` para verificar si branch existe
-- Si existe (exit code 0):
+  - TERMINATE process completely
+- Execute `git show-ref --verify --quiet refs/heads/$branch_name` to verify if branch exists
+- If exists (exit code 0):
   - Mostrar error: "❌ Error: Branch $branch_name ya existe"
-  - TERMINAR proceso completamente
-- Mostrar: "✓ No collisions detected"
+  - TERMINATE process completely
+- Mostrar: "✓ No se detectaron colisiones"
 
-### 6. Preparar parent branch
-- Ejecutar `git checkout "$parent_branch"` para cambiar al parent
-- Si falla, mostrar error: "❌ Error: Could not checkout $parent_branch" y terminar
-- Ejecutar `git pull origin "$parent_branch"` para actualizar desde remoto
-- Si falla, mostrar warning: "⚠️ No se pudo actualizar $parent_branch desde remoto" pero continuar
-- Si exitoso, mostrar: "✓ Parent branch updated from remote"
+### 6. Prepare parent branch
+- Execute `git checkout "$parent_branch"` to switch to parent
+- If fails, show error: "❌ Error: No se pudo cambiar a $parent_branch" and terminate
+- Execute `git pull origin "$parent_branch"` to update from remote
+- If fails, show warning: "⚠️ No se pudo actualizar $parent_branch desde remoto" but continue
+- Si exitoso, mostrar: "✓ Rama padre actualizada desde remoto"
 
-### 7. Crear worktree
-- Ejecutar `git worktree add "$worktree_path" -b "$branch_name"`
-- Si comando falla, mostrar error: "❌ Error: Failed to create worktree" y terminar
+### 7. Create worktree
+- Execute `git worktree add "$worktree_path" -b "$branch_name"`
+- If command fails, show error: "❌ Error: No se pudo crear worktree" and terminate
 - Mostrar: "✅ Worktree created: $worktree_path with branch $branch_name"
 
-### 8. Configurar rama remota
-- Ejecutar `(cd "$worktree_path" && git push -u origin "$branch_name")` para crear rama remota y set upstream
-- Si falla, mostrar error: "❌ Error: Failed to create remote branch" pero NO terminar
-- Si exitoso, mostrar: "✅ Remote branch created: origin/$branch_name"
-
-### 9. Abrir IDE automáticamente
-- Detectar IDE disponible ejecutando comandos en orden:
+### 8. Open IDE automatically
+- Detect available IDE by executing commands in order:
   - `which code > /dev/null 2>&1` para VS Code
   - `which cursor > /dev/null 2>&1` para Cursor
-- Si se encuentra IDE, ejecutar `(cd "$worktree_path" && [IDE_COMMAND] . --new-window)` donde [IDE_COMMAND] es `code` o `cursor`
+- If IDE is found, execute `(cd "$worktree_path" && [IDE_COMMAND] . --new-window)` where [IDE_COMMAND] is `code` or `cursor`
 - Si IDE se abre exitosamente, mostrar: "✅ IDE abierto en nueva ventana: $worktree_path"
 - Si no se encuentra IDE disponible, mostrar: "⚠️ No se encontró IDE compatible. Abre manualmente: [IDE] $worktree_path"
-- Si falla abrir IDE, mostrar warning: "⚠️ No se pudo abrir IDE automáticamente" pero continuar
+- If fails to open IDE, show warning: "⚠️ No se pudo abrir IDE automáticamente" but continue
 
-### 10. Logging y resultado final
-- **Log operación**: Crear directorio de logs con `log_dir=".claude/logs/$(date +%Y-%m-%d)" && mkdir -p "$log_dir"`
-- Si falla creación de directorio: mostrar warning pero continuar
-- Agregar entrada JSONL a `"$log_dir/worktree_operations.jsonl"` usando el template
-- Mostrar estado exitoso:
+### 9. Logging and final result
+- **Log operation**: Create logs directory with `log_dir=".claude/logs/$(date +%Y-%m-%d)" && mkdir -p "$log_dir"`
+- If directory creation fails: show warning but continue
+- Add JSONL entry to `"$log_dir/worktree_operations.jsonl"` using the template
+- Show successful status:
   ```
   ✅ Worktree created successfully:
   - Directory: $worktree_path
-  - Branch: $branch_name (tracking origin/$branch_name)
-  - Parent: $parent_branch
+  - Branch: $branch_name (local)
+  - Rama padre: $parent_branch
 
   ⚠️  CRÍTICO: IDE abierto automáticamente, pero debes:
 
@@ -127,7 +122,7 @@ Para operación exitosa, agregar línea al archivo JSONL:
 
 ### Worktree Creation Log:
 ```json
-{"timestamp":"$(date -Iseconds)","operation":"worktree_create","objetivo_descripcion":"$objetivo_descripcion","parent_branch":"$parent_branch","worktree_path":"$worktree_path","branch_name":"$branch_name","user":"$(whoami)","commit_sha":"$(git rev-parse HEAD)"}
+{"timestamp":"$(date -Iseconds)","operation":"worktree_create","objetivo_descripcion":"$objetivo_descripcion","parent_branch":"$parent_branch","worktree_path":"$worktree_path","branch_name":"$branch_name","local_only":true,"user":"$(whoami)","commit_sha":"$(git rev-parse HEAD)"}
 ```
 
 **IMPORTANTE**:
