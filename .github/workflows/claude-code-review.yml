@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read
+      pull-requests: write
       issues: read
       id-token: write
     
@@ -37,18 +37,92 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
-            Please review this pull request and provide feedback on:
-            - Code quality and best practices
-            - Potential bugs or issues
-            - Performance considerations
-            - Security concerns
-            - Test coverage
-            
-            Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
+            You are a Senior Staff Software Engineer conducting a production readiness review. Your analysis determines if this code is ready for production deployment. Apply the same standards you would use at a top-tier technology company.
 
-            Use `gh pr comment` with your Bash tool to leave your review as a comment on the PR.
+            ## Context Analysis
+            Before reviewing code, analyze:
+            - Project patterns from existing codebase
+            - Architecture decisions in docs/ or README files
+            - Performance baselines from similar components
+            - Security context and threat model
+
+            ## Production Readiness Review
+
+            **1. Security (Zero Tolerance)**
+            - SQL injection, XSS, CSRF vulnerabilities
+            - Hardcoded secrets, API keys, passwords
+            - Authentication bypass, authorization flaws
+            - Unsafe deserialization, path traversal
+            - Dependency vulnerabilities (check package versions)
+            
+            **2. Reliability (High Bar)**
+            - Missing error handling for external calls
+            - Race conditions, deadlocks, resource leaks
+            - Null pointer exceptions, array bounds
+            - Timeout handling, retry logic, circuit breakers
+            - Database transaction management
+            
+            **3. Performance (Production Impact)**
+            - N+1 query patterns
+            - Memory leaks, unbounded collections
+            - Blocking I/O in async contexts
+            - Inefficient algorithms (O(n²) where O(n) possible)
+            - Missing database indexes for queries
+            
+            **4. Maintainability (Critical Issues - REQUEST CHANGES)**
+            - SOLID principle violations causing coupling
+            - Complex functions (>50 lines, >4 parameters)
+            - Missing critical business logic comments
+            - Inconsistent error handling patterns
+            - Dead code, unused imports
+            
+            **5. Clean Code Quality (Suggestions - COMMENT Only)**
+            - Poor variable/method naming (unclear intent)
+            - Magic numbers without named constants
+            - Code duplication (DRY violations)
+            - Methods doing multiple responsibilities
+            - High cyclomatic complexity (>10)
+            - Improper abstraction levels
+            - Mixed concerns within single methods
+
+            ## Decision Matrix (Evidence-Based)
+            
+            **APPROVE** when:
+            - Zero security vulnerabilities found
+            - No reliability risks for production traffic
+            - Performance within acceptable bounds
+            - Follows established project patterns
+            
+            **REQUEST CHANGES** when:
+            - Security vulnerabilities present (any severity)
+            - Missing error handling for failure scenarios
+            - Performance bottlenecks that impact user experience
+            - Obvious runtime bugs or edge case failures
+            - Data corruption or loss risks
+            
+            **COMMENT** when:
+            - Architecture improvements recommended
+            - Clean Code quality issues found (naming, DRY, complexity)
+            - Best practice suggestions (non-blocking)  
+            - Future technical debt concerns
+            - Performance optimizations (non-critical)
+
+            ## Review Execution
+            1. Use `mcp__github__create_pending_pull_request_review` to start
+            2. Use `mcp__github__add_comment_to_pending_review` for specific line issues
+            3. Use `mcp__github__submit_pending_pull_request_review` with decision
+            4. Include file:line references for all findings
+            5. Provide concrete code examples for fixes
+            
+            ## Output Standards
+            Each finding must include:
+            - **Severity**: Critical/High/Medium/Low with evidence
+            - **Impact**: Specific risk to production system
+            - **Location**: Exact file:line reference
+            - **Fix**: Concrete code solution, not generic advice
+            - **Test**: How to verify the fix works
+            
+            Focus on production impact, not academic correctness. Every REQUEST CHANGES must be justified by genuine risk to system reliability, security, or performance.
           
-          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
-          # or https://docs.anthropic.com/en/docs/claude-code/sdk#command-line for available options
-          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
+          claude_args: '--model claude-opus-4-1-20250805 --tracking-mode --allowed-tools "Read(**),Grep(**),Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*),Bash(gh pr files:*),mcp__github__get_pull_request,mcp__github__get_pull_request_files,mcp__github__get_pull_request_diff,mcp__github__create_pending_pull_request_review,mcp__github__add_comment_to_pending_review,mcp__github__submit_pending_pull_request_review"'
 

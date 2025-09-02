@@ -5,7 +5,7 @@
   "model": "opusplan",
 
   "permissions": {
-    "defaultMode": "acceptEdits",
+    "defaultMode": "bypassPermissions",
     "additionalDirectories": [],
 
     "allow": [
@@ -36,7 +36,15 @@
       "Bash(node :*)",
 
       "WebFetch(domain:docs.anthropic.com)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+
+      "mcp__github__get_me",
+      "mcp__github__get_pull_request",
+      "mcp__github__get_pull_request_files",
+      "mcp__github__get_pull_request_diff",
+      "mcp__github__create_pending_pull_request_review",
+      "mcp__github__add_comment_to_pending_review",
+      "mcp__github__submit_pending_pull_request_review"
     ],
     "ask": [
       "Bash(git push:*)",
@@ -49,10 +57,7 @@
       "Bash(gcloud :*)",
       "Bash(az :*)",
       "Bash(terraform :*)",
-      "Bash(systemctl :*)",
-
-      "WebFetch",
-      "WebSearch"
+      "Bash(systemctl :*)"
     ],
     "deny": [
      "Bash(rm -rf /*)",

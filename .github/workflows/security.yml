@@ -6,87 +6,16 @@ on:
 jobs:
   security:
     runs-on: ubuntu-latest
-    
-    # Skip review for drafts and certain conditions  
-    if: |
-      !contains(github.event.pull_request.title, '[skip-security]') &&
-      !contains(github.event.pull_request.title, '[WIP]') &&
-      !github.event.pull_request.draft
     permissions:
       contents: read
-      pull-requests: write  # Required for security review comments
-      issues: read
-      actions: read         # Required for MCP github_ci server
-      id-token: write
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Full history for comprehensive security analysis
+      pull-requests: write
       
-      - name: Run Claude Security Review
-        id: claude-security
-        uses: anthropics/claude-code-action@v1
+    steps:
+      - uses: actions/checkout@v4
         with:
-          anthropic_api_key: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          
-          # Specialized security review prompt
-          prompt: |
-            You are conducting a comprehensive security audit as a senior security architect. Apply industry-standard security practices and identify vulnerabilities with precision.
-
-            ## SECURITY AUDIT METHODOLOGY
-
-            **1. VULNERABILITY ASSESSMENT**
-            Execute comprehensive security analysis:
-            - Scan for injection vulnerabilities (SQL, NoSQL, Command, LDAP, XSS, etc.)
-            - Identify authentication and authorization flaws  
-            - Detect insecure cryptographic implementations
-            - Check for sensitive data exposure risks
-            - Analyze input validation and output encoding gaps
-
-            **2. SECURITY ARCHITECTURE REVIEW**
-            Evaluate security design patterns:
-            - **Authentication**: Multi-factor, session management, password policies
-            - **Authorization**: Role-based access, privilege escalation prevention
-            - **Data Protection**: Encryption at rest/transit, key management
-            - **Secure Communication**: TLS configuration, certificate validation
-            - **Error Handling**: Information disclosure prevention
-
-            **3. THREAT MODELING**
-            Assess attack vectors and security controls:
-            - **OWASP Top 10**: Systematic coverage of common vulnerabilities
-            - **Supply Chain**: Dependency vulnerabilities, package integrity  
-            - **Infrastructure**: Container security, cloud misconfigurations
-            - **Business Logic**: Race conditions, privilege bypasses
-            - **Compliance**: GDPR, SOC2, PCI-DSS requirements where applicable
-
-            ## OUTPUT FORMAT
-
-            **🚨 CRITICAL VULNERABILITIES**
-            Immediate security risks requiring urgent remediation.
-
-            **⚠️ HIGH-RISK FINDINGS**  
-            Significant security gaps with potential business impact.
-
-            **🔍 SECURITY IMPROVEMENTS**
-            Defense-in-depth recommendations and security hardening.
-
-            **📋 COMPLIANCE GAPS**
-            Regulatory and industry standard compliance issues.
-
-            **🛡️ ACTIONABLE REMEDIATIONS**
-            For each finding provide:
-            - **Risk Level**: Critical/High/Medium/Low with CVSS scoring where applicable
-            - **Attack Vector**: How this could be exploited  
-            - **Business Impact**: Confidentiality, Integrity, Availability risks
-            - **Remediation**: Specific code fixes with secure implementation examples
-            - **Prevention**: Security controls to prevent similar issues
-
-            Focus on actionable, production-critical security findings that protect user data and business operations.
-          
-          # Advanced configuration for security analysis
-          claude_args: |
-            --model claude-opus-4-1-20250805
-            --sticky-comment
-            --allowedTools "Read,Write,Edit,Bash(git:*),Bash(ls:*),Bash(find:*),Bash(grep:*),Bash(npm audit:*),Bash(npm run security:*),Bash(python -m bandit:*),Bash(python -m safety:*),Bash(semgrep:*),Bash(codeql:*),Bash(snyk:*),Bash(trivy:*),Bash(gosec:*),Bash(brakeman:*),Bash(eslint --ext .js,.jsx,.ts,.tsx:*)"
+          fetch-depth: 2
+      
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: '--model claude-opus-4-1-20250805'

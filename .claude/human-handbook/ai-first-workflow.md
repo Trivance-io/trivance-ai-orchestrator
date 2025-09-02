@@ -28,7 +28,7 @@ pwd                # Debe mostrar: .../worktree-[feature-name]
 
 **Si estás en main/develop:** regresa a [session-start](#paso-1-implementación-inteligente) primero.
 
-**Importante**: al finalizar usar `/workflow:switch <base_branch>` (cambiar contexto) + `/worktree:cleanup <worktree-name>` (eliminar worktree). Usar `/workflow:changelog <number>` para actualizar CHANGELOG.md después de merge.
+**Importante**: al finalizar usar `/workflow:changelog <number>` (actualizar CHANGELOG.md) + `/worktree:cleanup <worktree-name>` (eliminar worktree y regresar automáticamente a rama base).
  
 ### **PASO 1: Implementación Inteligente**
 
@@ -139,7 +139,7 @@ git push     # Push directo al branch remoto
 
 **Después de 4-5 iteraciones sin resolver, o cuando hay:**
 - Issues de seguridad que requieren cambios arquitectónicos
-- Bloqueos críticos de +48 horas
+- Bloqueos críticos de +24 horas  
 - Conflictos técnicos complejos
 - Decisiones que afectan múltiples servicios
 
@@ -218,8 +218,8 @@ git push
 ```
 
 **Casos:**
-- ✅ Aprobado → Merge → `/workflow:changelog <number>` + `/workflow:switch <base_branch>` + `/worktree:cleanup <worktree-name>` (documentar + cambiar contexto + eliminar worktree)
-- 🔄 Nuevos findings → Repetir 4-7
+- ✅ Aprobado → Merge → `/workflow:changelog <number>` + `/worktree:cleanup <worktree-name>` 
+- 🔄 Nuevos findings → Repetir pasos 8-10
 - 🚨 Issues persistentes → Pedir autorización
 
 ---
@@ -258,20 +258,17 @@ git push
 /review pr <number>              # Analizar + plan implementación
 ```
 
-**Desde cualquier ubicación:**
+**Después de merge (desde worktree):**
 ```bash
-/workflow:switch <base_branch>   # Cambiar contexto (regresa a main/develop)
-/worktree:cleanup <worktree>     # Eliminar worktree específico completamente
 /workflow:changelog <pr_number>  # Actualizar CHANGELOG
-gh pr view [PR]                  # Ver estado
+/worktree:cleanup <worktree>     # Eliminar worktree (regresa automáticamente a main)
 ```
 
-### **Cleanup: Cuándo usar cada comando:**
-
-| Comando | Propósito | Cuándo usar |
-|---------|----------|--------------|
-| `/workflow:switch main` | Cambiar contexto de trabajo | Después de merge, para regresar a rama base |
-| `/worktree:cleanup <name>` | Eliminar worktree obsoleto | Cuando ya no necesitas el worktree (requiere confirmación) |
+**Desde cualquier ubicación:**
+```bash
+gh pr view [PR]                  # Ver estado
+/workflow:switch <base_branch>   # Solo si necesitas cambiar contexto manualmente
+```
 
 ---
 
@@ -361,4 +358,3 @@ Los siguientes comandos transforman tu productividad de horas a minutos:
 /understand → /implement → /test → /review → /pr
 # Total: 15-30 min para feature completa vs 4+ horas manual
 ```
-
