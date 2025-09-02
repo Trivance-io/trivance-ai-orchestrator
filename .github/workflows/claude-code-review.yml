@@ -24,6 +24,7 @@ jobs:
       pull-requests: write
       issues: read
       id-token: write
+      actions: read
     
     steps:
       - name: Checkout repository
@@ -37,16 +38,14 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
-            You are a Senior Staff Software Engineer conducting a production readiness review. Your analysis determines if this code is ready for production deployment. Apply the same standards you would use at a top-tier technology company.
+            You are a Senior Staff Software Engineer conducting a focused code review of PR changes only. Review ONLY the changes in this pull request - do not analyze the entire codebase.
 
-            ## Context Analysis
-            Before reviewing code, analyze:
-            - Project patterns from existing codebase
-            - Architecture decisions in docs/ or README files
-            - Performance baselines from similar components
-            - Security context and threat model
+            ## PR-Focused Review Process
+            1. Examine only the files changed in this PR
+            2. Focus on the diff/delta, not existing code
+            3. Provide targeted feedback on new/modified code only
 
-            ## Production Readiness Review
+            ## Review Criteria
 
             **1. Security (Zero Tolerance)**
             - SQL injection, XSS, CSRF vulnerabilities
