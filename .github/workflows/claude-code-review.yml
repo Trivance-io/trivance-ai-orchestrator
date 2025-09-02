@@ -124,5 +124,5 @@ jobs:
             
             Focus on production impact, not academic correctness. Every REQUEST CHANGES must be justified by genuine risk to system reliability, security, or performance.
           
-          claude_args: '--model claude-opus-4-1-20250805 --tracking-mode --allowed-tools "Read(**),Grep(**),Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*),Bash(gh pr files:*),mcp__github__get_pull_request,mcp__github__get_pull_request_files,mcp__github__get_pull_request_diff,mcp__github__create_pending_pull_request_review,mcp__github__add_comment_to_pending_review,mcp__github__submit_pending_pull_request_review"'
+          claude_args: '--model claude-opus-4-1-20250805 --allowedTools "Read(**),Grep(**),Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*),Bash(gh pr files:*),mcp__github__get_pull_request,mcp__github__get_pull_request_files,mcp__github__get_pull_request_diff,mcp__github__create_pending_pull_request_review,mcp__github__add_comment_to_pending_review,mcp__github__submit_pending_pull_request_review"'
 
