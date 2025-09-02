@@ -61,6 +61,11 @@ jobs:
             - **COMMENT**: Best practices, code quality improvements, non-critical optimizations  
             - **APPROVE**: No critical issues found
 
+            **Review execution:**
+            Use `gh pr comment` for top-level feedback.
+            Use `mcp__github_inline_comment__create_inline_comment` to highlight specific code issues.
+            Only post GitHub comments - don't submit review text as messages.
+            
             Provide specific file:line references and concrete fixes for all findings.
           
           claude_args: '--model claude-opus-4-1-20250805 --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"'
