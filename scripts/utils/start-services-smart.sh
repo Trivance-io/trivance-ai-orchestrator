@@ -81,7 +81,7 @@ start_services() {
     # Verificar nuevamente después de generar
     if [[ ! -f "${CONFIG_DIR}/docker/.env.docker-local" ]] || [[ ! -f "${CONFIG_DIR}/docker/.env.docker-auth-local" ]]; then
         echo -e "${RED}❌ Error: No se pudieron generar los archivos .env para Docker${NC}"
-        echo -e "${YELLOW}Ejecuta manualmente: ./trivance-dev-config/scripts/envs.sh switch ${current_env}${NC}"
+        echo -e "${YELLOW}Ejecuta manualmente: ./trivance-ai-orchestrator/scripts/envs.sh switch ${current_env}${NC}"
         exit 1
     fi
     
@@ -91,7 +91,7 @@ start_services() {
     
     # Detectar si las imágenes ya existen
     local images_exist=true
-    for image in "docker-ms_level_up_management" "docker-ms_trivance_auth"; do
+    for image in "docker-trivance_management" "docker-trivance_auth"; do
         if ! docker images --format "{{.Repository}}" | grep -q "^${image}$"; then
             images_exist=false
             break

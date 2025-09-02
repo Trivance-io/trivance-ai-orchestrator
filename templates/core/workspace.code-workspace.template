@@ -6,15 +6,15 @@
     },
     { 
       "name": "🖥️ Backend - Management (Docker)", 
-      "path": "./ms_level_up_management" 
+      "path": "./trivance_management" 
     },
     { 
       "name": "🔐 Backend - Auth (Docker)", 
-      "path": "./ms_trivance_auth" 
+      "path": "./trivance_auth" 
     },
     { 
       "name": "🌐 Frontend - Backoffice (PM2)", 
-      "path": "./level_up_backoffice" 
+      "path": "./trivance_backoffice" 
     },
     { 
       "name": "📱 Mobile App (Expo)", 
@@ -22,7 +22,7 @@
     },
     { 
       "name": "🔧 Dev Config", 
-      "path": "./trivance-dev-config" 
+      "path": "./trivance-ai-orchestrator" 
     },
     { 
       "name": "⚙️ Environments", 
@@ -65,9 +65,9 @@
     "typescript.updateImportsOnFileMove.enabled": "always",
     // Configuración de ESLint
     "eslint.workingDirectories": [
-      "./ms_level_up_management",
-      "./ms_trivance_auth", 
-      "./level_up_backoffice",
+      "./trivance_management",
+      "./trivance_auth", 
+      "./trivance_backoffice",
       "./trivance-mobile"
     ],
     "eslint.validate": [
@@ -183,7 +183,7 @@
       {
         "label": "🔄 Cambiar a Environment Local",
         "type": "shell",
-        "command": "./trivance-dev-config/scripts/envs.sh",
+        "command": "./trivance-ai-orchestrator/scripts/envs.sh",
         "args": ["switch", "local"],
         "group": "build",
         "presentation": {

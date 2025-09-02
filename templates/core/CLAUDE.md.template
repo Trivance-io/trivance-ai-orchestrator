@@ -54,15 +54,15 @@ Operate at Fortune 500 enterprise standards: every output must be production-rea
 
 ```bash
 # Testing por servicio
-cd ms_level_up_management && npm test        # Backend: Jest
-cd level_up_backoffice && npm test           # Frontend: Vitest
+cd trivance_management && npm test        # Backend: Jest
+cd trivance_backoffice && npm test           # Frontend: Vitest
 cd trivance-mobile && npm run type-check     # Mobile: TypeScript
 
 # Linting estándar en cada repo
 npm run lint && npm run format
 
 # Base de datos (Prisma)
-cd ms_level_up_management
+cd trivance_management
 npx prisma migrate dev && npx prisma generate
 ```
 
@@ -70,8 +70,8 @@ npx prisma migrate dev && npx prisma generate
 
 ```bash
 # Ver/cambiar environment
-./trivance-dev-config/scripts/envs.sh status
-./trivance-dev-config/scripts/envs.sh switch [local|qa|production]
+./trivance-ai-orchestrator/scripts/envs.sh status
+./trivance-ai-orchestrator/scripts/envs.sh switch [local|qa|production]
 ```
 
 ## 🏗️ Arquitectura
@@ -120,24 +120,24 @@ npx prisma migrate dev && npx prisma generate
 
 ### Workspace Context
 @./README.md
-@./trivance-dev-config/docs/ARCHITECTURE.md
-@./trivance-dev-config/docs/DEPLOYMENT.md
-@./trivance-dev-config/docs/DOCKER.md
-@./trivance-dev-config/docs/DOZZLE.md
-@./trivance-dev-config/docs/ENVIRONMENTS.md
-@./trivance-dev-config/docs/HOOKS_SYSTEM.md
-@./trivance-dev-config/docs/LOG-VIEWER.md
-@./trivance-dev-config/docs/ONBOARDING.md
-@./trivance-dev-config/docs/TROUBLESHOOTING.md
-@./trivance-dev-config/docs/WORKFLOWS.md
+@./trivance-ai-orchestrator/docs/ARCHITECTURE.md
+@./trivance-ai-orchestrator/docs/DEPLOYMENT.md
+@./trivance-ai-orchestrator/docs/DOCKER.md
+@./trivance-ai-orchestrator/docs/DOZZLE.md
+@./trivance-ai-orchestrator/docs/ENVIRONMENTS.md
+@./trivance-ai-orchestrator/docs/HOOKS_SYSTEM.md
+@./trivance-ai-orchestrator/docs/LOG-VIEWER.md
+@./trivance-ai-orchestrator/docs/ONBOARDING.md
+@./trivance-ai-orchestrator/docs/TROUBLESHOOTING.md
+@./trivance-ai-orchestrator/docs/WORKFLOWS.md
 
 ### Service-Specific Context
-@./ms_level_up_management/docs/API.md
-@./ms_level_up_management/docs/ARCHITECTURE.md
-@./ms_trivance_auth/docs/API.md
-@./ms_trivance_auth/docs/ARCHITECTURE.md
-@./level_up_backoffice/docs/ARCHITECTURE.md
-@./level_up_backoffice/docs/FEATURES.md
+@./trivance_management/docs/API.md
+@./trivance_management/docs/ARCHITECTURE.md
+@./trivance_auth/docs/API.md
+@./trivance_auth/docs/ARCHITECTURE.md
+@./trivance_backoffice/docs/ARCHITECTURE.md
+@./trivance_backoffice/docs/FEATURES.md
 @./trivance-mobile/docs/ARCHITECTURE.md
 @./trivance-mobile/docs/DEVELOPMENT.md
 
@@ -150,20 +150,20 @@ npx prisma migrate dev && npx prisma generate
 ## 📚 Referencias de Documentación
 
 @./README.md - Guía general del workspace
-@./trivance-dev-config/docs/ARCHITECTURE.md - Arquitectura técnica detallada
-@./trivance-dev-config/docs/DOCKER.md - Configuración Docker avanzada
-@./trivance-dev-config/docs/ENVIRONMENTS.md - Sistema de environments
-@./trivance-dev-config/docs/TROUBLESHOOTING.md - Solución de problemas
-@./ms_level_up_management/docs/ - Documentación Management API
-@./ms_trivance_auth/docs/ - Documentación Auth Service
-@./level_up_backoffice/docs/ - Documentación Frontend
+@./trivance-ai-orchestrator/docs/ARCHITECTURE.md - Arquitectura técnica detallada
+@./trivance-ai-orchestrator/docs/DOCKER.md - Configuración Docker avanzada
+@./trivance-ai-orchestrator/docs/ENVIRONMENTS.md - Sistema de environments
+@./trivance-ai-orchestrator/docs/TROUBLESHOOTING.md - Solución de problemas
+@./trivance_management/docs/ - Documentación Management API
+@./trivance_auth/docs/ - Documentación Auth Service
+@./trivance_backoffice/docs/ - Documentación Frontend
 @./trivance-mobile/docs/ - Documentación Mobile
 
 ---
 
 **⚠️ TEMPLATE AUTO-SINCRONIZADO**
 
-Fuente: `trivance-dev-config/templates/core/CLAUDE.md.template`
+Fuente: `trivance-ai-orchestrator/templates/core/CLAUDE.md.template`
 Para modificar: editar template y ejecutar `./setup.sh`
 
 ## Claude Code Memories

@@ -74,7 +74,7 @@ setup_environment_system() {
     if [[ -f "$env_docs" ]]; then
         # Crear symlink solo si no existe
         if [[ ! -L "$target_link" ]]; then
-            ln -sf "../trivance-dev-config/docs/ENVIRONMENTS.md" "$target_link"
+            ln -sf "../trivance-ai-orchestrator/docs/ENVIRONMENTS.md" "$target_link"
             log_info "📖 Symlink ENVIRONMENTS.md creado (Single Source of Truth)"
         fi
     else
@@ -95,7 +95,7 @@ generate_templates_from_json() {
     log_info "📝 Generando templates desde environments.json..."
     
     # Cargar o generar secrets si no existen
-    # Secrets ahora se guardan en config/ del repo trivance-dev-config
+    # Secrets ahora se guardan en config/ del repo trivance-ai-orchestrator
     local secrets_file="$SCRIPT_DIR/../config/.trivance-secrets"
     if [[ ! -f "$secrets_file" ]]; then
         log_info "🔑 Generando secrets seguros..."
@@ -141,17 +141,17 @@ generate_templates_from_json() {
         esac
     }
     
-    # ms_level_up_management
+    # trivance_management
     log_info "  - Generando local.management.env"
     {
-        echo "# 🖥️ LOCAL - ms_level_up_management"
+        echo "# 🖥️ LOCAL - trivance_management"
         echo "# Generado automáticamente desde environments.json"
         echo "# $(date)"
         echo "# ⚠️ Para QA/Prod: copiar este archivo y actualizar valores"
         echo ""
         
         # Procesar cada variable
-        jq -r '.environments.ms_level_up_management | to_entries[] | "\(.key)|\(.value)"' "$ENV_CONFIG" | while IFS='|' read -r key value; do
+        jq -r '.environments.trivance_management | to_entries[] | "\(.key)|\(.value)"' "$ENV_CONFIG" | while IFS='|' read -r key value; do
             processed_value=$(process_env_value "$key" "$value")
             echo "# $(echo "$key" | tr '_' ' ' | tr '[:upper:]' '[:lower:]')"
             echo "$key=$processed_value"
@@ -163,17 +163,17 @@ generate_templates_from_json() {
         echo "NODE_ENV=development"
     } > "$ENVS_DIR/local.management.env"
     
-    # ms_trivance_auth
+    # trivance_auth
     log_info "  - Generando local.auth.env"
     {
-        echo "# 🖥️ LOCAL - ms_trivance_auth"
+        echo "# 🖥️ LOCAL - trivance_auth"
         echo "# Generado automáticamente desde environments.json"
         echo "# $(date)"
         echo "# ⚠️ Para QA/Prod: copiar este archivo y actualizar valores"
         echo ""
         
         # Procesar cada variable para auth
-        jq -r '.environments.ms_trivance_auth | to_entries[] | "\(.key)|\(.value)"' "$ENV_CONFIG" | while IFS='|' read -r key value; do
+        jq -r '.environments.trivance_auth | to_entries[] | "\(.key)|\(.value)"' "$ENV_CONFIG" | while IFS='|' read -r key value; do
             # Mapeo especial para auth service
             case "$value" in
                 "__GENERATE_SECURE__")
@@ -198,19 +198,19 @@ generate_templates_from_json() {
         echo "NODE_ENV=development"
     } > "$ENVS_DIR/local.auth.env"
     
-    # level_up_backoffice
+    # trivance_backoffice
     log_info "  - Generando local.backoffice.env"
     {
-        echo "# 🖥️ LOCAL - level_up_backoffice"
+        echo "# 🖥️ LOCAL - trivance_backoffice"
         echo "# Generado automáticamente"
         echo "# $(date)"
         echo "# ⚠️ Para QA/Prod: copiar este archivo y actualizar valores"
         echo ""
         
         # Si hay configuración específica en JSON, usarla
-        if jq -e '.environments.level_up_backoffice' "$ENV_CONFIG" > /dev/null 2>&1; then
+        if jq -e '.environments.trivance_backoffice' "$ENV_CONFIG" > /dev/null 2>&1; then
             # Procesar cada variable para frontend
-            jq -r '.environments.level_up_backoffice | to_entries[] | "\(.key)|\(.value)"' "$ENV_CONFIG" | while IFS='|' read -r key value; do
+            jq -r '.environments.trivance_backoffice | to_entries[] | "\(.key)|\(.value)"' "$ENV_CONFIG" | while IFS='|' read -r key value; do
                 # Mapeo especial para frontend
                 case "$value" in
                     "__GENERATE_SECURE__")
@@ -503,9 +503,9 @@ switch_environment() {
     # Copiar archivos .env
     log_info "📄 Copiando configuraciones de $env..."
     
-    cp "$ENVS_DIR/$env.management.env" "$WORKSPACE_DIR/ms_level_up_management/.env"
-    cp "$ENVS_DIR/$env.auth.env" "$WORKSPACE_DIR/ms_trivance_auth/.env"
-    cp "$ENVS_DIR/$env.backoffice.env" "$WORKSPACE_DIR/level_up_backoffice/.env"
+    cp "$ENVS_DIR/$env.management.env" "$WORKSPACE_DIR/trivance_management/.env"
+    cp "$ENVS_DIR/$env.auth.env" "$WORKSPACE_DIR/trivance_auth/.env"
+    cp "$ENVS_DIR/$env.backoffice.env" "$WORKSPACE_DIR/trivance_backoffice/.env"
     cp "$ENVS_DIR/$env.mobile.env" "$WORKSPACE_DIR/trivance-mobile/.env"
     
     # Generar env.local.ts para la aplicación mobile
@@ -547,9 +547,9 @@ switch_environment() {
     
     # Aplicar permisos seguros a archivos .env
     log_info "🔒 Aplicando permisos seguros a archivos .env..."
-    chmod 600 "$WORKSPACE_DIR/ms_level_up_management/.env" 2>/dev/null || true
-    chmod 600 "$WORKSPACE_DIR/ms_trivance_auth/.env" 2>/dev/null || true
-    chmod 600 "$WORKSPACE_DIR/level_up_backoffice/.env" 2>/dev/null || true
+    chmod 600 "$WORKSPACE_DIR/trivance_management/.env" 2>/dev/null || true
+    chmod 600 "$WORKSPACE_DIR/trivance_auth/.env" 2>/dev/null || true
+    chmod 600 "$WORKSPACE_DIR/trivance_backoffice/.env" 2>/dev/null || true
     chmod 600 "$WORKSPACE_DIR/trivance-mobile/.env" 2>/dev/null || true
     chmod 600 "$docker_dir/.env.docker-local" 2>/dev/null || true
     chmod 600 "$docker_dir/.env.docker-auth-local" 2>/dev/null || true
@@ -578,7 +578,7 @@ validate_environment_config() {
     local has_warnings=false
     
     # Validar cada servicio
-    for service in ms_level_up_management ms_trivance_auth level_up_backoffice trivance-mobile; do
+    for service in trivance_management trivance_auth trivance_backoffice trivance-mobile; do
         local env_file="$WORKSPACE_DIR/$service/.env"
         
         if [[ ! -f "$env_file" ]]; then
@@ -589,13 +589,13 @@ validate_environment_config() {
         # Get critical vars for this service
         local vars_to_check=""
         case "$service" in
-            "ms_level_up_management")
+            "trivance_management")
                 vars_to_check="$critical_vars_management"
                 ;;
-            "ms_trivance_auth")
+            "trivance_auth")
                 vars_to_check="$critical_vars_auth"
                 ;;
-            "level_up_backoffice")
+            "trivance_backoffice")
                 vars_to_check="$critical_vars_backoffice"
                 ;;
             "trivance-mobile")
@@ -618,17 +618,17 @@ validate_environment_config() {
     # Validaciones específicas por environment
     case "$env" in
         "local")
-            if ! grep -q "localhost" "$WORKSPACE_DIR/ms_level_up_management/.env"; then
+            if ! grep -q "localhost" "$WORKSPACE_DIR/trivance_management/.env"; then
                 log_warning "  ⚠️  Local environment no está usando localhost"
                 has_warnings=true
             fi
             ;;
         "production")
-            if grep -q "localhost" "$WORKSPACE_DIR/ms_level_up_management/.env"; then
+            if grep -q "localhost" "$WORKSPACE_DIR/trivance_management/.env"; then
                 log_error "🚨 Production environment no puede usar localhost"
                 exit 1
             fi
-            if grep -q "dev_" "$WORKSPACE_DIR/ms_level_up_management/.env"; then
+            if grep -q "dev_" "$WORKSPACE_DIR/trivance_management/.env"; then
                 log_warning "  ⚠️  Production parece tener valores de desarrollo"
                 has_warnings=true
             fi
@@ -657,7 +657,7 @@ show_status() {
     
     # Estado de archivos .env
     echo "📄 Estado de archivos .env:"
-    local services=("ms_level_up_management" "ms_trivance_auth" "level_up_backoffice" "trivance-mobile")
+    local services=("trivance_management" "trivance_auth" "trivance_backoffice" "trivance-mobile")
     for service in "${services[@]}"; do
         local env_file="$WORKSPACE_DIR/$service/.env"
         if [[ -f "$env_file" ]]; then

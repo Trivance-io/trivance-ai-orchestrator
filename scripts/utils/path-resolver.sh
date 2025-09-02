@@ -18,20 +18,20 @@ resolve_workspace_paths() {
     local config_dir workspace_dir
     
     # Casos posibles:
-    # 1. Script en trivance-dev-config/scripts/core/
-    # 2. Script en trivance-dev-config/scripts/utils/
-    # 3. Script en trivance-dev-config/scripts/
+    # 1. Script en trivance-ai-orchestrator/scripts/core/
+    # 2. Script en trivance-ai-orchestrator/scripts/utils/
+    # 3. Script en trivance-ai-orchestrator/scripts/
     # 4. Script ejecutado como symlink desde workspace
     
-    if [[ "$calling_script_dir" == */trivance-dev-config/scripts/core ]]; then
+    if [[ "$calling_script_dir" == */trivance-ai-orchestrator/scripts/core ]]; then
         # Desde scripts/core/
         config_dir="$(cd "${calling_script_dir}/../.." && pwd)"
         workspace_dir="$(cd "${config_dir}/.." && pwd)"
-    elif [[ "$calling_script_dir" == */trivance-dev-config/scripts/utils ]]; then
+    elif [[ "$calling_script_dir" == */trivance-ai-orchestrator/scripts/utils ]]; then
         # Desde scripts/utils/
         config_dir="$(cd "${calling_script_dir}/../.." && pwd)"
         workspace_dir="$(cd "${config_dir}/.." && pwd)"
-    elif [[ "$calling_script_dir" == */trivance-dev-config/scripts ]]; then
+    elif [[ "$calling_script_dir" == */trivance-ai-orchestrator/scripts ]]; then
         # Desde scripts/
         config_dir="$(cd "${calling_script_dir}/.." && pwd)"
         workspace_dir="$(cd "${config_dir}/.." && pwd)"
@@ -43,23 +43,23 @@ resolve_workspace_paths() {
         real_dir="$(cd "$(dirname "$real_script")" && pwd)"
         
         # Ahora calcular desde la ubicación real
-        if [[ "$real_dir" == */trivance-dev-config/scripts ]]; then
+        if [[ "$real_dir" == */trivance-ai-orchestrator/scripts ]]; then
             config_dir="$(cd "${real_dir}/.." && pwd)"
             workspace_dir="$(cd "${config_dir}/.." && pwd)"
         else
             # Fallback: asumir que estamos en el workspace
             workspace_dir="$(cd "${calling_script_dir}" && pwd)"
-            config_dir="${workspace_dir}/trivance-dev-config"
+            config_dir="${workspace_dir}/trivance-ai-orchestrator"
         fi
     else
         # Fallback: intentar detectar automáticamente
         local current_dir="$calling_script_dir"
         
-        # Buscar hacia arriba hasta encontrar trivance-dev-config
+        # Buscar hacia arriba hasta encontrar trivance-ai-orchestrator
         while [[ "$current_dir" != "/" ]]; do
-            if [[ -d "$current_dir/trivance-dev-config" ]]; then
+            if [[ -d "$current_dir/trivance-ai-orchestrator" ]]; then
                 workspace_dir="$current_dir"
-                config_dir="$current_dir/trivance-dev-config"
+                config_dir="$current_dir/trivance-ai-orchestrator"
                 break
             fi
             current_dir="$(dirname "$current_dir")"
@@ -101,7 +101,7 @@ ensure_required_directories() {
         "$LOGS_DIR"
         "$LOGS_DIR/compilation"
         "$ENVS_DIR"
-        "$WORKSPACE_DIR/level_up_backoffice/logs"
+        "$WORKSPACE_DIR/trivance_backoffice/logs"
     )
     
     for dir in "${required_dirs[@]}"; do
@@ -114,10 +114,10 @@ ensure_required_directories() {
 # 🔍 Función para verificar estructura completa del workspace
 validate_workspace_structure() {
     local expected_repos=(
-        "trivance-dev-config"
-        "ms_level_up_management"
-        "ms_trivance_auth"
-        "level_up_backoffice"
+        "trivance-ai-orchestrator"
+        "trivance_management"
+        "trivance_auth"
+        "trivance_backoffice"
         "trivance-mobile"
     )
     

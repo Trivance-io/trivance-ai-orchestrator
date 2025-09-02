@@ -6,7 +6,7 @@
 
 ## 🎯 ¿Qué es este workspace?
 
-Este es el **workspace completo de Trivance** generado automáticamente desde [trivance-dev-config](./trivance-dev-config/README.md). Contiene todos los repositorios, configuraciones y herramientas necesarias para desarrollar la plataforma completa.
+Este es el **workspace completo de Trivance** generado automáticamente desde [trivance-ai-orchestrator](./trivance-ai-orchestrator/README.md). Contiene todos los repositorios, configuraciones y herramientas necesarias para desarrollar la plataforma completa.
 
 ### ✅ Lo que ya tienes configurado:
 - **4 repositorios** clonados y configurados
@@ -20,14 +20,14 @@ Este es el **workspace completo de Trivance** generado automáticamente desde [t
 
 ```
 📁 tu-workspace/
-├── 🔧 trivance-dev-config/          # ← CONFIGURACIÓN MAESTRA
+├── 🔧 trivance-ai-orchestrator/     # ← CONFIGURACIÓN MAESTRA
 │   ├── scripts/start.sh            # ← COMANDO PRINCIPAL
 │   ├── config/                     # Variables y secrets
 │   ├── docker/                     # Orquestación Docker
 │   └── docs/                       # Documentación especializada
-├── 🏢 ms_level_up_management/       # Backend principal (NestJS + GraphQL)
-├── 🔐 ms_trivance_auth/             # Servicio de autenticación (NestJS)
-├── 🖥️ level_up_backoffice/          # Frontend admin (React + Vite)
+├── 🏢 trivance_management/          # Backend principal (NestJS + GraphQL)
+├── 🔐 trivance_auth/                # Servicio de autenticación (NestJS)
+├── 🖥️ trivance_backoffice/          # Frontend admin (React + Vite)
 ├── 📱 trivance-mobile/              # App móvil (React Native + Expo)
 ├── 🎛️ envs/                         # Configuración de environments
 ├── 🚀 start.sh                     # → Comando maestro (symlink)
@@ -116,15 +116,15 @@ Una vez iniciado, accede a:
 
 ```bash
 # Ver environment actual
-./trivance-dev-config/scripts/envs.sh status
+./trivance-ai-orchestrator/scripts/envs.sh status
 
 # Cambiar environment (cambia TODOS los configs automáticamente)
-./trivance-dev-config/scripts/envs.sh switch local       # Desarrollo
-./trivance-dev-config/scripts/envs.sh switch qa          # QA/Testing
-./trivance-dev-config/scripts/envs.sh switch production  # Producción
+./trivance-ai-orchestrator/scripts/envs.sh switch local       # Desarrollo
+./trivance-ai-orchestrator/scripts/envs.sh switch qa          # QA/Testing
+./trivance-ai-orchestrator/scripts/envs.sh switch production  # Producción
 
 # Validar configuración
-./trivance-dev-config/scripts/envs.sh validate
+./trivance-ai-orchestrator/scripts/envs.sh validate
 ```
 
 ## 📱 Desarrollo Mobile
@@ -157,14 +157,14 @@ APP_ENV=development   # Application logic (development|qa|production)
 ### 🧪 Testing
 
 ```bash
-# Backend API (ms_level_up_management)
+# Backend API (trivance_management)
 cd ms_level_up_management
 npm test                    # Unit tests
 npm run test:watch          # Watch mode
 npm run test:e2e           # End-to-end
 
-# Frontend (level_up_backoffice)
-cd level_up_backoffice
+# Frontend (trivance_backoffice)
+cd trivance_backoffice
 npm test                    # Tests con Vitest
 
 # Mobile (trivance-mobile)
@@ -198,7 +198,7 @@ npx prisma db push         # Sincronizar schema
 ### 🛠️ Smart Docker Manager (Recomendado)
 
 ```bash
-cd trivance-dev-config/scripts/utils
+cd trivance-ai-orchestrator/scripts/utils
 ./smart-docker-manager.sh dev ../../docker/docker-compose.dev.yml     # Desarrollo con hot-reload
 ./smart-docker-manager.sh up ../../docker/docker-compose.dev.yml      # Iniciar servicios
 ./smart-docker-manager.sh down ../../docker/docker-compose.dev.yml    # Detener servicios
@@ -208,7 +208,7 @@ cd trivance-dev-config/scripts/utils
 ### 🐳 Docker Tradicional
 
 ```bash
-cd trivance-dev-config/docker
+cd trivance-ai-orchestrator/docker
 docker compose -f docker-compose.dev.yml up -d     # Iniciar
 docker compose -f docker-compose.dev.yml down      # Detener
 docker compose -f docker-compose.dev.yml logs -f   # Logs en tiempo real
@@ -241,7 +241,7 @@ open http://localhost:9999
 
 Cada instalación genera secrets únicos automáticamente:
 ```bash
-# Se crean en trivance-dev-config/config/.trivance-secrets
+# Se crean en trivance-ai-orchestrator/config/.trivance-secrets
 AUTH_JWT_SECRET=jwt_[64_chars_random]_[timestamp]
 MGMT_JWT_SECRET=jwt_[64_chars_random]_[timestamp]
 AUTH_ENCRYPT_SECRET=[64_chars_random]
@@ -320,15 +320,15 @@ killall node
 
 ```bash
 # Reset completo (cuando todo falla)
-./trivance-dev-config/scripts/utils/clean-workspace.sh
-./trivance-dev-config/setup.sh
+./trivance-ai-orchestrator/scripts/utils/clean-workspace.sh
+./trivance-ai-orchestrator/setup.sh
 
 # Reinstalar dependencias específicas
 cd [repositorio] && rm -rf node_modules && npm install
 
 # Regenerar secrets
-rm trivance-dev-config/config/.trivance-secrets
-./trivance-dev-config/scripts/utils/generate-secrets.sh
+rm trivance-ai-orchestrator/config/.trivance-secrets
+./trivance-ai-orchestrator/scripts/utils/generate-secrets.sh
 ```
 
 ## 📚 Documentación Completa
@@ -337,20 +337,20 @@ Para información detallada, consulta:
 
 | Tema | Archivo | Descripción |
 |------|---------|-------------|
-| **🏗️ Arquitectura** | [trivance-dev-config/README.md](trivance-dev-config/README.md) | Documentación maestra completa |
-| **🏛️ Arquitectura Detallada** | [trivance-dev-config/docs/ARCHITECTURE.md](trivance-dev-config/docs/ARCHITECTURE.md) | Arquitectura técnica profunda |
+| **🏗️ Arquitectura** | [trivance-ai-orchestrator/README.md](trivance-ai-orchestrator/README.md) | Documentación maestra completa |
+| **🏛️ Arquitectura Detallada** | [trivance-ai-orchestrator/docs/ARCHITECTURE.md](trivance-ai-orchestrator/docs/ARCHITECTURE.md) | Arquitectura técnica profunda |
 | **🤖 Claude Code** | [CLAUDE.md](CLAUDE.md) | Guía operacional para IA |
-| **🐳 Docker** | [trivance-dev-config/docs/DOCKER.md](trivance-dev-config/docs/DOCKER.md) | Configuración Docker avanzada |
+| **🐳 Docker** | [trivance-ai-orchestrator/docs/DOCKER.md](trivance-ai-orchestrator/docs/DOCKER.md) | Configuración Docker avanzada |
 | **🎛️ Environments** | [envs/ENVIRONMENTS.md](envs/ENVIRONMENTS.md) | Sistema de environments completo |
-| **🔄 Workflows** | [trivance-dev-config/docs/WORKFLOWS.md](trivance-dev-config/docs/WORKFLOWS.md) | Flujos de desarrollo |
-| **🛡️ Hooks System** | [trivance-dev-config/docs/HOOKS_SYSTEM.md](trivance-dev-config/docs/HOOKS_SYSTEM.md) | Sistema de supervisión Claude Code |
-| **🚨 Troubleshooting** | [trivance-dev-config/docs/TROUBLESHOOTING.md](trivance-dev-config/docs/TROUBLESHOOTING.md) | Solución de problemas |
+| **🔄 Workflows** | [trivance-ai-orchestrator/docs/WORKFLOWS.md](trivance-ai-orchestrator/docs/WORKFLOWS.md) | Flujos de desarrollo |
+| **🛡️ Hooks System** | [trivance-ai-orchestrator/docs/HOOKS_SYSTEM.md](trivance-ai-orchestrator/docs/HOOKS_SYSTEM.md) | Sistema de supervisión Claude Code |
+| **🚨 Troubleshooting** | [trivance-ai-orchestrator/docs/TROUBLESHOOTING.md](trivance-ai-orchestrator/docs/TROUBLESHOOTING.md) | Solución de problemas |
 
 ## 🎯 Para Nuevos Desarrolladores
 
 ### 🆕 Primer Día
 
-1. **Leer primero**: [trivance-dev-config/README.md](trivance-dev-config/README.md)
+1. **Leer primero**: [trivance-ai-orchestrator/README.md](trivance-ai-orchestrator/README.md)
 2. **Configurar Claude**: Revisar [CLAUDE.md](CLAUDE.md) 
 3. **Iniciar desarrollo**: `./start.sh start`
 4. **Verificar que todo funciona**: Visitar todas las URLs
@@ -359,7 +359,7 @@ Para información detallada, consulta:
 
 1. **Iniciar**: `./start.sh start`
 2. **Desarrollar**: Hot-reload automático ≤2s
-3. **Cambiar environments**: `./trivance-dev-config/scripts/envs.sh switch [env]`
+3. **Cambiar environments**: `./trivance-ai-orchestrator/scripts/envs.sh switch [env]`
 4. **Detener**: `./start.sh stop`
 
 ### 🔧 Cuando Algo Falla
@@ -367,14 +367,14 @@ Para información detallada, consulta:
 1. **Verificar estado**: `./start.sh status`
 2. **Ver logs**: Log Viewer en http://localhost:4000
 3. **Reset si es necesario**: `./start.sh stop && ./start.sh start`
-4. **Consultar troubleshooting**: [trivance-dev-config/docs/TROUBLESHOOTING.md](trivance-dev-config/docs/TROUBLESHOOTING.md)
+4. **Consultar troubleshooting**: [trivance-ai-orchestrator/docs/TROUBLESHOOTING.md](trivance-ai-orchestrator/docs/TROUBLESHOOTING.md)
 
 ## 🤖 Para Claude Code AI
 
 **Si eres Claude Code, LEE OBLIGATORIAMENTE:**
 
 1. **[CLAUDE.md](CLAUDE.md)** - Comandos operacionales y reglas críticas
-2. **[trivance-dev-config/README.md](trivance-dev-config/README.md)** - Arquitectura maestra
+2. **[trivance-ai-orchestrator/README.md](trivance-ai-orchestrator/README.md)** - Arquitectura maestra
 3. **NUNCA recrear soluciones existentes** - El sistema ya está optimizado
 
 ### ⚠️ Reglas Críticas
@@ -396,7 +396,7 @@ Para información detallada, consulta:
 
 ### 🏛️ Principios
 
-1. **Configuration as Code** - Todo desde trivance-dev-config
+1. **Configuration as Code** - Todo desde trivance-ai-orchestrator
 2. **Security by Default** - Secrets únicos automáticos
 3. **Developer Happiness** - Hot-reload ≤2s estándar
 4. **Zero Breaking Changes** - Actualizaciones sin romper
@@ -423,7 +423,7 @@ open http://localhost:5173
 
 ---
 
-**🔄 Última actualización**: Julio 2025 • **📦 Fuente**: [trivance-dev-config](trivance-dev-config/README.md)  
+**🔄 Última actualización**: Julio 2025 • **📦 Fuente**: [trivance-ai-orchestrator](trivance-ai-orchestrator/README.md)  
 **🤖 Generado automáticamente** desde template • **⚡ Hot-reload ≤2s estándar**
 
 *Parte del ecosistema Trivance Platform - Configurado automáticamente para máxima productividad*

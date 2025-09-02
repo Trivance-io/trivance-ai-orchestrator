@@ -239,7 +239,7 @@ setup_environments_legacy() {
     local env_config="${SCRIPT_DIR}/../../config/environments.json"
     
     # Configurar cada repositorio (método anterior)
-    local repos=("ms_trivance_auth" "ms_level_up_management" "level_up_backoffice" "trivance-mobile")
+    local repos=("trivance_auth" "trivance_management" "trivance_backoffice" "trivance-mobile")
     
     for repo in "${repos[@]}"; do
         local repo_path="${WORKSPACE_DIR}/${repo}"
@@ -254,7 +254,7 @@ setup_environments_legacy() {
             env_vars=$(jq -r --arg repo "$repo" '.environments[$repo] // .environments.default' "$env_config")
             
             if [[ "$env_vars" != "null" ]]; then
-                echo "# Archivo .env generado automáticamente por trivance-dev-config" > "$env_file"
+                echo "# Archivo .env generado automáticamente por trivance-ai-orchestrator" > "$env_file"
                 echo "# $(date)" >> "$env_file"
                 echo "" >> "$env_file"
                 
@@ -262,21 +262,21 @@ setup_environments_legacy() {
                 echo "$env_vars" | jq -r 'to_entries[] | "\(.key)=\(.value)"' | while IFS='=' read -r key value; do
                     case "$key" in
                         JWTSECRET)
-                            if [[ "$repo" == "ms_trivance_auth" ]]; then
+                            if [[ "$repo" == "trivance_auth" ]]; then
                                 echo "$key=${AUTH_JWT_SECRET:-$value}" >> "$env_file"
                             else
                                 echo "$key=${MGMT_JWT_SECRET:-$value}" >> "$env_file"
                             fi
                             ;;
                         PASSWORDSECRET)
-                            if [[ "$repo" == "ms_trivance_auth" ]]; then
+                            if [[ "$repo" == "trivance_auth" ]]; then
                                 echo "$key=${AUTH_PASSWORD_SECRET:-$value}" >> "$env_file"
                             else
                                 echo "$key=${MGMT_PASSWORD_SECRET:-$value}" >> "$env_file"
                             fi
                             ;;
                         ENCRYPTSECRET)
-                            if [[ "$repo" == "ms_trivance_auth" ]]; then
+                            if [[ "$repo" == "trivance_auth" ]]; then
                                 echo "$key=${AUTH_ENCRYPT_SECRET:-$value}" >> "$env_file"
                             else
                                 echo "$key=${MGMT_ENCRYPT_SECRET:-$value}" >> "$env_file"
@@ -311,7 +311,7 @@ setup_environments_legacy() {
 generate_secure_secrets() {
     log "Generando secrets seguros para desarrollo..."
     
-    # Secrets ahora se guardan en config/ del repo trivance-dev-config
+    # Secrets ahora se guardan en config/ del repo trivance-ai-orchestrator
     local secrets_file="${SCRIPT_DIR}/../../config/.trivance-secrets"
     
     # Check if secrets already exist
@@ -349,7 +349,7 @@ install_dependencies() {
         warn "⚠️  Instalación paralela falló, intentando método secuencial..."
         
         # Fallback: instalación secuencial tradicional
-        local repos=("ms_trivance_auth" "ms_level_up_management" "level_up_backoffice" "trivance-mobile")
+        local repos=("trivance_auth" "trivance_management" "trivance_backoffice" "trivance-mobile")
         
         for repo in "${repos[@]}"; do
             local repo_path="${WORKSPACE_DIR}/${repo}"
@@ -403,7 +403,7 @@ setup_tools() {
         mkdir -p "${WORKSPACE_DIR}/envs"
         # Crear symlink solo si no existe
         if [[ ! -L "$envs_doc_target" ]]; then
-            ln -sf "../trivance-dev-config/docs/ENVIRONMENTS.md" "$envs_doc_target"
+            ln -sf "../trivance-ai-orchestrator/docs/ENVIRONMENTS.md" "$envs_doc_target"
             success "✅ Symlink ENVIRONMENTS.md creado (Single Source of Truth)"
         fi
     fi
@@ -420,7 +420,7 @@ setup_tools() {
     info "🔗 Creando comando principal..."
     
     # Solo UN comando: start.sh
-    ln -sf "trivance-dev-config/scripts/start.sh" "${WORKSPACE_DIR}/start.sh"
+    ln -sf "trivance-ai-orchestrator/scripts/start.sh" "${WORKSPACE_DIR}/start.sh"
     
     # Hacer ejecutable
     chmod +x "${WORKSPACE_DIR}/start.sh" 2>/dev/null || true
@@ -436,11 +436,11 @@ setup_tools() {
 setup_docker_integration() {
     log "Configurando archivos Docker para desarrollo..."
     
-    # Verificar que existe la carpeta docker en trivance-dev-config
+    # Verificar que existe la carpeta docker en trivance-ai-orchestrator
     local docker_source="${SCRIPT_DIR}/../../docker"
     
     if [[ ! -d "$docker_source" ]]; then
-        warn "⚠️  Carpeta docker no encontrada en trivance-dev-config"
+        warn "⚠️  Carpeta docker no encontrada en trivance-ai-orchestrator"
         return 1
     fi
     
@@ -462,7 +462,7 @@ module.exports = {
   apps: [
     {
       name: 'backoffice',
-      cwd: './level_up_backoffice',
+      cwd: './trivance_backoffice',
       script: 'npm',
       args: 'run dev',
       env: {
@@ -531,7 +531,7 @@ start_and_validate_pm2_services() {
     fi
     
     # Create logs directory
-    mkdir -p "${WORKSPACE_DIR}/level_up_backoffice/logs"
+    mkdir -p "${WORKSPACE_DIR}/trivance_backoffice/logs"
     
     # Check if backoffice service is already running
     if pm2 list | grep -q "backoffice.*online"; then
@@ -540,7 +540,7 @@ start_and_validate_pm2_services() {
         info "🚀 Iniciando servicio frontend con PM2..."
         
         # Start the frontend service using ecosystem config
-        if pm2 start "${WORKSPACE_DIR}/trivance-dev-config/config/ecosystem.config.js" --only backoffice --silent; then
+        if pm2 start "${WORKSPACE_DIR}/trivance-ai-orchestrator/config/ecosystem.config.js" --only backoffice --silent; then
             success "✅ Servicio frontend iniciado exitosamente"
         else
             error "❌ Error al iniciar servicio frontend"
@@ -586,7 +586,7 @@ start_docker_services() {
     cd "${WORKSPACE_DIR}"
     
     # Use Smart Docker Manager to start services
-    local compose_file="${WORKSPACE_DIR}/trivance-dev-config/docker/docker-compose.dev.yml"
+    local compose_file="${WORKSPACE_DIR}/trivance-ai-orchestrator/docker/docker-compose.dev.yml"
     
     if [[ ! -f "$compose_file" ]]; then
         error "❌ Archivo docker-compose.dev.yml no encontrado"
@@ -597,7 +597,7 @@ start_docker_services() {
     
     # Start Docker services using smart manager with AI-friendly timeouts
     export AI_EXECUTION_MODE=true
-    if "${WORKSPACE_DIR}/trivance-dev-config/scripts/utils/smart-docker-manager.sh" up "$compose_file"; then
+    if "${WORKSPACE_DIR}/trivance-ai-orchestrator/scripts/utils/smart-docker-manager.sh" up "$compose_file"; then
         success "✅ Servicios Docker iniciados exitosamente"
         
         # Brief wait for services to stabilize
@@ -633,7 +633,7 @@ setup_monitoring_tools() {
             info "   📊 Accede al monitor en: http://localhost:9999"
         else
             warn "⚠️  Dozzle no se pudo configurar automáticamente"
-            info "   💡 Puedes instalarlo manualmente: ./trivance-dev-config/scripts/docker/install-dozzle.sh"
+            info "   💡 Puedes instalarlo manualmente: ./trivance-ai-orchestrator/scripts/docker/install-dozzle.sh"
         fi
         
         # Configurar Log Viewer (preparar para inicio posterior)
@@ -645,6 +645,66 @@ setup_monitoring_tools() {
     
     success "📈 Herramientas de monitoreo configuradas"
     info "   💡 Inicia los servicios con: ./start.sh"
+}
+
+setup_claude_workspace() {
+    log "🤖 Configurando workspace de Claude Code..."
+    
+    local source_claude="${SCRIPT_DIR}/../../.claude"
+    local target_claude="${WORKSPACE_DIR}/.claude"
+    
+    # Validar que el directorio fuente existe
+    if [[ ! -d "$source_claude" ]]; then
+        warn "⚠️  Directorio .claude no encontrado en config repo"
+        return 0
+    fi
+    
+    # Verificar si .claude ya existe en workspace
+    if [[ -d "$target_claude" ]]; then
+        info "📁 .claude ya existe en workspace, no se sobrescribirá"
+        info "   Para actualizar manualmente: rm -rf ${target_claude} && reexecute setup"
+        return 0
+    fi
+    
+    # Copiar .claude al workspace root
+    info "📋 Copiando configuración Claude Code al workspace..."
+    if cp -r "$source_claude" "$target_claude"; then
+        success "✅ Claude Code workspace configurado exitosamente"
+        info "   🤖 29 agentes especializados disponibles"
+        info "   ⚡ 23 comandos de desarrollo automatizado"
+        info "   🔐 4 hooks de seguridad y calidad activos"
+        info "   ⚙️  Configuración lista para uso workspace-wide"
+    else
+        error "❌ Error al configurar Claude Code workspace"
+        warn "⚠️  Puedes copiarlo manualmente: cp -r trivance-ai-orchestrator/.claude ."
+        return 1
+    fi
+    
+    # Validar estructura copiada
+    local expected_dirs=("agents" "commands" "human-handbook" "scripts")
+    local validation_failed=false
+    
+    for dir in "${expected_dirs[@]}"; do
+        if [[ ! -d "${target_claude}/${dir}" ]]; then
+            warn "⚠️  Directorio ${dir} no encontrado en .claude copiado"
+            validation_failed=true
+        fi
+    done
+    
+    if [[ "$validation_failed" == "true" ]]; then
+        warn "⚠️  Estructura .claude incompleta, algunas funcionalidades pueden no estar disponibles"
+    else
+        success "✅ Estructura .claude validada correctamente"
+    fi
+    
+    # Información sobre uso
+    echo
+    info "📖 Para usar Claude Code efectivamente:"
+    info "   1. Abre Claude Code en este directorio workspace"
+    info "   2. Usa /help para ver comandos disponibles"
+    info "   3. Consulta .claude/human-handbook/ para workflows AI-First"
+    
+    return 0
 }
 
 create_claude_md_final() {
@@ -676,7 +736,7 @@ create_claude_md_final() {
     echo -e "${CYAN}   3. Sigue las instrucciones para generar CLAUDE.md${NC}"
     echo
     echo -e "${CYAN}🔧 Alternativamente, podemos crear un CLAUDE.md básico ahora:${NC}"
-    echo -e "${CYAN}   • Copia el template: ${YELLOW}cp trivance-dev-config/templates/core/CLAUDE.md.template CLAUDE.md${NC}"
+    echo -e "${CYAN}   • Copia el template: ${YELLOW}cp trivance-ai-orchestrator/templates/core/CLAUDE.md.template CLAUDE.md${NC}"
     echo -e "${CYAN}   • Edita el archivo con información específica de tu proyecto${NC}"
     echo
     
@@ -689,12 +749,17 @@ create_claude_md_final() {
     else
         info "📝 CLAUDE.md ya existe, no se sobrescribirá"
     fi
+    
+    # NUEVA FUNCIONALIDAD: Setup automático del workspace .claude/
+    setup_claude_workspace
+    
     echo
-    echo -e "${GREEN}💡 Beneficios del CLAUDE.md:${NC}"
+    echo -e "${GREEN}💡 Beneficios del setup Claude Code completo:${NC}"
     echo -e "${GREEN}   ✅ Claude entiende mejor la arquitectura del proyecto${NC}"
     echo -e "${GREEN}   ✅ Respuestas más precisas y contextuales${NC}"
     echo -e "${GREEN}   ✅ Mejor manejo de comandos y workflows${NC}"
     echo -e "${GREEN}   ✅ Integración optimizada con Docker + PM2${NC}"
+    echo -e "${GREEN}   ✅ Stack completo de agentes y comandos disponible${NC}"
     echo
 }
 

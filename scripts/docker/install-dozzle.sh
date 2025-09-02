@@ -142,7 +142,7 @@ main() {
     # Detectar ubicación del proyecto
     local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     local project_root="$(cd "$script_dir/../.." && pwd)"
-    local docker_dir="$project_root/trivance-dev-config/docker"
+    local docker_dir="$project_root/trivance-ai-orchestrator/docker"
     local docker_compose_file="$docker_dir/docker-compose.yaml"
     
     print_status "Directorio del proyecto: $project_root"
@@ -169,7 +169,7 @@ main() {
         echo
         echo -e "${GREEN}🎉 ¡Instalación completada!${NC}"
         echo -e "${CYAN}📊 Accede a Dozzle: http://localhost:9999${NC}"
-        echo -e "${BLUE}📖 Documentación: trivance-dev-config/docs/DOZZLE.md${NC}"
+        echo -e "${BLUE}📖 Documentación: trivance-ai-orchestrator/docs/DOZZLE.md${NC}"
         
         # Ofrecer abrir en navegador
         echo
@@ -215,8 +215,8 @@ show_help() {
     echo ""
     echo "Después de la instalación:"
     echo "• Accede a http://localhost:9999"
-    echo "• Usa ./trivance-dev-config/scripts/dozzle.sh para gestionar"
-    echo "• Lee trivance-dev-config/docs/DOZZLE.md para más información"
+    echo "• Usa ./trivance-ai-orchestrator/scripts/dozzle.sh para gestionar"
+    echo "• Lee trivance-ai-orchestrator/docs/DOZZLE.md para más información"
 }
 
 # Manejar argumentos

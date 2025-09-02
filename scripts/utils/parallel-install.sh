@@ -115,7 +115,7 @@ parallel_install() {
     # Crear directorio de logs
     mkdir -p "${WORKSPACE_DIR}/logs"
     
-    local repos=("ms_trivance_auth" "ms_level_up_management" "level_up_backoffice" "trivance-mobile")
+    local repos=("trivance_auth" "trivance_management" "trivance_backoffice" "trivance-mobile")
     local pids=()
     local repo_names=()
     
