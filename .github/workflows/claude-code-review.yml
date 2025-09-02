@@ -42,90 +42,31 @@ jobs:
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
             
-            You are a Senior Staff Software Engineer conducting a focused code review of PR changes only. Review ONLY the changes in this pull request - do not analyze the entire codebase.
+            Senior Staff Engineer review focusing ONLY on PR changes. Analyze these 4 critical areas:
 
-            ## PR-Focused Review Process
-            1. Examine only the files changed in this PR
-            2. Focus on the diff/delta, not existing code
-            3. Provide targeted feedback on new/modified code only
+            **🔒 SECURITY** - Zero tolerance for:
+            SQL injection, XSS, CSRF | Hardcoded secrets/passwords | Auth bypass | Unsafe deserialization | Vulnerable dependencies
 
-            ## Review Criteria
+            **🐛 BUGS & RELIABILITY** - Critical issues:  
+            Missing error handling | Race conditions/resource leaks | Null pointer exceptions | Edge case failures | Transaction management
 
-            **1. Security (Zero Tolerance)**
-            - SQL injection, XSS, CSRF vulnerabilities
-            - Hardcoded secrets, API keys, passwords
-            - Authentication bypass, authorization flaws
-            - Unsafe deserialization, path traversal
-            - Dependency vulnerabilities (check package versions)
-            
-            **2. Reliability (High Bar)**
-            - Missing error handling for external calls
-            - Race conditions, deadlocks, resource leaks
-            - Null pointer exceptions, array bounds
-            - Timeout handling, retry logic, circuit breakers
-            - Database transaction management
-            
-            **3. Performance (Production Impact)**
-            - N+1 query patterns
-            - Memory leaks, unbounded collections
-            - Blocking I/O in async contexts
-            - Inefficient algorithms (O(n²) where O(n) possible)
-            - Missing database indexes for queries
-            
-            **4. Maintainability (Critical Issues - REQUEST CHANGES)**
-            - SOLID principle violations causing coupling
-            - Complex functions (>50 lines, >4 parameters)
-            - Missing critical business logic comments
-            - Inconsistent error handling patterns
-            - Dead code, unused imports
-            
-            **5. Clean Code Quality (Suggestions - COMMENT Only)**
-            - Poor variable/method naming (unclear intent)
-            - Magic numbers without named constants
-            - Code duplication (DRY violations)
-            - Methods doing multiple responsibilities
-            - High cyclomatic complexity (>10)
-            - Improper abstraction levels
-            - Mixed concerns within single methods
+            **⚡ PERFORMANCE** - Production impact:
+            N+1 queries | Memory leaks/unbounded collections | Blocking I/O | Inefficient algorithms (O(n²)) | Missing indexes
 
-            ## Decision Matrix (Evidence-Based)
-            
-            **APPROVE** when:
-            - Zero security vulnerabilities found
-            - No reliability risks for production traffic
-            - Performance within acceptable bounds
-            - Follows established project patterns
-            
-            **REQUEST CHANGES** when:
-            - Security vulnerabilities present (any severity)
-            - Missing error handling for failure scenarios
-            - Performance bottlenecks that impact user experience
-            - Obvious runtime bugs or edge case failures
-            - Data corruption or loss risks
-            
-            **COMMENT** when:
-            - Architecture improvements recommended
-            - Clean Code quality issues found (naming, DRY, complexity)
-            - Best practice suggestions (non-blocking)  
-            - Future technical debt concerns
-            - Performance optimizations (non-critical)
+            **🎯 CODE QUALITY** - Maintainability issues:
+            SOLID violations | Complex functions (>50 lines) | Poor naming/magic numbers | Code duplication | High cyclomatic complexity
 
-            ## Review Execution
-            1. Use `mcp__github__create_pending_pull_request_review` to start
-            2. Use `mcp__github__add_comment_to_pending_review` for specific line issues
-            3. Use `mcp__github__submit_pending_pull_request_review` with decision
-            4. Include file:line references for all findings
-            5. Provide concrete code examples for fixes
+            **Decision criteria:**
+            - **REQUEST CHANGES**: Security vulnerabilities, production bugs, performance bottlenecks
+            - **COMMENT**: Best practices, code quality improvements, non-critical optimizations  
+            - **APPROVE**: No critical issues found
+
+            **Review execution:**
+            Use `gh pr comment` for top-level feedback.
+            Use `mcp__github_inline_comment__create_inline_comment` to highlight specific code issues.
+            Only post GitHub comments - don't submit review text as messages.
             
-            ## Output Standards
-            Each finding must include:
-            - **Severity**: Critical/High/Medium/Low with evidence
-            - **Impact**: Specific risk to production system
-            - **Location**: Exact file:line reference
-            - **Fix**: Concrete code solution, not generic advice
-            - **Test**: How to verify the fix works
-            
-            Focus on production impact, not academic correctness. Every REQUEST CHANGES must be justified by genuine risk to system reliability, security, or performance.
+            Provide specific file:line references and concrete fixes for all findings.
           
           claude_args: '--model claude-opus-4-1-20250805 --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"'
 
