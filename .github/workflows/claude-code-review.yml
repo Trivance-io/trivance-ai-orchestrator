@@ -37,7 +37,11 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          track_progress: true
           prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+            
             You are a Senior Staff Software Engineer conducting a focused code review of PR changes only. Review ONLY the changes in this pull request - do not analyze the entire codebase.
 
             ## PR-Focused Review Process
@@ -123,5 +127,5 @@ jobs:
             
             Focus on production impact, not academic correctness. Every REQUEST CHANGES must be justified by genuine risk to system reliability, security, or performance.
           
-          claude_args: '--model claude-opus-4-1-20250805 --allowedTools "Read(**),Grep(**),Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*),Bash(gh pr files:*),mcp__github__get_pull_request,mcp__github__get_pull_request_files,mcp__github__get_pull_request_diff,mcp__github__create_pending_pull_request_review,mcp__github__add_comment_to_pending_review,mcp__github__submit_pending_pull_request_review"'
+          claude_args: '--model claude-opus-4-1-20250805 --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"'
 
