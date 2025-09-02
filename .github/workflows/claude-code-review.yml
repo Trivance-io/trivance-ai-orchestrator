@@ -36,7 +36,7 @@ jobs:
         id: claude-review
         uses: anthropics/claude-code-action@v1
         with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          anthropic_api_key: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 
           # Enterprise-grade code review prompt based on clean code principles
           prompt: |
@@ -97,12 +97,10 @@ jobs:
             - **Prevention**: Strategy to avoid similar issues
 
             Be thorough, practical, and educational. Execute with precision while focusing on teaching and improving code quality.
-
-          # Enable sticky comments for clean PR conversations
-          use_sticky_comment: true
           
           # Advanced configuration using claude_args (v1.0 format)
           claude_args: |
             --model claude-opus-4-1-20250805
+            --sticky-comment
             --allowedTools "Read,Write,Edit,Bash(git:*),Bash(ls:*),Bash(find:*),Bash(grep:*),Bash(npm test:*),Bash(npm run test:*),Bash(npm run build:*),Bash(npm run lint:*),Bash(npm run typecheck:*),Bash(pytest:*),Bash(python -m pytest:*),Bash(python -m flake8:*),Bash(python -m black --check:*),Bash(mypy:*),Bash(go test:*),Bash(go vet:*),Bash(go fmt -l:*),Bash(golangci-lint:*),Bash(cargo test:*),Bash(cargo clippy:*),Bash(cargo fmt --check:*),Bash(docker build:*),Bash(docker-compose config:*),Bash(hadolint:*),Bash(terraform validate:*),Bash(terraform fmt -check:*),Bash(shellcheck:*),Bash(yamllint:*),Bash(eslint:*),Bash(tsc --noEmit:*)"
 
