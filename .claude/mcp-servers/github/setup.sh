@@ -11,7 +11,7 @@ docker info >/dev/null 2>&1 || { echo "Docker no ejecutándose. Iniciar Docker D
 command -v curl >/dev/null || { echo "curl requerido para validación"; exit 1; }
 
 echo "Generar token: https://github.com/settings/tokens"
-echo "Permisos: repo, read:org, read:user"
+echo "Permisos: repo, read:org, read:user, actions:read"
 read -s -p "Token: " GITHUB_TOKEN
 echo
 

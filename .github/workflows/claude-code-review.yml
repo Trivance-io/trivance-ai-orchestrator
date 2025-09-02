@@ -23,6 +23,7 @@ jobs:
       contents: read
       pull-requests: write  # Required for sticky comments
       issues: read
+      actions: read         # Required for MCP github_ci server
       id-token: write
     
     steps:

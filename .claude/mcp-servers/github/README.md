@@ -21,6 +21,7 @@ El script te pedirá un GitHub Personal Access Token. Para generarlo:
    - `repo`
    - `read:org`
    - `read:user`
+   - `actions:read`
 6. Click **'Generate token'**
 7. Copia el token (solo se muestra una vez)
 8. Pégalo cuando el script lo solicite
@@ -77,5 +78,6 @@ cat .mcp.json  # Debe mostrar GITHUB_PERSONAL_ACCESS_TOKEN en env
 **"No MCP servers configured"** → Usar `/mcp` en Claude Code  
 **"Permission denied"** → Verificar permisos del token  
 **"Authentication failed"** → Reconfigurar token: `claude mcp update github -e GITHUB_PERSONAL_ACCESS_TOKEN="tu_nuevo_token"`  
+**"The github_ci MCP server requires 'actions: read' permission"** → Token sin permisos `actions:read` - regenerar token con todos los scopes requeridos  
 **"Missing toolset functionality"** → Verificar GITHUB_TOOLSETS: `cat .mcp.json | grep TOOLSETS`  
 **Docker no responde** → Iniciar Docker Desktop
