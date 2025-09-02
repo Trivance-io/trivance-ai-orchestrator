@@ -14,9 +14,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 2
       
-      - uses: anthropics/claude-code-action@v1
+      - uses: anthropics/claude-code-security-review@main
         with:
+          comment-pr: true
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          claude_args: '--model claude-opus-4-1-20250805'
+          
