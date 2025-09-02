@@ -8,16 +8,24 @@
 
 Cuando experimentas por primera vez un flujo AI-first real, algo cambia fundamentalmente en tu manera de trabajar. No es solo "usar herramientas AI" - es redefinir completamente cómo abordas los problemas de desarrollo.
 
-**La revelación típica** llega así: En lugar de pensar "necesito implementar autenticación OAuth" y abrir tu editor, tu primera reacción se convierte en "Claude, necesito autenticación OAuth". Lo que sigue es una orquestación automática donde especialistas analizan, planifican, implementan y revisan - mientras tú mantienes el control estratégico.
+**La revelación típica** llega así: En lugar de pensar "necesito implementar autenticación OAuth" y abrir tu editor, tu primera reacción se convierte en `/understand → /implement "OAuth"`. Lo que sigue es una orquestación automática donde especialistas analizan, planifican, implementan y revisan - mientras tú mantienes el control estratégico.
+
+> 📚 **Ver**: [Comandos de Alto Valor](ai-first-workflow.md#-comandos-de-alto-valor) para entender el poder de `/understand`, `/implement`, `/review`, `/test`
 
 ### Pro-Tip #1: El Test de la Primera Reacción
 
 Cuando te llega una nueva feature request, observa tu primera reacción mental:
 - **Novato**: "¿Por dónde empiezo?"
 - **Competente**: "Primero necesito entender el contexto" 
-- **Experto**: "Claude, analicemos esto"
+- **Experto**: `/understand → /implement "feature X"`
 
-La diferencia no es el conocimiento técnico - es la instinctiva delegación inteligente.
+La diferencia no es el conocimiento técnico - es la **instinctiva automatización**. Los expertos van directo a los [comandos de alto valor](ai-first-workflow.md#-comandos-de-alto-valor) que transforman horas en minutos.
+
+### 🚀 El Workflow Revelador
+
+En lugar de explicar cada comando aquí, la **transformación real** ocurre cuando internalizas el [workflow de alto impacto](ai-first-workflow.md#-comandos-de-alto-valor): `/understand → /implement → /test → /review → /pr`
+
+**Total: 15-30 minutos para feature production-ready** vs el approach tradicional de días.
 
 ---
 
@@ -46,11 +54,10 @@ Todo el ecosistema funciona con **contextos específicos**. Esta no es una limit
 ### Pro-Tip #2: La Regla del Context Switching Consciente
 
 Antes de ejecutar cualquier comando, hazte la pregunta: "¿Estoy en el contexto correcto?"
-- `git branch` antes de `/commit`
-- `pwd` antes de comandos de workflow
-- `/workflow:switch` para cambio consciente de contexto
 
-Los expertos hacen esto automáticamente. Los novatos se frustran porque "no funciona".
+Los expertos validan contexto instintivamente. Los novatos se frustran porque "no funciona".
+
+> 📚 **Ver**: [Validación de contexto detallada](ai-first-workflow.md#-flujo-completo) en el workflow principal.
 
 ---
 
@@ -77,7 +84,7 @@ Los expertos no solo saben QUÉ especialista usar - saben CUÁNDO usar múltiple
 Challenge complejo detectado:
 ├── 1° tech-lead-orchestrator (analysis + planning)
 ├── 2° [framework]-expert (implementation)
-├── 3° code-quality-reviewer (security + quality)
+├── 3° code-reviewer (security + quality)
 └── 4° performance-optimizer (optimization)
 ```
 
@@ -125,19 +132,19 @@ Novatos ejecutan secuencialmente. Expertos entienden dependencies y ejecutan en 
 # Novato (secuencial)
 /pr
 # espera... 
-/github:findings-to-issues  
+/review pr <number>  
 # espera...
-/github:issues-to-solved
+[resolver issues manualmente]
 
 # Experto (batch inteligente)
-/pr && sleep 30 && /github:findings-to-issues
+/pr && sleep 30 && /review pr <number>
 ```
 
 ### El Arte del Batching Inteligente
 
 Expertos procesan findings en batches por tipo, no uno por uno:
 
-- **SECURITY batch**: Todos los security issues juntos con `code-quality-reviewer`
+- **SECURITY batch**: Todos los security issues juntos con `code-reviewer`
 - **PERFORMANCE batch**: Todos los performance issues con `performance-optimizer`  
 - **REFACTOR batch**: Todos los code quality issues juntos
 
@@ -175,7 +182,7 @@ Antes de escalar a autorización, consulta el "expert panel":
 # Análisis de impact multi-angle
 /agent:tech-lead-orchestrator --impact-analysis
 /agent:performance-optimizer --cost-analysis  
-/agent:code-quality-reviewer --security-assessment
+/agent:code-reviewer --security-assessment
 ```
 
 Esto te da munición sólida para tu request de autorización y demuestra due diligence.
@@ -203,6 +210,6 @@ Esto no es casualidad - es el resultado inevitable de un flujo bien orquestado.
 - **[quickstart.md](quickstart.md)**: Setup técnico del ecosistema
 
 **📁 Estructura clave**:
-- `.claude/agents/`: Especiliasts disponibles para delegación
+- `.claude/agents/`: Specialists disponibles para delegación
 - `.claude/commands/`: Comandos organizados por contexto de uso
 - `.github/workflows/`: Pipeline de automatización (essential para AI-first)

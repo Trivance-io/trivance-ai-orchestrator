@@ -1,6 +1,45 @@
 # Guía Práctica de Comandos Claude Code
 
-## 🚀 Comandos Básicos
+*Comandos organizados por importancia y impact en productividad*
+
+## ⚡ Comandos de Alto Valor (ESENCIALES)
+
+### 🎯 `/understand` - Context Mapping
+```bash
+/understand
+```
+**Qué hace**: Analiza todo el codebase y explica arquitectura, patrones y funcionamiento completo.
+**Cuándo usarlo**: SIEMPRE antes de implementar. Primera acción en cualquier proyecto.
+**ROI**: 30 min ahorran 3+ horas de refactoring por inconsistencias.
+
+### 🚀 `/implement` - Motor de Implementación Automática
+```bash
+/implement "nueva feature de dashboard con notificaciones"
+```
+**Qué hace**: Motor central - planifica e implementa features completas con especialistas automáticos.
+**Cuándo usarlo**: Para cualquier implementación nueva. Reemplaza desarrollo manual.
+**Flujo**: Planning (tech-lead-orchestrator) → Coding (specialists) → Testing → Documentation
+**ROI**: Reduce 4+ horas desarrollo manual a 20-30 minutos.
+
+### 🔍 `/review` - Quality Assurance Multi-Especialista
+```bash
+/review
+```
+**Qué hace**: Análisis simultáneo de security, performance, code quality con múltiples especialistas.
+**Cuándo usarlo**: Después de cualquier implementación, ANTES de hacer PR.
+**ROI**: 5 min previenen 2+ horas de fixes post-merge.
+
+### ✅ `/test` - Validation Engine
+```bash
+/test
+```
+**Qué hace**: Ejecuta todos los tests, detecta fallos y sugiere/aplica fixes automáticos.
+**Cuándo usarlo**: Después de cambios significativos, antes de commits importantes.
+**ROI**: Debugging de horas a minutos.
+
+---
+
+## 🚀 Comandos Fundamentales
 
 ### 💾 `/commit` - Commits inteligentes
 ```bash
@@ -10,12 +49,6 @@
 **Cuándo usarlo**: Después de completar cualquier cambio en código.
 **Ejemplo**: `commit "fix user login validation"` → genera commit con mensaje optimizado.
 
-### ✅ `/test` - Ejecutar tests con auto-fix
-```bash
-/test
-```
-**Qué hace**: Ejecuta todos los tests, detecta fallos y sugiere fixes automáticos.
-**Cuándo usarlo**: Antes de commits importantes o después de cambios significativos.
 
 ### `/format` - Formateo consistente
 ```bash
@@ -28,20 +61,7 @@
 
 ## 🔧 Comandos de Desarrollo
 
-### ⚙️ `/implement` - Motor de implementación
-```bash
-/implement "nueva feature de dashboard con notificaciones"
-```
-**Qué hace**: Planifica e implementa features completas paso a paso.
-**Cuándo usarlo**: Para implementar nuevas funcionalidades desde cero.
-**Flujo**: Analiza → Planifica → Implementa → Valida → Documenta
 
-### `/scaffold` - Generar estructuras
-```bash
-/scaffold "API para gestión de usuarios"
-```
-**Qué hace**: Genera estructura completa de archivos siguiendo patrones del proyecto.
-**Cuándo usarlo**: Al empezar nuevos módulos, APIs o componentes.
 
 ### 🔄 `/refactor` - Refactoring inteligente
 ```bash
@@ -50,12 +70,6 @@
 **Qué hace**: Reestructura código manteniendo funcionalidad, mejorando calidad.
 **Cuándo usarlo**: Cuando el código funciona pero necesita mejoras estructurales.
 
-### `/fix-imports` - Reparar imports rotos
-```bash
-/fix-imports
-```
-**Qué hace**: Encuentra y repara sistemáticamente imports rotos por file moves o renames.
-**Cuándo usarlo**: Después de refactoring, reestructuración de carpetas o cuando hay errores de imports.
 
 ### `/make-it-pretty` - Mejora de legibilidad
 ```bash
@@ -75,19 +89,6 @@
 
 ## 🔍 Comandos de Análisis
 
-### 🧪 `/understand` - Comprensión profunda
-```bash
-/understand
-```
-**Qué hace**: Analiza todo el codebase y explica arquitectura, patrones y funcionamiento.
-**Cuándo usarlo**: Al empezar en un proyecto nuevo o cuando necesitas entender código complejo.
-
-### 🔎 `/review` - Revisión de código
-```bash
-/review
-```
-**Qué hace**: Revisa cambios recientes y sugiere mejoras de calidad, seguridad y performance.
-**Cuándo usarlo**: Después de implementar features importantes o antes de hacer merge.
 
 ### 🔒 `/security-scan` - Auditoría de seguridad
 ```bash
@@ -104,20 +105,7 @@
 **Cuándo usarlo**: Planificación estratégica, decisiones arquitectónicas críticas, auditorías profundas.
 **Flujo**: Análisis multi-perspectiva → Investigación de causa raíz → Pensamiento sistémico → Soluciones alternativas
 
-### `/e-team` - Análisis de equipo experto
-```bash
-/e-team "challenge técnico o arquitectónico"
-```
-**Qué hace**: Análisis estratégico con equipos de expertos virtuales especializados.
-**Cuándo usarlo**: Evaluación de challenges complejos, validación de enfoques técnicos.
-**Flujo**: Claude Code Strategist → Security Architect → Technical Architect → Strategic Director
 
-### `/explain-like-senior` - Explicación nivel senior
-```bash
-/explain-like-senior
-```
-**Qué hace**: Explica código como desarrollador senior, enfocándose en el por qué detrás de las decisiones.
-**Cuándo usarlo**: Para mentorización, entendimiento profundo de arquitectura y patrones de código.
 
 ---
 
@@ -207,13 +195,6 @@
 
 ## 🔗 Comandos GitHub
 
-### `/github:to-contributing` - Estrategia completa de contribución
-```bash
-/github:to-contributing
-```
-**Qué hace**: Análisis contextual completo para contribuciones - detecta tu trabajo, escanea issues remotos, crea PRs profesionales.
-**Cuándo usarlo**: Para contribuciones a cualquier repo con máxima probabilidad de aceptación.
-**Flujo**: Análisis contexto → Pre-flight checks → Escaneo remoto → Linking issues → PR optimizado
 
 ### 🔄 `/pr` - Crear pull requests
 ```bash
@@ -270,18 +251,26 @@
 
 ## 🎯 Flujos Típicos
 
-### Desarrollo de Feature Nueva
+### **🏆 Workflow de Alto Impacto: Feature Nueva**
 ```bash
-1. /worktree:create feature-name develop  # Crear worktree aislado
-2. cd ../worktree-feature-name            # Cambiar al worktree
-3. claude /workflow:session-start         # Nueva sesión en worktree
-4. /understand                            # Entender contexto
-5. /implement "nueva feature"             # Implementar
-6. /test                                 # Validar funcionamiento  
-7. /review                               # Revisar calidad
-8. /security-scan                        # Verificar seguridad
-9-12. Seguir workflow AI-First           # Ver: ai-first-workflow.md
+# SETUP (desde main/develop)
+1. /workflow:session-start               # Configurar workspace  
+2. /worktree:create feature-name develop # Crear worktree aislado
+3. cd ../worktree-feature-name           # Cambiar al worktree
+
+# COMANDOS DE ALTO VALOR (el 80% del impacto)
+4. /understand                           # 🎯 Context mapping completo
+5. /implement "nueva feature"            # 🚀 Implementation engine
+6. /review                              # 🔍 Multi-specialist quality check
+7. /pr                                  # Crear PR automático
+
+# ITERACIÓN (si hay findings)
+8. /review pr <number>                  # Plan para resolver findings
+9. [Resolver según plan]                # Manual o con especialistas
+10. Merge + /workflow:changelog + cleanup
 ```
+
+**⚡ Tiempo total con comandos de alto valor: 15-30 minutos** (vs 2-4 horas manual)
 
 > 📚 **Para workflow completo de PR + findings + issues:** Ver `ai-first-workflow.md`
 
@@ -309,7 +298,7 @@
 ### Análisis Estratégico Completo
 ```bash
 1. /deep "problema arquitectónico"           # Razonamiento profundo
-2. /e-team "challenge complejo"              # Análisis multi-experto
+2. /agent:tech-lead-orchestrator             # Análisis estratégico multi-experto
 3. /understand                      # Mapear codebase
 4. /review                         # Revisar estado actual
 5. Implementar solución
