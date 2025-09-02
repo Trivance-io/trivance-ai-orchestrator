@@ -30,6 +30,37 @@ def find_claude_root():
         current = current.parent
     return None
 
+def get_formatters_for_ext(file_ext):
+    """Get available formatters for file extension"""
+    formatters_map = {
+        '.js': [['npx', 'prettier', '--write'], ['npx', 'eslint', '--fix']],
+        '.jsx': [['npx', 'prettier', '--write'], ['npx', 'eslint', '--fix']],
+        '.ts': [['npx', 'prettier', '--write'], ['npx', 'eslint', '--fix']],
+        '.tsx': [['npx', 'prettier', '--write'], ['npx', 'eslint', '--fix']],
+        '.vue': [['npx', 'prettier', '--write'], ['npx', 'eslint', '--fix']],
+        '.svelte': [['npx', 'prettier', '--write'], ['npx', 'eslint', '--fix']],
+        '.json': [['npx', 'prettier', '--write']],
+        '.md': [['npx', 'prettier', '--write']],
+        '.yml': [['npx', 'prettier', '--write']],
+        '.yaml': [['npx', 'prettier', '--write']],
+        '.sh': [['shfmt', '-w']],
+        '.bash': [['shfmt', '-w']],
+        '.py': [['black'], ['ruff', '--fix']]
+    }
+    return formatters_map.get(file_ext, [])
+
+def check_tool_available(tool_cmd):
+    """Check if a formatting tool is available"""
+    try:
+        result = subprocess.run(
+            tool_cmd + ['--version'], 
+            capture_output=True, 
+            timeout=5
+        )
+        return result.returncode == 0
+    except (subprocess.TimeoutExpired, FileNotFoundError, PermissionError):
+        return False
+
 def ensure_tools_installed(project_root):
     """Auto-install prettier and eslint if not available"""
     try:
@@ -118,25 +149,41 @@ def main():
         print(json.dumps({"status": "skipped", "reason": "invalid_path"}))
         sys.exit(0)
     
-    # Only process JS/TS files for formatting
+    # Process common development files for formatting
     file_ext = Path(file_path).suffix.lower()
-    supported_exts = {'.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte'}
+    supported_exts = {'.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte', '.json', '.md', '.sh', '.bash', '.yml', '.yaml', '.py'}
     
     if file_ext not in supported_exts:
         print(json.dumps({"status": "skipped", "reason": "unsupported_file_type"}))
         sys.exit(0)
     
     project_root = find_package_json(file_path)
-    if not ensure_tools_installed(project_root):
-        print(json.dumps({"status": "skipped", "reason": "tools_unavailable"}))
+    
+    # Get formatters for this file type
+    formatters = get_formatters_for_ext(file_ext)
+    if not formatters:
+        print(json.dumps({"status": "skipped", "reason": "no_formatters"}))
         sys.exit(0)
     
-    # Run formatting tools silently
-    subprocess.run(['npx', 'prettier', '--write', file_path], cwd=project_root, capture_output=True)
-    subprocess.run(['npx', 'eslint', '--fix', file_path], cwd=project_root, capture_output=True)
+    # For JS/TS files, ensure npm tools are installed
+    if file_ext in {'.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte', '.json', '.md', '.yml', '.yaml'}:
+        if not ensure_tools_installed(project_root):
+            print(json.dumps({"status": "skipped", "reason": "tools_unavailable"}))
+            sys.exit(0)
+    
+    # Run available formatting tools silently
+    tools_used = []
+    for formatter_cmd in formatters:
+        tool_name = formatter_cmd[0]
+        if check_tool_available(formatter_cmd[:1]):
+            subprocess.run(formatter_cmd + [file_path], cwd=project_root, capture_output=True)
+            tools_used.append(tool_name.split('/')[-1])  # Get tool name without path
     
     log_result(file_path)
-    print(json.dumps({"status": "processed"}))
+    if tools_used:
+        print(json.dumps({"status": "processed", "tools": tools_used}))
+    else:
+        print(json.dumps({"status": "skipped", "reason": "no_tools_available"}))
 
 if __name__ == "__main__":
     main()

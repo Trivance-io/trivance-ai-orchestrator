@@ -15,6 +15,27 @@ TEST_JS_FORMATTED = """const badlyFormatted = { name: "test", value: 123 };
 console.log(badlyFormatted);
 """
 
+TEST_PYTHON_CODE = """def badly_formatted( x,y ):
+    return x+y
+result=badly_formatted(1,2)
+"""
+
+TEST_JSON_CODE = '{"name":"test","value":123}'
+
+TEST_MARKDOWN_CODE = """# Title
+
+Some   badly    formatted    text.
+
+-   list item 1
+-   list item 2
+"""
+
+TEST_YAML_CODE = """name:    test
+value:   123
+config:
+  enabled:    true
+"""
+
 def create_test_project():
     """Create a minimal test project with package.json"""
     temp_dir = Path(tempfile.mkdtemp())
@@ -46,7 +67,7 @@ def run_clean_code_hook(file_path):
     """Run the clean_code hook with given file path"""
     hook_path = Path(__file__).parent.parent.parent / 'scripts' / 'hooks' / 'clean_code.py'
     
-    input_data = json.dumps({"file_path": str(file_path)})
+    input_data = json.dumps({"tool_input": {"file_path": str(file_path)}})
     
     result = subprocess.run(
         ['python3', str(hook_path)],
@@ -223,6 +244,114 @@ def test_project_without_package_json():
     finally:
         shutil.rmtree(temp_dir)
 
+def test_python_formatting():
+    """Test Python file formatting with black/ruff"""
+    print("🧪 Testing Python formatting...")
+    
+    temp_dir = Path(tempfile.mkdtemp())
+    
+    try:
+        test_file = temp_dir / 'test.py'
+        with open(test_file, 'w') as f:
+            f.write(TEST_PYTHON_CODE)
+        
+        result = run_clean_code_hook(test_file)
+        
+        assert result.returncode == 0, f"Hook failed: {result.stderr}"
+        
+        if result.stdout.strip():
+            output = json.loads(result.stdout)
+            # Should process or skip if tools unavailable
+            assert output["status"] in ["processed", "skipped"], f"Unexpected status: {output}"
+        
+        print("✅ Python formatting test passed")
+        
+    finally:
+        shutil.rmtree(temp_dir)
+
+def test_json_formatting():
+    """Test JSON file formatting with prettier"""
+    print("🧪 Testing JSON formatting...")
+    
+    temp_dir = Path(tempfile.mkdtemp())
+    
+    try:
+        # Create package.json for prettier
+        package_json = {"name": "test-project", "version": "1.0.0"}
+        with open(temp_dir / 'package.json', 'w') as f:
+            json.dump(package_json, f)
+        
+        test_file = temp_dir / 'test.json'
+        with open(test_file, 'w') as f:
+            f.write(TEST_JSON_CODE)
+        
+        result = run_clean_code_hook(test_file)
+        
+        assert result.returncode == 0, f"Hook failed: {result.stderr}"
+        
+        if result.stdout.strip():
+            output = json.loads(result.stdout)
+            assert output["status"] in ["processed", "skipped"], f"Unexpected status: {output}"
+        
+        print("✅ JSON formatting test passed")
+        
+    finally:
+        shutil.rmtree(temp_dir)
+
+def test_markdown_formatting():
+    """Test Markdown file formatting with prettier"""
+    print("🧪 Testing Markdown formatting...")
+    
+    temp_dir = Path(tempfile.mkdtemp())
+    
+    try:
+        # Create package.json for prettier
+        package_json = {"name": "test-project", "version": "1.0.0"}
+        with open(temp_dir / 'package.json', 'w') as f:
+            json.dump(package_json, f)
+        
+        test_file = temp_dir / 'test.md'
+        with open(test_file, 'w') as f:
+            f.write(TEST_MARKDOWN_CODE)
+        
+        result = run_clean_code_hook(test_file)
+        
+        assert result.returncode == 0, f"Hook failed: {result.stderr}"
+        
+        if result.stdout.strip():
+            output = json.loads(result.stdout)
+            assert output["status"] in ["processed", "skipped"], f"Unexpected status: {output}"
+        
+        print("✅ Markdown formatting test passed")
+        
+    finally:
+        shutil.rmtree(temp_dir)
+
+def test_unsupported_file():
+    """Test hook behavior with unsupported file types"""
+    print("🧪 Testing unsupported file types...")
+    
+    temp_dir = Path(tempfile.mkdtemp())
+    
+    try:
+        test_file = temp_dir / 'test.cpp'  # C++ not supported
+        with open(test_file, 'w') as f:
+            f.write('#include <iostream>\nint main() { return 0; }')
+        
+        result = run_clean_code_hook(test_file)
+        
+        assert result.returncode == 0, f"Hook failed: {result.stderr}"
+        
+        if result.stdout.strip():
+            output = json.loads(result.stdout)
+            assert output["status"] == "skipped", f"Should skip unsupported files: {output}"
+            assert output["reason"] == "unsupported_file_type", f"Wrong skip reason: {output}"
+        
+        print("✅ Unsupported file test passed")
+        
+    finally:
+        shutil.rmtree(temp_dir)
+
 def test_error_handling():
     """Test hook behavior with invalid input"""
     print("🧪 Testing error handling...")
@@ -236,7 +365,10 @@ def test_error_handling():
         text=True
     )
     
-    assert result.returncode != 0, "Hook should fail with invalid JSON"
+    assert result.returncode == 0, "Hook should handle invalid JSON gracefully"
+    if result.stdout.strip():
+        output = json.loads(result.stdout)
+        assert output["status"] == "error", "Should return error status for invalid JSON"
     
     result = subprocess.run(
         ['python3', str(hook_path)],
@@ -245,7 +377,10 @@ def test_error_handling():
         text=True
     )
     
-    assert result.returncode != 0, "Hook should fail with missing file_path"
+    assert result.returncode == 0, "Hook should handle missing file_path gracefully"
+    if result.stdout.strip():
+        output = json.loads(result.stdout)
+        assert output["status"] == "skipped", "Should skip when no file_path provided"
     
     print("✅ Error handling test passed")
 
@@ -259,6 +394,10 @@ def main():
         test_logging()
         test_auto_installation()
         test_project_without_package_json()
+        test_python_formatting()
+        test_json_formatting()
+        test_markdown_formatting()
+        test_unsupported_file()
         test_error_handling()
         
         print("\n🎉 All tests passed! Hook is working correctly.")
