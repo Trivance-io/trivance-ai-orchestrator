@@ -100,6 +100,11 @@ For each confirmed target:
 - Execute `git remote prune origin`
 - Show final results report
 
+### 8. Update current branch from remote
+- Execute `git pull` to update current branch
+- If pull fails, show warning: "⚠️ No se pudo actualizar desde remoto" but continue
+- If pull successful, show: "Updated from remote"
+
 ## Discovery Mode Implementation
 
 When executed without arguments, follow these steps:
@@ -112,11 +117,18 @@ When executed without arguments, follow these steps:
   - If fails to get canonical path: skip this worktree
   - If `worktree_canonical` equals `current_canonical`: skip (it's current directory)
   - Verify basic ownership using cross-platform function
-  - If owner is current user: show suggested command with format `"   /worktree:cleanup $worktree_name"`
+  - If owner is current user: add to numbered list
+- Show numbered list: `"   1. $worktree_name"`
+- Request selection: "Selecciona números separados por espacios (ej: 1 2) o 'todos':"
+- Parse user input and convert to worktree names
+- Continue with normal cleanup flow for selected worktrees
 
 ## Logging Format Template
 
 For each processed target, add line to JSONL file:
+
+- Create log directory: `log_dir=".claude/logs/$(date +%Y-%m-%d)" && mkdir -p "$log_dir"`
+- Add entry to: `"$log_dir/worktree_operations.jsonl"`
 
 ```json
 {"timestamp":"$(date -Iseconds)","operation":"worktree_cleanup","target":"$target","user":"$(whoami)","my_email":"$(git config user.email)","worktree_removed":"$worktree_removed","local_removed":"$local_removed","local_only":true,"commit_sha":"$(git rev-parse HEAD)"}
@@ -126,6 +138,7 @@ For each processed target, add line to JSONL file:
 - **Single-pass validation**: One function, one pass, graceful degradation
 - **Current-directory protection**: Does not allow deleting the worktree you are standing in
 - **Cross-platform**: Auto-detection macOS/Linux
-- **Discovery-first**: Helps user find worktrees
+- **Discovery-first**: Interactive numbered selection for user convenience
 - **Backward compatibility**: Existing arguments work the same
 - **Atomic operations**: Complete cleanup or skip with warning
+- **Auto-sync**: Automatic git pull to keep current branch updated

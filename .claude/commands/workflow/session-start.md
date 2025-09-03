@@ -21,6 +21,12 @@ Mostrar exactamente este texto:
 ### 2. Leer configuración del proyecto
 - Ejecutar: `Read` en `/CLAUDE.md` para obtener configuraciones específicas
 
+### 2.5. Verificación de seguridad
+- Ejecutar: `Read` en `/.claude/settings.json` para verificar configuración de permisos
+- Si el archivo contiene `"defaultMode": "bypassPermissions"`:
+  - Mostrar: `⚠️ BYPASS PERMISSIONS ACTIVO - Asegúrate de estar en entorno seguro`
+- Si el archivo no existe o falla lectura: continuar sin alerta
+
 ### 3. Establecer contexto actual
 - Ejecutar: `pwd` para detectar si estamos en worktree (contiene "worktree-")
 - Ejecutar: `git status --porcelain` para ver cambios pendientes
