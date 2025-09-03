@@ -3,7 +3,10 @@
  * Simple focused test for inline comment validation
  */
 
-// Line 6: SECURITY - Hardcoded API key
+// Use environment variables for API keys
+const API_KEY = process.env.API_KEY || (() => {
+    throw new Error('API_KEY environment variable is required');
+})();
 const API_KEY = "sk-1234567890abcdef";
 
 // Line 9: SECURITY - Hardcoded password
