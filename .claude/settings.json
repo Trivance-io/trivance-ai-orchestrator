@@ -103,6 +103,7 @@
     ],
     "PreToolUse": [
       {
+        "matcher": "Task|Edit|MultiEdit|Write|Bash|WebFetch|WebSearch",
         "hooks": [
           {
             "type": "command",
@@ -133,7 +134,7 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Edit|Write|MultiEdit",
+        "matcher": "Task|Edit|MultiEdit|Write|Bash",
         "hooks": [
           {
             "type": "command",
