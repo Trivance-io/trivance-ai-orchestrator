@@ -1,8 +1,7 @@
 name: Security Review
 
-# TEMPORARILY DISABLED FOR TESTING
-# on:
-#   pull_request:
+on:
+  pull_request:
 
 jobs:
   security:
