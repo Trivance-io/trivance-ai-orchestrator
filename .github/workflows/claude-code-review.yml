@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read
+      pull-requests: write
       issues: read
       id-token: write
     
@@ -37,12 +37,14 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
-            as a Senior Staff Engineer, please review this pull request and provide feedback on:
-            
-            **🔒 SECURITY** - Zero tolerance for:
+            Create a formal GitHub review with inline comments for specific issues and submit with appropriate decision.
+
+            Review criteria:
+
+            **🔒 SECURITY** - Zero tolerance:
             SQL injection, XSS, CSRF | Hardcoded secrets/passwords | Auth bypass | Unsafe deserialization | Vulnerable dependencies
 
-            **🐛 BUGS & RELIABILITY** - Critical issues:  
+            **🐛 BUGS & RELIABILITY** - Critical issues:
             Missing error handling | Race conditions/resource leaks | Null pointer exceptions | Edge case failures | Transaction management
 
             **⚡ PERFORMANCE** - Production impact:
@@ -53,14 +55,12 @@ jobs:
 
             **Decision criteria:**
             - **REQUEST CHANGES**: Security vulnerabilities, production bugs, performance bottlenecks
-            - **COMMENT**: Best practices, code quality improvements, non-critical optimizations  
+            - **COMMENT**: Best practices, code quality improvements, non-critical optimizations
             - **APPROVE**: No critical issues found
 
-            Provide specific file:line references and concrete fixes for all findings.
-            
-            Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
+            Provide specific file:line references and concrete fixes. Follow CLAUDE.md conventions.
           
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://docs.anthropic.com/en/docs/claude-code/sdk#command-line for available options
-          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
+          claude_args: '--allowed-tools "mcp__github__get_pull_request,mcp__github__get_pull_request_files,mcp__github__get_pull_request_diff,mcp__github__create_pending_pull_request_review,mcp__github__add_comment_to_pending_review,mcp__github__submit_pending_pull_request_review"'
 
