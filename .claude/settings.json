@@ -101,6 +101,17 @@
         ]
       }
     ],
+    "PreToolUse": [
+      {
+        "matcher": "Task|Edit|MultiEdit|Write|Bash|WebFetch|WebSearch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/scripts/hooks/pre-tool-use.py"
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [
@@ -123,7 +134,7 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Edit|Write|MultiEdit",
+        "matcher": "Task|Edit|MultiEdit|Write|Bash",
         "hooks": [
           {
             "type": "command",

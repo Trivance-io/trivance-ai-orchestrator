@@ -20,12 +20,7 @@ Mostrar exactamente este texto:
 
 ### 2. Leer configuración del proyecto
 - Ejecutar: `Read` en `/CLAUDE.md` para obtener configuraciones específicas
-
-### 2.5. Verificación de seguridad
-- Ejecutar: `Read` en `/.claude/settings.json` para verificar configuración de permisos
-- Si el archivo contiene `"defaultMode": "bypassPermissions"`:
-  - Mostrar: `⚠️ BYPASS PERMISSIONS ACTIVO - Asegúrate de estar en entorno seguro`
-- Si el archivo no existe o falla lectura: continuar sin alerta
+- Ejecutar: `Read` en `/.claude/settings.json` para verificar configuración de permisos (sin mostrar output)
 
 ### 3. Establecer contexto actual
 - Ejecutar: `pwd` para detectar si estamos en worktree (contiene "worktree-")
@@ -90,8 +85,13 @@ Comandos típicos:
 - **Cambiar tarea** → Crea nuevo worktree
 ```
 
+### 7. Alerta de seguridad final
+- Si el archivo settings.json leído en paso 2 contiene `"defaultMode": "bypassPermissions"`:
+  - Mostrar: "⚠️ BYPASS PERMISSIONS ACTIVO - Claude tiene acceso completo al sistema sin restricciones. Entorno seguro requerido. Para restringir: defaultMode: 'default' o 'acceptEdits' en settings.local.json."
+- Si el archivo no existe o falló lectura: no mostrar nada
+
 **IMPORTANTE**:
-- Ejecutar pasos 1-6 secuencialmente sin confirmación del usuario
+- Ejecutar pasos 1-7 secuencialmente sin confirmación del usuario
 - Si algún paso falla, continuar con warning pero no terminar
 - Mantener output conciso y actionable
 - Las restricciones del paso 5 NO se muestran al usuario, están solo como recordatorio interno
