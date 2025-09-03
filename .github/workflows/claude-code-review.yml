@@ -37,9 +37,10 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
-            Create a formal GitHub review with inline comments for specific issues and submit with appropriate decision.
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
 
-            Review criteria:
+            Review this pull request with inline comments for specific code issues.
 
             **🔒 SECURITY** - Zero tolerance:
             SQL injection, XSS, CSRF | Hardcoded secrets/passwords | Auth bypass | Unsafe deserialization | Vulnerable dependencies
@@ -58,9 +59,10 @@ jobs:
             - **COMMENT**: Best practices, code quality improvements, non-critical optimizations
             - **APPROVE**: No critical issues found
 
-            Provide specific file:line references and concrete fixes. Follow CLAUDE.md conventions.
+            Use inline comments for specific code issues. Follow CLAUDE.md conventions.
           
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://docs.anthropic.com/en/docs/claude-code/sdk#command-line for available options
-          claude_args: '--allowed-tools "mcp__github__get_pull_request,mcp__github__get_pull_request_files,mcp__github__get_pull_request_diff,mcp__github__create_pending_pull_request_review,mcp__github__add_comment_to_pending_review,mcp__github__submit_pending_pull_request_review"'
+          claude_args: |
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(ghpr comment:*),Bash(ghpr diff:*),Bash(ghpr view:*)"
 
