@@ -21,18 +21,14 @@ Mostrar exactamente este texto:
 ### 2. Leer configuración del proyecto
 - Ejecutar: `Read` en `/CLAUDE.md` para obtener configuraciones específicas
 
-### 2.5. Verificación de seguridad
-- Ejecutar: `Read` en `/.claude/settings.json` para verificar configuración de permisos
-- Si el archivo contiene `"defaultMode": "bypassPermissions"`:
-  - Mostrar: `⚠️ BYPASS PERMISSIONS ACTIVO - Asegúrate de estar en entorno seguro`
-- Si el archivo no existe o falla lectura: continuar sin alerta
-
 ### 3. Establecer contexto actual
 - Ejecutar: `pwd` para detectar si estamos en worktree (contiene "worktree-")
 - Ejecutar: `git status --porcelain` para ver cambios pendientes
 - Ejecutar: `git branch --show-current` para rama actual
 - Ejecutar: `git log --oneline -3` para commits recientes
+- Ejecutar: `Read` en `/.claude/settings.json` para verificar configuración de permisos
 - Mostrar resumen: "📍 Branch: [rama] | Estado: [limpio/[X] cambios pendientes] | Último commit: [mensaje del commit más reciente]"
+- Si el archivo settings.json contiene `"defaultMode": "bypassPermissions"`: mostrar en línea nueva: "⚠️ BYPASS PERMISSIONS ACTIVO - Asegúrate de estar en entorno seguro"
 
 ### 4. Mostrar situación del trabajo actual
 - Ejecutar: `gh issue list --assignee @me --state open --limit 6` si gh está disponible
