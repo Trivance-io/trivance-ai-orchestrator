@@ -4,20 +4,26 @@ I'll intelligently implement features from any source - adapting them perfectly 
 
 Arguments: `$ARGUMENTS` - URLs, paths, or descriptions of what to implement
 
-## Session Intelligence
+## Usage Examples
 
-I'll check for existing implementation sessions to continue seamlessly:
+**Single Source:**
+```
+/implement https://github.com/user/feature
+/implement ./legacy-code/auth-system/
+/implement "payment processing like Stripe"
+```
 
-**Session Files (in current project directory):**
-- `.claude/implementations/plan.md` - Current implementation plan and progress
-- `.claude/implementations/state.json` - Session state and checkpoints
+**Multiple Sources:**
+```
+/implement https://github.com/projectA ./local-examples/
+```
 
-**Session Management:**
-- **Auto-resume**: If session files exist, I'll load existing plan and state, show progress summary, continue from last checkpoint
-- **New session**: If no session exists, I'll create new implementation plan and tracking
-- **Commands**: `/implement resume` (explicit), `/implement status` (check progress)
-
-**IMPORTANT:** Session files stored in `.claude/implementations/` folder in current project root, NOT home directory or parent folders.
+**Resume Session:**
+```
+/implement              # Auto-detects and resumes
+/implement resume       # Explicit resume
+/implement status       # Check progress
+```
 
 ## Phase 1: Strategic Planning with Quality Prevention
 
@@ -37,62 +43,50 @@ I'll examine what you've provided and your project structure:
 - Existing dependencies and their versions
 - Code conventions and established patterns
 - Testing approach and quality standards
+- **SCOPE BOUNDARY**: Focus on patterns relevant to requested feature only
 
 **Orchestrated Strategic Process:**
-1. **Invoke tech-lead-orchestrator** with source analysis and project context
-2. **Receive comprehensive strategy** including:
+1. Execute `/agent:tech-lead-orchestrator` with:
+   - Source URLs/paths and extracted features
+   - Project stack (detected via `Glob("**/*.{js,py,rb,go}")`)
+   - Existing patterns (detected via `Grep`)
+   - Current dependencies and architecture
+   - **COMPLEXITY BUDGET**: [S≤80 LOC|M≤250 LOC|L≤600 LOC] based on scope
+   - **SIMPLICITY MANDATE**: Implement ONLY requested features, avoid gold-plating
+   - **YAGNI PRINCIPLE**: No speculative features, no "might need later" additions
+2. Receive comprehensive strategy including:
    - Dream Team Assembly with specialist agent assignments
    - Quality Prevention Strategy from mandatory reviewer consultation
    - Execution timeline with parallel/sequential coordination
-3. **Establish implementation roadmap** with integrated quality checkpoints
+   - **IMPLEMENTATION CONSTRAINTS**: Simplest solution that meets requirements
+3. Follow orchestrator-recommended implementation approach and specialist assignments
 
-## Phase 2: Plan Documentation & Setup
+## Phase 2: Plan Documentation & Session Management
 
 Based on strategic planning from Phase 1, I'll create implementation infrastructure:
 
-**Session Setup:**
-1. Check if `.claude/implementations` directory exists in current working directory
-2. If directory exists, check for session files:
-   - Look for `.claude/implementations/state.json`
-   - Look for `.claude/implementations/plan.md` 
-   - If found, resume from existing session
-3. If no directory or session exists:
-   - Create implementation infrastructure
-   - Initialize tracking files with strategic plan
-4. Document the orchestrated strategy received from tech-lead-orchestrator
+**Session Management:**
+1. Check for existing session in `./claude/implementations/` 
+2. If found: Resume from `plan.md` and `state.json`, show progress summary
+3. If new: Create session directory and initialize tracking files
+4. Document orchestrator strategy in plan file
 
-**Critical:** Use `.claude/implementations` folder in current directory. Do NOT use `$HOME/.claude/implementations` or parent directory paths
+**Commands**: `/implement resume`, `/implement status` (check progress)
 
-I'll write this enhanced plan to `.claude/implementations/plan.md`:
+I'll write the strategic plan to `./claude/implementations/plan.md`:
 
 ```markdown
 # Implementation Plan - [timestamp]
 
 ## Source Analysis
-- **Source Type**: [URL/Local/Description]
-- **Core Features**: [identified features to implement]
-- **Dependencies**: [required libraries/frameworks]
-- **Complexity**: [estimated effort]
+- **Source**: [URL/Local/Description]
+- **Features**: [list to implement]
+- **Dependencies**: [required]
 
-## Strategic Coordination (tech-lead-orchestrator)
-- **Challenge Type**: [ANALYSIS|BUG|REFACTOR|API|IMPLEMENTATION]
-- **Dream Team**: [selected specialist agents]
-- **SubAgent Assignments**: [task delegation with timeline]
-- **Execution Order**: [parallel/sequential coordination]
-
-## Quality Prevention Strategy
-- **Code Quality Risks**: [preventive measures from code-quality-reviewer]
-- **Security Considerations**: [preventive measures from config-security-expert]
-- **Edge Case Mitigation**: [preventive measures from edge-case-detector]
-- **Integrated Checkpoints**: [quality gates during implementation]
-
-## Implementation Tasks
-[Prioritized checklist with progress tracking and quality gates]
-
-## Risk Mitigation
-- **Technical Risks**: [identified technical issues]
-- **Quality Risks**: [prevention strategy per reviewer domain]
-- **Rollback Strategy**: [git checkpoints and recovery plan]
+## Strategic Plan
+- **Team**: [assigned agents]
+- **Tasks**: [prioritized checklist]
+- **Risks**: [identified + mitigation]
 ```
 
 ## Phase 3: Intelligent Adaptation
@@ -130,50 +124,57 @@ I'll implement features incrementally:
 5. Validate everything works correctly
 
 **Progress Tracking:**
-- Update `.claude/implementations/plan.md` as I complete each item
-- Mark checkpoints in `.claude/implementations/state.json`
+- Update session plan file as I complete each item
+- Mark checkpoints in session state file
 - Create meaningful git commits at logical points
 
-## Phase 5: Implementation Quality Validation
+## Phase 5: Quality Validation
 
-**Pre-Certification Validation:**
-- Run existing lint commands and execute test suite
-- Check for type errors and verify integration points
-- Confirm no regressions in existing functionality
+**Validation Steps:**
+1. **Technical Validation (Stack-Aware):**
+   - **JS/TS**: `npm run lint` || `yarn lint` || `tsc --noEmit`
+   - **Python**: `flake8 .` || `pylint .` || `python -m py_compile **/*.py`
+   - **Ruby**: `rubocop` || `ruby -c **/*.rb`
+   - **Fallback**: Manual code inspection using `Read` tool
+   - Run available test suites, skip if none configured
+
+2. **Integration Validation:**
+   - Test implemented features work as specified
+   - Verify no regressions in existing functionality
+   - Confirm integration points function correctly
+
+3. **Quality Review (with Fallbacks):**
+   - Try `/agent:code-quality-reviewer` → fallback to manual architectural review
+     (Focus: Is solution appropriately simple for the problem scale?)
+   - Try `/agent:config-security-expert` → fallback to security pattern analysis
+     (Focus: Essential security only, avoid over-engineering auth)
+   - Try `/agent:edge-case-detector` → fallback to boundary condition testing
+     (Focus: Critical edge cases only, not exhaustive theoretical scenarios)
+
+4. **Simplicity Validation:**
+   - **Lines of Code**: Verify within complexity budget (S/M/L limits)
+   - **YAGNI Check**: Confirm no unused features or speculative code
+   - **Abstraction Audit**: Question each class/interface - is it necessary?
+   - **File Count**: Challenge excessive file splitting or over-modularization
+
+**Success Criteria:** New implementation validated successfully (existing issues documented separately)
+**Simplicity Criteria:** 
+- No unused abstractions or speculative features
+- Implementation solves stated problem without gold-plating
+- Complexity justified by actual requirements (not imagined ones)
 
 
-
-## Practical Examples
-
-**Single Source:**
-```
-/implement https://github.com/user/feature
-/implement ./legacy-code/auth-system/
-/implement "payment processing like Stripe"
-```
-
-**Multiple Sources:**
-```
-/implement https://github.com/projectA ./local-examples/
-```
-
-**Resume Session:**
-```
-/implement              # Auto-detects and resumes
-/implement resume       # Explicit resume
-/implement status       # Check progress
-```
 
 ## Execution Guarantee
 
 **My workflow ALWAYS follows this logical order:**
 
 1. **Strategic planning** - Professional orchestration with quality prevention FIRST
-2. **Plan documentation** - Write comprehensive strategic plan to `.claude/implementations/plan.md`
+2. **Plan documentation** - Write comprehensive strategic plan to session directory
 3. **Setup session** - Create/load state files and infrastructure  
 4. **Show plan** - Present strategic summary before implementing
 5. **Execute systematically** - Follow orchestrated plan with agent coordination
-6. **QA certification** - Final validation through specialist reviewers
+6. **Quality validation** - Final validation through specialist reviewers
 
 **I will NEVER:**
 - Start implementing without a written plan
@@ -181,40 +182,8 @@ I'll implement features incrementally:
 - Bypass session file creation
 - Begin coding before showing the plan
 - Use emojis in commits, PRs, or git-related content
-
-## Phase 6: QA Certification
-
-Final quality certification through specialist reviewer delegation:
-
-**QA Certification Process:**
-1. **Delegate to code-quality-reviewer**: Architectural review, maintainability assessment, technical debt analysis
-2. **Delegate to config-security-expert**: Security audit, configuration safety, production readiness
-3. **Delegate to edge-case-detector**: Boundary condition testing, integration failure scenarios, resilience validation
-4. **Consolidate findings**: Unified quality certification report with severity classification
-
-**Quality Certification Report:**
-```
-QA CERTIFICATION RESULTS
-├── Code Quality: [PASS/ISSUES] - Architectural soundness and maintainability
-├── Security Audit: [PASS/ISSUES] - Vulnerability assessment and config safety  
-├── Edge Case Coverage: [PASS/ISSUES] - Boundary conditions and failure scenarios
-├── Integration Validation: [PASS/ISSUES] - System integration and compatibility
-└── Production Readiness: [CERTIFIED/CONDITIONAL/BLOCKED]
-
-CRITICAL FINDINGS:
-[Issues that must be resolved before deployment]
-
-HIGH PRIORITY:
-[Issues that should be addressed]
-
-SUGGESTIONS:
-[Improvement opportunities for consideration]
-```
-
-**Certification Actions:**
-- Address all CRITICAL findings before deployment
-- Document HIGH PRIORITY items for next iteration  
-- Implement suggestions based on team priorities
-- Generate final certification status and production readiness assessment
+- Add features not explicitly requested (gold-plating)
+- Create abstractions "for future use" without current need
+- Implement enterprise patterns for simple problems
 
 I'll maintain perfect continuity across sessions, always picking up exactly where we left off with full context preservation.
