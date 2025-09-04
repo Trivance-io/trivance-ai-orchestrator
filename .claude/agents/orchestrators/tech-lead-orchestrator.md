@@ -124,7 +124,7 @@ Task 2: [description] → AGENT: @agent-[exact-agent-name]
 Check system context for available agents. Categories include:
 - **Orchestrators**: tech-lead-orchestrator
 - **Core Specialists**: code-archaeologist, performance-optimizer, documentation-specialist
-- **Review Specialists**: code-quality-reviewer, config-security-expert, edge-case-detector
+- **Review Specialists**: code-quality-reviewer, config-security-expert, edge-case-detector, security-reviewer
 - **Backend Specialists**: nestjs-backend-expert, django-backend-expert, django-api-developer, django-orm-expert, rails-backend-expert, rails-api-developer, rails-activerecord-expert, laravel-backend-expert, laravel-eloquent-expert
 - **Frontend Specialists**: react-component-architect, react-nextjs-expert, react-native-expert, vue-component-architect, vue-nuxt-expert, frontend-developer, tailwind-frontend-expert
 - **Design Specialists**: ui-designer, ux-researcher, brand-guardian, visual-storyteller, whimsy-injector
@@ -134,6 +134,7 @@ Check system context for available agents. Categories include:
 - Prefer specific over generic (nestjs-backend-expert > backend-developer)
 - Match technology exactly (NestJS API → nestjs-backend-expert, Next.js → react-nextjs-expert, React Native → react-native-expert, Database tasks → database-expert)
 - Use universal agents only when no specialist exists
+- **Security-reviewer**: Use for PR/branch security analysis with git diff review capabilities (complements config-security-expert)
 
 Remember: **Every task gets a sub-agent**. Parallel execution based on dependencies. Use exact format.
 
