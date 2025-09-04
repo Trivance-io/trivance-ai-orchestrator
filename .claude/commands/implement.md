@@ -25,7 +25,7 @@ Arguments: `$ARGUMENTS` - URLs, paths, or descriptions of what to implement
 /implement status       # Check progress
 ```
 
-## Phase 1: Strategic Planning with Quality Prevention
+## Phase 1: **MANDATORY** Strategic Planning with Quality Prevention
 
 First, I'll establish strategic direction through professional orchestration:
 
@@ -59,37 +59,26 @@ I'll examine what you've provided and your project structure:
    - Quality Prevention Strategy from mandatory reviewer consultation
    - Execution timeline with parallel/sequential coordination
    - **IMPLEMENTATION CONSTRAINTS**: Simplest solution that meets requirements
-3. Follow orchestrator-recommended implementation approach and specialist assignments
+   - **STRUCTURED PLAN**: Plan automatically saved to ./claude/implementations/plan.md by orchestrator
+3. Display implementation plan and request user authorization:
+   - Read orchestrator's plan from `./claude/implementations/plan.md` (automatically created by orchestrator)
+   - Display plan summary to user including: source analysis, strategic approach, team assignments, complexity assessment, risks
+   - **MANDATORY USER AUTHORIZATION**: Ask user "Proceed with this implementation plan? [Y/n]"
+   - **BLOCKING**: Do NOT proceed to Phase 2 without explicit user approval
+   - If user declines: terminate implementation, preserve plan.md for later review
 
-## Phase 2: Plan Documentation & Session Management
+## Phase 2: **MANDATORY** Session Management & Implementation Setup
 
-Based on strategic planning from Phase 1, I'll create implementation infrastructure:
+Based on user authorization from Phase 1, proceed with implementation setup:
 
-**Session Management:**
+**Session Management** (ONLY executed after user authorization):
 1. Check for existing session in `./claude/implementations/` 
 2. If found: Resume from `plan.md` and `state.json`, show progress summary
-3. If new: Create session directory and initialize tracking files
-4. Document orchestrator strategy in plan file
+3. If new: Create session directory and initialize state tracking files
 
 **Commands**: `/implement resume`, `/implement status` (check progress)
 
-I'll write the strategic plan to `./claude/implementations/plan.md`:
-
-```markdown
-# Implementation Plan - [timestamp]
-
-## Source Analysis
-- **Source**: [URL/Local/Description]
-- **Features**: [list to implement]
-- **Dependencies**: [required]
-
-## Strategic Plan
-- **Team**: [assigned agents]
-- **Tasks**: [prioritized checklist]
-- **Risks**: [identified + mitigation]
-```
-
-## Phase 3: Intelligent Adaptation
+## Phase 3: **MANDATORY** Intelligent Adaptation
 
 I'll transform the source to fit your project perfectly:
 
@@ -112,7 +101,7 @@ For large repositories, I'll use smart sampling:
 - Skip generated files, test data, documentation
 - Focus on actual implementation code
 
-## Phase 4: Implementation Execution
+## Phase 4: **MANDATORY** Implementation Execution
 
 I'll implement features incrementally:
 
@@ -128,7 +117,7 @@ I'll implement features incrementally:
 - Mark checkpoints in session state file
 - Create meaningful git commits at logical points
 
-## Phase 5: Quality Validation
+## Phase 5: **MANDATORY** Quality Validation
 
 **Validation Steps:**
 1. **Technical Validation (Stack-Aware):**
@@ -171,16 +160,17 @@ I'll implement features incrementally:
 
 1. **Strategic planning** - Professional orchestration with quality prevention FIRST
 2. **Plan documentation** - Write comprehensive strategic plan to session directory
-3. **Setup session** - Create/load state files and infrastructure  
-4. **Show plan** - Present strategic summary before implementing
+3. **User authorization** - Request explicit approval before proceeding with implementation
+4. **Setup session** - Create/load state files and infrastructure  
 5. **Execute systematically** - Follow orchestrated plan with agent coordination
 6. **Quality validation** - Final validation through specialist reviewers
 
 **I will NEVER:**
-- Start implementing without a written plan
+- **Start implementing WITHOUT a written plan**
+- **Start implementing WITHOUT user authorization**
 - Skip source or project analysis
 - Bypass session file creation
-- Begin coding before showing the plan
+- Begin coding before user approves the plan
 - Use emojis in commits, PRs, or git-related content
 - Add features not explicitly requested (gold-plating)
 - Create abstractions "for future use" without current need
