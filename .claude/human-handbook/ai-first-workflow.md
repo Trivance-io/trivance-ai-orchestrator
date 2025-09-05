@@ -23,8 +23,8 @@
 /workflow:session-start
 
 # 2. Crear worktree para tu feature
-/worktree:create feature-name main        # Para features
-/worktree:create fix-bug-name main        # Para hotfixes
+/worktree:create feature-name develop    # Para features
+/worktree:create fix-bug-name main        # Para hotfixes urgentes
 
 # 3. Cambiar al worktree
 cd ../worktree-feature-name
@@ -48,7 +48,7 @@ pwd          # Muestra: .../worktree-feature-name
 /understand                    # Mapea arquitectura y patrones existentes
 
 # 2. Implementación automática (MOTOR CENTRAL)
-/implement "autenticación OAuth"  # Planning → USER AUTHORIZATION → Coding → Testing → Documentation
+/implement "autenticación OAuth"  # Planning → ⚠️ APROBACIÓN REQUERIDA → Implementation
 
 # 3. Validación (CRÍTICO)
 /test                         # Ejecuta tests y valida funcionamiento
@@ -59,17 +59,12 @@ pwd          # Muestra: .../worktree-feature-name
 /pr        # Pull request automático
 ```
 
-**🎯 Flujo automático de `/implement`:**
+**🎯 Fases de `/implement`:**
 - **Planning Phase**: `tech-lead-orchestrator` analiza y planifica
 - **Authorization Phase**: Usuario aprueba plan antes de proceder
 - **Implementation Phase**: Especialistas del framework ejecutan
 - **Quality Phase**: `security-reviewer` + `performance-optimizer` validan
 - **Documentation Phase**: Actualiza docs automáticamente
-
-💡 **Comando `/implement` - Motor de Automatización:**
-- **Integra automáticamente** especialistas según el tipo de challenge
-- **Flujo completo** desde planning hasta documentación  
-- **Zero-friction implementation** - de idea a código funcionando
 
 **Auto-delegation interna:**
 - **Multi-step features** → `tech-lead-orchestrator` (automático)
@@ -85,7 +80,7 @@ pwd          # Muestra: .../worktree-feature-name
 ---
 
 ### **PASO 2: Review Automático**
-*Al momento de generar el PR se realiza un code review automatico en Github, a consideración del equipo lider, se realiza un code review manual tambien*
+El PR generado activa review automático en GitHub. El equipo puede realizar review manual adicional según necesidad.
 Tipos de findings:
 - SECURITY, BUG, TODO, PERFORMANCE
 
@@ -137,7 +132,7 @@ git push     # Push directo al branch remoto
 ```
 
 **Casos posibles:**
-- ✅ Todo limpio → Merge automático
+- ✅ Todo limpio → Listo para merge (requiere aprobación manual)
 - 🔄 Nuevos findings → Repetir pasos 4-5  
 - 🚨 Issues persistentes (4-5 iteraciones) → Pedir autorización
 
@@ -216,7 +211,7 @@ git push
 ```bash
 0. /workflow:session-start → "Desarrollo" → worktree  # Setup inicial
 1. /understand            # Mapear contexto COMPLETO (ESENCIAL)
-2. /implement "feature"   # MOTOR CENTRAL - Planning → Coding → Testing → Docs
+2. /implement "feature"   # MOTOR CENTRAL - Planning → APROBACIÓN → Implementation
 3. /test                  # Validación de funcionamiento (FUNDAMENTAL)
 4. /review                # Análisis multi-especialista (CRÍTICO)
 5. /pr                    # Crear PR con metadata completa
@@ -331,7 +326,7 @@ Los siguientes comandos transforman tu productividad de horas a minutos:
 - Mapea arquitectura completa del proyecto
 - Identifica patrones y convenciones existentes  
 - Previene inconsistencias antes de escribir código
-- **ROI**: 30 min de análisis ahorran 3+ horas de refactoring
+- Previene inconsistencias costosas en refactoring posterior
 
 ### **🚀 `/implement` - Motor Central**
 ```bash
@@ -341,7 +336,7 @@ Los siguientes comandos transforman tu productividad de horas a minutos:
 - Planning automático con `tech-lead-orchestrator`
 - Implementación con especialistas del stack
 - Testing y validación integrados
-- **ROI**: Reduce 4+ horas de desarrollo manual a 20-30 minutos
+- Automatiza planning, implementación y validación
 
 ### **🔍 `/review` - Quality Assurance (CRÍTICO)**
 ```bash
@@ -351,7 +346,7 @@ Los siguientes comandos transforman tu productividad de horas a minutos:
 - Detecta issues antes de PR
 - Security, performance, code quality simultáneamente
 - Previene findings costosos en review manual
-- **ROI**: 5 min de review previenen 2+ horas de fixes post-merge
+- Detecta issues antes de PR para reducir iteraciones
 
 ### **✅ `/test` - Validation Engine (FUNDAMENTAL)**
 ```bash
@@ -361,10 +356,10 @@ Los siguientes comandos transforman tu productividad de horas a minutos:
 - Validación completa automatizada
 - Auto-fix inteligente de test failures
 - Confidence para hacer PR
-- **ROI**: Reduce debugging de horas a minutos
+- Auto-fix inteligente de test failures comunes
 
 **🏆 Workflow de Alto Impacto:**
 ```bash
 /understand → /implement → /test → /review → /pr
-# Total: 15-30 min para feature completa vs 4+ horas manual
+# Workflow optimizado para máxima eficiencia
 ```
