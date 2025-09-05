@@ -18,7 +18,7 @@
 ```
 **Qué hace**: Motor central - planifica e implementa features completas con especialistas automáticos.
 **Cuándo usarlo**: Para cualquier implementación nueva. Reemplaza desarrollo manual.
-**Flujo**: Planning (tech-lead-orchestrator) → Coding (specialists) → Testing → Documentation
+**Flujo**: Planning (tech-lead-orchestrator) → **USER AUTHORIZATION** → Coding (specialists) → Testing → Documentation
 **ROI**: Reduce 4+ horas desarrollo manual a 20-30 minutos.
 
 ### 🔍 `/review` - Quality Assurance Multi-Especialista
@@ -61,8 +61,6 @@
 
 ## 🔧 Comandos de Desarrollo
 
-
-
 ### 🔄 `/refactor` - Refactoring inteligente
 ```bash
 /refactor "mejorar performance de consultas de base de datos"
@@ -101,7 +99,7 @@
 ```bash
 /deep "problema complejo o decisión arquitectónica"
 ```
-**Qué hace**: Activa capacidades máximas de análisis para problemas complejos y decisiones estratégicas.
+**Qué hace**: Activa análisis profundo para problemas complejos y decisiones estratégicas.
 **Cuándo usarlo**: Planificación estratégica, decisiones arquitectónicas críticas, auditorías profundas.
 **Flujo**: Análisis multi-perspectiva → Investigación de causa raíz → Pensamiento sistémico → Soluciones alternativas
 
@@ -202,7 +200,7 @@
 ```
 **Qué hace**: Crea PRs con validación automática de branch, push seguro y metadata completa.
 **Cuándo usarlo**: Para crear PRs que faciliten review y mantengan estándares de calidad.
-**Flujo**: Valida target branch → Pre-fetch remoto → Crea branch temporal → Push seguro → PR con metadata
+**Flujo**: Valida target branch → **SECURITY REVIEW** → Pre-fetch remoto → Crea branch temporal → Push seguro → PR con metadata
 
 
 ### 🎯 `/review pr` - Smart PR Review & Implementation Plan
@@ -309,7 +307,7 @@
 
 ## 💡 Tips de Uso
 
-- **Combina comandos**: Usa flujos secuenciales para máximo valor
+- **Combina comandos**: Usa flujos secuenciales para mayor eficiencia
 - **Iterativo**: Los comandos recuerdan contexto entre ejecuciones
 - **Seguridad primero**: Siempre usa /security-scan antes de production
 - **Test frecuente**: Ejecuta /test después de cambios significativos

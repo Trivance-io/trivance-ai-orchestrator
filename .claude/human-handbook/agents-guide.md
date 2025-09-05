@@ -79,7 +79,7 @@
 ```bash
 /agent:vue-component-architect   # Composition API y componentes Vue 3
 /agent:vue-nuxt-expert          # Nuxt.js applications
-/agent:vue-state-manager        # State management (Pinia, Vuex)
+# State management integrado en vue-component-architect
 ```
 
 ### Backend Frameworks
@@ -182,9 +182,9 @@
 **Qué hace**: Apps nativas iOS/Android, performance mobile, platform-specific optimization.
 **Cuándo usarlo**: Desarrollo mobile nativo, optimización mobile, features específicas de plataforma.
 
-### 🎨 `/agent:tailwind-css-expert` - Styling con Tailwind
+### 🎨 `/agent:tailwind-frontend-expert` - Styling con Tailwind
 ```bash
-/agent:tailwind-css-expert  
+/agent:tailwind-frontend-expert  
 ```
 **Qué hace**: Utility-first CSS, responsive design, design system con Tailwind.
 **Cuándo usarlo**: Styling con Tailwind, componentes responsive, design system implementation.

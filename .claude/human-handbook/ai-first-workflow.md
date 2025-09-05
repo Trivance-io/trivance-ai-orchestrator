@@ -39,7 +39,7 @@ pwd                # Debe mostrar: .../worktree-[feature-name]
 /understand                    # Mapea arquitectura y patrones existentes
 
 # 2. Implementación automática (MOTOR CENTRAL)
-/implement "autenticación OAuth"  # Planning → Coding → Testing → Documentation
+/implement "autenticación OAuth"  # Planning → USER AUTHORIZATION → Coding → Testing → Documentation
 
 # 3. Validación (CRÍTICO)
 /test                         # Ejecuta tests y valida funcionamiento
@@ -52,8 +52,9 @@ pwd                # Debe mostrar: .../worktree-[feature-name]
 
 **🎯 Flujo automático de `/implement`:**
 - **Planning Phase**: `tech-lead-orchestrator` analiza y planifica
+- **Authorization Phase**: Usuario aprueba plan antes de proceder
 - **Implementation Phase**: Especialistas del framework ejecutan
-- **Quality Phase**: `code-reviewer` + `performance-optimizer` validan
+- **Quality Phase**: `security-reviewer` + `performance-optimizer` validan
 - **Documentation Phase**: Actualiza docs automáticamente
 
 💡 **Comando `/implement` - Motor de Automatización:**
@@ -63,13 +64,13 @@ pwd                # Debe mostrar: .../worktree-[feature-name]
 
 **Auto-delegation interna:**
 - **Multi-step features** → `tech-lead-orchestrator` (automático)
-- **Security-sensitive** → `code-reviewer` (automático)  
+- **Security-sensitive** → `security-reviewer` (automático)  
 - **Performance-critical** → `performance-optimizer` (automático)
 
 **Manual override disponible:**
 ```bash
 /agent:tech-lead-orchestrator    # Para análisis estratégico específico
-/agent:code-reviewer             # Para auditoría de seguridad enfocada
+/agent:security-reviewer        # Para auditoría de seguridad enfocada
 ```
 
 ---
@@ -80,7 +81,7 @@ Tipos de findings:
 - SECURITY, BUG, TODO, PERFORMANCE
 
 💡 **Smart Delegation**: Findings complejos se benefician de especialistas:
-- **SECURITY findings** → `code-reviewer` → `/agent:code-reviewer --security-audit`
+- **SECURITY findings** → `security-reviewer` → `/agent:security-reviewer`
 - **PERFORMANCE issues** → `performance-optimizer` → `/agent:performance-optimizer`
 - **LEGACY code problems** → `code-archaeologist` → `/agent:code-archaeologist`
 
@@ -128,7 +129,7 @@ git push     # Push directo al branch remoto
 
 **Casos posibles:**
 - ✅ Todo limpio → Merge automático
-- 🔄 Nuevos findings → Repetir pasos 4-7  
+- 🔄 Nuevos findings → Repetir pasos 4-5  
 - 🚨 Issues persistentes (4-5 iteraciones) → Pedir autorización
 
 ---
@@ -144,9 +145,9 @@ git push     # Push directo al branch remoto
 - Decisiones que afectan múltiples servicios
 
 💡 **Expert Panel Consultation**: Antes de escalar, considera consultar especialistas:
-- **Technical impact** → `tech-lead-orchestrator` → `/agent:tech-lead-orchestrator --impact-analysis`
-- **Security assessment** → `code-reviewer` → `/agent:code-reviewer --vulnerability-assessment`
-- **Performance implications** → `performance-optimizer` → `/agent:performance-optimizer --cost-analysis`
+- **Technical impact** → `tech-lead-orchestrator` → `/agent:tech-lead-orchestrator`
+- **Security assessment** → `security-reviewer` → `/agent:security-reviewer`
+- **Performance implications** → `performance-optimizer` → `/agent:performance-optimizer`
 
 ### **Template Simple para Autorización**
 
@@ -282,7 +283,7 @@ Los agentes especialistas aceleran la resolución y mejoran la calidad. Son **op
 - `tech-lead-orchestrator`: Multi-step features, decisiones arquitectónicas, coordination compleja
 
 **Core Specialists** (para quality):
-- `code-reviewer`: Security issues, code quality, vulnerability assessment
+- `security-reviewer`: Security issues, code quality, vulnerability assessment
 - `performance-optimizer`: Bottlenecks, optimization, cost analysis
 - `code-archaeologist`: Legacy code, complex codebase exploration
 
@@ -323,7 +324,7 @@ Los siguientes comandos transforman tu productividad de horas a minutos:
 - Previene inconsistencias antes de escribir código
 - **ROI**: 30 min de análisis ahorran 3+ horas de refactoring
 
-### **🚀 `/implement` - Motor Central (TRANSFORMACIONAL)**
+### **🚀 `/implement` - Motor Central**
 ```bash
 /implement "autenticación OAuth con roles"  # De idea a código funcionando
 ```

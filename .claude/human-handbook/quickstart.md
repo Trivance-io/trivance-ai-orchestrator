@@ -90,7 +90,7 @@ echo "test" > test.txt && claude "/commit"
 /understand
 # Mapea arquitectura completa del proyecto automáticamente
 
-# 3. Implementation Engine (5 min) - TRANSFORMACIONAL
+# 3. Implementation Engine (5 min)
 /implement "pequeña mejora o fix específico"
 # Motor completo: planning → coding → testing → documentation
 
