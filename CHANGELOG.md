@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2025-09-05]
+
+### Added
+- feat(hooks): optimize hook matchers based on usage analysis (PR #160)
+- feat: optimize GitHub Actions workflow for Claude Code integration (PR #157)
+- feat: Expand Clean Code Hook + Modernize MCP Setup (PR #156)
+- feat: complete Trivance platform optimization (PR #154)
+
+### Fixed
+- fix(docs): eliminate promotional content - remove marketing fluff, keep technical information and visual emojis (PR #171)
+- fix(handbook): resolve critical consistency issues (PR #153)
+
+### Changed
+- Add Claude Code GitHub Workflow (PR #166)
+- refactor: arquitectura de documentación y mejoras de comandos (PR #159)
+- test: validate GitHub Actions workflow with Claude Code (PR #158)
+- Add Claude Code GitHub Workflow (PR #155)
+
 ## [2025-08-25]
 
 ### Changed
