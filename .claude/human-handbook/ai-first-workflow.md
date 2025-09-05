@@ -1,34 +1,43 @@
 # Workflow AI-First
 
-*Paso a paso: desde código hasta merge sin fricción*
+*Guía paso a paso para workflow completo*
 
 ## 🎯 Qué aprenderás
 
-- **Prerequisito**: Worktree activo via `/workflow:session-start`
-- Crear PR con Claude Code
-- Convertir findings en issues
-- Resolver issues en el mismo PR
-- 💡 **Cuándo usar agentes especialistas** para acelerar resolución
-- Gestionar iteraciones hasta validación
-- Cuándo pedir autorización
+- Configurar workspace con worktrees aislados
+- Implementar features con comandos de alto valor
+- Crear PRs con review automático
+- Resolver findings iterativamente
+- Cuándo usar agentes especialistas
+- Gestión de autorización cuando sea necesaria
 
 ---
 
-## 📋 Flujo Completo
+## 📋 Setup Inicial (OBLIGATORIO)
 
-**Prerequisito**: usar `/workflow:session-start` → si tu flujo de trabajo sera desarollo/bugs/refactor → crear worktree automáticamente para tu feature con `/worktree:create`.
+**⚠️ ANTES DE EMPEZAR**: Este workflow requiere worktree aislado.
 
-**⚠️ CONTEXTO CRÍTICO**: Los siguientes comandos se ejecutan desde tu worktree (NO desde main/develop). 
-
-**Validación de contexto antes de proceder:**
+**Desde main/develop:**
 ```bash
-git branch          # Debe mostrar tu feature branch (NO main/develop)  
-pwd                # Debe mostrar: .../worktree-[feature-name]
+# 1. Configurar sesión inicial
+/workflow:session-start
+
+# 2. Crear worktree para tu feature
+/worktree:create feature-name main        # Para features
+/worktree:create fix-bug-name main        # Para hotfixes
+
+# 3. Cambiar al worktree
+cd ../worktree-feature-name
+
+# 4. Nueva sesión en el worktree
+/workflow:session-start
 ```
 
-**Si estás en main/develop:** regresa a [session-start](#paso-1-implementación-inteligente) primero.
-
-**Importante**: al finalizar usar `/workflow:changelog <number>` (actualizar CHANGELOG.md) + `/worktree:cleanup <worktree-name>` (eliminar worktree y regresar automáticamente a rama base).
+**Validación - estás listo cuando:**
+```bash
+git branch    # Muestra: * feature-name (NO main/develop)
+pwd          # Muestra: .../worktree-feature-name
+```
  
 ### **PASO 1: Implementación Inteligente**
 
