@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - fix(handbook): resolve critical consistency issues (PR #153)
 
 ### Changed
+- docs(changelog): update with 10 missing PRs from 2025-09-05 (PR #172)
 - Add Claude Code GitHub Workflow (PR #166)
 - refactor: arquitectura de documentación y mejoras de comandos (PR #159)
 - test: validate GitHub Actions workflow with Claude Code (PR #158)
