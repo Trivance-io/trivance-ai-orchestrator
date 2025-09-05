@@ -17,17 +17,32 @@
 
 **⚠️ ANTES DE EMPEZAR**: Este workflow requiere worktree aislado.
 
-**Desde main/develop:**
-```bash
-# 1. Configurar sesión inicial
-/workflow:session-start
+**Desde main/develop - dos opciones:**
 
-# 2. Crear worktree para tu feature
-/worktree:create feature-name develop    # Para features
-/worktree:create fix-bug-name main        # Para hotfixes urgentes
+**A) Flujo directo** (si ya sabes qué implementar):
+```bash
+# 1. Crear worktree directamente
+/worktree:create "implementar OAuth" develop     # Features
+/worktree:create "fix bug pagos" main            # Hotfixes
+
+# 2. Cambiar al worktree  
+cd ../worktree-implementar-oauth
+
+# 3. Sesión en el worktree
+/workflow:session-start
+```
+
+**B) Flujo exploración** (si necesitas análisis):
+```bash
+# 1. Analizar situación actual
+/workflow:session-start
+# → Te mostrará issues activos y te sugerirá crear worktree
+
+# 2. Crear worktree según recomendación
+/worktree:create "feature-name" develop
 
 # 3. Cambiar al worktree
-cd ../worktree-feature-name
+cd ../worktree-feature-name  
 
 # 4. Nueva sesión en el worktree
 /workflow:session-start
@@ -209,7 +224,7 @@ git push
 ## 🔄 Flujo Resumido
 
 ```bash
-0. /workflow:session-start → "Desarrollo" → worktree  # Setup inicial
+0. Crear worktree (directo o via session-start)  # Setup inicial
 1. /understand            # Mapear contexto COMPLETO (ESENCIAL)
 2. /implement "feature"   # MOTOR CENTRAL - Planning → APROBACIÓN → Implementation
 3. /test                  # Validación de funcionamiento (FUNDAMENTAL)
@@ -251,9 +266,10 @@ git push
 
 ### **Por Contexto de Trabajo:**
 
-**Desde main (inicio de sesión):**
+**Desde main/develop:**
 ```bash
-/workflow:session-start          # Configurar workspace
+/workflow:session-start             # Análisis + orientación
+/worktree:create "feature" develop   # Crear worktree directo
 ```
 
 **Desde worktree (desarrollo activo):**
