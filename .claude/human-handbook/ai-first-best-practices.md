@@ -1,12 +1,12 @@
 # AI-First Best Practices
 
-*Del caos manual a la orquestación inteligente: tu ruta hacia la productividad máxima*
+*Guía de implementación para flujos AI-first eficientes*
 
 ---
 
 ## El Momento del Descubrimiento
 
-Cuando experimentas por primera vez un flujo AI-first real, algo cambia fundamentalmente en tu manera de trabajar. No es solo "usar herramientas AI" - es redefinir completamente cómo abordas los problemas de desarrollo.
+Cuando experimentas por primera vez un flujo AI-first real, algo cambia fundamentalmente en tu manera de trabajar. No es solo "usar herramientas AI" - es cambiar cómo abordas los problemas de desarrollo.
 
 **La revelación típica** llega así: En lugar de pensar "necesito implementar autenticación OAuth" y abrir tu editor, tu primera reacción se convierte en `/understand → /implement "OAuth"`. Lo que sigue es una orquestación automática donde especialistas analizan, planifican, implementan y revisan - mientras tú mantienes el control estratégico.
 
@@ -23,9 +23,7 @@ La diferencia no es el conocimiento técnico - es la **instinctiva automatizaci�
 
 ### 🚀 El Workflow Revelador
 
-En lugar de explicar cada comando aquí, la **transformación real** ocurre cuando internalizas el [workflow de alto impacto](ai-first-workflow.md#-comandos-de-alto-valor): `/understand → /implement → /test → /review → /pr`
-
-**Total: 15-30 minutos para feature production-ready** vs el approach tradicional de días.
+La implementación exitosa requiere dominar el [workflow de alto impacto documentado](ai-first-workflow.md#-comandos-de-alto-valor) que reduce desarrollo de días a minutos.
 
 ---
 
@@ -84,7 +82,7 @@ Los expertos no solo saben QUÉ especialista usar - saben CUÁNDO usar múltiple
 Challenge complejo detectado:
 ├── 1° tech-lead-orchestrator (analysis + planning)
 ├── 2° [framework]-expert (implementation)
-├── 3° code-reviewer (security + quality)
+├── 3° security-reviewer (security + quality)
 └── 4° performance-optimizer (optimization)
 ```
 
@@ -144,7 +142,7 @@ Novatos ejecutan secuencialmente. Expertos entienden dependencies y ejecutan en 
 
 Expertos procesan findings en batches por tipo, no uno por uno:
 
-- **SECURITY batch**: Todos los security issues juntos con `code-reviewer`
+- **SECURITY batch**: Todos los security issues juntos con `security-reviewer`
 - **PERFORMANCE batch**: Todos los performance issues con `performance-optimizer`  
 - **REFACTOR batch**: Todos los code quality issues juntos
 
@@ -180,9 +178,9 @@ Antes de escalar a autorización, consulta el "expert panel":
 
 ```bash
 # Análisis de impact multi-angle
-/agent:tech-lead-orchestrator --impact-analysis
-/agent:performance-optimizer --cost-analysis  
-/agent:code-reviewer --security-assessment
+/agent:tech-lead-orchestrator
+/agent:performance-optimizer  
+/agent:security-reviewer
 ```
 
 Esto te da munición sólida para tu request de autorización y demuestra due diligence.

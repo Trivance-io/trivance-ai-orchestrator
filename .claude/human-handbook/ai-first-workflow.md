@@ -1,104 +1,120 @@
 # Workflow AI-First
 
-*Paso a paso: desde código hasta merge sin fricción*
+*Guía paso a paso para workflow completo*
 
 ## 🎯 Qué aprenderás
 
-- **Prerequisito**: Worktree activo via `/workflow:session-start`
-- Crear PR con Claude Code
-- Convertir findings en issues
-- Resolver issues en el mismo PR
-- 💡 **Cuándo usar agentes especialistas** para acelerar resolución
-- Gestionar iteraciones hasta validación
-- Cuándo pedir autorización
+- Configurar workspace con worktrees aislados
+- Implementar features con comandos de alto valor
+- Crear PRs con review automático
+- Resolver findings iterativamente
+- Cuándo usar agentes especialistas
+- Gestión de autorización cuando sea necesaria
 
 ---
 
-## 📋 Flujo Completo
+## 📋 Setup Inicial (OBLIGATORIO)
 
-**Prerequisito**: usar `/workflow:session-start` → si tu flujo de trabajo sera desarollo/bugs/refactor → crear worktree automáticamente para tu feature con `/worktree:create`.
+**⚠️ ANTES DE EMPEZAR**: Este workflow requiere worktree aislado.
 
-**⚠️ CONTEXTO CRÍTICO**: Los siguientes comandos se ejecutan desde tu worktree (NO desde main/develop). 
+**Desde main/develop - dos opciones:**
 
-**Validación de contexto antes de proceder:**
+**A) Flujo directo** (si ya sabes qué implementar):
 ```bash
-git branch          # Debe mostrar tu feature branch (NO main/develop)  
-pwd                # Debe mostrar: .../worktree-[feature-name]
+# 1. Crear worktree directamente
+/worktree:create "implementar OAuth" develop     # Features
+/worktree:create "fix bug pagos" main            # Hotfixes
+
+# 2. Cambiar al worktree  
+cd ../worktree-implementar-oauth
+
+# 3. Sesión en el worktree
+/workflow:session-start
 ```
 
-**Si estás en main/develop:** regresa a [session-start](#paso-1-implementación-inteligente) primero.
+**B) Flujo exploración** (si necesitas análisis):
+```bash
+# 1. Analizar situación actual
+/workflow:session-start
+# → Te mostrará issues activos y te sugerirá crear worktree
 
-**Importante**: al finalizar usar `/workflow:changelog <number>` (actualizar CHANGELOG.md) + `/worktree:cleanup <worktree-name>` (eliminar worktree y regresar automáticamente a rama base).
+# 2. Crear worktree según recomendación
+/worktree:create "feature-name" develop
+
+# 3. Cambiar al worktree
+cd ../worktree-feature-name  
+
+# 4. Nueva sesión en el worktree
+/workflow:session-start
+```
+
+**Validación - estás listo cuando:**
+```bash
+git branch    # Muestra: * feature-name (NO main/develop)
+pwd          # Muestra: .../worktree-feature-name
+```
  
 ### **PASO 1: Implementación Inteligente**
 
 💡 **Confirmación**: Estás en tu worktree de feature (NO en main/develop, etc...)
 
 ```bash
-# 1. Comprender contexto (ESENCIAL)
+# 1. Comprender contexto
 /understand                    # Mapea arquitectura y patrones existentes
 
-# 2. Implementación automática (MOTOR CENTRAL)
-/implement "autenticación OAuth"  # Planning → Coding → Testing → Documentation
+# 2. Implementación completa (MOTOR CENTRAL)
+/implement "autenticación OAuth"  # Planning → APROBACIÓN → Implementation → Testing → Quality Gates
 
-# 3. Validación (CRÍTICO)
-/test                         # Ejecuta tests y valida funcionamiento
-/review                       # Análisis multi-especialista
-
-# 4. Crear PR
+# 3. Crear PR
 /commit    # Commit semántico con validaciones
 /pr        # Pull request automático
 ```
 
-**🎯 Flujo automático de `/implement`:**
-- **Planning Phase**: `tech-lead-orchestrator` analiza y planifica
-- **Implementation Phase**: Especialistas del framework ejecutan
-- **Quality Phase**: `code-reviewer` + `performance-optimizer` validan
-- **Documentation Phase**: Actualiza docs automáticamente
+**Comandos opcionales solo si necesarios:**
+```bash
+/test      # Solo si necesitas testing adicional específico
+/review    # Solo para review independiente (redundante con /implement)
+```
 
-💡 **Comando `/implement` - Motor de Automatización:**
-- **Integra automáticamente** especialistas según el tipo de challenge
-- **Flujo completo** desde planning hasta documentación  
-- **Zero-friction implementation** - de idea a código funcionando
+**🎯 Fases de `/implement`:**
+- **Planning Phase**: `tech-lead-orchestrator` analiza y planifica
+- **Authorization Phase**: Usuario aprueba plan antes de proceder
+- **Implementation Phase**: Especialistas del framework ejecutan
+- **Quality Phase**: `security-reviewer` + `performance-optimizer` validan
+- **Documentation Phase**: Actualiza docs automáticamente
 
 **Auto-delegation interna:**
 - **Multi-step features** → `tech-lead-orchestrator` (automático)
-- **Security-sensitive** → `code-reviewer` (automático)  
+- **Security-sensitive** → `security-reviewer` (automático)  
 - **Performance-critical** → `performance-optimizer` (automático)
 
 **Manual override disponible:**
 ```bash
 /agent:tech-lead-orchestrator    # Para análisis estratégico específico
-/agent:code-reviewer             # Para auditoría de seguridad enfocada
+/agent:security-reviewer        # Para auditoría de seguridad enfocada
 ```
 
 ---
 
-### **PASO 2: Review Automático**
-*Al momento de generar el PR se realiza un code review automatico en Github, a consideración del equipo lider, se realiza un code review manual tambien*
+### **PASO 2: Review Automático y Findings**
+El PR generado activa review automático en GitHub. El equipo puede realizar review manual adicional según necesidad.
 Tipos de findings:
 - SECURITY, BUG, TODO, PERFORMANCE
 
-💡 **Smart Delegation**: Findings complejos se benefician de especialistas:
-- **SECURITY findings** → `code-reviewer` → `/agent:code-reviewer --security-audit`
+**Si hay findings:**
+```bash
+/review pr <number>    # Analizar findings + plan implementación
+```
+Analiza findings y genera plan organizado por prioridad: CRÍTICO → ALTO → MEDIO → BAJO
+
+**Findings complejos** - usar especialistas:
+- **SECURITY findings** → `security-reviewer` → `/agent:security-reviewer`
 - **PERFORMANCE issues** → `performance-optimizer` → `/agent:performance-optimizer`
 - **LEGACY code problems** → `code-archaeologist` → `/agent:code-archaeologist`
 
-⚠️ **Importante:** No crear PR nuevo, usar el mismo
-
 ---
 
-### **PASO 3: Convertir Findings en Issues**
-
-```bash
-/review pr <number>
-```
-
-Analiza findings y genera plan de implementación organizado por prioridad: CRÍTICO → ALTO → MEDIO → BAJO
-
----
-
-### **PASO 4: Resolver Issues**
+### **PASO 3: Resolver Issues (si existen)**
 
 ⚠️ **Importante:** Usar el mismo PR, no crear uno nuevo.
 
@@ -108,7 +124,7 @@ Analiza findings y genera plan de implementación organizado por prioridad: CRÍ
 - **C:** Resolver manualmente
 - **D:** 💡 **Delegar a especialista** para issues complejos
 
-💡 **Specialist Assistance**: Cuando un issue requiere expertise específico:
+**Para issues complejos** - delegar a especialista:
 - **Complex architecture** → `tech-lead-orchestrator` → `/agent:tech-lead-orchestrator`
 - **Database optimization** → `database-expert` → `/agent:database-expert`
 - **API design** → `api-architect` → `/agent:api-architect`
@@ -118,7 +134,7 @@ Siempre usar `Closes #77` en commits para trazabilidad.
 
 ---
 
-### **PASO 5: Push y Re-Review**
+### **PASO 4: Push y Re-Review**
 
 ```bash
 git push     # Push directo al branch remoto
@@ -127,8 +143,8 @@ git push     # Push directo al branch remoto
 ```
 
 **Casos posibles:**
-- ✅ Todo limpio → Merge automático
-- 🔄 Nuevos findings → Repetir pasos 4-7  
+- ✅ Todo limpio → Listo para merge (requiere aprobación manual)
+- 🔄 Nuevos findings → Repetir pasos 3-4  
 - 🚨 Issues persistentes (4-5 iteraciones) → Pedir autorización
 
 ---
@@ -143,10 +159,10 @@ git push     # Push directo al branch remoto
 - Conflictos técnicos complejos
 - Decisiones que afectan múltiples servicios
 
-💡 **Expert Panel Consultation**: Antes de escalar, considera consultar especialistas:
-- **Technical impact** → `tech-lead-orchestrator` → `/agent:tech-lead-orchestrator --impact-analysis`
-- **Security assessment** → `code-reviewer` → `/agent:code-reviewer --vulnerability-assessment`
-- **Performance implications** → `performance-optimizer` → `/agent:performance-optimizer --cost-analysis`
+**Antes de escalar** - consultar especialistas:
+- **Technical impact** → `tech-lead-orchestrator` → `/agent:tech-lead-orchestrator`
+- **Security assessment** → `security-reviewer` → `/agent:security-reviewer`
+- **Performance implications** → `performance-optimizer` → `/agent:performance-optimizer`
 
 ### **Template Simple para Autorización**
 
@@ -204,22 +220,20 @@ git push
 ## 🔄 Flujo Resumido
 
 ```bash
-0. /workflow:session-start → "Desarrollo" → worktree  # Setup inicial
-1. /understand            # Mapear contexto COMPLETO (ESENCIAL)
-2. /implement "feature"   # MOTOR CENTRAL - Planning → Coding → Testing → Docs
-3. /test                  # Validación de funcionamiento (FUNDAMENTAL)
-4. /review                # Análisis multi-especialista (CRÍTICO)
-5. /pr                    # Crear PR con metadata completa
-6. [Review automático]    # Findings aparecen en GitHub
-7. /review pr <number>    # Analizar findings + plan implementación
-8. Resolver issues        # Manual o con especialistas
-9. /commit + push         # Actualizar PR
-10. Re-review             # Validación final
+0. Crear worktree (directo o via session-start)  # Setup inicial
+1. /understand            # Mapear contexto del proyecto
+2. /implement "feature"   # MOTOR CENTRAL - Incluye testing + quality gates
+3. /pr                    # Crear PR con metadata completa
+4. [Review automático]    # Findings aparecen en GitHub
+5. /review pr <number>    # Analizar findings + plan implementación
+6. Resolver issues        # Manual o con especialistas
+7. /commit + push         # Actualizar PR
+8. Re-review             # Validación final
 ```
 
 **Casos:**
 - ✅ Aprobado → Merge → `/workflow:changelog <number>` + `/worktree:cleanup <worktree-name>` 
-- 🔄 Nuevos findings → Repetir pasos 8-10
+- 🔄 Nuevos findings → Repetir pasos 6-8
 - 🚨 Issues persistentes → Pedir autorización
 
 ---
@@ -246,9 +260,10 @@ git push
 
 ### **Por Contexto de Trabajo:**
 
-**Desde main (inicio de sesión):**
+**Desde main/develop:**
 ```bash
-/workflow:session-start          # Configurar workspace
+/workflow:session-start             # Análisis + orientación
+/worktree:create "feature" develop   # Crear worktree directo
 ```
 
 **Desde worktree (desarrollo activo):**
@@ -282,7 +297,7 @@ Los agentes especialistas aceleran la resolución y mejoran la calidad. Son **op
 - `tech-lead-orchestrator`: Multi-step features, decisiones arquitectónicas, coordination compleja
 
 **Core Specialists** (para quality):
-- `code-reviewer`: Security issues, code quality, vulnerability assessment
+- `security-reviewer`: Security issues, code quality, vulnerability assessment
 - `performance-optimizer`: Bottlenecks, optimization, cost analysis
 - `code-archaeologist`: Legacy code, complex codebase exploration
 
@@ -309,52 +324,41 @@ Challenge: IMPLEMENTATION + Security → usar tech-lead-orchestrator
 
 ---
 
-## ⚡ Comandos de Alto Valor
+## Comandos Principales
 
-Los siguientes comandos transforman tu productividad de horas a minutos:
-
-### **🎯 `/understand` - Context Mapping (ESENCIAL)**
+### **`/understand` - Context Mapping**
 ```bash
-/understand  # SIEMPRE ejecutar ANTES de implementar
+/understand
 ```
-**Por qué es crítico:**
 - Mapea arquitectura completa del proyecto
 - Identifica patrones y convenciones existentes  
-- Previene inconsistencias antes de escribir código
-- **ROI**: 30 min de análisis ahorran 3+ horas de refactoring
+- Previene inconsistencias costosas en refactoring posterior
 
-### **🚀 `/implement` - Motor Central (TRANSFORMACIONAL)**
+### **`/implement` - Implementation Engine**
 ```bash
-/implement "autenticación OAuth con roles"  # De idea a código funcionando
+/implement "autenticación OAuth con roles"
 ```
-**Por qué cambia todo:**
 - Planning automático con `tech-lead-orchestrator`
 - Implementación con especialistas del stack
 - Testing y validación integrados
-- **ROI**: Reduce 4+ horas de desarrollo manual a 20-30 minutos
+- Automatiza planning, implementación y validación
 
-### **🔍 `/review` - Quality Assurance (CRÍTICO)**
+### **`/review` - Quality Assurance**
 ```bash
-/review  # Análisis multi-especialista automático
+/review
 ```
-**Por qué es indispensable:**
 - Detecta issues antes de PR
 - Security, performance, code quality simultáneamente
-- Previene findings costosos en review manual
-- **ROI**: 5 min de review previenen 2+ horas de fixes post-merge
+- Detecta issues antes de PR para reducir iteraciones
 
-### **✅ `/test` - Validation Engine (FUNDAMENTAL)**
+### **`/test` - Validation Engine**
 ```bash
-/test  # Ejecuta + autofix de failures
+/test
 ```
-**Por qué es esencial:**
 - Validación completa automatizada
-- Auto-fix inteligente de test failures
-- Confidence para hacer PR
-- **ROI**: Reduce debugging de horas a minutos
+- Auto-fix inteligente de test failures comunes
 
-**🏆 Workflow de Alto Impacto:**
+### **Workflow Principal**
 ```bash
-/understand → /implement → /test → /review → /pr
-# Total: 15-30 min para feature completa vs 4+ horas manual
+/understand → /implement → /pr
 ```

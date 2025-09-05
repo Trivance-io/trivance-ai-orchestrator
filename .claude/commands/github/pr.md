@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(git *), Bash(gh *), mcp__github__*
+allowed-tools: Bash(git *), Bash(gh *), mcp__github__*, Read, Glob, Grep, Task
 description: Crea PR automáticamente desde rama actual hacia target branch
 ---
 
@@ -29,7 +29,21 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 - Verificar que el branch objetivo existe en remoto con `git branch -r | grep origin/<target_branch>`
 - Si no existe, mostrar error y terminar
 
-### 2. Validar PR existente en rama actual
+### 2. Security Review (BLOCKING)
+- Ejecutar `/agent:security-reviewer` para analizar cambios en branch actual
+- **Timeout**: 80 segundos máximo con timeout handling
+- **Blocking conditions**: 
+  - HIGH severity findings (confidence >= 8.0): ALWAYS block PR creation
+  - MEDIUM severity findings (confidence >= 8.0): Block in production (configurable)
+- **Success case**: Sin vulnerabilidades críticas encontradas → continuar flujo
+- **Failure cases**:
+  - Security findings found: Mostrar detailed findings + block PR creation + exit error
+  - Timeout: Show warning + create PR with SECURITY_REVIEW_TIMEOUT flag  
+  - System error: Block PR creation + show retry instructions
+- **Log operación**: Agregar entrada JSONL a `.claude/logs/$(date +%Y-%m-%d)/security.jsonl`
+- Solo proceder a step 3 si security review pasa o timeout occurs
+
+### 3. Validar PR existente en rama actual
 - Ejecutar `gh pr view --json number,state,title,url 2>/dev/null` para detectar PR asociado a rama actual
 - Si el comando devuelve datos JSON válidos y `state: "open"`:
   - Mostrar: "⚠️  Esta rama ya tiene un PR abierto (#{number}): {title}"
@@ -42,10 +56,10 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
     - **Log operación**: Agregar entrada JSONL a `.claude/logs/$(date +%Y-%m-%d)/pr_operations.jsonl`
     - Mostrar: "✅ PR actualizado: {url}"
     - Terminar ejecución exitosa
-  - Si elige "2": continuar con paso 3 (flujo normal)
-- Si no existe PR o está cerrado: continuar con paso 3 (flujo normal)
+  - Si elige "2": continuar con paso 4 (flujo normal)
+- Si no existe PR o está cerrado: continuar con paso 4 (flujo normal)
 
-### 3. Generar nombre de rama semántico
+### 4. Generar nombre de rama semántico
 - Obtener título del último commit con `git log -1 --pretty=format:"%s"`
 - Extraer tipo de commit del título (feat/fix/refactor/docs/style/test/chore/merge)
 - Si no hay tipo explícito, usar "update" como default
@@ -53,13 +67,13 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 - Generar timestamp con formato HHMMSS
 - Construir nombre de rama: `{tipo}-{slug}-{timestamp}`
 
-### 4. Crear rama temporal
+### 5. Crear rama temporal
 - Ejecutar `git checkout -b {tipo}-{slug}-{timestamp}`
 - Ejecutar `git push origin {tipo}-{slug}-{timestamp} --set-upstream`
 - **Log operación**: Agregar entrada JSONL a `.claude/logs/$(date +%Y-%m-%d)/pr_operations.jsonl` 
 - Si algún comando falla, mostrar error y terminar
 
-### 5. Preparar contenido del PR
+### 6. Preparar contenido del PR
 - Obtener título del último commit con `git log -1 --pretty=format:"%s"`
 - Obtener lista de commits con `git log --oneline origin/{target_branch}..HEAD`  
 - Analizar commits para detectar breaking changes (keywords: BREAKING, breaking, deprecated, removed)
@@ -77,7 +91,7 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
   [None | Descripción específica si se detectaron]
   ```
 
-### 6. Crear el PR
+### 7. Crear el PR
 - Usar herramienta MCP GitHub create_pull_request con:
   - base: target_branch
   - head: nueva rama creada
@@ -85,7 +99,7 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
   - body: contenido preparado
 - **Log operación**: Agregar entrada JSONL a `.claude/logs/$(date +%Y-%m-%d)/pr_operations.jsonl`
 
-### 7. Mostrar resultado
+### 8. Mostrar resultado
 - Mostrar URL del PR creado
 - Confirmar: "✅ PR creado: {tipo}-{slug}-{timestamp} → {target}"
 
@@ -93,23 +107,19 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 
 Para cada operación exitosa, agregar una línea al archivo JSONL correspondiente:
 
-### Branch Creation Log:
+### Security Review Log:
 ```json
-{"timestamp":"$(date -Iseconds)","operation":"branch_create","branch":"{tipo}-{slug}-{timestamp}","target_branch":"{target_branch}","commit_sha":"$(git rev-parse HEAD)","user":"$(whoami)"}
+{"timestamp":"$(date -Iseconds)","operation":"security_review","status":"pass|fail|timeout"}
 ```
 
-### PR Creation Log:
+### PR Operations Log:
 ```json
-{"timestamp":"$(date -Iseconds)","operation":"pr_create","pr_number":{pr_number},"pr_url":"{pr_url}","branch":"{tipo}-{slug}-{timestamp}","target_branch":"{target_branch}","title":"{pr_title}","changes_count":{commit_count}}
-```
-
-### PR Update Log:
-```json
-{"timestamp":"$(date -Iseconds)","operation":"pr_update","pr_number":{pr_number},"pr_url":"{pr_url}","branch":"$(git branch --show-current)","commits_added":{new_commits_count}}
+{"timestamp":"$(date -Iseconds)","operation":"pr_create|pr_update|branch_create","status":"success|failed"}
 ```
 
 **IMPORTANTE**: 
 - No solicitar confirmación al usuario en ningún paso
 - Ejecutar todos los pasos secuencialmente
 - Si algún paso falla, detener ejecución y mostrar error claro
-- Crear directorio .claude/logs/$(date +%Y-%m-%d)/ si no existe antes de escribir logs
+- Ejecutar `mkdir -p .claude/logs/$(date +%Y-%m-%d)` para crear estructura de directorios antes de escribir logs
+
