@@ -62,16 +62,18 @@ pwd          # Muestra: .../worktree-feature-name
 # 1. Comprender contexto (ESENCIAL)
 /understand                    # Mapea arquitectura y patrones existentes
 
-# 2. Implementación automática (MOTOR CENTRAL)
-/implement "autenticación OAuth"  # Planning → ⚠️ APROBACIÓN REQUERIDA → Implementation
+# 2. Implementación completa (MOTOR CENTRAL)
+/implement "autenticación OAuth"  # Planning → APROBACIÓN → Implementation → Testing → Quality Gates
 
-# 3. Validación (CRÍTICO)
-/test                         # Ejecuta tests y valida funcionamiento
-/review                       # Análisis multi-especialista
-
-# 4. Crear PR
+# 3. Crear PR
 /commit    # Commit semántico con validaciones
 /pr        # Pull request automático
+```
+
+**Comandos opcionales solo si necesarios:**
+```bash
+/test      # Solo si necesitas testing adicional específico
+/review    # Solo para review independiente (redundante con /implement)
 ```
 
 **🎯 Fases de `/implement`:**
@@ -94,31 +96,25 @@ pwd          # Muestra: .../worktree-feature-name
 
 ---
 
-### **PASO 2: Review Automático**
+### **PASO 2: Review Automático y Findings**
 El PR generado activa review automático en GitHub. El equipo puede realizar review manual adicional según necesidad.
 Tipos de findings:
 - SECURITY, BUG, TODO, PERFORMANCE
+
+**Si hay findings:**
+```bash
+/review pr <number>    # Analizar findings + plan implementación
+```
+Analiza findings y genera plan organizado por prioridad: CRÍTICO → ALTO → MEDIO → BAJO
 
 💡 **Smart Delegation**: Findings complejos se benefician de especialistas:
 - **SECURITY findings** → `security-reviewer` → `/agent:security-reviewer`
 - **PERFORMANCE issues** → `performance-optimizer` → `/agent:performance-optimizer`
 - **LEGACY code problems** → `code-archaeologist` → `/agent:code-archaeologist`
 
-⚠️ **Importante:** No crear PR nuevo, usar el mismo
-
 ---
 
-### **PASO 3: Convertir Findings en Issues**
-
-```bash
-/review pr <number>
-```
-
-Analiza findings y genera plan de implementación organizado por prioridad: CRÍTICO → ALTO → MEDIO → BAJO
-
----
-
-### **PASO 4: Resolver Issues**
+### **PASO 3: Resolver Issues (si existen)**
 
 ⚠️ **Importante:** Usar el mismo PR, no crear uno nuevo.
 
@@ -138,7 +134,7 @@ Siempre usar `Closes #77` en commits para trazabilidad.
 
 ---
 
-### **PASO 5: Push y Re-Review**
+### **PASO 4: Push y Re-Review**
 
 ```bash
 git push     # Push directo al branch remoto
@@ -148,7 +144,7 @@ git push     # Push directo al branch remoto
 
 **Casos posibles:**
 - ✅ Todo limpio → Listo para merge (requiere aprobación manual)
-- 🔄 Nuevos findings → Repetir pasos 4-5  
+- 🔄 Nuevos findings → Repetir pasos 3-4  
 - 🚨 Issues persistentes (4-5 iteraciones) → Pedir autorización
 
 ---
@@ -226,20 +222,18 @@ git push
 ```bash
 0. Crear worktree (directo o via session-start)  # Setup inicial
 1. /understand            # Mapear contexto COMPLETO (ESENCIAL)
-2. /implement "feature"   # MOTOR CENTRAL - Planning → APROBACIÓN → Implementation
-3. /test                  # Validación de funcionamiento (FUNDAMENTAL)
-4. /review                # Análisis multi-especialista (CRÍTICO)
-5. /pr                    # Crear PR con metadata completa
-6. [Review automático]    # Findings aparecen en GitHub
-7. /review pr <number>    # Analizar findings + plan implementación
-8. Resolver issues        # Manual o con especialistas
-9. /commit + push         # Actualizar PR
-10. Re-review             # Validación final
+2. /implement "feature"   # MOTOR CENTRAL - Incluye testing + quality gates
+3. /pr                    # Crear PR con metadata completa
+4. [Review automático]    # Findings aparecen en GitHub
+5. /review pr <number>    # Analizar findings + plan implementación
+6. Resolver issues        # Manual o con especialistas
+7. /commit + push         # Actualizar PR
+8. Re-review             # Validación final
 ```
 
 **Casos:**
 - ✅ Aprobado → Merge → `/workflow:changelog <number>` + `/worktree:cleanup <worktree-name>` 
-- 🔄 Nuevos findings → Repetir pasos 8-10
+- 🔄 Nuevos findings → Repetir pasos 6-8
 - 🚨 Issues persistentes → Pedir autorización
 
 ---
@@ -376,6 +370,6 @@ Los siguientes comandos transforman tu productividad de horas a minutos:
 
 **🏆 Workflow de Alto Impacto:**
 ```bash
-/understand → /implement → /test → /review → /pr
-# Workflow optimizado para máxima eficiencia
+/understand → /implement → /pr
+# Workflow optimizado - /implement incluye testing + quality gates automáticamente
 ```
