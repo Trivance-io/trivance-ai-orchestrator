@@ -9,7 +9,7 @@ I'll intelligently review your code using specialized agents.
 
 ## Usage
 ```bash
-/review                    # Complete codebase review with 3 specialists
+/review                    # Complete codebase review with all available reviewers
 /review $ARGUMENTS         # Targeted review based on your specific context
 ```
 
@@ -21,56 +21,68 @@ When executing this command with argument `$ARGUMENTS`, follow these steps:
 - **If no arguments**: Set context = "complete workspace context"
 - **If arguments provided**: Set context = arguments as specific analysis scope
 
-### 2. Unified Review Process
+### 2. Intelligent Review & Analysis  
 - Show: "🔍 Iniciando review..."
-- **Mandatory pre-checkpoint**:
-  - Use `git add -A` to add changes
-  - Use `git commit -m "Pre-review checkpoint" || echo "No changes to commit"`
-- **Parallel delegation to specialists**:
-  - Use `Task` tool to delegate to `code-quality-reviewer`
-  - Use `Task` tool to delegate to `config-security-expert`  
-  - Use `Task` tool to delegate to `edge-case-detector`
-  - Provide each specialist with the determined context
-  - Each specialist will analyze according to their specialized domain
-- **Result consolidation**:
-  - Capture findings from 3 specialists
-  - Classify by severity: CRITICAL/HIGH/SUGGESTIONS
-  - Combine into unified report
-- Continue with step 3
+- **Specialist delegation**:
+  - If context contains "pr" + number: Focus analysis on PR diff only
+  - Use `Glob` tool with pattern `.claude/agents/reviewers/*.md` to discover available reviewers
+  - Extract agent names by removing `.md` extension from discovered files
+  - Use `Task` tool to delegate to all discovered reviewer agents
+  - Provide each specialist with determined context and scope
+- **Intelligent consolidation**:
+  - Capture raw findings from all discovered reviewers
+  - Read project README, CLAUDE.md, and recent commits for context
+  - Analyze each finding against project architecture and conventions
+  - Filter findings that don't apply to this codebase (false positives)
+  - Remove duplications and merge related findings
+  - Classify by real business/technical impact
+  - Generate specific action items with file locations and commands
+  - Prioritize by actual impact on project goals and stability
 
-### 3. Unified Storage and Reporting
+### 3. Report Generation
 - **Create directories**: `mkdir -p .claude/reviews .claude/logs/$(date +%Y-%m-%d)`
 - **Generate timestamp**: `date '+%Y-%m-%dT%H:%M:%S'`
 - **Determine filename**:
   - No arguments: `.claude/reviews/review-$(timestamp).md`
   - With arguments: `.claude/reviews/targeted-$(timestamp).md`
-- **Write consolidated report** using `Write` tool with findings and recommendations
+- **Write structured report** with executive summary, analysis, and action plan
 - **Log activity**: Append entry to `.claude/logs/$(date +%Y-%m-%d)/review_activity.jsonl`
 
-### 4. Final Report
+### 4. Reporte Ejecutivo
 ```
-📊 **Review Finalizado**
+📊 **Análisis de Review Completado**
 
-**Especialistas ejecutados:**
-├─ code-quality-reviewer: <findings_count> findings
-├─ config-security-expert: <findings_count> findings  
-└─ edge-case-detector: <findings_count> findings
+## Resumen
+**Impacto:** [Alto/Medio/Bajo] - **Acción Requerida:** [Sí/No] - **Confianza:** [Alta/Media/Baja]
 
-**Clasificación consolidada:**
-├─ 🚨 CRÍTICOS: <count> (requieren atención inmediata)
-├─ ⚠️ ALTA PRIORIDAD: <count> (deberían resolverse pronto)
-└─ 💡 SUGERENCIAS: <count> (mejoras opcionales)
+## Hallazgos: <valid_count> válidos, <filtered_count> filtrados, <total_count> total
 
-**Resultados:** <review_file>
+## Acciones Requeridas
+### 🚨 INMEDIATO (1-2 items máximo)
+- [ ] [Acción específica con archivo:línea] - [Por qué es crítico] - [Cómo solucionarlo]
 
-**Próximos pasos:**
-- Revisar findings críticos primero
-- Priorizar según impacto
+### ⚠️ ALTO IMPACTO (3-5 items máximo)  
+- [ ] [Acción específica con archivo:línea] - [Impacto en negocio] - [Enfoque recomendado]
+
+### 💡 MEJORAS (2-3 items estratégicos)
+- [ ] [Oportunidad de mejora] - [Evaluación ROI] - [Sugerencia de implementación]
+
+## Notas de Análisis
+**Contexto del Proyecto:** [Patrones/convenciones clave considerados]
+**Items Filtrados:** [Falsos positivos principales eliminados con justificación]
+
+**Reporte Detallado:** <review_file>
+
+**Próximos Pasos:**
+1. Resolver items inmediatos (est: X min)
+2. Planificar items de alto impacto para próximo sprint
+3. Considerar mejoras estratégicas
 ```
 
 ## Success Criteria
 
-- **Unified Process**: Single delegation flow to 3 specialists with context-dependent analysis
-- **Consistent Architecture**: Same specialist delegation regardless of arguments
-- **Smart Context**: Complete workspace vs targeted scope based on user input
-- **Storage**: Organized files in .claude/reviews/ with unique timestamps
+- **Context-Aware Analysis**: Validates findings against project patterns with false positive filtering
+- **Actionable Output**: Executable action items with specific file locations and commands
+- **Smart Scope Detection**: PR-specific analysis vs complete workspace based on context
+- **Quality Focus**: Prioritizes valid, impactful findings over raw volume
+- **Structured Storage**: Organized reports in .claude/reviews/ with executive summaries
