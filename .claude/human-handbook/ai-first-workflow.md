@@ -59,7 +59,7 @@ pwd          # Muestra: .../worktree-feature-name
 💡 **Confirmación**: Estás en tu worktree de feature (NO en main/develop, etc...)
 
 ```bash
-# 1. Comprender contexto (ESENCIAL)
+# 1. Comprender contexto
 /understand                    # Mapea arquitectura y patrones existentes
 
 # 2. Implementación completa (MOTOR CENTRAL)
@@ -107,7 +107,7 @@ Tipos de findings:
 ```
 Analiza findings y genera plan organizado por prioridad: CRÍTICO → ALTO → MEDIO → BAJO
 
-💡 **Smart Delegation**: Findings complejos se benefician de especialistas:
+**Findings complejos** - usar especialistas:
 - **SECURITY findings** → `security-reviewer` → `/agent:security-reviewer`
 - **PERFORMANCE issues** → `performance-optimizer` → `/agent:performance-optimizer`
 - **LEGACY code problems** → `code-archaeologist` → `/agent:code-archaeologist`
@@ -124,7 +124,7 @@ Analiza findings y genera plan organizado por prioridad: CRÍTICO → ALTO → M
 - **C:** Resolver manualmente
 - **D:** 💡 **Delegar a especialista** para issues complejos
 
-💡 **Specialist Assistance**: Cuando un issue requiere expertise específico:
+**Para issues complejos** - delegar a especialista:
 - **Complex architecture** → `tech-lead-orchestrator` → `/agent:tech-lead-orchestrator`
 - **Database optimization** → `database-expert` → `/agent:database-expert`
 - **API design** → `api-architect` → `/agent:api-architect`
@@ -159,7 +159,7 @@ git push     # Push directo al branch remoto
 - Conflictos técnicos complejos
 - Decisiones que afectan múltiples servicios
 
-💡 **Expert Panel Consultation**: Antes de escalar, considera consultar especialistas:
+**Antes de escalar** - consultar especialistas:
 - **Technical impact** → `tech-lead-orchestrator` → `/agent:tech-lead-orchestrator`
 - **Security assessment** → `security-reviewer` → `/agent:security-reviewer`
 - **Performance implications** → `performance-optimizer` → `/agent:performance-optimizer`
@@ -221,7 +221,7 @@ git push
 
 ```bash
 0. Crear worktree (directo o via session-start)  # Setup inicial
-1. /understand            # Mapear contexto COMPLETO (ESENCIAL)
+1. /understand            # Mapear contexto del proyecto
 2. /implement "feature"   # MOTOR CENTRAL - Incluye testing + quality gates
 3. /pr                    # Crear PR con metadata completa
 4. [Review automático]    # Findings aparecen en GitHub
@@ -324,52 +324,41 @@ Challenge: IMPLEMENTATION + Security → usar tech-lead-orchestrator
 
 ---
 
-## ⚡ Comandos de Alto Valor
+## Comandos Principales
 
-Los siguientes comandos transforman tu productividad de horas a minutos:
-
-### **🎯 `/understand` - Context Mapping (ESENCIAL)**
+### **`/understand` - Context Mapping**
 ```bash
-/understand  # SIEMPRE ejecutar ANTES de implementar
+/understand
 ```
-**Por qué es crítico:**
 - Mapea arquitectura completa del proyecto
 - Identifica patrones y convenciones existentes  
-- Previene inconsistencias antes de escribir código
 - Previene inconsistencias costosas en refactoring posterior
 
-### **🚀 `/implement` - Motor Central**
+### **`/implement` - Implementation Engine**
 ```bash
-/implement "autenticación OAuth con roles"  # De idea a código funcionando
+/implement "autenticación OAuth con roles"
 ```
-**Por qué cambia todo:**
 - Planning automático con `tech-lead-orchestrator`
 - Implementación con especialistas del stack
 - Testing y validación integrados
 - Automatiza planning, implementación y validación
 
-### **🔍 `/review` - Quality Assurance (CRÍTICO)**
+### **`/review` - Quality Assurance**
 ```bash
-/review  # Análisis multi-especialista automático
+/review
 ```
-**Por qué es indispensable:**
 - Detecta issues antes de PR
 - Security, performance, code quality simultáneamente
-- Previene findings costosos en review manual
 - Detecta issues antes de PR para reducir iteraciones
 
-### **✅ `/test` - Validation Engine (FUNDAMENTAL)**
+### **`/test` - Validation Engine**
 ```bash
-/test  # Ejecuta + autofix de failures
+/test
 ```
-**Por qué es esencial:**
 - Validación completa automatizada
-- Auto-fix inteligente de test failures
-- Confidence para hacer PR
 - Auto-fix inteligente de test failures comunes
 
-**🏆 Workflow de Alto Impacto:**
+### **Workflow Principal**
 ```bash
 /understand → /implement → /pr
-# Workflow optimizado - /implement incluye testing + quality gates automáticamente
 ```
