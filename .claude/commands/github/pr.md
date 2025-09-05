@@ -60,35 +60,49 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 - Si no existe PR o está cerrado: continuar con paso 4 (flujo normal)
 
 ### 4. Generar nombre de rama semántico
-- Obtener título del último commit con `git log -1 --pretty=format:"%s"`
-- Extraer tipo de commit del título (feat/fix/refactor/docs/style/test/chore/merge)
-- Si no hay tipo explícito, usar "update" como default
-- Generar slug descriptivo: primeras 2-3 palabras significativas, máximo 15 chars, lowercase, guiones
-- Generar timestamp con formato HHMMSS
-- Construir nombre de rama: `{tipo}-{slug}-{timestamp}`
+- Obtener todos los commits del PR: `commits=$(git log --oneline "origin/$target_branch..HEAD")`
+- Analizar tipos de commits: extraer tipos (feat/fix/docs/refactor/style/test/chore) de todos los commits
+- Determinar tipo principal: el tipo más frecuente en el conjunto de commits
+- Si no hay tipos explícitos, usar "update" como default
+- Generar descriptor: basado en el tipo principal + contador de commits (ej: "feat-5commits", "fix-3commits")
+- Generar timestamp con formato HHMMSS  
+- Construir nombre de rama: `{tipo_principal}-{descriptor}-{timestamp}`
 
-### 5. Crear rama temporal
-- Ejecutar `git checkout -b {tipo}-{slug}-{timestamp}`
-- Ejecutar `git push origin {tipo}-{slug}-{timestamp} --set-upstream`
+### 5. Crear rama temporal  
+- Ejecutar `git checkout -b {tipo_principal}-{descriptor}-{timestamp}`
+- Ejecutar `git push origin {tipo_principal}-{descriptor}-{timestamp} --set-upstream`
 - **Log operación**: Agregar entrada JSONL a `.claude/logs/$(date +%Y-%m-%d)/pr_operations.jsonl` 
 - Si algún comando falla, mostrar error y terminar
 
 ### 6. Preparar contenido del PR
-- Obtener título del último commit con `git log -1 --pretty=format:"%s"`
-- Obtener lista de commits con `git log --oneline origin/{target_branch}..HEAD`  
-- Analizar commits para detectar breaking changes (keywords: BREAKING, breaking, deprecated, removed)
-- Construir body del PR con template industry-standard:
+- Capturar datos del cambio: `title=$(git log -1 --pretty=format:"%s")`
+- Obtener commits: `commits=$(git log --oneline "origin/$target_branch..HEAD")`
+- Contar commits: `commit_count=$(git rev-list --count "origin/$target_branch..HEAD")`
+- Calcular impacto: `files_changed=$(git diff --name-only "origin/$target_branch..HEAD" | wc -l)`
+- Contar líneas: `additions` y `deletions` usando `git diff --numstat`
+- Detectar tipo principal de cambios: `primary_type` (feat/fix/docs/refactor/style/test/chore)
+- Identificar áreas afectadas: `scope_areas` (directorios del proyecto)
+- Detectar breaking changes: buscar keywords BREAKING/deprecated/removed en commits
+- Generar summary basado en tipo de cambio
+- Generar test plan apropiado para el tipo de cambio
+- Construir body del PR con template dinámico:
   ```
-  ## What Changed
-  - [resumir cambios principales de commits, máximo 3 puntos descriptivos]
+  ## Summary
+  [Generated based on primary_type and files_changed]
+  
+  ## Changes Made ([commit_count] commits)
+  [List of all commits with hash + message]
+  
+  ## Files & Impact
+  - **Files modified**: [files_changed]
+  - **Lines**: +[additions] -[deletions]
+  - **Areas affected**: [scope_areas]
   
   ## Test Plan
-  - [ ] Command executes without errors
-  - [ ] Feature works as expected
-  - [ ] No breaking changes
+  [Dynamic test plan based on change type]
   
   ## Breaking Changes
-  [None | Descripción específica si se detectaron]
+  [Auto-detected breaking commits or "None"]
   ```
 
 ### 7. Crear el PR
@@ -101,7 +115,7 @@ Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
 
 ### 8. Mostrar resultado
 - Mostrar URL del PR creado
-- Confirmar: "✅ PR creado: {tipo}-{slug}-{timestamp} → {target}"
+- Confirmar: "✅ PR creado: {tipo_principal}-{descriptor}-{timestamp} → {target_branch}"
 
 ## 📊 Logging Format Templates
 
