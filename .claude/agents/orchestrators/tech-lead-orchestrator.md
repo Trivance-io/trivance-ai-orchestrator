@@ -134,14 +134,26 @@ Task 2: [description] → AGENT: @agent-[exact-agent-name]
 
 ## Agent Selection
 
-Check system context for available agents. Categories include:
-- **Orchestrators**: tech-lead-orchestrator
-- **Core Specialists**: code-archaeologist, performance-optimizer, documentation-specialist
-- **Review Specialists**: code-quality-reviewer, config-security-expert, edge-case-detector, security-reviewer
-- **Backend Specialists**: nestjs-backend-expert, django-backend-expert, django-api-developer, django-orm-expert, rails-backend-expert, rails-api-developer, rails-activerecord-expert, laravel-backend-expert, laravel-eloquent-expert
-- **Frontend Specialists**: react-component-architect, react-nextjs-expert, react-native-expert, vue-component-architect, vue-nuxt-expert, frontend-developer, tailwind-frontend-expert
-- **Design Specialists**: ui-designer, ux-researcher, brand-guardian, visual-storyteller, whimsy-injector
-- **Universal Specialists**: backend-developer, api-architect, mobile-developer, database-expert
+**Dynamic Agent Discovery Process:**
+1. Use `Glob` tool to discover agents by category from `.claude/agents/` structure
+2. For each category, use pattern `{category_dir}/*.md` to find available agents
+3. Extract agent names by removing `.md` extension
+4. Present agents grouped by specialization for optimal team selection
+5. Apply selection rules for framework-specific agent prioritization
+
+**Agent Categories (discovered dynamically):**
+- **Orchestrators**: Agents from `.claude/agents/orchestrators/`
+- **Core Specialists**: Agents from `.claude/agents/core/`
+- **Review Specialists**: Agents from `.claude/agents/reviewers/`  
+- **Design Specialists**: Agents from `.claude/agents/design/`
+- **Universal Specialists**: Agents from `.claude/agents/universal/`
+- **Specialized Agents**: Agents from `.claude/agents/specialized/` (all frameworks)
+
+**Implementation Instructions for Commands:**
+- Use `Glob` tool with pattern `.claude/agents/{category}/*.md` for discovery
+- Handle empty directories gracefully (return empty list, not error)
+- Extract agent names using file basename without extension
+- Group by category for structured agent selection
 
 ### Selection rules:
 - Prefer specific over generic (nestjs-backend-expert > backend-developer)
