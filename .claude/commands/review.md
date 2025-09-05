@@ -48,35 +48,35 @@ When executing this command with argument `$ARGUMENTS`, follow these steps:
 - **Write structured report** with executive summary, analysis, and action plan
 - **Log activity**: Append entry to `.claude/logs/$(date +%Y-%m-%d)/review_activity.jsonl`
 
-### 4. Executive Report
+### 4. Reporte Ejecutivo
 ```
-📊 **Review Analysis Complete**
+📊 **Análisis de Review Completado**
 
-## Summary
-**Impact:** [High/Medium/Low] - **Action Required:** [Yes/No] - **Confidence:** [High/Medium/Low]
+## Resumen
+**Impacto:** [Alto/Medio/Bajo] - **Acción Requerida:** [Sí/No] - **Confianza:** [Alta/Media/Baja]
 
-## Findings: <valid_count> valid, <filtered_count> filtered, <total_count> total
+## Hallazgos: <valid_count> válidos, <filtered_count> filtrados, <total_count> total
 
-## Action Items
-### 🚨 IMMEDIATE (1-2 items max)
-- [ ] [Specific action with file:line] - [Why critical] - [How to fix]
+## Acciones Requeridas
+### 🚨 INMEDIATO (1-2 items máximo)
+- [ ] [Acción específica con archivo:línea] - [Por qué es crítico] - [Cómo solucionarlo]
 
-### ⚠️ HIGH IMPACT (3-5 items max)  
-- [ ] [Specific action with file:line] - [Business impact] - [Recommended approach]
+### ⚠️ ALTO IMPACTO (3-5 items máximo)  
+- [ ] [Acción específica con archivo:línea] - [Impacto en negocio] - [Enfoque recomendado]
 
-### 💡 IMPROVEMENTS (2-3 strategic items)
-- [ ] [Enhancement opportunity] - [ROI assessment] - [Implementation suggestion]
+### 💡 MEJORAS (2-3 items estratégicos)
+- [ ] [Oportunidad de mejora] - [Evaluación ROI] - [Sugerencia de implementación]
 
-## Analysis Notes
-**Project Context:** [Key patterns/conventions considered]
-**Filtered Items:** [Major false positives eliminated with reasoning]
+## Notas de Análisis
+**Contexto del Proyecto:** [Patrones/convenciones clave considerados]
+**Items Filtrados:** [Falsos positivos principales eliminados con justificación]
 
-**Detailed Report:** <review_file>
+**Reporte Detallado:** <review_file>
 
-**Next Steps:**
-1. Address immediate items (est: X min)
-2. Plan high impact items for next sprint
-3. Consider strategic improvements
+**Próximos Pasos:**
+1. Resolver items inmediatos (est: X min)
+2. Planificar items de alto impacto para próximo sprint
+3. Considerar mejoras estratégicas
 ```
 
 ## Success Criteria
