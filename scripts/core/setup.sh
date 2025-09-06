@@ -57,7 +57,7 @@ while IFS= read -r url; do
     repo_name=$(basename "$repo_url" .git)
     
     # Security validation: prevent command injection and path traversal
-    [[ "$repo_url" =~ ^https://github\.com/Trivance-io/[a-zA-Z0-9_-]+\.git$ ]] || { echo "⚠️  Skipping invalid URL: $repo_url"; continue; }
+    [[ "$repo_url" =~ ^https://github\.com/Trivance-io/[a-zA-Z0-9_-]+(\.git)?$ ]] || { echo "⚠️  Skipping invalid URL: $repo_url"; continue; }
     [[ "$repo_name" =~ ^[a-zA-Z0-9_-]+$ && ${#repo_name} -le 50 ]] || { echo "⚠️  Skipping invalid repo name: $repo_name"; continue; }
     
     repo_path="$WORKSPACE_DIR/$repo_name"
