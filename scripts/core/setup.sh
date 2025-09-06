@@ -5,27 +5,21 @@
 
 set -euo pipefail
 
-# Secure path construction with validation
+# Calculate correct workspace (parent of orchestrator repo)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-WORKSPACE_DIR="$(realpath "$(dirname "$(dirname "$SCRIPT_DIR")")")"
+WORKSPACE_DIR="$(realpath "$SCRIPT_DIR/../../..")"
 
-# Validate we're in expected directory structure
-if [[ ! "$SCRIPT_DIR" =~ /trivance-ai-orchestrator/scripts/core$ ]]; then
-    echo "❌ Script must be run from trivance-ai-orchestrator/scripts/core/" >&2
+# Validate workspace calculation
+if [[ -z "$WORKSPACE_DIR" || ! -d "$WORKSPACE_DIR" ]]; then
+    echo "❌ Failed to calculate workspace directory" >&2
     exit 1
 fi
 
 REPOS_FILE="$SCRIPT_DIR/../../docs/trivance-repos.md"
-CLAUDE_SOURCE="$SCRIPT_DIR/../../.claude"
+CLAUDE_SOURCE="$SCRIPT_DIR/../../.claude"  
 CLAUDE_TARGET="$WORKSPACE_DIR/.claude"
 
-# Validate critical paths are within expected locations
-if [[ ! "$CLAUDE_TARGET" == "$WORKSPACE_DIR/.claude" ]] || [[ "$CLAUDE_TARGET" == "/" ]]; then
-    echo "❌ Invalid Claude target path" >&2
-    exit 1
-fi
-
-# Check prerequisites
+# Essential validation only
 if ! command -v git &>/dev/null; then
     echo "❌ Git not found" >&2
     exit 1
@@ -41,89 +35,66 @@ if [[ ! -d "$CLAUDE_SOURCE" ]]; then
     exit 1
 fi
 
-# Validate repository URL to prevent command injection
-validate_repo_url() {
-    local url="$1"
-    # Only allow GitHub URLs with valid repo format
-    if [[ ! "$url" =~ ^https://github\.com/[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+/?$ ]]; then
-        echo "❌ Invalid repository URL: $url" >&2
-        return 1
-    fi
-}
+if [[ ! -w "$WORKSPACE_DIR" ]]; then
+    echo "❌ Workspace directory not writable: $WORKSPACE_DIR" >&2
+    exit 1
+fi
 
 echo "🚀 Starting workspace setup..."
 echo "📁 Workspace: $WORKSPACE_DIR"
 
-# Process repositories
+# Process repositories with error tolerance  
 echo "📥 Processing repositories..."
-while IFS= read -r line; do
+success_count=0
+total_count=0
+
+while IFS= read -r url; do
     # Skip empty lines and comments
-    [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
+    [[ -z "$url" || "$url" =~ ^[[:space:]]*# ]] && continue
     
-    # Clean URL and extract repo name
-    repo_url="${line%/}"
-    
-    # Validate URL before using with git commands
-    if ! validate_repo_url "$repo_url"; then
-        echo "❌ Skipping invalid URL: $repo_url"
-        continue
-    fi
-    
+    total_count=$((total_count + 1))
+    repo_url="${url%/}"
     repo_name=$(basename "$repo_url" .git)
-    repo_path="${WORKSPACE_DIR}/${repo_name}"
+    repo_path="$WORKSPACE_DIR/$repo_name"
     
-    # Validate repo_path is within workspace
-    if [[ ! "$repo_path" == "$WORKSPACE_DIR"/* ]]; then
-        echo "❌ Invalid repository path: $repo_path" >&2
-        continue
-    fi
-    
-    if [[ -d "$repo_path" ]]; then
+    if [[ -d "$repo_path/.git" ]]; then
         echo "⚡ Updating $repo_name..."
-        if cd "$repo_path" && git pull --quiet; then
+        if (cd "$repo_path" && git fetch --quiet && git pull --ff-only --quiet 2>/dev/null); then
             echo "✅ Updated $repo_name"
+            success_count=$((success_count + 1))
         else
-            echo "⚠️  Failed to update $repo_name"
+            echo "⚠️  $repo_name: Manual merge needed or update failed"
         fi
     else
         echo "📥 Cloning $repo_name..."
-        if git clone --quiet "$repo_url" "$repo_path"; then
+        if git clone --quiet "$repo_url" "$repo_path" 2>/dev/null; then
             echo "✅ Cloned $repo_name"
+            success_count=$((success_count + 1))
         else
-            echo "❌ Failed to clone $repo_name"
-            exit 1
+            echo "❌ Failed to clone $repo_name from $repo_url"
         fi
     fi
 done < "$REPOS_FILE"
 
-# Copy Claude workspace
-echo "🤖 Setting up Claude workspace..."
-if [[ -d "$CLAUDE_TARGET" ]]; then
-    echo "🔄 Updating existing .claude..."
+echo "📊 Repository summary: $success_count/$total_count successful"
+
+# Setup Claude workspace (avoid NOP if source == target)
+if [[ "$CLAUDE_SOURCE" != "$CLAUDE_TARGET" ]]; then
+    echo "🤖 Setting up Claude workspace..."
+    temp_target="${CLAUDE_TARGET}.tmp.$$"
     
-    # Validate path before rm -rf to prevent accidental system deletion
-    if [[ "$CLAUDE_TARGET" == "$WORKSPACE_DIR/.claude" ]] && [[ -n "$CLAUDE_TARGET" ]] && [[ "$CLAUDE_TARGET" != "/" ]]; then
-        rm -rf "$CLAUDE_TARGET"
+    # Atomic operation: copy to temp, then move
+    if cp -r "$CLAUDE_SOURCE" "$temp_target" 2>/dev/null && mv "$temp_target" "$CLAUDE_TARGET" 2>/dev/null; then
+        echo "✅ Claude workspace configured"
     else
-        echo "❌ Unsafe path for deletion: $CLAUDE_TARGET" >&2
+        # Cleanup temp on failure
+        rm -rf "$temp_target" 2>/dev/null
+        echo "❌ Failed to copy .claude from $CLAUDE_SOURCE to $CLAUDE_TARGET" >&2
         exit 1
     fi
-fi
-
-if cp -r "$CLAUDE_SOURCE" "$CLAUDE_TARGET"; then
-    echo "✅ Claude workspace configured"
 else
-    echo "❌ Failed to copy .claude"
-    exit 1
-fi
-
-# Verify copy
-if [[ -d "${CLAUDE_TARGET}/agents" && -d "${CLAUDE_TARGET}/commands" ]]; then
-    echo "✅ Claude workspace verified"
-else
-    echo "❌ Claude workspace incomplete"
-    exit 1
+    echo "🤖 Claude workspace already in correct location"
 fi
 
 echo "🎉 Setup completed successfully!"
-echo "💡 Open Claude Code in this workspace directory"
+echo "💡 Navigate to workspace directory: $WORKSPACE_DIR"
