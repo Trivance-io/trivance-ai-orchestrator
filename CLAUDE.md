@@ -68,6 +68,21 @@ Choose the highest ROI; tie-break toward the simpler one.
 - Authorization workflows and iterative improvement
 - High-impact command sequences and best practices
 
+## guidelines for code review (claude bot review)
+
+* Priority: **SECURITY**, **BUG**, **RELIABILITY**, **PERFORMANCE** with production impact.
+* Ignore style/nits if they do not affect clarity or security.
+* Do not suggest repo-wide refactors outside the diff.
+
+### Project conventions
+
+* **JS/TS**: use `camelCase` names, avoid magic numbers, handle errors with `Result` or consistent `try/catch`.
+* **Testing**: do not comment on snapshots/coverage unless there are signs of real fragility.
+
+### Exclusions
+
+* `build/`, `dist/`, `vendor/`, `**/*.lock`, assets (`*.png`/`*.jpg`/`*.svg`), `coverage/`, `snapshots/`
+
 ## Claude Code Memories
 
 ### Project Operations
