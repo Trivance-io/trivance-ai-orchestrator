@@ -5,21 +5,34 @@ Clona repositorios Trivance y configura workspace Claude Code.
 ## Funcionalidad
 
 1. Clona repositorios listados en `docs/trivance-repos.md`
-2. Copia configuración `.claude/` al workspace
-3. Verifica integridad de la copia
+2. Actualiza repositorios existentes con `git fetch && git pull --ff-only`
+3. Copia configuración `.claude/` al workspace usando operación atómica
 
 ## Uso
 
 ```bash
 git clone https://github.com/Trivance-io/trivance-ai-orchestrator.git
 cd trivance-ai-orchestrator
-./setup.sh
+./scripts/core/setup.sh
 ```
 
 ## Prerequisitos
 
+**Básicos (obligatorios):**
 - Git instalado
 - Permisos de escritura en directorio padre
+
+**Claude Code (esencial):**
+- Claude Code CLI
+- GitHub CLI: `gh auth login`
+- Python 3.8+
+
+**MCP GitHub (opcional):**
+- Docker + curl
+- GitHub Personal Access Token
+
+**Utilidades (opcional):**
+- `jq`, `terminal-notifier`/`notify-send`
 
 ## Estructura Resultante
 
@@ -28,7 +41,7 @@ workspace/
 ├── trivance-ai-orchestrator/
 │   ├── .claude/
 │   ├── docs/trivance-repos.md
-│   └── setup.sh
+│   └── scripts/core/setup.sh
 ├── trivance-mobile/
 ├── trivance_auth/
 ├── trivance_management/
@@ -39,32 +52,46 @@ workspace/
 ## Comportamiento
 
 **Repositorio no existe**: Lo clona
-**Repositorio existe**: Ejecuta `git pull`
+**Repositorio existe**: Ejecuta `git fetch && git pull --ff-only`
 **Falla actualización**: Continúa con advertencia
 
-## Claude Code
+## Instalación de Dependencias
 
-El setup copia la configuración completa:
-- Agentes especializados
-- Comandos personalizados  
-- Scripts de automatización
-- Configuración workspace
+### Herramientas Esenciales
+```bash
+# GitHub CLI
+brew install gh                    # macOS
+sudo apt install gh                # Ubuntu/Debian  
+winget install GitHub.cli          # Windows
 
-Abre Claude Code en el directorio workspace después del setup.
+gh auth login                       # Autenticación
+
+# Python 3.8+
+brew install python3               # macOS
+sudo apt install python3-pip       # Ubuntu/Debian
+winget install Python.Python.3     # Windows
+```
+
+### MCP GitHub (Opcional)
+```bash
+# Setup automático
+./.claude/mcp-servers/github/setup.sh
+
+# O instalación manual:
+brew install --cask docker         # macOS + Docker
+# Crear Personal Access Token en: https://github.com/settings/tokens
+# Scopes: repo, read:org, read:user, actions:read
+```
 
 ## Solución de Problemas
 
-**"Git not found"**
-→ Instalar Git desde https://git-scm.com/downloads
-
-**"docs/trivance-repos.md not found"**
-→ Ejecutar desde directorio `trivance-ai-orchestrator`
-
-**".claude directory not found"**
-→ Clonar repositorio completo con subdirectorios
-
-**Error clonando repositorio**
-→ Verificar conexión y acceso a repositorios Trivance-io
+| Error | Solución |
+|-------|----------|
+| "Git not found" | Instalar Git: https://git-scm.com/downloads |
+| "docs/trivance-repos.md not found" | Ejecutar desde `scripts/core/` |
+| ".claude directory not found" | Clonar repositorio completo |
+| "MCP GitHub falla" | `gh auth logout && gh auth login` |
+| "Claude no responde" | `claude --reset-config` |
 
 ## Documentación AI-First
 
