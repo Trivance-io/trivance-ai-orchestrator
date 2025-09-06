@@ -58,7 +58,7 @@ jobs:
             - **COMMENT**: Best practices, code quality improvements, non-critical optimizations
             - **APPROVE**: No critical issues found
 
-            Create ONE consolidated review with all inline comments. Follow CLAUDE.md conventions.
+            Create ONE consolidated review with all inline comments.
           
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://docs.anthropic.com/en/docs/claude-code/sdk#command-line for available options
