@@ -87,11 +87,6 @@ jobs:
             - Are there specific code locations and reproduction steps?
             - Would this finding be actionable for a security team?
 
-            For each finding, assign a confidence score from 1-10:
-            - 1-3: Low confidence, likely false positive or noise
-            - 4-6: Medium confidence, needs investigation
-            - 7-10: High confidence, likely true vulnerability
-
             OUTPUT FORMAT (per finding)
             - Category: SECURITY | BUG | RELIABILITY | PERFORMANCE | MAINTAINABILITY
             - Severity: BLOCKER | CRITICAL | MAJOR | MINOR | NIT
@@ -110,7 +105,7 @@ jobs:
             - Prefer precise inline comments over a long general comment.
 
             FLOW
-            1) Use the repository exploration tools to understand the codebase context.
+            1) Explore codebase context: Use Read (CLAUDE.md, README.md), Glob (find related files), Grep (search patterns) to understand architecture, conventions, and existing patterns before reviewing changes.
             2) Triage diff and draft findings.
             3) Self-check: drop low-confidence, cosmetic or duplicate items.
             4) Add only the high-impact findings as inline comments and submit one consolidated review.
@@ -118,5 +113,5 @@ jobs:
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://docs.anthropic.com/en/docs/claude-code/sdk#command-line for available options
           claude_args: |
-            --allowedTools "mcp__github__get_pull_request,mcp__github__get_pull_request_files,mcp__github__get_pull_request_diff,mcp__github__create_pending_pull_request_review,mcp__github__add_comment_to_pending_review,mcp__github__submit_pending_pull_request_review"
+            --allowedTools "Read,Glob,Grep,mcp__github__get_pull_request,mcp__github__get_pull_request_files,mcp__github__get_pull_request_diff,mcp__github__create_pending_pull_request_review,mcp__github__add_comment_to_pending_review,mcp__github__submit_pending_pull_request_review"
 
