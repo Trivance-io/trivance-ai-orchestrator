@@ -100,10 +100,6 @@ jobs:
             - COMMENT if only MAJOR/MINOR/NIT.
             - APPROVE if no valid findings remain.
 
-            LIMITS
-            - Max 12 comments. Prefer fewer, higher-impact issues.
-            - Prefer precise inline comments over a long general comment.
-
             FLOW
             1) Explore codebase context: Use Read (CLAUDE.md, README.md), Glob (find related files), Grep (search patterns) to understand architecture, conventions, and existing patterns before reviewing changes.
             2) Triage diff and draft findings.
