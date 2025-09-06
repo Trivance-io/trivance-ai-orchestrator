@@ -55,15 +55,23 @@ while IFS= read -r url; do
     total_count=$((total_count + 1))
     repo_url="${url%/}"
     repo_name=$(basename "$repo_url" .git)
+    
+    # Security validation: prevent command injection and path traversal
+    [[ "$repo_url" =~ ^https://github\.com/Trivance-io/[a-zA-Z0-9_-]+(\.git)?$ ]] || { echo "⚠️  Skipping invalid URL: $repo_url"; continue; }
+    [[ "$repo_name" =~ ^[a-zA-Z0-9_-]+$ && ${#repo_name} -le 50 ]] || { echo "⚠️  Skipping invalid repo name: $repo_name"; continue; }
+    
     repo_path="$WORKSPACE_DIR/$repo_name"
     
     if [[ -d "$repo_path/.git" ]]; then
         echo "⚡ Updating $repo_name..."
-        if (cd "$repo_path" && git fetch --quiet && git pull --ff-only --quiet 2>/dev/null); then
+        if (cd "$repo_path" && 
+            git symbolic-ref HEAD >/dev/null 2>&1 && 
+            git fetch --quiet && 
+            git pull --ff-only --quiet 2>/dev/null); then
             echo "✅ Updated $repo_name"
             success_count=$((success_count + 1))
         else
-            echo "⚠️  $repo_name: Manual merge needed or update failed"
+            echo "⚠️  $repo_name: Manual merge needed, detached HEAD, or update failed"
         fi
     else
         echo "📥 Cloning $repo_name..."
@@ -71,6 +79,7 @@ while IFS= read -r url; do
             echo "✅ Cloned $repo_name"
             success_count=$((success_count + 1))
         else
+            rm -rf "$repo_path" 2>/dev/null  # Cleanup partial clone
             echo "❌ Failed to clone $repo_name from $repo_url"
         fi
     fi
@@ -81,14 +90,13 @@ echo "📊 Repository summary: $success_count/$total_count successful"
 # Setup Claude workspace (avoid NOP if source == target)
 if [[ "$CLAUDE_SOURCE" != "$CLAUDE_TARGET" ]]; then
     echo "🤖 Setting up Claude workspace..."
-    temp_target="${CLAUDE_TARGET}.tmp.$$"
+    temp_target=$(mktemp -d "${CLAUDE_TARGET}.XXXXXX")
+    trap 'rm -rf "$temp_target" 2>/dev/null' EXIT
     
     # Atomic operation: copy to temp, then move
-    if cp -r "$CLAUDE_SOURCE" "$temp_target" 2>/dev/null && mv "$temp_target" "$CLAUDE_TARGET" 2>/dev/null; then
+    if cp -r "$CLAUDE_SOURCE/." "$temp_target/" 2>/dev/null && mv "$temp_target" "$CLAUDE_TARGET" 2>/dev/null; then
         echo "✅ Claude workspace configured"
     else
-        # Cleanup temp on failure
-        rm -rf "$temp_target" 2>/dev/null
         echo "❌ Failed to copy .claude from $CLAUDE_SOURCE to $CLAUDE_TARGET" >&2
         exit 1
     fi

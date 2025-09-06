@@ -43,8 +43,8 @@ Al ejecutar este comando con el argumento `$ARGUMENTS`, seguir estos pasos:
 - **Crear directorios**: `mkdir -p .claude/reviews .claude/logs/$(date +%Y-%m-%d)`
 - **Generar timestamp**: `date '+%Y-%m-%dT%H:%M:%S'`
 - **Determinar nombre de archivo**:
-  - Sin argumentos: `.claude/reviews/revision-$(timestamp).md`
-  - Con argumentos: `.claude/reviews/dirigida-$(timestamp).md`
+  - Sin argumentos: `.claude/reviews/review-$(timestamp).md`
+  - Con argumentos: `.claude/reviews/targeted-$(timestamp).md`
 - **Escribir reporte ejecutivo** con base en la estructura del punto 4 "Reporte Ejecutivo", análisis y plan de acción con solicitud al usuario.
 - **Registrar actividad**: Agregar entrada a `.claude/logs/$(date +%Y-%m-%d)/revision_actividad.jsonl`
 
