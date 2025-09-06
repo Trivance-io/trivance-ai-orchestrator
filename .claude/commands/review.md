@@ -1,52 +1,52 @@
 ---
 allowed-tools: mcp__github__*, Bash(mkdir *), Bash(date *), Bash(echo *), Bash(gh *), Bash(git *), Task, Edit, MultiEdit, Write
-description: AI-powered code review engine with specialist analysis
+description: Motor de revisión de código inteligente con análisis especializado
 ---
 
-# Smart Code Review
+# Revisión Inteligente de Código
 
-I'll intelligently review your code using specialized agents.
+Revisaré inteligentemente tu código utilizando agentes especializados.
 
-## Usage
+## Uso
 ```bash
-/review                    # Complete codebase review with all available reviewers
-/review $ARGUMENTS         # Targeted review based on your specific context
+/review                    # Revisión completa del código con todos los revisores disponibles
+/review $ARGUMENTS         # Revisión dirigida basada en tu contexto específico
 ```
 
-## Execution
+## Ejecución
 
-When executing this command with argument `$ARGUMENTS`, follow these steps:
+Al ejecutar este comando con el argumento `$ARGUMENTS`, seguir estos pasos:
 
-### 1. Context Detection
-- **If no arguments**: Set context = "complete workspace context"
-- **If arguments provided**: Set context = arguments as specific analysis scope
+### 1. Detección de Contexto
+- **Sin argumentos**: Establecer contexto = "contexto completo del workspace"
+- **Con argumentos proporcionados**: Establecer contexto = argumentos como alcance específico de análisis
 
-### 2. Intelligent Review & Analysis  
-- Show: "🔍 Iniciando review..."
-- **Specialist delegation**:
-  - If context contains "pr" + number: Focus analysis on PR diff only
-  - Use `Glob` tool with pattern `.claude/agents/reviewers/*.md` to discover available reviewers
-  - Extract agent names by removing `.md` extension from discovered files
-  - Use `Task` tool to delegate to all discovered reviewer agents
-  - Provide each specialist with determined context and scope
-- **Intelligent consolidation**:
-  - Capture raw findings from all discovered reviewers
-  - Read project README, CLAUDE.md, and recent commits for context
-  - Analyze each finding against project architecture and conventions
-  - Filter findings that don't apply to this codebase (false positives)
-  - Remove duplications and merge related findings
-  - Classify by real business/technical impact
-  - Generate specific action items with file locations and commands
-  - Prioritize by actual impact on project goals and stability
+### 2. Revisión y Análisis Inteligente  
+- Mostrar: "🔍 Iniciando revisión..."
+- **Delegación de especialistas**:
+  - Si el contexto contiene "pr" + número: Enfocar análisis solo en el diff del PR
+  - Usar herramienta `Glob` con patrón `.claude/agents/reviewers/*.md` para descubrir revisores disponibles
+  - Extraer nombres de agentes eliminando la extensión `.md` de los archivos descubiertos
+  - Usar herramienta `Task` para delegar a todos los agentes revisores descubiertos
+  - Proporcionar a cada especialista el contexto y alcance determinados
+- **Consolidación inteligente**:
+  - Capturar hallazgos en bruto de todos los revisores descubiertos
+  - Leer README del proyecto, CLAUDE.md y commits recientes para contexto
+  - Analizar cada hallazgo contra la arquitectura y convenciones del proyecto
+  - Filtrar hallazgos que no aplican a este código base (falsos positivos)
+  - Eliminar duplicaciones y fusionar hallazgos relacionados
+  - Clasificar por impacto técnico/empresarial real
+  - Generar elementos de acción específicos con ubicaciones de archivos y comandos
+  - Priorizar por impacto real en los objetivos y estabilidad del proyecto
 
-### 3. Report Generation
-- **Create directories**: `mkdir -p .claude/reviews .claude/logs/$(date +%Y-%m-%d)`
-- **Generate timestamp**: `date '+%Y-%m-%dT%H:%M:%S'`
-- **Determine filename**:
-  - No arguments: `.claude/reviews/review-$(timestamp).md`
-  - With arguments: `.claude/reviews/targeted-$(timestamp).md`
-- **Write structured report** with executive summary, analysis, and action plan
-- **Log activity**: Append entry to `.claude/logs/$(date +%Y-%m-%d)/review_activity.jsonl`
+### 3. Generación de Reporte
+- **Crear directorios**: `mkdir -p .claude/reviews .claude/logs/$(date +%Y-%m-%d)`
+- **Generar timestamp**: `date '+%Y-%m-%dT%H:%M:%S'`
+- **Determinar nombre de archivo**:
+  - Sin argumentos: `.claude/reviews/revision-$(timestamp).md`
+  - Con argumentos: `.claude/reviews/dirigida-$(timestamp).md`
+- **Escribir reporte ejecutivo** con base en la estructura del punto 4 "Reporte Ejecutivo", análisis y plan de acción con solicitud al usuario.
+- **Registrar actividad**: Agregar entrada a `.claude/logs/$(date +%Y-%m-%d)/revision_actividad.jsonl`
 
 ### 4. Reporte Ejecutivo
 ```
@@ -69,7 +69,7 @@ When executing this command with argument `$ARGUMENTS`, follow these steps:
 
 ## Notas de Análisis
 **Contexto del Proyecto:** [Patrones/convenciones clave considerados]
-**Items Filtrados:** [Falsos positivos principales eliminados con justificación]
+**Items Filtrados:** [Falsos positivos principales descartados con justificación]
 
 **Reporte Detallado:** <review_file>
 
@@ -79,10 +79,10 @@ When executing this command with argument `$ARGUMENTS`, follow these steps:
 3. Considerar mejoras estratégicas
 ```
 
-## Success Criteria
+## Criterios de Éxito
 
-- **Context-Aware Analysis**: Validates findings against project patterns with false positive filtering
-- **Actionable Output**: Executable action items with specific file locations and commands
-- **Smart Scope Detection**: PR-specific analysis vs complete workspace based on context
-- **Quality Focus**: Prioritizes valid, impactful findings over raw volume
-- **Structured Storage**: Organized reports in .claude/reviews/ with executive summaries
+- **Análisis Consciente del Contexto**: Valida hallazgos contra patrones del proyecto con filtrado de falsos positivos
+- **Salida Ejecutable**: Elementos de acción ejecutables con ubicaciones específicas de archivos y comandos
+- **Detección de Alcance Inteligente**: Análisis específico de PR vs workspace completo basado en contexto
+- **Enfoque en Calidad**: Prioriza hallazgos válidos e impactantes sobre volumen bruto
+- **Almacenamiento Estructurado**: Reportes organizados en .claude/reviews/ con resúmenes ejecutivos
