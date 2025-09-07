@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2025-09-06]
+
+### Changed
+- security: enhance setup script with comprehensive security improvements (PR #174)
+- refactor: massive simplification for .claude-first ecosystem (PR #173)
+
+
 ## [2025-09-05]
 
 ### Added
@@ -27,7 +34,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 - refactor(ux): improve session-start UX and behavioral guidelines (PR #138)
-
 
 ## [2025-08-22]
 
