@@ -22,12 +22,36 @@ Mostrar exactamente este texto:
 - Ejecutar: `Read` en `/CLAUDE.md` para obtener configuraciones específicas
 - Ejecutar: `Read` en `/.claude/settings.json` para verificar configuración de permisos (sin mostrar output)
 
-### 3. Establecer contexto actual
+### 3. Establecer contexto actual con análisis contextual inteligente
 - Ejecutar: `pwd` para detectar si estamos en worktree (contiene "worktree-")
 - Ejecutar: `git status --porcelain` para ver cambios pendientes
 - Ejecutar: `git branch --show-current` para rama actual
+- Ejecutar: `git fetch --quiet 2>/dev/null` para actualizar referencias remotas (ignorar errores)
+
+#### 3.1 Detectar contexto y rama de referencia
+- Si directorio actual (pwd) contiene "worktree-":
+  - Contexto = "worktree"
+  - Ejecutar: `git rev-parse --abbrev-ref @{upstream} 2>/dev/null` para obtener rama origen
+  - Si comando exitoso: rama referencia = resultado
+  - Si comando falla: rama referencia = "origin/main" (fallback)
+- Si NO (repositorio principal):
+  - Contexto = "main-repo"
+  - Rama referencia = "origin/main"
+
+#### 3.2 Calcular estado de sincronización
+- Ejecutar: `git rev-list --left-right --count [rama-referencia]...HEAD 2>/dev/null`
+- Parse resultado formato "X\tY" donde X=behind (commits que faltan), Y=ahead (commits locales)
+- Si comando falla: sync-status = "fetch-failed"
+- Si exitoso, determinar sync-status basado en X,Y:
+  - X=0, Y=0 → "up-to-date"
+  - X>0, Y=0 → "X behind"
+  - X=0, Y>0 → "Y ahead"
+  - X>0, Y>0 → "X behind, Y ahead"
+
+#### 3.3 Mostrar resumen contextual
 - Ejecutar: `git log --oneline -3` para commits recientes
-- Mostrar resumen: "📍 Branch: [rama] | Estado: [limpio/[X] cambios pendientes] | Último commit: [mensaje del commit más reciente]"
+- Mostrar resumen: "📡 [sync-status] vs [rama-referencia] | 📍 Branch: [rama] ([contexto]) | Estado: [limpio/[X] cambios pendientes] | Último commit: [mensaje del commit más reciente]"
+- Si X>0 (hay commits behind): Agregar línea: "💡 Considera sincronizar antes de continuar desarrollo"
 
 ### 4. Mostrar situación del trabajo actual
 - Ejecutar: `gh issue list --assignee @me --state open --limit 6` si gh está disponible
@@ -38,7 +62,7 @@ Mostrar exactamente este texto:
   - Para issues 1-5: mostrar cada uno como "• #[número] [título]"
   - Si hay 6 o más: agregar línea "• Ver todos en: github.com/[owner]/[repo]/issues/assigned"
   - Agregar línea vacía después
-- Si exitoso y no hay issues: 
+- Si exitoso y no hay issues:
   - Mostrar: "🎯 **Tu situación actual:**"
   - Agregar: "✓ No tienes issues asignados - workspace limpio para nuevas tareas"
   - Agregar línea vacía después
