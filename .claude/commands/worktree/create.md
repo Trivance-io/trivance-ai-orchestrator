@@ -57,15 +57,11 @@ When executing this command with `$ARGUMENTS`, follow these steps:
 - Mostrar: "Nombres generados desde objetivo: '$objetivo_descripcion' → Directorio: $worktree_path, Rama: $branch_name"
 
 ### 5. Check for collisions
-- Execute `test -d "$worktree_path"` to verify if directory exists
-- If exists (exit code 0):
-  - Mostrar error: "❌ Error: Directory $worktree_path ya existe"
-  - TERMINATE process completely
-- Execute `git show-ref --verify --quiet refs/heads/$branch_name` to verify if branch exists
-- If exists (exit code 0):
-  - Mostrar error: "❌ Error: Branch $branch_name ya existe"
-  - TERMINATE process completely
-- Mostrar: "✓ No se detectaron colisiones"
+- **5a. Directory collision check**: Execute `[ -d "$worktree_path" ]` to verify if directory exists
+  - If exists (exit code 0): Mostrar error: "❌ Error: Directory $worktree_path ya existe" and TERMINATE
+- **5b. Branch collision check**: Execute `git show-ref --verify --quiet refs/heads/$branch_name` to verify if branch exists  
+  - If exists (exit code 0): Mostrar error: "❌ Error: Branch $branch_name ya existe" and TERMINATE
+- **5c. Confirmation**: Mostrar: "✓ No se detectaron colisiones"
 
 ### 6. Prepare parent branch
 - Execute `git checkout "$parent_branch"` to switch to parent
