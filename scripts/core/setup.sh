@@ -48,7 +48,7 @@ echo "📥 Processing repositories..."
 success_count=0
 total_count=0
 
-while IFS= read -r url; do
+while IFS= read -r url || [[ -n "$url" ]]; do
     # Skip empty lines and comments
     [[ -z "$url" || "$url" =~ ^[[:space:]]*# ]] && continue
     
