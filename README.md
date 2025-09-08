@@ -19,19 +19,18 @@ cd trivance-ai-orchestrator
 ## Prerequisitos
 
 **Básicos (obligatorios):**
+
 - Git instalado
 - Permisos de escritura en directorio padre
 
 **Claude Code (esencial):**
+
 - Claude Code CLI
 - GitHub CLI: `gh auth login`
 - Python 3.8+
 
-**MCP GitHub (opcional):**
-- Docker + curl
-- GitHub Personal Access Token
-
 **Utilidades (opcional):**
+
 - `jq`, `terminal-notifier`/`notify-send`
 
 ## Estructura Resultante
@@ -58,10 +57,11 @@ workspace/
 ## Instalación de Dependencias
 
 ### Herramientas Esenciales
+
 ```bash
 # GitHub CLI
 brew install gh                    # macOS
-sudo apt install gh                # Ubuntu/Debian  
+sudo apt install gh                # Ubuntu/Debian
 winget install GitHub.cli          # Windows
 
 gh auth login                       # Autenticación
@@ -72,26 +72,14 @@ sudo apt install python3-pip       # Ubuntu/Debian
 winget install Python.Python.3     # Windows
 ```
 
-### MCP GitHub (Opcional)
-```bash
-# Setup automático
-./.claude/mcp-servers/github/setup.sh
-
-# O instalación manual:
-brew install --cask docker         # macOS + Docker
-# Crear Personal Access Token en: https://github.com/settings/tokens
-# Scopes: repo, read:org, read:user, actions:read
-```
-
 ## Solución de Problemas
 
-| Error | Solución |
-|-------|----------|
-| "Git not found" | Instalar Git: https://git-scm.com/downloads |
-| "docs/trivance-repos.md not found" | Ejecutar desde `scripts/core/` |
-| ".claude directory not found" | Clonar repositorio completo |
-| "MCP GitHub falla" | `gh auth logout && gh auth login` |
-| "Claude no responde" | `claude --reset-config` |
+| Error                              | Solución                                    |
+| ---------------------------------- | ------------------------------------------- |
+| "Git not found"                    | Instalar Git: https://git-scm.com/downloads |
+| "docs/trivance-repos.md not found" | Ejecutar desde `scripts/core/`              |
+| ".claude directory not found"      | Clonar repositorio completo                 |
+| "Claude no responde"               | `claude --reset-config`                     |
 
 ## Documentación AI-First
 

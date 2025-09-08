@@ -164,3 +164,13 @@ react-native-packager-cache-*
 # Local settings that shouldn't be shared
 settings.local.json
 config.local.json
+
+# Playwright test artifacts
+test-results/
+playwright-report/
+blob-report/
+.local-browsers/
+drivers/
+.auth/
+*.auth.json
+.playwright-mcp/
