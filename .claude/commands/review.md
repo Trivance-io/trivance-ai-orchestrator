@@ -26,23 +26,44 @@ Al ejecutar este comando con el argumento `$ARGUMENTS`, seguir estos pasos:
 ### 2. Revisión y Análisis Inteligente
 
 - Mostrar: "🔍 Iniciando revisión..."
-- **Delegación de especialistas**:
-  - Si el contexto contiene "pr" + número: Usar `gh pr view <numero> --json` para obtener datos del PR y `gh pr diff <numero>` para el diff
-  - Para PR review: Obtener archivos con `gh pr view <numero> --json files`
-  - Obtener diff completo con `gh pr diff <numero>`
-  - Usar herramienta `Glob` con patrón `.claude/agents/reviewers/*.md` para descubrir revisores disponibles
-  - Extraer nombres de agentes eliminando la extensión `.md` de los archivos descubiertos
-  - Usar herramienta `Task` para delegar a todos los agentes revisores descubiertos
-  - Proporcionar a cada especialista el contexto y alcance determinados
-- **Consolidación inteligente**:
-  - Capturar hallazgos en bruto de todos los revisores descubiertos
-  - Leer README del proyecto, CLAUDE.md y commits recientes para contexto
-  - Analizar cada hallazgo contra la arquitectura y convenciones del proyecto
-  - Filtrar hallazgos que no aplican a este código base (falsos positivos)
-  - Eliminar duplicaciones y fusionar hallazgos relacionados
-  - Clasificar por impacto técnico/empresarial real
-  - Generar elementos de acción específicos con ubicaciones de archivos y comandos
-  - Priorizar por impacto real en los objetivos y estabilidad del proyecto
+
+#### 2.1 Descubrimiento de Reviewers
+
+- Usar herramienta `Glob` con patrón `.claude/agents/reviewers/*.md` para descubrir revisores disponibles
+- Extraer nombres de agentes eliminando la extensión `.md` de los archivos descubiertos
+
+#### 2.2 Preparación Inteligente de Contexto
+
+- **Detectar tipo de argumento**:
+  - Analizar patrón del argumento proporcionado (URL, path, patrón, texto libre)
+  - Identificar recursos específicos requeridos (PR data, archivos, directorios)
+
+- **Extraer información específica**:
+  - Si contiene URL GitHub: Extraer datos de PR/issue con `gh` commands apropiados
+  - Si es path de archivo/directorio: Validar existencia y preparar scope de archivos
+  - Si es patrón (_.js, src/_): Expandir con `glob` para obtener lista de archivos
+  - Si es texto libre: Usar como descriptor de scope para búsqueda contextual
+
+- **Preparar contexto enriquecido**:
+  - Combinar información específica con contexto general del proyecto
+  - Validar accesibilidad de todos los recursos identificados
+  - Generar scope contextual optimizado para todos los reviewers
+
+#### 2.3 Delegación a Todos los Reviewers
+
+- Usar herramienta `Task` para delegar a todos los agentes revisores descubiertos
+- Proporcionar a cada especialista el contexto y alcance determinados en paso 2.2
+
+#### 2.4 Consolidación Inteligente
+
+- Capturar hallazgos en bruto de todos los revisores descubiertos
+- Leer README del proyecto, CLAUDE.md y commits recientes para contexto
+- Analizar cada hallazgo contra la arquitectura y convenciones del proyecto
+- Filtrar hallazgos que no aplican a este código base (falsos positivos)
+- Eliminar duplicaciones y fusionar hallazgos relacionados
+- Clasificar por impacto técnico/empresarial real
+- Generar elementos de acción específicos con ubicaciones de archivos y comandos
+- Priorizar por impacto real en los objetivos y estabilidad del proyecto
 
 ### 3. Generación de Reporte
 
