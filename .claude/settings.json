@@ -9,7 +9,7 @@
     "additionalDirectories": [],
 
     "allow": [
-     "Read(**)",
+      "Read(**)",
       "Edit(**)",
       "MultiEdit(**)",
       "Write(**)",
@@ -60,7 +60,7 @@
       "Bash(systemctl :*)"
     ],
     "deny": [
-     "Bash(rm -rf /*)",
+      "Bash(rm -rf /*)",
       "Bash(rm -rf :*)",
       "Bash(rm -rf ~/*)",
       "Bash(sudo:*)",
@@ -85,7 +85,7 @@
     "command": "npx -y ccstatusline@latest",
     "padding": 0
   },
-  
+
   "hooks": {
     "UserPromptSubmit": [
       {

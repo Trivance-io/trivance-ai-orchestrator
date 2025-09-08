@@ -1,8 +1,8 @@
 {
   "_README": "IMPORTANTE: Este archivo debe copiarse como .mcp.json en la RAÍZ del workspace donde trabajas (NO dentro de carpetas), para que Claude Code lo detecte correctamente.",
   "_DOCS": "Documentación: https://modelcontextprotocol.io/introduction | https://docs.anthropic.com/en/docs/claude-code/mcp",
-  "_USAGE": "1) Copiar: cp .claude/mcp-servers/.mcp.example.json ./.mcp.json\n2) Editar: Reemplazar GITHUB_PERSONAL_ACCESS_TOKEN con tu token\n3) Reiniciar Claude Code para aplicar",
-  "_VALIDATED": "Configuración validada con GitHub Actions workflows y permisos .claude/settings.json",
+  "_USAGE": "1) Copiar: cp .claude/mcp-servers/.mcp.example.json ./.mcp.json\n2) Editar: Reemplazar tokens con tus credenciales\n3) Reiniciar Claude Code para aplicar",
+  "_VALIDATED": "Configuración validada con GitHub Actions workflows, Playwright MCP y permisos .claude/settings.json",
 
   "mcpServers": {
     "github": {
@@ -18,6 +18,13 @@
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": "github_pat_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
       }
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest",
+        "--isolated"]
+      
     }
   }
 }
