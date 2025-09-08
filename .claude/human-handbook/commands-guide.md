@@ -107,6 +107,19 @@
 
 ---
 
+## 🧪 Comandos de QA y Testing
+
+### 🎯 `/qa-e2e` - QA End-to-End Automation
+```bash
+/qa-e2e [target-url] [--browsers=chrome,firefox,safari] [--critical]
+```
+**Qué hace**: Ejecuta testing funcional completo usando Playwright automation con agent delegation.
+**Cuándo usarlo**: Para validación comprehensiva después de features, antes de deployments.
+**Flujo**: Analysis → Agent Delegation → Cross-browser Testing → Quality Report
+**ROI**: Reduce testing manual de horas a minutos con cross-browser coverage.
+
+---
+
 ## 📄 Comandos de Documentación
 
 ### 📚 `/docs` - Gestión de documentación
@@ -272,6 +285,20 @@
 
 > 📚 **Para workflow completo de PR + findings + issues:** Ver `ai-first-workflow.md`
 
+### **🏆 Workflow QA Integration: Feature con Testing**
+```bash
+# DEVELOPMENT (desde worktree)
+1. /understand                           # Context mapping
+2. /implement "nueva feature"            # Feature implementation  
+3. /qa-e2e --critical                    # Critical path validation
+4. /review                              # Multi-specialist review
+5. /pr                                  # PR con QA evidence
+
+# TESTING ESPECÍFICO
+6. /qa-e2e --browsers=chrome,firefox     # Cross-browser testing
+7. /agent:playwright-qa-specialist       # Advanced test scenarios
+```
+
 ### Bug Fix Urgente
 ```bash
 1. /worktree:create fix-bug-name main     # Worktree desde main
@@ -311,6 +338,8 @@
 - **Iterativo**: Los comandos recuerdan contexto entre ejecuciones
 - **Seguridad primero**: Siempre usa /security-scan antes de production
 - **Test frecuente**: Ejecuta /test después de cambios significativos
+- **QA automation**: Usa /qa-e2e para validación comprehensiva de features críticas
+- **Cross-browser testing**: Incluye /qa-e2e --browsers para máxima compatibilidad
 - **Documenta cambios**: Usa /docs para mantener documentación actualizada
 - **Análisis profundo**: Usa /deep para decisiones arquitectónicas críticas
 - **Gestión de deuda**: Convierte TODOs en issues con /todos:to-issues
