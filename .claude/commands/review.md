@@ -1,5 +1,5 @@
 ---
-allowed-tools: mcp__github__*, Bash(mkdir *), Bash(date *), Bash(echo *), Bash(gh *), Bash(git *), Task, Edit, MultiEdit, Write
+allowed-tools: Bash(gh pr *), Bash(gh api *), Bash(mkdir *), Bash(date *), Bash(echo *), Bash(gh *), Bash(git *), Task, Edit, MultiEdit, Write
 description: Motor de revisión de código inteligente con análisis especializado
 ---
 
@@ -8,6 +8,7 @@ description: Motor de revisión de código inteligente con análisis especializa
 Revisaré inteligentemente tu código utilizando agentes especializados.
 
 ## Uso
+
 ```bash
 /review                    # Revisión completa del código con todos los revisores disponibles
 /review $ARGUMENTS         # Revisión dirigida basada en tu contexto específico
@@ -18,13 +19,17 @@ Revisaré inteligentemente tu código utilizando agentes especializados.
 Al ejecutar este comando con el argumento `$ARGUMENTS`, seguir estos pasos:
 
 ### 1. Detección de Contexto
+
 - **Sin argumentos**: Establecer contexto = "contexto completo del workspace"
 - **Con argumentos proporcionados**: Establecer contexto = argumentos como alcance específico de análisis
 
-### 2. Revisión y Análisis Inteligente  
+### 2. Revisión y Análisis Inteligente
+
 - Mostrar: "🔍 Iniciando revisión..."
 - **Delegación de especialistas**:
-  - Si el contexto contiene "pr" + número: Enfocar análisis solo en el diff del PR
+  - Si el contexto contiene "pr" + número: Usar `gh pr view <numero> --json` para obtener datos del PR y `gh pr diff <numero>` para el diff
+  - Para PR review: Obtener archivos con `gh pr view <numero> --json files`
+  - Obtener diff completo con `gh pr diff <numero>`
   - Usar herramienta `Glob` con patrón `.claude/agents/reviewers/*.md` para descubrir revisores disponibles
   - Extraer nombres de agentes eliminando la extensión `.md` de los archivos descubiertos
   - Usar herramienta `Task` para delegar a todos los agentes revisores descubiertos
@@ -40,6 +45,7 @@ Al ejecutar este comando con el argumento `$ARGUMENTS`, seguir estos pasos:
   - Priorizar por impacto real en los objetivos y estabilidad del proyecto
 
 ### 3. Generación de Reporte
+
 - **Crear directorios**: `mkdir -p .claude/reviews .claude/logs/$(date +%Y-%m-%d)`
 - **Generar timestamp**: `date '+%Y-%m-%dT%H:%M:%S'`
 - **Determinar nombre de archivo**:
@@ -49,6 +55,7 @@ Al ejecutar este comando con el argumento `$ARGUMENTS`, seguir estos pasos:
 - **Registrar actividad**: Agregar entrada a `.claude/logs/$(date +%Y-%m-%d)/revision_actividad.jsonl`
 
 ### 4. Reporte Ejecutivo
+
 ```
 📊 **Análisis de Review Completado**
 
@@ -61,7 +68,7 @@ Al ejecutar este comando con el argumento `$ARGUMENTS`, seguir estos pasos:
 ### 🚨 INMEDIATO (1-2 items máximo)
 - [ ] [Acción específica con archivo:línea] - [Por qué es crítico] - [Cómo solucionarlo]
 
-### ⚠️ ALTO IMPACTO (3-5 items máximo)  
+### ⚠️ ALTO IMPACTO (3-5 items máximo)
 - [ ] [Acción específica con archivo:línea] - [Impacto en negocio] - [Enfoque recomendado]
 
 ### 💡 MEJORAS (2-3 items estratégicos)
