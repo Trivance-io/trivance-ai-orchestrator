@@ -18,6 +18,8 @@ fi
 REPOS_FILE="$SCRIPT_DIR/../../docs/trivance-repos.md"
 CLAUDE_SOURCE="$SCRIPT_DIR/../../.claude"  
 CLAUDE_TARGET="$WORKSPACE_DIR/.claude"
+GITIGNORE_SOURCE="$SCRIPT_DIR/../../.gitignore"
+GITIGNORE_TARGET="$WORKSPACE_DIR/.gitignore"
 
 # Essential validation only
 if ! command -v git &>/dev/null; then
@@ -32,6 +34,11 @@ fi
 
 if [[ ! -d "$CLAUDE_SOURCE" ]]; then
     echo "❌ .claude directory not found" >&2
+    exit 1
+fi
+
+if [[ ! -f "$GITIGNORE_SOURCE" ]]; then
+    echo "❌ .gitignore file not found" >&2
     exit 1
 fi
 
@@ -87,21 +94,39 @@ done < "$REPOS_FILE"
 
 echo "📊 Repository summary: $success_count/$total_count successful"
 
-# Setup Claude workspace (avoid NOP if source == target)
+# Setup workspace configuration (avoid NOP if source == target)
 if [[ "$CLAUDE_SOURCE" != "$CLAUDE_TARGET" ]]; then
-    echo "🤖 Setting up Claude workspace..."
+    echo "🤖 Setting up workspace configuration..."
     temp_target=$(mktemp -d "${CLAUDE_TARGET}.XXXXXX")
     trap 'rm -rf "$temp_target" 2>/dev/null' EXIT
     
-    # Atomic operation: copy to temp, then move
+    # Atomic operation: copy .claude to temp, then move
     if cp -r "$CLAUDE_SOURCE/." "$temp_target/" 2>/dev/null && mv "$temp_target" "$CLAUDE_TARGET" 2>/dev/null; then
         echo "✅ Claude workspace configured"
     else
         echo "❌ Failed to copy .claude from $CLAUDE_SOURCE to $CLAUDE_TARGET" >&2
         exit 1
     fi
+    
+    # Copy .gitignore to workspace
+    if cp "$GITIGNORE_SOURCE" "$GITIGNORE_TARGET" 2>/dev/null; then
+        echo "✅ Workspace .gitignore configured"
+    else
+        echo "❌ Failed to copy .gitignore from $GITIGNORE_SOURCE to $GITIGNORE_TARGET" >&2
+        exit 1
+    fi
 else
     echo "🤖 Claude workspace already in correct location"
+    
+    # Still copy .gitignore if needed
+    if [[ "$GITIGNORE_SOURCE" != "$GITIGNORE_TARGET" ]] && ! cmp -s "$GITIGNORE_SOURCE" "$GITIGNORE_TARGET" 2>/dev/null; then
+        if cp "$GITIGNORE_SOURCE" "$GITIGNORE_TARGET" 2>/dev/null; then
+            echo "✅ Workspace .gitignore updated"
+        else
+            echo "❌ Failed to update .gitignore" >&2
+            exit 1
+        fi
+    fi
 fi
 
 echo "🎉 Setup completed successfully!"
