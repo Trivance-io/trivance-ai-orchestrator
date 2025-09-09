@@ -1,0 +1,18 @@
+{
+  "_README": "IMPORTANTE: Este archivo debe copiarse como .mcp.json en la RAÍZ del workspace donde trabajas (NO dentro de carpetas), para que Claude Code lo detecte correctamente.",
+  "_DOCS": "Documentación: https://modelcontextprotocol.io/introduction | https://docs.anthropic.com/en/docs/claude-code/mcp",
+  "_USAGE": "1) Copiar: cp .claude/dev-tools/playwright/mcp/.mcp.example.json ./.mcp.json\n2) Reiniciar Claude Code para aplicar\n3) Ver documentación: .claude/dev-tools/playwright/README.md",
+  "_VALIDATED": "Configuración validada empíricamente - funciona garantizado con screenshots automáticos en .playwright-mcp/",
+
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest",
+        "--isolated",
+        "--viewport-size",
+        "1920x1080"
+      ]
+    }
+  }
+}

@@ -134,6 +134,19 @@
 
 ---
 
+## 🧪 Agentes de QA y Testing
+
+### 🎭 `/agent:playwright-qa-specialist` - E2E Testing Expert
+```bash
+/agent:playwright-qa-specialist
+```
+**Qué hace**: Testing end-to-end comprehensivo con browser automation, cross-browser validation, performance testing.
+**Cuándo usarlo**: Features nuevas, regression testing, release validation, CI/CD integration.
+**Casos**: User flows críticos, checkout processes, authentication flows, API integration testing.
+**ROI**: Automatiza testing manual complejo, reduce regression bugs y acelera releases.
+
+---
+
 ## 🎨 Agentes de Design y UX
 
 ### 🖼️ `/agent:ui-designer` - Diseño de Interfaces
@@ -239,6 +252,14 @@
 4. /agent:brand-guardian               # Brand consistency
 ```
 
+### **🧪 QA Integration Comprehensive**
+```bash
+1. /agent:playwright-qa-specialist      # E2E testing strategy
+2. /agent:edge-case-detector           # Boundary testing
+3. /agent:performance-optimizer        # Performance validation
+4. /agent:code-quality-reviewer        # Quality gates
+```
+
 ### **🚀 Production Readiness**
 ```bash  
 1. /agent:config-security-expert        # Security hardening
@@ -256,6 +277,8 @@
 - **Framework expertise**: Prefiere especialistas específicos (react-component-architect vs frontend-developer)
 - **Security by design**: Incluye `config-security-expert` en flows de production
 - **Performance proactivo**: Usa `performance-optimizer` durante desarrollo, no solo debugging
+- **QA automation**: Integra `playwright-qa-specialist` en releases críticas
+- **Cross-browser validation**: Combina QA specialist con edge-case detection
 - **Documentation ongoing**: Involucra `documentation-specialist` durante desarrollo, no al final
 - **Edge case thinking**: `edge-case-detector` es especialmente valioso en features críticas
 - **Design cohesion**: Combina múltiples design agents para experiences coherentes
@@ -264,10 +287,12 @@
 - **Complejidad baja**: Usa agentes universales (backend-developer, frontend-developer)
 - **Complejidad media**: Combina universal + especialista específico  
 - **Complejidad alta**: Orquestador + múltiples especialistas + quality agents
-- **Production critical**: Siempre incluye security, performance y edge-case agents
+- **Production critical**: Siempre incluye security, performance, edge-case y QA agents
+- **User-facing features**: Siempre incluye QA specialist para validation
 
 ### **Combinaciones Poderosas**
 - `tech-lead-orchestrator` + `code-quality-reviewer` = Strategic quality  
 - `performance-optimizer` + framework-specific = Optimized implementation
 - `ux-researcher` + `ui-designer` + `whimsy-injector` = Delightful experience
+- `playwright-qa-specialist` + `edge-case-detector` = Comprehensive testing
 - `code-archaeologist` + `documentation-specialist` = Knowledge transfer
