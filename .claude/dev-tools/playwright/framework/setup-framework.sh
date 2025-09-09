@@ -16,10 +16,21 @@ if ! npx playwright --version >/dev/null 2>&1; then
     read -p "   ¿Instalar Playwright? (y/N): " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        echo "   Instalando..."
-        npm init playwright@latest
+        echo "   Instalando Playwright (latest stable)..."
+        if npm install --save-dev @playwright/test@latest --silent; then
+            if npx playwright install --with-deps >/dev/null 2>&1; then
+                echo "   ✅ Playwright instalado correctamente"
+            else
+                echo "   ❌ Error: Falló instalación de navegadores"
+                exit 1
+            fi
+        else
+            echo "   ❌ Error: Falló instalación de @playwright/test"
+            exit 1
+        fi
     else
-        echo "   Saltando instalación. Puedes instalar manualmente con: npm init playwright@latest"
+        echo "   Saltando instalación."
+        echo "   Manual: npm install --save-dev @playwright/test@latest"
     fi
 else
     echo "   ✅ Playwright ya está instalado"
@@ -30,12 +41,10 @@ echo "📁 Creando estructura de testing..."
 mkdir -p tests/e2e/specs/core
 mkdir -p tests/api/specs
 
-# Crear estructura adicional solo si no existe (lazy creation)
 for dir in unit integration visual performance; do
     [[ ! -d "tests/$dir" ]] && mkdir -p "tests/$dir"
 done
 
-# Subdirectorios E2E
 for subdir in auth admin; do
     [[ ! -d "tests/e2e/specs/$subdir" ]] && mkdir -p "tests/e2e/specs/$subdir"
 done
@@ -49,19 +58,17 @@ echo "   ✅ Estructura de directorios creada"
 
 # 3. Actualizar .gitignore de forma segura
 echo "📝 Configurando archivos..."
-if [[ -f ".gitignore" ]]; then
+if [[ -f ".gitignore" ]] && [[ "$(realpath .gitignore 2>/dev/null)" == "$(pwd)/.gitignore" ]]; then
     cp .gitignore .gitignore.backup
-    
-    # Solo agregar si no existen estas entradas
-    if ! grep -q "test-results" .gitignore; then
-        echo "" >> .gitignore
-        echo "# Playwright artifacts" >> .gitignore
-        echo "test-results/" >> .gitignore
-        echo "playwright-report/" >> .gitignore
-        echo "playwright/.auth/" >> .gitignore
-        echo ".playwright-mcp/" >> .gitignore
-        echo "   ✅ .gitignore actualizado"
-    fi
+    entries_added=false
+    for entry in "test-results/" "playwright-report/" "playwright/.auth/" ".playwright-mcp/"; do
+        if ! grep -q "$entry" .gitignore; then
+            [[ $entries_added == false ]] && echo "" >> .gitignore && echo "# Playwright artifacts" >> .gitignore
+            echo "$entry" >> .gitignore
+            entries_added=true
+        fi
+    done
+    [[ $entries_added == true ]] && echo "   ✅ .gitignore actualizado"
 else
     cat > .gitignore << 'EOF'
 node_modules/
@@ -78,15 +85,18 @@ fi
 
 # 4. Variables de entorno
 if [[ ! -f ".env.test" ]]; then
-    cat > .env.test << 'EOF'
-# Test Environment Variables
+    random_password=$(openssl rand -base64 16 2>/dev/null || echo "CHANGE_ME_$(date +%s)")
+    cat > .env.test << EOF
+# Test Environment Variables - PERSONALIZAR ANTES DE USO EN PRODUCCIÓN
 API_BASE_URL=http://localhost:3000
 TEST_USER_EMAIL=test@example.com
-TEST_USER_PASSWORD=testpass123
+TEST_USER_PASSWORD=$random_password
 HEADLESS=true
 TIMEOUT=30000
 EOF
-    echo "   ✅ .env.test creado"
+    chmod 600 .env.test
+    echo "   ✅ .env.test creado con contraseña aleatoria"
+    echo "   ⚠️  IMPORTANTE: Personaliza credenciales antes de usar en producción"
 fi
 
 # 5. Archivos de ejemplo esenciales
@@ -119,51 +129,57 @@ EOF
 fi
 
 # 6. Scripts package.json de forma segura
-if [[ -f "package.json" ]] && ! grep -q "test:e2e" package.json; then
-    echo "📜 Agregando scripts de testing..."
-    cp package.json package.json.backup
+if [[ -f "package.json" ]]; then
+    missing_scripts=()
+    ! grep -q '"test:unit"' package.json && missing_scripts+=("test:unit")
+    ! grep -q '"test:api"' package.json && missing_scripts+=("test:api")
+    ! grep -q '"test:e2e"[^:]' package.json && missing_scripts+=("test:e2e")
+    ! grep -q '"test:e2e:headed"' package.json && missing_scripts+=("test:e2e:headed")
+    ! grep -q '"test:visual"' package.json && missing_scripts+=("test:visual")
+    ! grep -q '"test:all"' package.json && missing_scripts+=("test:all")
+    ! grep -q '"test:report"' package.json && missing_scripts+=("test:report")
     
-    # Método seguro usando jq si está disponible
-    if command -v jq >/dev/null 2>&1; then
-        jq '.scripts += {
-          "test:unit": "echo \"Configure unit testing framework (Jest/Vitest)\"",
-          "test:api": "playwright test tests/api",
-          "test:e2e": "playwright test tests/e2e", 
-          "test:e2e:headed": "playwright test tests/e2e --headed",
-          "test:visual": "playwright test tests/visual",
-          "test:all": "npm run test:unit && npm run test:api && npm run test:e2e",
-          "test:report": "playwright show-report"
-        }' package.json > package.json.tmp && mv package.json.tmp package.json
-        echo "   ✅ Scripts agregados con jq"
-    else
-        # Fallback más seguro sin jq
-        echo "   ⚠️  jq no disponible. Agregando scripts manualmente..."
-        cat >> package.json.backup << 'EOF'
+    if [[ ${#missing_scripts[@]} -gt 0 ]]; then
+        echo "📜 Agregando scripts de testing faltantes..."
+        cp package.json package.json.backup
+        
+        if command -v jq >/dev/null 2>&1; then
+            temp_file=$(mktemp) && chmod 600 "$temp_file"
+            if jq '.scripts += {
+              "test:unit": "echo \"Configure unit testing framework (Jest/Vitest)\"",
+              "test:api": "playwright test tests/api",
+              "test:e2e": "playwright test tests/e2e",
+              "test:e2e:headed": "playwright test tests/e2e --headed",
+              "test:visual": "playwright test tests/visual",
+              "test:all": "npm run test:unit && npm run test:api && npm run test:e2e",
+              "test:report": "playwright show-report"
+            }' package.json > "$temp_file" && jq empty "$temp_file" 2>/dev/null; then
+                mv "$temp_file" package.json
+                echo "   ✅ Scripts agregados con jq"
+            else
+                rm -f "$temp_file"
+                echo "   ❌ Error: Falló actualización de package.json"
+                exit 1
+            fi
+        else
+            echo "   ⚠️  jq no disponible. Agregando scripts manualmente..."
+            cat >> package.json.backup << 'EOF'
 
 Scripts sugeridos para agregar a package.json:
 "test:unit": "echo \"Configure unit testing framework (Jest/Vitest)\"",
 "test:api": "playwright test tests/api",
 "test:e2e": "playwright test tests/e2e",
-"test:e2e:headed": "playwright test tests/e2e --headed", 
+"test:e2e:headed": "playwright test tests/e2e --headed",
 "test:visual": "playwright test tests/visual",
 "test:all": "npm run test:unit && npm run test:api && npm run test:e2e",
 "test:report": "playwright show-report"
 EOF
-        echo "   📝 Scripts guardados en package.json.backup para agregar manualmente"
+            echo "   📝 Scripts guardados en package.json.backup para agregar manualmente"
+        fi
     fi
 fi
 
-# 7. README de testing
-if [[ ! -f "tests/README.md" ]]; then
-    if [[ -f ".claude/dev-tools/playwright/framework/TESTING-README-TEMPLATE.md" ]]; then
-        cp .claude/dev-tools/playwright/framework/TESTING-README-TEMPLATE.md tests/README.md
-        echo "   ✅ README de testing creado"
-    else
-        echo "   ⚠️  Template README no encontrado, saltando..."
-    fi
-fi
-
-# 8. Resumen final
+# 7. Resumen final
 echo ""
 echo "🎉 Setup completado!"
 echo "📋 Estructura:"
@@ -171,7 +187,7 @@ echo "   tests/{e2e,api,unit,integration,visual,performance}/"
 echo ""
 echo "🚀 Comandos (si se agregaron scripts):"
 echo "   npm run test:e2e"
-echo "   npm run test:api" 
+echo "   npm run test:api"
 echo "   npm run test:all"
 echo ""
 echo "📖 Personaliza tests en tests/e2e/specs/ según tu aplicación"
