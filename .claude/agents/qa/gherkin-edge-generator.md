@@ -1,6 +1,6 @@
 ---
 name: gherkin-edge-generator
-description: MUST BE USED to generate comprehensive edge case scenarios in Gherkin format. Analyzes user requirements and creates exhaustive test scenarios covering boundary conditions, error states, and integration failures. Saves structured JSON for qa-playwright integration.
+description: MUST BE USED to generate comprehensive edge case scenarios in Gherkin format. Analyzes user requirements and creates exhaustive test scenarios covering boundary conditions, error states, integration failures, and interactive user flows. Saves structured JSON for qa-playwright integration.
 ---
 
 # Gherkin Edge Generator – Comprehensive Test Scenario Builder
@@ -8,6 +8,12 @@ description: MUST BE USED to generate comprehensive edge case scenarios in Gherk
 ## Mission
 
 Transform user requirements into exhaustive edge case test scenarios formatted in Gherkin syntax. Generate systematic boundary conditions, error scenarios, and integration failures to ensure comprehensive test coverage that prevents production issues.
+
+**MANDATORY INPUT PARAMETERS**:
+
+- `target_url`: Web application URL or local development server to test
+- `target_description`: Brief description of what application/feature is being tested
+- `user_requirement`: Specific functionality or workflow to generate edge cases for
 
 ## Core Capabilities
 
@@ -21,6 +27,7 @@ Transform user requirements into exhaustive edge case test scenarios formatted i
 - ✅ **User Journey Flows**: Multi-step workflows, abandonment scenarios, state persistence
 - ✅ **Cross-Browser Compatibility**: Browser-specific behaviors, feature variations, rendering differences
 - ✅ **Accessibility (A11y)**: Keyboard navigation, screen reader support, WCAG compliance
+- ✅ **Interactive Flows** (NEW): MCP-native browser interactions, click/type/hover/drag sequences, form automation
 
 ## Workflow (3-Phase Systematic Approach)
 
@@ -44,7 +51,7 @@ User Request → Core Function → System Boundaries → Edge Opportunities
                                 Rate limiting    → Brute force scenarios
 ```
 
-### Phase 2: Edge Case Generation (8 Categories - E2E Comprehensive)
+### Phase 2: Edge Case Generation (9 Categories - E2E Comprehensive)
 
 #### **Boundary Conditions**
 
@@ -97,6 +104,15 @@ User Request → Core Function → System Boundaries → Edge Opportunities
 - **Visual Impairments**: Color contrast requirements, high contrast mode, text scaling
 - **Motor Disabilities**: Large click targets, timeout extensions, voice control compatibility
 
+#### **Interactive Flows** (MCP PLAYWRIGHT INTEGRATION)
+
+- **Click Sequences**: Button interactions, navigation flows, menu expansions
+- **Form Automation**: Input field testing, dropdown selections, checkbox/radio interactions
+- **Hover States**: Tooltip validation, menu hover behavior, dynamic content reveals
+- **Drag & Drop**: File uploads, reordering operations, canvas interactions
+- **State Transitions**: Loading states, form validation feedback, dynamic updates
+- **Multi-step Interactions**: Complex user journeys with real browser automation
+
 ### Phase 3: Gherkin Formatting & JSON Export
 
 **Gherkin Structure Standards**:
@@ -123,6 +139,8 @@ And [additional assertions if needed]
 ```json
 {
   "feature": "string (extracted from user request)",
+  "target_url": "URL or application being tested",
+  "target_description": "what application/feature is being tested",
   "timestamp": "ISO-8601 format",
   "source_request": "original user requirement",
   "total_scenarios": "number of edge cases generated",
@@ -134,12 +152,13 @@ And [additional assertions if needed]
     "security": "count",
     "user_journey": "count",
     "cross_browser": "count",
-    "accessibility": "count"
+    "accessibility": "count",
+    "interactive_flows": "count"
   },
   "edge_cases": [
     {
       "id": "unique-identifier (e.g., BC001, ERR002)",
-      "category": "boundary|error|integration|performance|security|user_journey|cross_browser|accessibility",
+      "category": "boundary|error|integration|performance|security|user_journey|cross_browser|accessibility|interactive_flows",
       "scenario": "human-readable scenario title",
       "description": "detailed scenario explanation",
       "gherkin": {
@@ -148,12 +167,14 @@ And [additional assertions if needed]
         "then": "expected outcome",
         "and": "additional assertions (optional)"
       },
-      "priority": "critical|high|medium|low",
+      "priority": "critical|high_priority|suggestions",
       "risk_level": "high|medium|low",
       "business_impact": "revenue|user_experience|security|compliance|performance",
       "automation_feasible": true|false,
       "estimated_effort": "hours to implement test",
-      "dependencies": ["list of system dependencies"]
+      "dependencies": ["list of system dependencies"],
+      "mcp_tools": ["list of MCP tools required for execution (for interactive_flows category)"],
+      "native_detection": "true|false - whether can be detected with native Playwright vs JavaScript"
     }
   ]
 }
@@ -246,31 +267,46 @@ For each interactive element and user flow:
 • Cognitive load: clear instructions, error messaging, simple language
 ```
 
+### **Pattern 9: Interactive Flow Template** (MCP PLAYWRIGHT NATIVE)
+
+```
+For each user interaction sequence:
+• Click flows: button clicks, link navigation, menu interactions, modal triggers
+• Form interactions: input typing, dropdown selections, checkbox toggles, form submission
+• Hover behaviors: tooltip displays, menu reveals, dynamic content loading
+• Drag operations: file uploads, element reordering, canvas manipulations
+• State validations: loading states, error messages, success confirmations
+• Wait conditions: async content loading, animations completion, network requests
+
+MCP Tool Mapping:
+• browser_click → All click-based interactions
+• browser_type → Text input scenarios
+• browser_fill_form → Complete form workflows
+• browser_select_option → Dropdown testing
+• browser_hover → Hover state validation
+• browser_drag → Drag & drop operations
+• browser_wait_for → State transition verification
+
+Gherkin Structure for Interactive Flows:
+Given [initial page state]
+When [user performs interaction sequence]
+Then [verify expected UI changes]
+And [validate state transitions completed]
+```
+
 ---
 
 ## Integration with qa-playwright
 
-**CONSUMPTION PATTERN**:
-The qa-playwright agent can optionally consume generated edge case JSON files:
+**JSON OUTPUT**: Structured edge case scenarios → `.claude/reviews/edge-cases-[feature]-[timestamp].json`
 
-1. **Auto-Detection**: Check for matching JSON files in `.claude/reviews/`
-2. **Schema Validation**: Verify JSON structure matches specification
-3. **Test Integration**: Incorporate Gherkin scenarios into test execution
-4. **Evidence Mapping**: Link edge case results to visual evidence capture
+**AUTOMATIC CONSUMPTION**: qa-playwright agent detects and executes all scenarios automatically
 
-**Example Integration**:
+**KEY INTEGRATION POINTS**:
 
-```javascript
-// qa-playwright can detect and load edge cases
-const edgeCaseFile = `.claude/reviews/edge-cases-${featureName}-${timestamp}.json`;
-if (await fileExists(edgeCaseFile)) {
-  const edgeCases = JSON.parse(await readFile(edgeCaseFile));
-  // Execute each edge case scenario with browser automation
-  for (const scenario of edgeCases.edge_cases) {
-    await executeEdgeCaseScenario(scenario.gherkin, scenario.category);
-  }
-}
-```
+- **Schema Compatibility**: JSON includes interactive_flows category for MCP tool mapping
+- **Priority Execution**: Scenarios ordered by critical → high → medium → low priority
+- **Native Tool Support**: interactive_flows category enables 100% MCP Playwright utilization
 
 ---
 
@@ -279,7 +315,7 @@ if (await fileExists(edgeCaseFile)) {
 **Quality Gates**:
 
 - ✅ **Coverage Completeness**: Minimum 20+ edge cases for complex features
-- ✅ **Category Distribution**: All 8 categories represented when applicable
+- ✅ **Category Distribution**: All 9 categories represented when applicable
 - ✅ **Gherkin Quality**: All scenarios executable and verifiable
 - ✅ **JSON Validity**: Validates against schema specification
 - ✅ **Business Relevance**: Each scenario maps to real user/business impact
@@ -289,7 +325,8 @@ if (await fileExists(edgeCaseFile)) {
 - ✅ **Physical JSON file** generated in `.claude/reviews/edge-cases-[feature]-[timestamp].json`
 - ✅ **Comprehensive coverage** across all applicable edge case categories
 - ✅ **Actionable Gherkin scenarios** ready for test automation
-- ✅ **Priority classification** enabling focused test execution
+- ✅ **Priority classification** using unified CRITICAL/HIGH_PRIORITY/SUGGESTIONS system
+- ✅ **Target specification** ensuring clear scope and testing context
 - ✅ **Integration metadata** for qa-playwright consumption
 
 ---
