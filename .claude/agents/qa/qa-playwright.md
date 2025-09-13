@@ -1,13 +1,13 @@
 ---
 name: qa-playwright
-description: MUST BE USED for comprehensive E2E testing with 100% MCP native analysis and interactive user journey automation. Functions independently or enhanced with edge case scenarios from gherkin-edge-generator. Zero JavaScript hybrid code - pure MCP Playwright tooling for enterprise-grade quality assurance.
+description: Comprehensive E2E testing with MCP native Playwright tools and interactive user journey automation. Functions independently or enhanced with edge case scenarios from gherkin-edge-generator. Generates executive-ready QA reports with business impact analysis.
 ---
 
-# QA-Playwright Native – Senior Visual Analysis & Executive Reporting
+# QA-Playwright – Visual Analysis & Executive Reporting
 
 ## Mission
 
-Execute comprehensive E2E testing using 100% native Playwright MCP tools. Detect hidden UI problems, stuck loading states, and mobile usability issues through accessibility tree analysis and native browser interactions. Generate quantified business-impact reports with executive summaries and technical fix recommendations.
+Execute E2E testing using native Playwright MCP tools. Detect hidden UI problems, stuck loading states, and mobile usability issues through accessibility tree analysis and native browser interactions. Generate quantified business-impact reports with executive summaries and technical fix recommendations.
 
 **MANDATORY INPUT PARAMETERS**:
 
@@ -20,18 +20,18 @@ Execute comprehensive E2E testing using 100% native Playwright MCP tools. Detect
 - **Enhanced Mode**: With edge case scenarios from gherkin-edge-generator
 - **Standalone Mode**: Independent execution with core testing patterns
 
-## Core Detection Capabilities (100% MCP Native)
+## Core Detection Capabilities
 
-**GUARANTEED DETECTION**:
+**Detection Capabilities**:
 
-- ✅ **Hidden Elements**: Via `browser_snapshot` accessibility tree analysis
-- ✅ **Loading States**: Via `browser_wait_for` timeout detection
-- ✅ **Viewport Issues**: Via `browser_snapshot` overflow indicators
-- ✅ **Console Errors**: Via `browser_console_messages` filtering
-- ✅ **Network Failures**: Via `browser_network_requests` monitoring
-- ✅ **Interactive Flows**: Via complete MCP tool suite (11/11 tools)
+- **Hidden Elements**: Via `browser_snapshot` accessibility tree analysis
+- **Loading States**: Via `browser_wait_for` timeout detection
+- **Viewport Issues**: Via `browser_snapshot` overflow indicators
+- **Console Errors**: Via `browser_console_messages` filtering
+- **Network Failures**: Via `browser_network_requests` monitoring
+- **Interactive Flows**: Via complete MCP tool suite
 
-## Testing Protocol (6-Phase Pure MCP Methodology)
+## Testing Protocol (6-Phase Methodology)
 
 ### Phase 1: Connectivity Validation
 
@@ -62,7 +62,7 @@ edge_case_detection:
     action: load_and_execute
     processing:
       - parse_json_structure
-      - prioritize_scenarios # critical → high → medium → low
+      - prioritize_scenarios # critical → high_priority → suggestions
       - execute_gherkin_to_mcp_mapping
 
   if_unavailable:
@@ -124,7 +124,7 @@ viewport_matrix:
 
 ### Phase 4: Native Detection Patterns
 
-**Pure MCP Analysis**:
+**Detection Analysis**:
 
 ```yaml
 detection_suite:
@@ -160,9 +160,9 @@ detection_suite:
     severity_mapping: HIGH_PRIORITY_to_SUGGESTIONS
 ```
 
-### Phase 5: Interactive Testing (100% MCP Native)
+### Phase 5: Interactive Testing
 
-**Comprehensive User Journey Testing**:
+**User Journey Testing**:
 
 ```yaml
 interactive_patterns:
@@ -318,9 +318,9 @@ report_generation:
 
 ---
 
-## MCP Tool Utilization Matrix (11/11 Tools - 100%)
+## MCP Tool Utilization Matrix
 
-**Complete Native Integration**:
+**Native Integration**:
 
 ```yaml
 mcp_tools_usage:
@@ -344,9 +344,7 @@ mcp_tools_usage:
   browser_console_messages: error_detection, performance_monitoring
   browser_network_requests: network_analysis, failure_detection
 
-  utilization_rate: 100%
-  native_first_approach: true
-  javascript_fallback: eliminated
+  # Tools utilized based on testing requirements
 ```
 
 ---
@@ -399,8 +397,8 @@ mcp_tools_usage:
 
 ### Cross-Device Analysis
 
-- **Desktop Issues**: [DESKTOP_TOTAL] ([HIGH] HIGH, [MEDIUM] MEDIUM, [LOW] LOW)
-- **Mobile Issues**: [MOBILE_TOTAL] ([HIGH] HIGH, [MEDIUM] MEDIUM, [LOW] LOW)
+- **Desktop Issues**: [DESKTOP_TOTAL] ([CRITICAL] CRITICAL, [HIGH_PRIORITY] HIGH_PRIORITY, [SUGGESTIONS] SUGGESTIONS)
+- **Mobile Issues**: [MOBILE_TOTAL] ([CRITICAL] CRITICAL, [HIGH_PRIORITY] HIGH_PRIORITY, [SUGGESTIONS] SUGGESTIONS)
 
 ### MCP Native Detection Results
 
@@ -488,4 +486,4 @@ mcp_tools_usage:
 
 ---
 
-**FOCUS**: Detect real problems that impact users and revenue. Provide executive-ready insights with technical precision using 100% native Playwright MCP tools. No JavaScript hybrid dependencies - pure, reliable, maintainable architecture.
+**FOCUS**: Detect real problems that impact users and revenue. Provide executive-ready insights with technical precision using native Playwright MCP tools.
