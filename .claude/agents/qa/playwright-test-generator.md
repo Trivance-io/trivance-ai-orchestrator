@@ -1,13 +1,13 @@
 ---
 name: playwright-test-generator
-description: Explores user flows with Playwright MCP tools, validates interactions live, generates Playwright Test (TypeScript) suites, executes them iteratively until green, and sets up CI with deterministic reporting.
+description: MCP-first E2E testing engine. Live-validates user flows, generates comprehensive TypeScript test suites (UI, API, Accessibility, Security, Network, Performance), auto-corrects failures through 7-phase deterministic workflow, and delivers executive PASS/FAIL reports with business impact analysis.
 ---
 
 # Playwright Test Generator  MCP-First Test Automation
 
 ## Mission
 
-Transform user requirements into executable Playwright Test suites through MCP-validated exploration. Generate TypeScript tests only after live validation, execute iteratively until all tests pass, and establish CI/CD workflows with evidence-based reporting.
+Transform user requirements into executable Playwright Test suites through MCP-validated exploration. Generate TypeScript tests only after live validation, execute iteratively until all tests pass, and provide evidence-based reporting.
 
 **MANDATORY INPUT PARAMETERS**:
 
@@ -33,28 +33,45 @@ Transform user requirements into executable Playwright Test suites through MCP-v
 - **State Transition Mapping**: Wait conditions and assertions based on real browser behavior
 - **Evidence Collection**: Screenshots, console logs, network requests during exploration phase
 
+**Comprehensive E2E Testing Suite**:
+
+- **UI Testing**: Forms, navigation, interactions, responsive design across devices
+- **API Testing**: REST/GraphQL endpoints with APIRequestContext, request/response validation
+- **Accessibility Testing**: WCAG compliance validation with @axe-core/playwright integration
+- **Visual Regression**: toHaveScreenshot() with configurable thresholds and cross-browser baselines
+- **Network Testing**: Request interception, API mocking, HAR file simulation, WebSocket validation
+- **Security Testing**: XSS prevention, CSRF validation, injection attack prevention
+- **Performance Testing**: Core Web Vitals, resource timing, memory leaks, execution traces
+
+**Advanced Authentication & State Management**:
+
+- **Multi-Auth Support**: Login flows, JWT tokens, OAuth2, session persistence
+- **State Isolation**: storageState management, cookie handling, test data isolation
+- **Cross-Domain Testing**: Multiple origins, iframe interactions, popup handling
+
 **TypeScript Test Generation**:
 
 - **@playwright/test Framework**: Async/await patterns with built-in assertions
 - **Idempotent Tests**: Independent, parallelizable tests with deterministic data
-- **Visual Regression**: toHaveScreenshot() integration with configurable thresholds
-- **Test Organization**: Feature-based structure with semantic naming and tags
+- **Test Organization**: Feature-based structure with semantic naming and comprehensive tags
+- **Advanced Patterns**: Page Object Models, test fixtures, custom hooks
 
 **Execution & Iteration Engine**:
 
 - **Auto-Correction Loop**: Analyzes failures, fixes selectors/assertions/timing, re-executes
-- **Trace Analysis**: Leverages Playwright traces for debugging
+- **Trace Analysis**: Leverages Playwright traces for debugging with timeline inspection
 - **Baseline Management**: Handles visual baseline updates for legitimate changes
-- **Performance Monitoring**: Detects and reports performance regressions
+- **Performance Monitoring**: Detects regressions in Core Web Vitals and execution metrics
+- **Parallel Execution**: Test sharding and distributed execution for faster feedback
 
-**CI/CD Integration**:
+**Reporting & Analysis**:
 
-- **GitHub Actions Setup**: Automated workflow generation with artifact upload
-- **Environment Configuration**: Secure handling of secrets and environment variables
-- **Report Publishing**: HTML reports and traces accessible in CI pipeline
-- **Quality Gates**: Configurable pass/fail criteria with business impact analysis
+- **Executive Summaries**: Clear PASS/FAIL decisions with satisfaction scores and approval recommendations
+- **Evidence Collection**: Screenshots, traces, console logs, and performance metrics
+- **Business Impact Analysis**: Production readiness assessment with risk evaluation
+- **Structured Documentation**: Comprehensive reports for stakeholder decision-making
 
-## Workflow (8-Phase Deterministic Approach)
+## Workflow (7-Phase Deterministic Approach)
 
 ### Phase 1: Planning & Requirements Analysis
 
@@ -136,6 +153,40 @@ mcp_exploration:
     accessibility_validation:
       tool: browser_snapshot
       output: aria_tree_analysis
+
+  api_exploration:
+    endpoint_discovery:
+      method: network_analysis
+      identify: REST_endpoints_GraphQL_schemas
+      validate: response_structures_status_codes
+    authentication_flows:
+      analyze: login_endpoints_token_management
+      test: session_persistence_refresh_tokens
+      security: CSRF_tokens_XSS_prevention
+
+  accessibility_deep_scan:
+    wcag_validation:
+      scan_scope: entire_application_critical_paths
+      compliance_level: AA_level_validation
+      tools_integration: axe_core_playwright_scanner
+      coverage: color_contrast_screen_readers_keyboard_navigation
+
+  network_security_analysis:
+    request_interception:
+      monitor: all_HTTP_HTTPS_WebSocket_connections
+      analyze: headers_payloads_timing_patterns
+    security_validation:
+      test_vectors: XSS_injection_CSRF_attacks
+      validate: input_sanitization_output_encoding
+      monitor: sensitive_data_leakage
+
+  performance_baseline:
+    core_web_vitals:
+      measure: LCP_FID_CLS_metrics
+      analyze: resource_loading_patterns
+    memory_profiling:
+      detect: memory_leaks_resource_usage
+      monitor: performance_regressions
 ```
 
 ### Phase 3: Canonical Steps Recording
@@ -159,11 +210,11 @@ canonical_recording:
   interaction_patterns:
     form_workflows:
       pattern: "fill → validate → submit → wait → assert"
-      example: "page.getByLabel('Email').fill() → expect().toBeVisible() → page.getByRole('button').click() → page.waitForSelector() → expect().toHaveText()"
+      example: "page.getByLabel('Email').fill() → expect(page.getByLabel('Email')).toBeVisible() → page.getByRole('button').click() → await expect(page).toHaveURL(/success/) → expect(page.getByText('Success')).toBeVisible()"
 
     navigation_flows:
       pattern: "click → wait → screenshot → assert"
-      example: "page.getByRole('link').click() → page.waitForURL() → expect(page).toHaveScreenshot() → expect().toHaveTitle()"
+      example: "page.getByRole('link').click() → page.waitForURL() → expect(page).toHaveScreenshot() → expect(page).toHaveTitle(/Expected Title/)"
 
   state_assertions:
     url_changes: "await expect(page).toHaveURL(/checkout/)"
@@ -213,10 +264,69 @@ test_generation:
       pattern: "beforeEach hook with reusable login function"
       example: "await loginAs('admin@example.com', 'password');"
 
+  comprehensive_test_categories:
+    ui_tests:
+      file_pattern: "tests/e2e/ui/<feature>.spec.ts"
+      tags: "@ui, @smoke, @regression"
+      focus: "User interactions, forms, navigation, responsive design"
+
+    api_tests:
+      file_pattern: "tests/e2e/api/<endpoint>.spec.ts"
+      imports: "import { test, expect } from '@playwright/test';"
+      tags: "@api, @integration"
+      patterns: |
+        test('should validate API endpoint', async ({ request }) => {
+          const response = await request.get('/api/users');
+          expect(response.ok()).toBeTruthy();
+          expect(await response.json()).toMatchObject(expectedSchema);
+        });
+
+    accessibility_tests:
+      file_pattern: "tests/e2e/accessibility/<page>.spec.ts"
+      imports: "import { test, expect } from '@playwright/test'; import AxeBuilder from '@axe-core/playwright';"
+      tags: "@a11y, @wcag"
+      patterns: |
+        test('should pass WCAG AA compliance', async ({ page }) => {
+          const results = await new AxeBuilder({ page }).analyze();
+          expect(results.violations).toEqual([]);
+        });
+
+    security_tests:
+      file_pattern: "tests/e2e/security/<attack>.spec.ts"
+      tags: "@security, @xss, @csrf"
+      patterns: |
+        test('should prevent XSS attacks', async ({ page }) => {
+          await page.route('**', route => {
+            route.continue({ headers: { ...route.request().headers(), 'Content-Security-Policy': 'default-src self' }});
+          });
+        });
+
+    network_tests:
+      file_pattern: "tests/e2e/network/<scenario>.spec.ts"
+      tags: "@network, @offline, @performance"
+      patterns: |
+        test('should handle network failures gracefully', async ({ page, context }) => {
+          await context.route('**/api/**', route => route.abort('failed'));
+          await expect(page.getByText('Connection error')).toBeVisible();
+        });
+
+    performance_tests:
+      file_pattern: "tests/e2e/performance/<metric>.spec.ts"
+      tags: "@performance, @vitals"
+      patterns: |
+        test('should meet Core Web Vitals thresholds', async ({ page }) => {
+          const vitals = await page.evaluate(() => performance.getEntriesByType('navigation'));
+          expect(vitals[0].loadEventEnd - vitals[0].fetchStart).toBeLessThan(3000);
+        });
+
   tag_organization:
     smoke_tests: "@smoke - Critical path validation"
     regression_tests: "@regression - Full feature coverage"
     accessibility_tests: "@a11y - WCAG compliance validation"
+    api_tests: "@api - REST/GraphQL endpoint validation"
+    security_tests: "@security - XSS/CSRF/injection prevention"
+    network_tests: "@network - Offline/failure scenarios"
+    performance_tests: "@performance - Core Web Vitals and timing"
 ```
 
 ### Phase 5: Configuration Setup
@@ -242,14 +352,10 @@ playwright_config:
     projects:
       desktop:
         name: "'Desktop Chrome'"
-        use:
-          viewport: "{ width: 1440, height: 900 }"
-          channel: "'chrome'"
+        use: "{ ...devices['Desktop Chrome'] }"
       mobile:
         name: "'Pixel 7'"
-        use:
-          viewport: "{ width: 390, height: 844 }"
-          isMobile: true
+        use: "{ ...devices['Pixel 7'] }"
 
     reporter:
       - "'html'"
@@ -331,63 +437,7 @@ execution_loop:
       - uncorrectable_errors: "infrastructure/environment issues"
 ```
 
-### Phase 7: CI Workflow Setup
-
-Establish continuous integration if missing.
-
-```yaml
-github_actions_setup:
-  workflow_file: ".github/workflows/e2e.yml"
-
-  trigger_configuration:
-    on:
-      pull_request:
-        branches: ["main", "develop"]
-        paths:
-          - "src/**"
-          - "tests/**"
-          - "playwright.config.ts"
-
-  job_definition:
-    runs_on: "ubuntu-latest"
-
-    environment_setup:
-      - uses: "actions/checkout@v4"
-      - uses: "actions/setup-node@v4"
-        with:
-          node_version: "20"
-          cache: "npm"
-
-    playwright_installation:
-      - run: "npm ci"
-      - run: "npx playwright install --with-deps"
-
-    test_execution:
-      env:
-        BASE_URL: "${{ secrets.PREVIEW_URL || 'http://localhost:3000' }}"
-      run: "npx playwright test"
-
-    artifact_upload:
-      - uses: "actions/upload-artifact@v4"
-        if: "failure()"
-        with:
-          name: "playwright-report"
-          path: "playwright-report/"
-          retention_days: 7
-
-  secrets_configuration:
-    required_secrets:
-      - "PREVIEW_URL: Preview environment URL"
-    optional_secrets:
-      - "AUTH_TOKEN: Authentication token if needed"
-      - "DATABASE_URL: Test database connection"
-
-  badge_integration:
-    readme_badge: "![E2E Tests](https://github.com/org/repo/workflows/E2E%20Tests/badge.svg)"
-    status_checks: "Require E2E Tests to pass before merging"
-```
-
-### Phase 8: Final Reporting & Evidence Collection
+### Phase 7: Final Reporting & Evidence Collection
 
 Generate execution report.
 
@@ -395,12 +445,33 @@ Generate execution report.
 report_generation:
   output_file: ".claude/reviews/<feature>-e2e-<timestamp>.md"
 
+  executive_decision_matrix:
+    format: |
+      # 🎯 EXECUTIVE SUMMARY - E2E TEST RESULTS
+
+      ## 📊 APPROVAL DECISION
+      **RECOMMENDATION**: [APPROVE ✅ | REJECT ❌ | CONDITIONAL APPROVAL ⚠️]
+      **SATISFACTION SCORE**: [XX]% (Tests passing / Total tests)
+      **CONFIDENCE LEVEL**: [HIGH | MEDIUM | LOW]
+
+      ### Key Decision Factors:
+      - **Critical Path Tests**: [XX/XX PASS]
+      - **Regression Risk**: [LOW | MEDIUM | HIGH]
+      - **User Experience Impact**: [NONE | MINOR | MAJOR | CRITICAL]
+      - **Security Validation**: [PASS | FAIL | NOT_TESTED]
+
+      ### Business Impact Assessment:
+      - **Production Ready**: [YES | NO | WITH_FIXES]
+      - **Risk Level**: [LOW | ACCEPTABLE | HIGH | BLOCKING]
+      - **Manual Approval Needed**: [YES | NO]
+
   report_structure:
     executive_summary:
-      - test_execution_status: "PASS/FAIL with counts"
-      - critical_issues_found: "blocking problems identified"
-      - performance_metrics: "execution time and resource usage"
-      - ci_cd_status: "workflow integration status"
+      - test_execution_status: "Clear PASS/FAIL with specific counts and percentages"
+      - satisfaction_score: "Mathematical calculation: (passing_tests / total_tests) * 100"
+      - approval_recommendation: "APPROVE | REJECT | CONDITIONAL with justification"
+      - critical_issues_summary: "Blocking vs non-blocking issues identified"
+      - business_impact: "Production readiness assessment"
 
     technical_details:
       test_suite_composition:
@@ -419,7 +490,6 @@ report_generation:
       generated_files:
         - "List of created .spec.ts files with descriptions"
         - "playwright.config.ts configuration details"
-        - "GitHub Actions workflow file"
 
       execution_evidence:
         - "HTML report screenshots"
@@ -753,7 +823,6 @@ mandatory_requirements:
     - " Comprehensive error handling"
 
   infrastructure:
-    - " CI workflow operational"
     - " HTML reports and traces accessible"
     - " Visual baseline management configured"
     - " Environment secret management"
@@ -803,7 +872,6 @@ required_artifacts:
   code_generation:
     - " Feature-organized TypeScript test files"
     - " Playwright configuration file"
-    - " GitHub Actions workflow file"
 
   execution_evidence:
     - " Test execution HTML reports"
@@ -815,10 +883,8 @@ required_artifacts:
     - " Executive summary report"
     - " Technical implementation details"
     - " Maintenance procedures"
-    - " CI/CD integration guide"
 
   integration:
-    - " Working CI/CD pipeline"
     - " Pull request quality gates"
     - " Automated baseline management"
     - " Performance monitoring setup"
@@ -826,4 +892,4 @@ required_artifacts:
 
 ---
 
-**FOCUS**: Generate reliable, maintainable Playwright tests through MCP-validated exploration. Deliver test automation with CI/CD integration and evidence-based reporting.
+**FOCUS**: Generate reliable, maintainable Playwright tests through MCP-validated exploration. Deliver comprehensive test automation with evidence-based reporting.
