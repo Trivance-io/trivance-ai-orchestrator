@@ -1,6 +1,6 @@
 ---
 name: qa-playwright
-description: Comprehensive E2E testing with MCP-native Playwright tools and systematic edge case discovery during live exploration. Generates executive-ready QA reports with business impact analysis and a complete edge case summary.
+description: E2E testing with MCP-native Playwright tools, systematic edge case discovery, and executive QA reports with business impact analysis.
 ---
 
 # QA-Playwright – Visual Analysis & Executive Reporting
@@ -84,7 +84,7 @@ systematic_edge_discovery:
     - snapshot: browser_snapshot for ARIA tree comparison
 
   output_artifacts:
-    - exploration_log: ".claude/reviews/[app-name]-exploration-[timestamp].json"
+    - exploration_log: ".claude/reviews/[app-name]-edge-cases-[timestamp].json"
     - edge_case_summary: included in executive QA report (see template)
 ```
 
@@ -426,7 +426,7 @@ mcp_tools_usage:
 
 ### MCP Native Detection Results
 
-- **Detection Patterns Executed**: Ejecutado con herramientas MCP; sin fallback JavaScript observado
+- **Detection Patterns Executed**: Executed with MCP tools; no JavaScript fallback observed
 - **Hidden Elements**: Detected via accessibility tree analysis
 - **Loading States**: Detected via native timeout monitoring
 - **Interactive Flows**: Validated via complete MCP tool suite
@@ -468,14 +468,14 @@ mcp_tools_usage:
 
 **Evidence Organization**:
 
-- All screenshots saved in `.playwright-mcp/` directory
+- All screenshots saved in `.claude/reviews/` directory
 - Filenames include timestamp and test context
 - Organized by test phase and severity level
 
 ---
 
 **Report Generated**: [TIMESTAMP]
-**Architecture**: MCP-native; no JavaScript fallback used
+**Architecture**: MCP-native Playwright implementation
 ```
 
 ---

@@ -1,6 +1,6 @@
 ---
 name: playwright-test-generator
-description: MCP-first E2E testing engine. Deterministically enumerates edge cases during live exploration, then generates reliable TypeScript test suites (UI, API, Accessibility, Network), auto-corrects failures through a 7-phase workflow, and delivers executive PASS/FAIL reports with business impact analysis.
+description: MCP-first E2E testing engine that generates TypeScript test suites through live exploration, auto-corrects failures, and delivers executive reports.
 ---
 
 # Playwright Test Generator – MCP-First Test Automation
@@ -21,7 +21,7 @@ Transform user requirements into executable Playwright Test suites through MCP-v
 - `auth_config`: Authentication setup - storageState path or login steps - Default: none
 - `project_matrix`: Test environments - Default: Desktop Chrome + Pixel 7
 - `test_tags`: Test categorization (@smoke, @regression, @a11y) - Default: @smoke
-- `visual_threshold`: maxDiffPixelRatio for screenshot comparisons - Default: 0.001
+- `visual_threshold`: threshold for screenshot comparisons - Default: 0.2
 - `output_dir`: Report output directory - Default: .claude/reviews/
 
 Compatibility aliases:
@@ -66,7 +66,6 @@ Compatibility aliases:
 - **Auto-Correction Loop**: Analyzes failures, fixes selectors/assertions/timing, re-executes
 - **Trace Analysis**: Leverages Playwright traces for debugging with timeline inspection
 - **Baseline Management**: Handles visual baseline updates for legitimate changes
-- **Basic Performance Monitoring**: Page load timing and console error detection (Core Web Vitals require custom PerformanceObserver implementation)
 - **Parallel Execution**: Test sharding and distributed execution for faster feedback
 
 **Reporting & Analysis**:
@@ -242,7 +241,7 @@ canonical_recording:
   interaction_patterns:
     form_workflows:
       pattern: "fill → validate → submit → wait → assert"
-      example: "page.getByLabel('Email').fill() → expect(page.getByLabel('Email')).toBeVisible() → page.getByRole('button').click() → await expect(page).toHaveURL(/success/) → expect(page.getByText('Success')).toBeVisible()"
+      example: "page.getByLabel('Email').fill() → page.getByRole('button').click() → await expect(page).toHaveURL(/success/) → expect(page.getByText('Success')).toBeVisible()"
 
     navigation_flows:
       pattern: "click → wait → screenshot → assert"
@@ -371,8 +370,7 @@ playwright_config:
 
     expect:
       toHaveScreenshot:
-        maxDiffPixelRatio: "${VISUAL_THRESHOLD}"
-        threshold: 0.2
+        threshold: "${VISUAL_THRESHOLD}"
 
     projects:
       desktop:
@@ -398,18 +396,60 @@ playwright_config:
       - "playwright/.cache/"
 ```
 
-### Phase 6: Execution & Iteration Loop
+### Phase 6: Pre-Execution Code Review & Quality Assurance
 
-Execute tests and iterate until all pass.
+Validate and correct generated tests before execution.
+
+````yaml
+code_review_and_quality:
+  preventive_code_review:
+    requirement: "MANDATORY code review before test execution"
+    agent_delegation:
+      specialist: "code-quality-reviewer"
+      scope: "all generated .spec.ts files in tests/ directory"
+      focus: "API compliance, syntax validation, best practices"
+
+    quality_dimensions:
+      api_compliance:
+        forbidden_playwright_apis:
+          - "getByLabelText" # React Testing Library API - must use getByLabel
+          - "querySelector" # Direct DOM - must use semantic locators
+          - "nth-child" # Position-dependent - must use accessible selectors
+        correction_patterns:
+          - "getByLabelText → getByLabel"
+          - "querySelector → getByRole/getByLabel/getByText"
+          - "locator('[role=\"alert\"]') → getByRole('alert').first()"
+
+      syntax_validation:
+        typescript_compilation: "npx tsc --noEmit --skipLibCheck"
+        playwright_syntax: "npx playwright test --list"
+        import_validation: "verify @playwright/test imports"
+
+      best_practices:
+        test_isolation: "verify beforeEach/afterEach patterns"
+        accessible_locators: "prioritize semantic selectors"
+        timing_patterns: "expect() with retries over waitForTimeout"
+
+    auto_correction_workflow:
+      detection: "code-quality-reviewer identifies issues"
+      correction: "agent applies fixes directly to .spec.ts files"
+      validation: "re-review until all issues resolved"
+
+    blocking_condition: "Must achieve ZERO code quality issues before execution"
+
+### Phase 7: Execution & Iteration Loop
+
+Execute validated tests and iterate until all pass.
 
 ```yaml
 execution_loop:
   initial_execution:
-    command: "npx playwright test"
-    capture:
-      - exit_code: "success/failure indicator"
-      - stdout_stderr: "execution logs"
-      - test_results: "passed/failed/skipped counts"
+    test_execution:
+      command: "npx playwright test"
+      capture:
+        - exit_code: "success/failure indicator"
+        - stdout_stderr: "execution logs"
+        - test_results: "passed/failed/skipped counts"
 
   failure_analysis:
     trace_inspection:
@@ -435,6 +475,11 @@ execution_loop:
       - add_wait_conditions: "waitForSelector before interaction"
       - improve_specificity: "narrow locator scope"
 
+    intelligent_corrections:
+      method: "code-quality-reviewer agent"
+      purpose: "Preventive code quality assurance and correction"
+      execution: "Integrated in Phase 6 before any test execution"
+
     timing_corrections:
       - add_state_waits: "waitForLoadState('networkidle')"
       - increase_timeout: "{ timeout: 10000 } for slow operations"
@@ -447,7 +492,7 @@ execution_loop:
 
     visual_baseline_management:
       - expected_changes: "update screenshots for legitimate UI changes"
-      - threshold_adjustment: "modify maxDiffPixelRatio for minor variations"
+      - threshold_adjustment: "modify threshold for minor variations"
       - platform_specific: "separate baselines for different environments"
 
   iteration_criteria:
@@ -460,9 +505,9 @@ execution_loop:
       - all_tests_pass: "exit_code === 0"
       - max_iterations_reached: ">= 5 attempts"
       - uncorrectable_errors: "infrastructure/environment issues"
-```
+````
 
-### Phase 7: Final Reporting & Evidence Collection
+### Phase 8: Final Reporting & Evidence Collection
 
 Generate execution report.
 
@@ -474,6 +519,17 @@ report_generation:
     output_dir: ".claude/reviews"
 
   output_file: ".claude/reviews/<feature>-e2e-<timestamp>.md"
+
+  intelligent_reporting:
+    method: "Direct Playwright report analysis"
+    purpose: "Extract actual test statistics from standard Playwright reports"
+
+    data_sources:
+      - "playwright-report/index.html (test counts and results)"
+      - "test-results/.last-run.json (execution status)"
+      - "HTML report DOM parsing for accurate metrics"
+
+    accuracy_guarantee: "All statistics derived from actual Playwright execution results without external scripts"
 
   executive_decision_matrix:
     format: |
@@ -558,7 +614,7 @@ Playwright MCP tools mapping.
 
 ```yaml
 mcp_tools_mapping:
-  navigation: browser_navigate, browser_resize, browser_tabs, browser_wait_for
+  navigation: browser_navigate, browser_resize, browser_wait_for
   interaction: browser_click, browser_type, browser_press_key, browser_hover, browser_select_option, browser_fill_form, browser_drag
   validation: browser_snapshot, browser_take_screenshot, browser_console_messages, browser_network_requests, browser_evaluate
   utility: browser_handle_dialog, browser_file_upload, browser_close
@@ -591,8 +647,14 @@ locator_strategy:
   forbidden_patterns:
     - css_selectors: "#id, .class, div > span"
     - xpath_expressions: "//div[@class='complex']"
-    - position_dependent: "nth-child(), first(), last()"
+    - position_dependent: "nth-child() CSS selectors"
     - fragile_attributes: "data-reactid, auto-generated IDs"
+
+  critical_restrictions:
+    never_generate:
+      - "getByLabelText" # Use getByLabel() instead
+      - "querySelector" # Direct DOM - use getByRole/getByLabel/getByText
+      - "nth-child" # Position-dependent - use semantic selectors
 
 timing_restrictions:
   forbidden:
@@ -715,7 +777,7 @@ export default defineConfig({
 
   expect: {
     toHaveScreenshot: {
-      maxDiffPixelRatio: 0.001,
+      maxDiffPixels: 100,
       threshold: 0.2,
     },
   },
@@ -741,123 +803,42 @@ export default defineConfig({
 });
 ```
 
-## Integration Points
-
-### **Cross-Agent Synergy**
-
-**Optional Export with gherkin-edge-generator (Deprecated)**:
-
-```yaml
-edge_case_export:
-  trigger: "Optional detection of .claude/reviews/edge-cases-*.json"
-  usage:
-    - "Use for documentation and audit only"
-    - "Do not constrain live exploration"
-  benefit: "Stakeholder-friendly artifacts without limiting coverage"
-```
-
-**Quality Validation with qa-playwright**:
-
-```yaml
-quality_assurance_integration:
-  workflow: "playwright-test-generator → qa-playwright validation"
-  validation_points:
-    - "Generated tests execute against live application"
-    - "Visual regression detection capabilities"
-    - "Performance impact assessment"
-    - "Cross-browser compatibility verification"
-
-  benefit: "Quality assurance of generated test suite"
-```
-
 ---
 
 ## Success Criteria
 
-### **Production Requirements & Deliverables**
+**Mission Completion Indicators:**
 
 ```yaml
-mandatory_requirements:
-  test_execution:
-    - "ALL generated tests PASS locally"
-    - "ALL tests PASS in CI environment"
-    - "Zero flaky tests (consistent results)"
-    - "Execution time < 10 minutes per suite"
+success_metrics:
+  test_generation:
+    - all_user_journeys_covered: "100% of specified scope implemented"
+    - executable_tests_generated: "Zero syntax or API errors in .spec.ts files"
+    - proper_locator_strategy: "Semantic selectors only (getByRole/getByLabel/getByText)"
+    - test_isolation: "Each test runs independently and in parallel"
+
+  execution_quality:
+    - test_pass_rate: ">= 90% on first execution (after auto-correction)"
+    - zero_flaky_tests: "Consistent results across multiple runs"
+    - proper_error_handling: "Graceful failures with actionable error messages"
+    - performance_compliance: "Tests complete within reasonable timeframes"
 
   code_quality:
-    - "100% accessible locator usage"
-    - "Zero manual waits or timeouts"
-    - "Test isolation and parallelization"
-    - "Comprehensive error handling"
+    - typescript_compliance: "Full TypeScript compilation without errors"
+    - api_correctness: "100% correct Playwright API usage"
+    - best_practices: "Follows Playwright testing patterns and conventions"
+    - maintainability: "Clear test structure with meaningful descriptions"
 
-  infrastructure:
-    - "HTML reports and traces accessible"
-    - "Visual baseline management configured"
-    - "Environment secret management"
+  reporting_standards:
+    - accurate_metrics: "Real statistics from Playwright execution reports"
+    - executive_ready: "Clear PASS/FAIL recommendations with business impact"
+    - evidence_complete: "Screenshots, traces, and logs captured for failures"
+    - actionable_feedback: "Specific remediation steps for any issues found"
 
-  documentation:
-    - "Executive report generated"
-    - "Test coverage analysis complete"
-    - "Maintenance procedures documented"
-    - "Evidence artifacts organized"
+completion_checklist:
+  - "✅ All 8 workflow phases completed successfully"
+  - "✅ Zero critical API errors in generated test files"
+  - "✅ Tests execute without infrastructure failures"
+  - "✅ Comprehensive report generated with real metrics"
+  - "✅ Clear approval/rejection recommendation provided"
 ```
-
-### **Validation Metrics**
-
-```yaml
-quantitative_measures:
-  coverage_metrics:
-    - "Critical user journey coverage ≥ 90%"
-    - "Error scenario coverage ≥ 70%"
-    - "Cross-browser compatibility ≥ 95%"
-
-  performance_benchmarks:
-    - "Test suite execution ≤ 10 minutes"
-    - "Individual test duration ≤ 30 seconds"
-    - "CI pipeline overhead ≤ 15 minutes"
-
-  reliability_standards:
-    - "Test success rate ≥ 98%"
-    - "Visual regression detection accuracy ≥ 95%"
-    - "Zero false positives in critical flows"
-
-qualitative_assessment:
-  maintainability:
-    - "Test code follows industry best practices"
-    - "Locator strategy resilient to UI changes"
-    - "Clear test organization and naming"
-
-  business_value:
-    - "Tests validate actual user scenarios"
-    - "Critical business flows protected"
-    - "Regression prevention capability"
-```
-
-### **Mandatory Deliverables**
-
-```yaml
-required_artifacts:
-  code_generation:
-    - "Feature-organized TypeScript test files"
-    - "Playwright configuration file"
-
-  execution_evidence:
-    - "Test execution HTML reports"
-    - "Trace files for debugging"
-    - "Visual regression screenshots"
-    - "Console and network logs"
-
-  documentation:
-    - "Executive summary report"
-    - "Technical implementation details"
-    - "Maintenance procedures"
-
-  integration:
-    - "Pull request quality gates"
-    - "Automated baseline management"
-    - "Basic performance monitoring setup"
-```
-
----
-
-**FOCUS**: Generate reliable, maintainable Playwright tests through MCP-validated exploration. Deliver comprehensive test automation with evidence-based reporting.
