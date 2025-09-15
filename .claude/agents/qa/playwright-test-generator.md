@@ -1,13 +1,13 @@
 ---
 name: playwright-test-generator
-description: MCP-first E2E testing engine. Deterministically enumerates edge cases during live exploration, then generates comprehensive TypeScript test suites (UI, API, Accessibility, Security, Network, Performance), auto-corrects failures through a 7-phase workflow, and delivers executive PASS/FAIL reports with business impact analysis.
+description: MCP-first E2E testing engine. Deterministically enumerates edge cases during live exploration, then generates reliable TypeScript test suites (UI, API, Accessibility, Network), auto-corrects failures through a 7-phase workflow, and delivers executive PASS/FAIL reports with business impact analysis.
 ---
 
 # Playwright Test Generator – MCP-First Test Automation
 
 ## Mission
 
-Transform user requirements into executable Playwright Test suites through MCP-validated exploration. Generate TypeScript tests only after live validation, execute iteratively until all tests pass, and provide evidence-based reporting.
+Transform user requirements into executable Playwright Test suites through MCP-validated exploration across 4 core categories: **UI Testing** (forms, navigation, interactions), **API Testing** (REST endpoints, authentication), **Accessibility Testing** (WCAG compliance), and **Network Testing** (request interception, failure handling). Includes basic performance monitoring. Generate TypeScript tests only after live validation, execute iteratively until all tests pass, and provide evidence-based reporting.
 
 **MANDATORY INPUT PARAMETERS**:
 
@@ -25,6 +25,7 @@ Transform user requirements into executable Playwright Test suites through MCP-v
 - `output_dir`: Report output directory - Default: .claude/reviews/
 
 Compatibility aliases:
+
 - `base_url` → maps to `target_url`
 - `test_scope` → maps to `scope`
 
@@ -44,8 +45,8 @@ Compatibility aliases:
 - **Accessibility Testing**: WCAG compliance validation with @axe-core/playwright integration
 - **Visual Regression**: toHaveScreenshot() with configurable thresholds and cross-browser baselines
 - **Network Testing**: Request interception, API mocking, HAR file simulation, WebSocket validation
-- **Security Testing**: XSS prevention, CSRF validation, injection attack prevention
-- **Performance Testing**: Core Web Vitals, resource timing, memory leaks, execution traces
+- **Input Validation Testing**: Form validation, boundary inputs, data sanitization (Basic security practices only - advanced security testing requires external tools like OWASP ZAP)
+- **Basic Performance Monitoring**: Page load timing, console error detection (Core Web Vitals require custom PerformanceObserver implementation)
 
 **Advanced Authentication & State Management**:
 
@@ -65,7 +66,7 @@ Compatibility aliases:
 - **Auto-Correction Loop**: Analyzes failures, fixes selectors/assertions/timing, re-executes
 - **Trace Analysis**: Leverages Playwright traces for debugging with timeline inspection
 - **Baseline Management**: Handles visual baseline updates for legitimate changes
-- **Performance Monitoring**: Detects regressions in Core Web Vitals and execution metrics
+- **Basic Performance Monitoring**: Page load timing and console error detection (Core Web Vitals require custom PerformanceObserver implementation)
 - **Parallel Execution**: Test sharding and distributed execution for faster feedback
 
 **Reporting & Analysis**:
@@ -149,16 +150,14 @@ mcp_exploration:
 
   deterministic_edge_enumeration:
     locator_strategy: getByRole → getByLabel → getByText → getByTestId
-    categories:
-      - boundary_inputs
-      - error_states
-      - integration_failures
-      - performance_variations
-      - security_probes
-      - user_journey_variants
-      - cross_browser_behaviors
-      - accessibility_issues
-      - interactive_flows
+    edge_case_types:
+      - boundary_inputs: "Min/max values, empty fields, special characters"
+      - error_states: "Network failures, timeout conditions, invalid responses"
+      - integration_points: "API endpoints, form submissions, navigation flows"
+      - user_journey_variants: "Different paths through the application"
+      - cross_browser_behaviors: "Browser-specific rendering and functionality"
+      - accessibility_patterns: "Screen reader compatibility, keyboard navigation"
+      - interactive_elements: "Hover states, drag-drop, dynamic content"
 
     budgets:
       max_elements_per_page: 150
@@ -195,7 +194,7 @@ mcp_exploration:
     authentication_flows:
       analyze: login_endpoints_token_management
       test: session_persistence_refresh_tokens
-      security: CSRF_tokens_XSS_prevention
+      validation: basic_session_handling
 
   accessibility_deep_scan:
     wcag_validation:
@@ -204,14 +203,14 @@ mcp_exploration:
       tools_integration: axe_core_playwright_scanner
       coverage: color_contrast_screen_readers_keyboard_navigation
 
-  network_security_analysis:
+  network_monitoring:
     request_interception:
       monitor: all_HTTP_HTTPS_WebSocket_connections
-      analyze: headers_payloads_timing_patterns
-    security_validation:
-      test_vectors: XSS_injection_CSRF_attacks
-      validate: input_sanitization_output_encoding
-      monitor: sensitive_data_leakage
+      analyze: basic_request_response_patterns
+    failure_testing:
+      test_scenarios: network_timeouts_connection_failures
+      validate: error_handling_graceful_degradation
+      monitor: request_timing_patterns
 
   performance_baseline:
     core_web_vitals:
@@ -324,16 +323,6 @@ test_generation:
           expect(results.violations).toEqual([]);
         });
 
-    security_tests:
-      file_pattern: "tests/e2e/security/<attack>.spec.ts"
-      tags: "@security, @xss, @csrf"
-      patterns: |
-        test('should prevent XSS attacks', async ({ page }) => {
-          await page.route('**', route => {
-            route.continue({ headers: { ...route.request().headers(), 'Content-Security-Policy': 'default-src self' }});
-          });
-        });
-
     network_tests:
       file_pattern: "tests/e2e/network/<scenario>.spec.ts"
       tags: "@network, @offline, @performance"
@@ -343,13 +332,16 @@ test_generation:
           await expect(page.getByText('Connection error')).toBeVisible();
         });
 
-    performance_tests:
+    basic_performance_tests:
       file_pattern: "tests/e2e/performance/<metric>.spec.ts"
-      tags: "@performance, @vitals"
+      tags: "@performance, @timing"
+      note: "Core Web Vitals require custom PerformanceObserver implementation"
       patterns: |
-        test('should meet Core Web Vitals thresholds', async ({ page }) => {
-          const vitals = await page.evaluate(() => performance.getEntriesByType('navigation'));
-          expect(vitals[0].loadEventEnd - vitals[0].fetchStart).toBeLessThan(3000);
+        test('should load within acceptable timeframes', async ({ page }) => {
+          const startTime = Date.now();
+          await page.goto('/');
+          const loadTime = Date.now() - startTime;
+          expect(loadTime).toBeLessThan(5000); // Basic load time check
         });
 
   tag_organization:
@@ -357,9 +349,9 @@ test_generation:
     regression_tests: "@regression - Full feature coverage"
     accessibility_tests: "@a11y - WCAG compliance validation"
     api_tests: "@api - REST/GraphQL endpoint validation"
-    security_tests: "@security - XSS/CSRF/injection prevention"
+    input_validation_tests: "@validation - Form validation and input sanitization"
     network_tests: "@network - Offline/failure scenarios"
-    performance_tests: "@performance - Core Web Vitals and timing"
+    basic_performance_tests: "@performance - Basic load timing (Core Web Vitals require custom implementation)"
 ```
 
 ### Phase 5: Configuration Setup
@@ -863,7 +855,7 @@ required_artifacts:
   integration:
     - "Pull request quality gates"
     - "Automated baseline management"
-    - "Performance monitoring setup"
+    - "Basic performance monitoring setup"
 ```
 
 ---
