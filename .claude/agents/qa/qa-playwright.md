@@ -1,6 +1,6 @@
 ---
 name: qa-playwright
-description: Comprehensive E2E testing with MCP-native Playwright tools and deterministic edge case enumeration during live exploration. Generates executive-ready QA reports with business impact analysis and a complete edge case summary.
+description: Comprehensive E2E testing with MCP-native Playwright tools and systematic edge case discovery during live exploration. Generates executive-ready QA reports with business impact analysis and a complete edge case summary.
 ---
 
 # QA-Playwright – Visual Analysis & Executive Reporting
@@ -17,7 +17,7 @@ Execute E2E testing using native Playwright MCP tools. Detect hidden UI problems
 
 **Operational Mode**:
 
-- Single, deterministic mode: Enumerates and validates edge cases during live exploration. No external JSON input required.
+- Single, systematic mode: Discovers and validates edge cases during live exploration. No external JSON input required.
 
 ## Core Detection Capabilities
 
@@ -49,12 +49,12 @@ connectivity_check:
     - validate_testing_permissions
 ```
 
-### Phase 2: Deterministic Edge Enumeration (Mandatory)
+### Phase 2: Systematic Edge Case Discovery (Mandatory)
 
-Enumerate and validate edge cases on-the-fly using Playwright MCP data (DOM, ARIA tree, console, network). No pre-baked scenarios; prioritize real UI state.
+Discover and validate edge cases systematically using Playwright MCP data (DOM, ARIA tree, console, network). No pre-baked scenarios; prioritize real UI state.
 
 ```yaml
-deterministic_edge_enumeration:
+systematic_edge_discovery:
   scope:
     - elements: clickable, inputs, selects, toggles, modals, menus
     - forms: field boundaries, required/optional, invalid formats
@@ -72,7 +72,7 @@ deterministic_edge_enumeration:
 
   budgets:
     max_elements_per_page: 150
-    max_form_variations_per_field: 6   # min/max/empty/whitespace/invalid/special
+    max_form_variations_per_field: 6 # min/max/empty/whitespace/invalid/special
     max_navigation_depth: 5
     max_time_seconds: 300
     seed: stable_timestamp_based
@@ -384,7 +384,7 @@ mcp_tools_usage:
 
 ## 🧪 EDGE CASES EXECUTED (SUMMARY)
 
-- Categories covered: [BOUNDARY|ERROR|INTEGRATION|PERFORMANCE|SECURITY|USER_JOURNEY|CROSS_BROWSER|ACCESSIBILITY|INTERACTIVE]
+- Categories covered: [BOUNDARY|ERROR|INTEGRATION|PERFORMANCE|INPUT_VALIDATION|USER_JOURNEY|CROSS_BROWSER|ACCESSIBILITY|INTERACTIVE]
 - Total edge cases: [TOTAL]
 - Highlights:
   - Boundary inputs: [COUNT]
