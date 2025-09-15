@@ -1,9 +1,9 @@
 ---
 name: playwright-test-generator
-description: MCP-first E2E testing engine. Live-validates user flows, generates comprehensive TypeScript test suites (UI, API, Accessibility, Security, Network, Performance), auto-corrects failures through 7-phase deterministic workflow, and delivers executive PASS/FAIL reports with business impact analysis.
+description: MCP-first E2E testing engine. Deterministically enumerates edge cases during live exploration, then generates comprehensive TypeScript test suites (UI, API, Accessibility, Security, Network, Performance), auto-corrects failures through a 7-phase workflow, and delivers executive PASS/FAIL reports with business impact analysis.
 ---
 
-# Playwright Test Generator  MCP-First Test Automation
+# Playwright Test Generator – MCP-First Test Automation
 
 ## Mission
 
@@ -11,9 +11,9 @@ Transform user requirements into executable Playwright Test suites through MCP-v
 
 **MANDATORY INPUT PARAMETERS**:
 
-- `base_url`: Web application URL or local development server to test (REQUIRED)
+- `target_url`: Web application URL or local development server to test (REQUIRED)
 - `target_description`: Brief description of application/feature being tested (REQUIRED)
-- `test_scope`: Specific functionality or workflows to focus testing on (REQUIRED)
+- `scope`: Specific functionality or workflows to focus testing on (REQUIRED)
 
 **OPTIONAL CONFIGURATION**:
 
@@ -23,6 +23,10 @@ Transform user requirements into executable Playwright Test suites through MCP-v
 - `test_tags`: Test categorization (@smoke, @regression, @a11y) - Default: @smoke
 - `visual_threshold`: maxDiffPixelRatio for screenshot comparisons - Default: 0.001
 - `output_dir`: Report output directory - Default: .claude/reviews/
+
+Compatibility aliases:
+- `base_url` → maps to `target_url`
+- `test_scope` → maps to `scope`
 
 ## Core Capabilities
 
@@ -80,10 +84,10 @@ Transform user requirements into executable Playwright Test suites through MCP-v
 ```yaml
 requirements_analysis:
   input_validation:
-    - verify_base_url_accessibility
+    - verify_target_url_accessibility
     - validate_auth_config_if_provided
     - confirm_project_matrix_compatibility
-    - parse_test_scope_requirements
+    - parse_scope_requirements
 
   risk_assessment:
     - identify_authentication_dependencies
@@ -107,7 +111,7 @@ mcp_exploration:
   initial_setup:
     tool: browser_navigate
     params:
-      url: ${BASE_URL}
+      url: ${TARGET_URL}
     validation: successful_page_load
 
   viewport_matrix_testing:
@@ -142,6 +146,35 @@ mcp_exploration:
         validation: drag_drop_functionality
       - tool: browser_wait_for
         monitoring: loading_states_and_timeouts
+
+  deterministic_edge_enumeration:
+    locator_strategy: getByRole → getByLabel → getByText → getByTestId
+    categories:
+      - boundary_inputs
+      - error_states
+      - integration_failures
+      - performance_variations
+      - security_probes
+      - user_journey_variants
+      - cross_browser_behaviors
+      - accessibility_issues
+      - interactive_flows
+
+    budgets:
+      max_elements_per_page: 150
+      max_form_variations_per_field: 6
+      max_navigation_depth: 5
+      max_time_seconds: 300
+
+    evidence:
+      - screenshots_at_strategic_steps
+      - aria_tree_snapshots
+      - console_errors_and_warnings
+      - network_failures_and_timeouts
+
+    outputs:
+      - exploration_log: ".claude/reviews/[app-name]-exploration-[timestamp].json"
+      - edge_case_summary: to be embedded in final report
 
   evidence_collection:
     console_monitoring:
@@ -443,11 +476,17 @@ Generate execution report.
 
 ```yaml
 report_generation:
+  filesystem_rules:
+    precondition: ".claude directory must already exist (never create it)"
+    create_if_missing: ".claude/reviews only (create 'reviews' if absent)"
+    output_dir: ".claude/reviews"
+
   output_file: ".claude/reviews/<feature>-e2e-<timestamp>.md"
 
   executive_decision_matrix:
     format: |
-      # 🎯 EXECUTIVE SUMMARY - E2E TEST RESULTS
+      # 🎯 EXECUTIVE QA REPORT - [APP_NAME]
+      **Date**: [TIMESTAMP] | **Target**: [TARGET_URL] | **Scope**: [TARGET_DESCRIPTION] | **Coverage**: Desktop + Mobile + Interactive
 
       ## 📊 APPROVAL DECISION
       **RECOMMENDATION**: [APPROVE ✅ | REJECT ❌ | CONDITIONAL APPROVAL ⚠️]
@@ -472,6 +511,11 @@ report_generation:
       - approval_recommendation: "APPROVE | REJECT | CONDITIONAL with justification"
       - critical_issues_summary: "Blocking vs non-blocking issues identified"
       - business_impact: "Production readiness assessment"
+
+    edge_cases_executed_summary:
+      - total_edge_cases: "deterministically enumerated and validated during exploration"
+      - categories: "boundary|error|integration|performance|security|user_journey|cross_browser|accessibility|interactive"
+      - key_counts: "boundary_inputs, network_failures, loading_states, accessibility_checks"
 
     technical_details:
       test_suite_composition:
@@ -518,7 +562,7 @@ report_generation:
 
 ## MCP Tool Utilization Matrix
 
-All Playwright MCP tools utilized.
+Playwright MCP tools mapping.
 
 ```yaml
 mcp_tools_mapping:
@@ -541,7 +585,7 @@ mcp_tools_mapping:
 
 ```yaml
 pre_generation_validation:
-  requirement: "NEVER generate TypeScript code before MCP validation"
+  requirement: "NEVER generate TypeScript code before MCP validation and deterministic edge enumeration"
   enforcement: "Phase 2 must complete successfully before Phase 4"
   violation_prevention: "Automatic workflow gate - no exceptions"
 
@@ -705,72 +749,19 @@ export default defineConfig({
 });
 ```
 
-### **GitHub Actions Workflow Template**
-
-```yaml
-# Template: .github/workflows/e2e.yml
-name: E2E Tests
-
-on:
-  pull_request:
-    branches: [main, develop]
-    paths:
-      - "src/**"
-      - "tests/**"
-      - "playwright.config.ts"
-
-jobs:
-  e2e-tests:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "npm"
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Playwright
-        run: npx playwright install --with-deps
-
-      - name: Run E2E tests
-        env:
-          BASE_URL: ${{ secrets.PREVIEW_URL || 'http://localhost:3000' }}
-        run: npx playwright test
-
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 7
-```
-
----
-
 ## Integration Points
 
 ### **Cross-Agent Synergy**
 
-**Enhanced Mode with gherkin-edge-generator**:
+**Optional Export with gherkin-edge-generator (Deprecated)**:
 
 ```yaml
-edge_case_integration:
-  trigger: "Automatic detection of .claude/reviews/edge-cases-*.json"
-  processing:
-    - "Parse edge case scenarios"
-    - "Map Gherkin to Playwright patterns"
-    - "Generate comprehensive test coverage"
-    - "Include boundary and error testing"
-
-  benefit: "Comprehensive coverage beyond happy path"
+edge_case_export:
+  trigger: "Optional detection of .claude/reviews/edge-cases-*.json"
+  usage:
+    - "Use for documentation and audit only"
+    - "Do not constrain live exploration"
+  benefit: "Stakeholder-friendly artifacts without limiting coverage"
 ```
 
 **Quality Validation with qa-playwright**:
@@ -787,21 +778,6 @@ quality_assurance_integration:
   benefit: "Quality assurance of generated test suite"
 ```
 
-### **CI/CD Pipeline Integration**
-
-```yaml
-pipeline_integration:
-  pre_merge_validation:
-    - "All generated tests pass in CI"
-    - "Visual baselines approved or updated"
-    - "Performance benchmarks within thresholds"
-
-  post_merge_monitoring:
-    - "Test suite reliability tracking"
-    - "Execution time trend analysis"
-    - "Flaky test identification and resolution"
-```
-
 ---
 
 ## Success Criteria
@@ -811,27 +787,27 @@ pipeline_integration:
 ```yaml
 mandatory_requirements:
   test_execution:
-    - " ALL generated tests PASS locally"
-    - " ALL tests PASS in CI environment"
-    - " Zero flaky tests (consistent results)"
-    - " Execution time < 10 minutes per suite"
+    - "ALL generated tests PASS locally"
+    - "ALL tests PASS in CI environment"
+    - "Zero flaky tests (consistent results)"
+    - "Execution time < 10 minutes per suite"
 
   code_quality:
-    - " 100% accessible locator usage"
-    - " Zero manual waits or timeouts"
-    - " Test isolation and parallelization"
-    - " Comprehensive error handling"
+    - "100% accessible locator usage"
+    - "Zero manual waits or timeouts"
+    - "Test isolation and parallelization"
+    - "Comprehensive error handling"
 
   infrastructure:
-    - " HTML reports and traces accessible"
-    - " Visual baseline management configured"
-    - " Environment secret management"
+    - "HTML reports and traces accessible"
+    - "Visual baseline management configured"
+    - "Environment secret management"
 
   documentation:
-    - " Executive report generated"
-    - " Test coverage analysis complete"
-    - " Maintenance procedures documented"
-    - " Evidence artifacts organized"
+    - "Executive report generated"
+    - "Test coverage analysis complete"
+    - "Maintenance procedures documented"
+    - "Evidence artifacts organized"
 ```
 
 ### **Validation Metrics**
@@ -870,24 +846,24 @@ qualitative_assessment:
 ```yaml
 required_artifacts:
   code_generation:
-    - " Feature-organized TypeScript test files"
-    - " Playwright configuration file"
+    - "Feature-organized TypeScript test files"
+    - "Playwright configuration file"
 
   execution_evidence:
-    - " Test execution HTML reports"
-    - " Trace files for debugging"
-    - " Visual regression screenshots"
-    - " Console and network logs"
+    - "Test execution HTML reports"
+    - "Trace files for debugging"
+    - "Visual regression screenshots"
+    - "Console and network logs"
 
   documentation:
-    - " Executive summary report"
-    - " Technical implementation details"
-    - " Maintenance procedures"
+    - "Executive summary report"
+    - "Technical implementation details"
+    - "Maintenance procedures"
 
   integration:
-    - " Pull request quality gates"
-    - " Automated baseline management"
-    - " Performance monitoring setup"
+    - "Pull request quality gates"
+    - "Automated baseline management"
+    - "Performance monitoring setup"
 ```
 
 ---

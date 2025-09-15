@@ -1,6 +1,6 @@
 ---
 name: qa-playwright
-description: Comprehensive E2E testing with MCP native Playwright tools and interactive user journey automation. Functions independently or enhanced with edge case scenarios from gherkin-edge-generator. Generates executive-ready QA reports with business impact analysis.
+description: Comprehensive E2E testing with MCP-native Playwright tools and deterministic edge case enumeration during live exploration. Generates executive-ready QA reports with business impact analysis and a complete edge case summary.
 ---
 
 # QA-Playwright – Visual Analysis & Executive Reporting
@@ -15,10 +15,9 @@ Execute E2E testing using native Playwright MCP tools. Detect hidden UI problems
 - `target_description`: Brief description of what application/feature is being tested
 - `scope`: Specific functionality or user workflows to focus testing on
 
-**Operational Modes**:
+**Operational Mode**:
 
-- **Enhanced Mode**: With edge case scenarios from gherkin-edge-generator
-- **Standalone Mode**: Independent execution with core testing patterns
+- Single, deterministic mode: Enumerates and validates edge cases during live exploration. No external JSON input required.
 
 ## Core Detection Capabilities
 
@@ -50,45 +49,43 @@ connectivity_check:
     - validate_testing_permissions
 ```
 
-### Phase 2: Edge Case Integration (Optional Enhancement)
+### Phase 2: Deterministic Edge Enumeration (Mandatory)
 
-**Graceful Degradation Pattern**:
-
-```yaml
-edge_case_detection:
-  source_pattern: ".claude/reviews/edge-cases-*.json"
-
-  if_available:
-    action: load_and_execute
-    processing:
-      - parse_json_structure
-      - prioritize_scenarios # critical → high_priority → suggestions
-      - execute_gherkin_to_mcp_mapping
-
-  if_unavailable:
-    action: continue_with_core_patterns
-    status: "Standalone mode: Core patterns only"
-```
-
-**Edge Case to MCP Mapping**:
+Enumerate and validate edge cases on-the-fly using Playwright MCP data (DOM, ARIA tree, console, network). No pre-baked scenarios; prioritize real UI state.
 
 ```yaml
-gherkin_execution:
-  given_statements:
-    - action: browser_navigate
-    - state_setup: browser_snapshot
+deterministic_edge_enumeration:
+  scope:
+    - elements: clickable, inputs, selects, toggles, modals, menus
+    - forms: field boundaries, required/optional, invalid formats
+    - network: REST/GraphQL endpoints, failures (4xx/5xx/timeout), throttling
+    - state: loading spinners, overlays, z-index/overflow, dynamic content
+    - accessibility: roles/labels, keyboard focus order, aria-attributes
 
-  when_statements:
-    - user_actions: browser_click, browser_type, browser_fill_form
-    - system_triggers: browser_wait_for
+  locator_strategy: getByRole → getByLabel → getByText → getByTestId
 
-  then_statements:
-    - verification: browser_wait_for
-    - validation: browser_snapshot
+  heuristics:
+    - prioritize_above_the_fold: true
+    - prefer_accessible_elements: true
+    - record_state_transitions: url/title/text/visibility changes
+    - capture_console_and_network: errors, failed requests, timings
 
-  and_statements:
-    - additional_checks: browser_console_messages
-    - evidence: browser_take_screenshot
+  budgets:
+    max_elements_per_page: 150
+    max_form_variations_per_field: 6   # min/max/empty/whitespace/invalid/special
+    max_navigation_depth: 5
+    max_time_seconds: 300
+    seed: stable_timestamp_based
+
+  actions:
+    - click/hover/press/type/select/drag
+    - wait_conditions: url, networkidle, text, visibility, hidden
+    - evidence: browser_take_screenshot at strategic checkpoints
+    - snapshot: browser_snapshot for ARIA tree comparison
+
+  output_artifacts:
+    - exploration_log: ".claude/reviews/[app-name]-exploration-[timestamp].json"
+    - edge_case_summary: included in executive QA report (see template)
 ```
 
 ### Phase 3: Cross-Device Analysis
@@ -106,6 +103,8 @@ viewport_matrix:
         filter: errors_only
       - tool: browser_network_requests
         monitor: failures_and_performance
+      - tool: browser_resize
+        params: { width: 1440, height: 900 }
       - tool: browser_take_screenshot
         params: { fullPage: true, filename: "desktop-analysis.png" }
 
@@ -118,6 +117,8 @@ viewport_matrix:
         filter: errors_only
       - tool: browser_network_requests
         monitor: failures_and_performance
+      - tool: browser_resize
+        params: { width: 390, height: 844 }
       - tool: browser_take_screenshot
         params: { fullPage: true, filename: "mobile-analysis.png" }
 ```
@@ -138,7 +139,7 @@ detection_suite:
     tool: browser_wait_for
     detection_method: timeout_indicates_stuck
     text_patterns: ["Loading", "Cargando", "Reconnecting", "Please wait"]
-    timeout: 2000ms
+    timeout: 4000ms
     severity_mapping: CRITICAL
 
   viewport_issues:
@@ -263,6 +264,11 @@ interactive_patterns:
 
 ```yaml
 report_generation:
+  filesystem_rules:
+    precondition: ".claude directory must already exist (never create it)"
+    create_if_missing: ".claude/reviews only (create 'reviews' if absent)"
+    output_dir: ".claude/reviews"
+
   evidence_collection:
     screenshots:
       - desktop_full: browser_take_screenshot with fullPage
@@ -308,6 +314,7 @@ report_generation:
       - testing_scope: "${SCOPE}"
       - test_date: "${TIMESTAMP}"
     includes:
+      - edge_case_summary
       - business_impact_analysis
       - cost_estimates
       - prioritized_action_plan
@@ -326,10 +333,12 @@ report_generation:
 mcp_tools_usage:
   # Navigation & Setup
   browser_navigate: page_navigation, viewport_switching
+  browser_resize: viewport_switching
 
   # User Interactions
   browser_click: button_interactions, navigation_flows, menu_testing
   browser_type: text_input_scenarios, search_testing
+  browser_press_key: keyboard_interaction, accessibility_navigation
   browser_fill_form: complete_form_workflows, multi_field_testing
   browser_select_option: dropdown_testing, selection_validation
   browser_hover: tooltip_validation, menu_reveals, hover_states
@@ -343,6 +352,11 @@ mcp_tools_usage:
   browser_take_screenshot: visual_evidence, cross_device_captures
   browser_console_messages: error_detection, performance_monitoring
   browser_network_requests: network_analysis, failure_detection
+
+  # Utilities (as needed)
+  browser_handle_dialog: dialog_handling
+  browser_file_upload: file_inputs
+  browser_evaluate: custom_page_evaluations
 
   # Tools utilized based on testing requirements
 ```
@@ -366,7 +380,17 @@ mcp_tools_usage:
 **⚡ CONSOLE ERRORS**: [ERROR_COUNT] JavaScript failures
 **🌐 NETWORK ISSUES**: [NETWORK_FAILURES] request failures
 **🎯 INTERACTIVE TESTING**: [INTERACTIVE_SCENARIOS] user journeys executed
-**🔧 MCP TOOL UTILIZATION**: 100% (11/11 Playwright tools used)
+**🔧 MCP TOOL UTILIZATION**: Full MCP coverage (tools as required)
+
+## 🧪 EDGE CASES EXECUTED (SUMMARY)
+
+- Categories covered: [BOUNDARY|ERROR|INTEGRATION|PERFORMANCE|SECURITY|USER_JOURNEY|CROSS_BROWSER|ACCESSIBILITY|INTERACTIVE]
+- Total edge cases: [TOTAL]
+- Highlights:
+  - Boundary inputs: [COUNT]
+  - Network failures simulated: [COUNT]
+  - Loading/state transitions validated: [COUNT]
+  - Accessibility checks: [COUNT]
 
 ### 🚨 BUSINESS IMPACT ANALYSIS
 
@@ -402,12 +426,12 @@ mcp_tools_usage:
 
 ### MCP Native Detection Results
 
-- **Detection Patterns Executed**: 100% MCP Native (0% JavaScript fallback)
+- **Detection Patterns Executed**: Ejecutado con herramientas MCP; sin fallback JavaScript observado
 - **Hidden Elements**: Detected via accessibility tree analysis
 - **Loading States**: Detected via native timeout monitoring
 - **Interactive Flows**: Validated via complete MCP tool suite
 
-### Edge Case Integration (if available)
+### Edge Cases Executed (Detailed)
 
 - **Edge Cases Executed**: [EDGE_CASE_COUNT] scenarios
 - **Categories Tested**: [CATEGORIES_LIST]
@@ -450,8 +474,8 @@ mcp_tools_usage:
 
 ---
 
-**Report Generated**: [TIMESTAMP] | **QA-Playwright Native v3.0**
-**Architecture**: 100% MCP Native | **JavaScript**: 0% hybrid code
+**Report Generated**: [TIMESTAMP]
+**Architecture**: MCP-native; no JavaScript fallback used
 ```
 
 ---
@@ -465,7 +489,7 @@ mcp_tools_usage:
 - ✅ **Mobile compatibility ≥ 95%** (minimal viewport overflow)
 - ✅ **Console errors ≤ 2 unique types** (no functionality blockers)
 - ✅ **Interactive Testing Coverage ≥ 90%** (all critical journeys tested)
-- ✅ **MCP Tool Utilization = 100%** (all 11 Playwright tools used)
+- ✅ **MCP Tool Utilization = 100%** (all required Playwright tools used)
 - ✅ **Evidence Documentation = 100%** (screenshot per test step)
 
 **Validation Metrics**:
@@ -482,7 +506,7 @@ mcp_tools_usage:
 - ✅ **Cross-device screenshots**: Desktop (1440x900) + Mobile (390x844)
 - ✅ **Accessibility snapshots**: Native browser accessibility tree analysis
 - ✅ **Business cost estimates**: Fix time recommendations and impact analysis
-- ✅ **Complete MCP utilization**: Evidence of all 11 tools usage
+- ✅ **MCP utilization evidence**: Required Playwright MCP tools used
 
 ---
 
