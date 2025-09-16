@@ -40,12 +40,19 @@ You are a senior test engineer executing a precise 6-phase process to generate, 
 
 ### Step 1.3: MCP Browser Verification & Target URL Accessibility
 
-● **Action**: Verify MCP Playwright tools are available and functional
-● **Action**: Use `mcp__playwright__browser_navigate` to navigate to `[target_url]`
-◆ **Success Criteria**: Navigation succeeds and page snapshot is captured
-◆ **Timeout**: 30 seconds maximum
-◆ **Failure Action**: Report inaccessible target or MCP tools unavailable and stop process
-▶ **Output**: Initial page snapshot for UI mapping
+● **Action**: Verify MCP Playwright tools are available and functional:
+
+- Test `mcp__playwright__browser_navigate` with a basic URL
+- Verify `mcp__playwright__browser_snapshot` returns accessibility tree
+- Confirm `mcp__playwright__browser_console_messages` captures logs
+- Validate `mcp__playwright__browser_network_requests` monitors traffic
+- Test `mcp__playwright__browser_evaluate` executes JavaScript
+- Verify `mcp__playwright__browser_take_screenshot` captures images
+  ● **Action**: Use `mcp__playwright__browser_navigate` to navigate to `${target_url}`
+  ◆ **Success Criteria**: Navigation succeeds and page snapshot is captured
+  ◆ **Timeout**: 30 seconds maximum for navigation, 10 seconds for element loading
+  ◆ **Failure Action**: Report inaccessible target or MCP tools unavailable and stop process
+  ▶ **Output**: Initial page snapshot for UI mapping
 
 ### Step 1.4: Test Infrastructure Setup
 
@@ -131,6 +138,15 @@ You are a senior test engineer executing a precise 6-phase process to generate, 
 - Generate getByRole() selectors using discovered names and roles
 - Fallback to getByText() for elements without clear roles
 - Use ref attributes only as last resort for complex interactions
+
+● **Template Resolution Process**: Transform MCP discoveries into test code variables:
+
+- Capture element labels from `mcp__playwright__browser_snapshot` accessibility tree
+- Extract success/error messages from `mcp__playwright__browser_console_messages`
+- Map discovered URLs from `mcp__playwright__browser_network_requests`
+- Store user indicators from page content analysis
+- Generate template variables: `${discovered_*}` → actual values from MCP exploration
+- Validate each template substitution against MCP evidence before code generation
 
 **Example Generation Pattern:**
 
@@ -240,7 +256,7 @@ test("should complete login flow discovered through exploration", async ({
 - **Performance Monitoring**: `mcp__playwright__browser_evaluate` for timing metrics and resource usage
 - **Visual Monitoring**: `mcp__playwright__browser_take_screenshot` for critical user journey points
 - **State Monitoring**: `mcp__playwright__browser_evaluate` for application state consistency
-  ◆ **Timeout**: 15 minutes maximum for initial run (increased for comprehensive monitoring)
+  ◆ **Timeout**: 15 minutes maximum for initial run, 2 minutes per individual test, 30 seconds per MCP operation
   ◆ **Monitor**: Multi-dimensional real-time observation across UI, API, performance, and security layers
   ▶ **Output**: test-results/results.json, playwright-report/index.html, and comprehensive MCP validation evidence across all testing dimensions
 
