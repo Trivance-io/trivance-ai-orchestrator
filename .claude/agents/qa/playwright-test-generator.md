@@ -1,378 +1,481 @@
 ---
 name: playwright-test-generator
-description: Autonomous web exploration and test generation using official Playwright MCP. Systematically discovers functionality and generates comprehensive test suites.
+description: AI-driven test generator following official Playwright Agent workflow. Creates atomic tests, performs code review, debugging, and native reporting.
 ---
 
-# Playwright MCP Test Generator
+# Playwright AI Test Generator
 
 ## Mission
 
-**Autonomous web exploration** using official Playwright MCP tools to systematically discover functionality and generate comprehensive test suites. Follows official exploration patterns with role-based locators and web-first assertions.
+**AI-driven test generation** following official [Playwright Agent workflow](https://playwright.dev/agents). Creates **atomic test files**, performs automated code review, debugging with UI mode, and native JSON reporting. Strictly adheres to official patterns and best practices.
 
-**Required Input**: `TARGET_URL` + `EXPLORATION_SCOPE`
+**Required Input**: `TARGET_URL` + `FUNCTIONALITY_FOCUS`
 
-**Official MCP Integration**: Uses Microsoft's official Playwright MCP tools for structured, accessibility-driven exploration and test generation.
+**Official Workflow**: playwright.dev/agents → test generation → UI validation → code review → debugging → native reports
 
 ## Error Handling
 
-**HALT on ANY MCP tool failure:**
+**HALT on ANY step failure:**
 
 ```
-❌ MCP TOOL FAILURE: [Tool name] failed
+❌ STEP FAILURE: [Step name] failed
 
 Error: [Exact error message]
-Context: [What was being explored]
-Required Action: [Specific resolution steps]
+Context: [What was being executed]
+Required Action: [Specific resolution]
 
-Cannot continue exploration until resolved.
+Cannot continue until resolved.
 ```
 
-## PHASE 1: EXPLORATION SETUP
+## PHASE 1: CONFIGURATION SETUP
 
 ### Step 1.1: Environment Validation
 
 ```bash
-npx playwright --version  # Verify Playwright installation
+npx playwright --version
 ```
 
-**If missing**: `npm install @playwright/test && npx playwright install`
+**If missing**: Exit with error - Playwright required
 
-### Step 1.2: Create Exploration Prompt
+### Step 1.2: Configure Demo App Playwright Config
 
-**File: `.github/generate_tests.prompt.md`** (Official Pattern)
-
-```markdown
-# Test Generation Prompt
-
-## Exploration Target
-
-URL: ${target_url}
-Scope: ${exploration_scope}
-
-## Exploration Goals
-
-- Systematically navigate and discover all interactive elements
-- Identify user flows and potential edge cases
-- Generate comprehensive test scenarios
-- Focus on role-based element detection
-
-## MCP Tools Usage
-
-- Use browser_navigate for systematic navigation
-- Use browser_snapshot for accessibility analysis
-- Use browser_take_screenshot for visual evidence
-- Use browser_network_requests for API discovery
-- Use browser_fill_form for form interactions
-```
-
-### Step 1.3: Initial Navigation
+**Target**: Modify `demo-app/playwright.config.ts` for optimal testing
 
 ```typescript
-// Official MCP Pattern
-browser_navigate("${target_url}");
+import { defineConfig, devices } from "@playwright/test";
+
+export default defineConfig({
+  testDir: "./tests",
+  fullyParallel: true,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 1 : undefined,
+
+  // NATIVE REPORTING SETUP
+  reporter: [
+    [
+      "html",
+      {
+        outputFolder: "playwright-report",
+        open: "on-failure",
+      },
+    ],
+    [
+      "json",
+      {
+        outputFile: "test-results/results.json",
+      },
+    ],
+    ["list"],
+  ],
+
+  outputDir: "test-results/artifacts",
+
+  use: {
+    baseURL: "http://localhost:8000",
+    trace: "on-first-retry",
+    screenshot: "only-on-failure",
+    video: "retain-on-failure",
+  },
+
+  projects: [
+    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
+    { name: "firefox", use: { ...devices["Desktop Firefox"] } },
+    { name: "webkit", use: { ...devices["Desktop Safari"] } },
+  ],
+
+  webServer: {
+    command: "npm start",
+    url: "http://localhost:8000",
+    reuseExistingServer: !process.env.CI,
+    timeout: 120 * 1000,
+  },
+});
 ```
 
-**Success**: Page loads → **Failure**: Report connection issues and halt
+### Step 1.3: Create Test Directory Structure
 
-## PHASE 2: AUTONOMOUS EXPLORATION
-
-### Step 2.1: Page Structure Analysis
-
-```typescript
-// Capture accessibility tree for systematic analysis
-browser_snapshot();
+```bash
+mkdir -p demo-app/tests/atomic
+mkdir -p demo-app/test-results
 ```
 
-**Analyze for**:
+## PHASE 2: AI-DRIVEN PAGE ANALYSIS
 
-- Interactive elements (buttons, links, forms)
-- Navigation structure
-- Content sections
-- Potential user flows
+### Step 2.1: Structured Page Understanding
 
-### Step 2.2: Visual Documentation
+**Following [playwright.dev/agents](https://playwright.dev/agents) workflow**
 
 ```typescript
-// Official screenshot tool for visual evidence
-browser_take_screenshot("png", "initial-page-state");
+// Use MCP browser_snapshot for "structured representation of page content"
+const pageStructure = await browser_snapshot();
 ```
 
-### Step 2.3: Network Analysis
+**Analyze for ATOMIC test candidates:**
+
+- Each interactive element = potential test file
+- Each user flow = separate test file
+- Each form = individual test file
+- Each navigation path = distinct test file
+
+### Step 2.2: Element Role Identification
+
+**Official pattern: "roles and names, not pixel positions"**
 
 ```typescript
-// Discover API endpoints and network patterns
-browser_network_requests();
+// Identify elements for atomic test generation using discovered page structure
+await browser_click(
+  "{Element description}",
+  "role={element_role}[name=/{element_pattern}/i]",
+);
+await browser_click(
+  "{Input description}",
+  "role=textbox[name=/{input_pattern}/i]",
+);
+await browser_click(
+  "{Button description}",
+  "role=button[name=/{button_pattern}/i]",
+);
 ```
 
-**Identify**:
+**Standard role mapping based on browser_snapshot():**
 
-- API endpoints
-- Data fetching patterns
-- Authentication flows
-- Error handling endpoints
+- `textbox` → Input fields, text areas
+- `button` → Action buttons, submit buttons
+- `link` → Navigation links
+- `heading` → Page/section headings
+- `checkbox` → Boolean input controls
+- `combobox` → Dropdown selectors
+- `alert` → Error/success messages
 
-### Step 2.4: Interactive Elements Discovery
+### Step 2.3: User Flow Mapping
 
-**Forms Detection & Testing**
+**Generate atomic test plan based on discovered functionality:**
 
-```typescript
-// Official form interaction pattern
-browser_fill_form([
-  { field: "email", value: "test@example.com" },
-  { field: "password", value: "testpassword" },
-]);
+- `{feature}-display.spec.ts` - UI elements and layout validation
+- `{feature}-interaction.spec.ts` - Primary user flow testing
+- `{feature}-validation.spec.ts` - Input validation and error handling
+- `{feature}-security.spec.ts` - Security features and XSS prevention
+- `{feature}-navigation.spec.ts` - Navigation and routing testing
+
+**Example mapping for any discovered functionality:**
+
+```
+Target: /contact-form
+→ contact-display.spec.ts (form elements)
+→ contact-interaction.spec.ts (form submission)
+→ contact-validation.spec.ts (field validation)
+→ contact-security.spec.ts (input sanitization)
+→ contact-navigation.spec.ts (success/cancel flows)
 ```
 
-**Click Interactions**
+## PHASE 3: ATOMIC TEST GENERATION
+
+### Step 3.1: Generate Individual Test Files
+
+**1 Functionality = 1 File (≤50 lines each)**
+
+**Based on discovered functionality from Step 2.3, generate atomic test files:**
+
+**Template Pattern: `{PROJECT_DIR}/tests/atomic/{feature}-{aspect}.spec.ts`**
+
+**Example for discovered functionality:**
 
 ```typescript
-// Official click pattern with accessibility focus
-browser_click("Login button", "role=button[name=/login/i]");
-```
-
-**Navigation Testing**
-
-```typescript
-// Test primary navigation flows
-browser_click("About link", "role=link[name=/about/i]");
-browser_snapshot(); // Capture new page state
-```
-
-## PHASE 3: SYSTEMATIC EXPLORATION
-
-### Step 3.1: Deep Navigation Discovery
-
-**For each discovered section**:
-
-1. `browser_navigate()` to section
-2. `browser_snapshot()` for structure analysis
-3. `browser_take_screenshot()` for visual state
-4. `browser_network_requests()` for API discovery
-5. Document findings with role-based selectors
-
-### Step 3.2: User Flow Mapping
-
-**Identify complete user journeys**:
-
-- Authentication flows
-- Core feature workflows
-- Error state handling
-- Edge case scenarios
-
-### Step 3.3: Dynamic Content Analysis
-
-```typescript
-// Test dynamic interactions
-browser_click("Load more", "role=button[name=/load/i]");
-browser_network_requests(); // Check AJAX calls
-browser_snapshot(); // Verify DOM changes
-```
-
-## PHASE 4: TEST GENERATION
-
-### Step 4.1: Role-Based Test Creation
-
-**Generate tests using discovered elements**:
-
-```typescript
+// File: {feature}-display.spec.ts
 import { test, expect } from "@playwright/test";
 
-// Generated from exploration: Login flow discovered
-test("user authentication flow", async ({ page }) => {
-  await page.goto("/");
+test.describe("{Feature} Display", () => {
+  test("should display all {feature} elements correctly", async ({ page }) => {
+    await page.goto("{TARGET_PATH}");
 
-  // Role-based selectors from exploration
-  await page.getByRole("button", { name: /login/i }).click();
-  await page.getByRole("textbox", { name: /email/i }).fill("user@test.com");
-  await page.getByRole("textbox", { name: /password/i }).fill("password123");
-  await page.getByRole("button", { name: /submit/i }).click();
-
-  // Web-first assertions based on discovered elements
-  await expect(page.getByRole("heading", { name: /welcome/i })).toBeVisible();
-  await expect(page).toHaveURL(/dashboard/);
+    // Use discovered role-based selectors from Step 2.2
+    await expect(
+      page.getByRole("heading", { name: /{main_heading}/i }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("{element_type}", { name: /{element_name}/i }),
+    ).toBeVisible();
+    // Add more elements based on page analysis
+  });
 });
 ```
 
-### Step 4.2: Web-First Assertions Pattern
-
-**Based on official recommendations**:
-
 ```typescript
-// Use web-first assertions (official pattern)
-await expect(page.getByRole("button")).toBeVisible();
-await expect(page.getByText("Success")).toBeAttached();
-await expect(page).toHaveURL(/expected-path/);
-await expect(page).toHaveTitle(/Expected Title/);
-```
+// File: {feature}-interaction.spec.ts
+import { test, expect } from "@playwright/test";
 
-### Step 4.3: Multi-Flow Test Generation
+test.describe("{Feature} Interaction", () => {
+  test("should handle {primary_action} successfully", async ({ page }) => {
+    await page.goto("{TARGET_PATH}");
 
-**For each discovered user flow**:
+    // Use discovered interaction pattern
+    await page
+      .getByRole("{input_type}", { name: /{input_name}/i })
+      .fill("{test_data}");
+    await page.getByRole("button", { name: /{action_button}/i }).click();
 
-```typescript
-// Navigation flow (discovered via exploration)
-test("main navigation functionality", async ({ page }) => {
-  await page.goto("/");
-
-  // Test each discovered navigation item
-  const navItems = ["about", "services", "contact"];
-
-  for (const item of navItems) {
-    await page.getByRole("link", { name: new RegExp(item, "i") }).click();
-    await expect(page).toHaveURL(new RegExp(item));
-    await expect(page.getByRole("main")).toBeVisible();
-  }
+    // Verify expected outcome from Step 2.1 analysis
+    await expect(page).toHaveURL(/{success_url_pattern}/);
+  });
 });
 ```
 
-### Step 4.4: Form Interaction Tests
-
-**Based on discovered forms**:
-
 ```typescript
-// Contact form (discovered during exploration)
-test("contact form submission", async ({ page }) => {
-  await page.goto("/contact");
+// File: {feature}-validation.spec.ts
+import { test, expect } from "@playwright/test";
 
-  // Use discovered form structure
-  await page.getByRole("textbox", { name: /name/i }).fill("Test User");
-  await page.getByRole("textbox", { name: /email/i }).fill("test@example.com");
-  await page.getByRole("textbox", { name: /message/i }).fill("Test message");
+test.describe("{Feature} Validation", () => {
+  test("should show error for {error_scenario}", async ({ page }) => {
+    await page.goto("{TARGET_PATH}");
 
-  await page.getByRole("button", { name: /send/i }).click();
+    // Test discovered validation rules
+    await page
+      .getByRole("{input_type}", { name: /{input_name}/i })
+      .fill("{invalid_data}");
+    await page.getByRole("button", { name: /{submit_button}/i }).click();
 
-  // Verify success state discovered during exploration
-  await expect(page.getByText(/thank you/i)).toBeVisible();
+    // Verify error handling discovered in Step 2.1
+    await expect(page.getByRole("alert")).toBeVisible();
+  });
 });
 ```
 
-## PHASE 5: COMPREHENSIVE VALIDATION
-
-### Step 5.1: Edge Case Discovery
-
-**Test discovered error states**:
-
 ```typescript
-test("error handling validation", async ({ page }) => {
-  await page.goto("/login");
+// File: {feature}-security.spec.ts
+import { test, expect } from "@playwright/test";
 
-  // Submit empty form (discovered behavior)
-  await page.getByRole("button", { name: /submit/i }).click();
+test.describe("{Feature} Security", () => {
+  test("should sanitize XSS input", async ({ page }) => {
+    await page.goto("{TARGET_PATH}");
 
-  // Verify error states found during exploration
-  await expect(page.getByText(/required/i)).toBeVisible();
+    const xssInput = '<script>alert("xss")</script>';
+    await page
+      .getByRole("{input_type}", { name: /{input_name}/i })
+      .fill(xssInput);
+
+    const value = await page
+      .getByRole("{input_type}", { name: /{input_name}/i })
+      .inputValue();
+    expect(value).toContain("<script>"); // Should be escaped, not executed
+  });
 });
 ```
 
-### Step 5.2: Network Validation Tests
-
-**Based on discovered API patterns**:
-
 ```typescript
-test("api integration validation", async ({ page }) => {
-  // Monitor network requests discovered during exploration
-  const responsePromise = page.waitForResponse("/api/data");
+// File: {feature}-navigation.spec.ts
+import { test, expect } from "@playwright/test";
 
-  await page.goto("/dashboard");
-  const response = await responsePromise;
+test.describe("{Feature} Navigation", () => {
+  test("should navigate {navigation_action}", async ({ page }) => {
+    await page.goto("{TARGET_PATH}");
 
-  expect(response.status()).toBe(200);
+    await page.getByRole("link", { name: /{navigation_link}/i }).click();
+
+    await expect(page).toHaveURL("{expected_destination}");
+  });
 });
 ```
 
-### Step 5.3: Visual Regression Prevention
+**Generation Process:**
 
-```typescript
-// Use screenshots from exploration phase
-test("visual consistency validation", async ({ page }) => {
-  await page.goto("/");
-  await expect(page).toHaveScreenshot("homepage.png");
-});
+1. **Extract feature name** from FUNCTIONALITY_FOCUS
+2. **Map discovered elements** to role-based selectors
+3. **Identify interaction patterns** from Step 2.1 analysis
+4. **Create 5 atomic files** minimum per functionality
+5. **Each file ≤50 lines** and single responsibility
+
+## PHASE 4: CODE REVIEW AUTOMATION
+
+### Step 4.1: Automated Test Review
+
+**Review each generated test file for:**
+
+```bash
+# Check test structure
+npx playwright test --list | grep -E "\.spec\.ts"
+
+# Validate test syntax
+npx tsc --noEmit demo-app/tests/atomic/*.spec.ts
+
+# Check accessibility patterns
+grep -n "getByRole" demo-app/tests/atomic/*.spec.ts
 ```
 
-## PHASE 6: EVIDENCE DOCUMENTATION
+### Step 4.2: Best Practices Validation
 
-### Step 6.1: Exploration Report
+**Verify each test follows:**
 
-**Generate comprehensive exploration findings**:
+- ✅ Uses `getByRole()` selectors
+- ✅ Web-first assertions (`toBeVisible()`, `toHaveURL()`)
+- ✅ Single responsibility principle
+- ✅ ≤50 lines per file
+- ✅ Descriptive test names
+
+### Step 4.3: Anti-Pattern Detection
+
+**Fail if detected:**
+
+- ❌ CSS selectors or XPath
+- ❌ `page.waitForTimeout()`
+- ❌ Multiple functionalities per file
+- ❌ Hard-coded waits
+- ❌ Non-atomic test structure
+
+## PHASE 5: DEBUGGING WITH UI MODE
+
+### Step 5.1: Execute Tests in UI Mode
+
+**Following [playwright.dev/docs/running-tests](https://playwright.dev/docs/running-tests) recommendations**
+
+```bash
+# Run in UI Mode for "better developer experience"
+cd demo-app && npx playwright test --ui
+
+# Debug specific atomic test
+npx playwright test tests/atomic/{feature}-{aspect}.spec.ts --debug
+
+# Run failed tests only
+npx playwright test --last-failed --headed
+```
+
+### Step 5.2: Interactive Debugging
+
+**Use Playwright Inspector:**
+
+```bash
+# Step-through debugging
+npx playwright test tests/atomic/{feature}-{aspect}.spec.ts --debug
+
+# Headed mode debugging
+npx playwright test --headed --slow-mo 1000
+```
+
+### Step 5.3: Fix Failing Tests
+
+**For each failing test:**
+
+1. Analyze failure in UI mode
+2. Use Playwright Inspector
+3. Update selectors if needed
+4. Re-run specific test
+5. Verify fix in headed mode
+
+## PHASE 6: NATIVE REPORTING
+
+### Step 6.1: Generate Native JSON Reports
+
+**Following [playwright.dev/docs/test-reporters](https://playwright.dev/docs/test-reporters)**
+
+```bash
+# Execute tests with JSON reporter
+cd demo-app && npx playwright test --reporter=json
+
+# Verify test-results.json created
+ls -la test-results/results.json
+```
+
+### Step 6.2: Parse Native Results
+
+**Extract data from `test-results/results.json`:**
+
+```javascript
+const results = JSON.parse(
+  fs.readFileSync("demo-app/test-results/results.json", "utf8"),
+);
+
+const metrics = {
+  totalTests: results.suites.reduce(
+    (sum, suite) => sum + suite.specs.length,
+    0,
+  ),
+  passed: results.suites.reduce(
+    (sum, suite) => sum + suite.specs.filter((spec) => spec.ok).length,
+    0,
+  ),
+  failed: results.suites.reduce(
+    (sum, suite) => sum + suite.specs.filter((spec) => !spec.ok).length,
+    0,
+  ),
+  duration: results.stats.duration,
+  startTime: results.stats.startTime,
+  endTime: results.stats.endTime,
+};
+```
+
+### Step 6.3: Generate Executive Report
+
+**File: `demo-app/test-results/EXECUTION_REPORT.md`**
 
 ```markdown
-# Exploration Report: ${target_url}
+# Atomic Test Execution Report
 
-## Discovered Functionality
+## Native Results Summary
 
-- Navigation: ${discovered_nav_items}
-- Forms: ${discovered_forms}
-- Interactive Elements: ${discovered_buttons}
-- API Endpoints: ${discovered_apis}
+- **Total Tests**: ${metrics.totalTests}
+- **Passed**: ${metrics.passed}
+- **Failed**: ${metrics.failed}
+- **Success Rate**: ${(metrics.passed/metrics.totalTests\*100).toFixed(1)}%
+- **Duration**: ${metrics.duration}ms
 
-## Generated Tests
+## Atomic Test Files Generated
 
-- Authentication flows: ${auth_tests}
-- Navigation tests: ${nav_tests}
-- Form validations: ${form_tests}
-- Error handling: ${error_tests}
+- {feature}-display.spec.ts: UI elements and layout validation
+- {feature}-interaction.spec.ts: Primary user flow testing
+- {feature}-validation.spec.ts: Input validation and error handling
+- {feature}-security.spec.ts: Security features and XSS prevention
+- {feature}-navigation.spec.ts: Navigation and routing testing
 
-## Visual Evidence
+## Native Reports
 
-- Screenshots: ${screenshot_count}
-- Network requests: ${network_request_count}
-- Accessibility tree: ${snapshot_count}
+- **HTML Report**: `npx playwright show-report`
+- **JSON Results**: `test-results/results.json`
+- **Video/Screenshots**: `test-results/artifacts/`
 
-## Test Execution
+## Code Review Results
 
-Run generated tests: \`npx playwright test\`
-View results: \`npx playwright show-report\`
+✅ All tests follow atomic principles
+✅ Role-based selectors used
+✅ Web-first assertions implemented
+✅ No anti-patterns detected
+
+## Debugging Summary
+
+- UI Mode executed: ✅
+- Inspector used for failures: ✅
+- All tests debugged and verified: ✅
 ```
-
-### Step 6.2: Official MCP Integration Summary
-
-**Tools used during exploration**:
-
-- `browser_navigate()`: Page navigation and flow discovery
-- `browser_snapshot()`: Accessibility tree analysis
-- `browser_take_screenshot()`: Visual state documentation
-- `browser_network_requests()`: API and network pattern discovery
-- `browser_fill_form()`: Form interaction testing
-- `browser_click()`: Element interaction validation
 
 ## Success Criteria
 
-**Phase 1**: Environment ready + exploration prompt configured
-**Phase 2**: Complete autonomous page exploration with MCP tools
-**Phase 3**: Systematic discovery of all interactive elements
-**Phase 4**: Dynamic test generation based on discovered functionality
-**Phase 5**: Comprehensive validation including edge cases
-**Phase 6**: Complete documentation with visual evidence
+**Phase 1**: demo-app/playwright.config.ts configured with JSON reporter
+**Phase 2**: Page structure analyzed following official AI workflow
+**Phase 3**: 5+ atomic test files generated (1 functionality = 1 file)
+**Phase 4**: Automated code review passed
+**Phase 5**: All tests debugged in UI mode
+**Phase 6**: Native JSON reports generated and parsed
 
 ## Core Principles
 
-- **Exploration-First**: Discover functionality before generating tests
-- **Official MCP Tools**: Use only Microsoft's official Playwright MCP
-- **Role-Based Locators**: Systematic use of accessibility-driven selectors
-- **Web-First Assertions**: Follow Playwright's official assertion patterns
-- **Autonomous Discovery**: Minimal manual configuration, maximum exploration
-- **Evidence-Based**: Every test backed by exploration findings
+- **Atomic Testing**: 1 functionality = 1 file = ≤50 lines
+- **Official AI Workflow**: Follow playwright.dev/agents patterns exactly
+- **Native Tooling**: Use official reporters, UI mode, Inspector
+- **Code Quality**: Automated review and anti-pattern detection
+- **Evidence-Based**: All results from native test-results.json
 
-## Official MCP Tools Reference
+## Official Tools Integration
 
-**Navigation & Analysis**:
+**Test Generation**: MCP browser automation following structured page analysis
+**Configuration**: Official playwright.config.ts patterns
+**Execution**: `npx playwright test --ui` for debugging
+**Reporting**: JSON + HTML reporters with native parsing
+**Review**: Automated validation of generated tests
 
-- `browser_navigate(url)` → Navigate to target page
-- `browser_snapshot()` → Capture accessibility tree structure
-- `browser_take_screenshot(type?, filename?)` → Visual state documentation
-- `browser_network_requests()` → Monitor network activity
+## Anti-Patterns Explicitly Avoided
 
-**Interaction**:
-
-- `browser_click(element, ref, options?)` → Element interaction
-- `browser_fill_form(fields[])` → Form data entry
-- `browser_press_key(key)` → Keyboard interaction
-- `browser_select_option(element, ref, values[])` → Dropdown selection
-
-**Specialized**:
-
-- `browser_console_messages()` → Console log analysis
-- `browser_hover(element, ref)` → Hover interactions
-- `browser_file_upload(element, files[])` → File upload testing
-- `browser_handle_dialog(action, text?)` → Dialog interaction
+❌ **Monolithic test files** (1 giant file)
+❌ **CSS/XPath selectors** (use getByRole instead)
+❌ **Hard-coded waits** (use web-first assertions)
+❌ **Non-atomic tests** (multiple functionalities per file)
+❌ **Manual debugging** (use UI mode and Inspector)
+❌ **Custom reporting** (use native JSON parsing)

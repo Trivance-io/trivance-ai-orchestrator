@@ -365,148 +365,68 @@ mcp_tools_usage:
 
 ## Executive Report Template
 
-**Mandatory Output Structure**:
+**Streamlined Output Structure**:
 
 ```markdown
-# 🎯 EXECUTIVE QA REPORT - [APP_NAME]
+# QA REPORT - [APP_NAME]
 
-**Date**: [TIMESTAMP] | **Target**: [TARGET_URL] | **Scope**: [TARGET_DESCRIPTION] | **Coverage**: Desktop + Mobile + Interactive
+**Target**: [TARGET_URL] | **Score**: [CALCULATED_SCORE]/100 | **Status**: [READY/BLOCKED/NEEDS_FIXES]
 
-## 📊 EXECUTIVE SUMMARY
+## CRITICAL ISSUES ([CRITICAL_COUNT])
 
-**🏆 VISUAL QUALITY SCORE**: [CALCULATED_SCORE]/100 ([QUALITY_GRADE])
-**🚨 CRITICAL ISSUES**: [CRITICAL_COUNT] blocking problems
-**📱 MOBILE COMPATIBILITY**: [MOBILE_ISSUES] issues detected
-**⚡ CONSOLE ERRORS**: [ERROR_COUNT] JavaScript failures
-**🌐 NETWORK ISSUES**: [NETWORK_FAILURES] request failures
-**🎯 INTERACTIVE TESTING**: [INTERACTIVE_SCENARIOS] user journeys executed
-**🔧 MCP TOOL UTILIZATION**: Full MCP coverage (tools as required)
+[Only show if CRITICAL_COUNT > 0]
 
-## 🧪 EDGE CASES EXECUTED (SUMMARY)
+- **[Issue Title]**: [Brief description] → `[SELECTOR]`
+  - **Impact**: [Business impact in 1 line]
+  - **Fix**: [Specific action required]
+  - **Time**: [HOURS]h
 
-- Categories covered: [BOUNDARY|ERROR|INTEGRATION|PERFORMANCE|INPUT_VALIDATION|USER_JOURNEY|CROSS_BROWSER|ACCESSIBILITY|INTERACTIVE]
-- Total edge cases: [TOTAL]
-- Highlights:
-  - Boundary inputs: [COUNT]
-  - Network failures simulated: [COUNT]
-  - Loading/state transitions validated: [COUNT]
-  - Accessibility checks: [COUNT]
+## HIGH PRIORITY ([HIGH_PRIORITY_COUNT])
 
-### 🚨 BUSINESS IMPACT ANALYSIS
+[Only show if HIGH_PRIORITY_COUNT > 0]
 
-**Hidden Content Elements**: [COUNT] issues → **User Confusion, Support Tickets**
-💰 **Cost**: $[ESTIMATED_COST] | 🕒 **Fix Time**: [HOURS]h | 🔧 **Action**: Immediate
+- **[Issue Title]**: [Brief description] → `[SELECTOR]`
+  - **Fix**: [Specific action required]
 
-**Stuck Loading States**: [COUNT] issues → **User Abandonment, Revenue Loss**
-💰 **Cost**: $[ESTIMATED_COST] | 🕒 **Fix Time**: [HOURS]h | 🔧 **Action**: Critical
+## RECOMMENDATIONS
 
-### 💡 PRIORITIZED ACTION PLAN
+[Only show if there are actionable suggestions]
 
-**🚨 CRITICAL (Must fix before deployment)**:
+- [Specific recommendation with business rationale]
 
-- Fix [SPECIFIC_ISSUES] preventing core functionality
-- Resolve stuck loading states in [SPECIFIC_COMPONENTS]
+## VALIDATION COVERAGE
 
-**⚠️ HIGH PRIORITY (Should fix)**:
+- **Edge Cases**: [EDGE_CASE_COUNT] scenarios tested
+- **Devices**: Desktop (1440x900) + Mobile (390x844)
+- **Scope**: [TARGET_DESCRIPTION]
 
-- Address mobile viewport overflow in [SPECIFIC_AREAS]
-- Fix console errors affecting [SPECIFIC_FEATURES]
+## EVIDENCE
 
-**💡 SUGGESTIONS (Consider improving)**:
-
-- Optimize performance and user experience enhancements
-- Implement additional accessibility improvements
-
-## 🔧 TECHNICAL FINDINGS
-
-### Cross-Device Analysis
-
-- **Desktop Issues**: [DESKTOP_TOTAL] ([CRITICAL] CRITICAL, [HIGH_PRIORITY] HIGH_PRIORITY, [SUGGESTIONS] SUGGESTIONS)
-- **Mobile Issues**: [MOBILE_TOTAL] ([CRITICAL] CRITICAL, [HIGH_PRIORITY] HIGH_PRIORITY, [SUGGESTIONS] SUGGESTIONS)
-
-### MCP Native Detection Results
-
-- **Detection Patterns Executed**: Executed with MCP tools; no JavaScript fallback observed
-- **Hidden Elements**: Detected via accessibility tree analysis
-- **Loading States**: Detected via native timeout monitoring
-- **Interactive Flows**: Validated via complete MCP tool suite
-
-### Edge Cases Executed (Detailed)
-
-- **Edge Cases Executed**: [EDGE_CASE_COUNT] scenarios
-- **Categories Tested**: [CATEGORIES_LIST]
-- **Critical Failures**: [HIGH_FAILURES] business-impact issues
-
-### Issue Registry
-
-**🚨 CRITICAL** ([CRITICAL_COUNT] issues):
-
-- `[SELECTOR]`: [ISSUE_DESCRIPTION]
-
-**⚠️ HIGH PRIORITY** ([HIGH_PRIORITY_COUNT] issues):
-
-- `[SELECTOR]`: [ISSUE_DESCRIPTION]
-
-**💡 SUGGESTIONS** ([SUGGESTIONS_COUNT] issues):
-
-- `[SELECTOR]`: [ISSUE_DESCRIPTION]
-
-### 📸 Visual Evidence
-
-**Core Evidence**:
-
-- **Desktop Screenshot**: [DESKTOP_PATH]
-- **Mobile Screenshot**: [MOBILE_PATH]
-- **Accessibility Snapshots**: [ACCESSIBILITY_PATHS]
-
-**Per-Test Evidence** (Enhanced Coverage):
-
-- **Interactive Flow Screenshots**: [FLOW_SCREENSHOTS_LIST]
-- **Issue-Specific Evidence**: [ISSUE_EVIDENCE_LIST]
-- **Test Step Documentation**: [STEP_BY_STEP_EVIDENCE]
-- **Error State Captures**: [ERROR_STATE_SCREENSHOTS]
-
-**Evidence Organization**:
-
-- All screenshots saved in `.claude/reviews/` directory
-- Filenames include timestamp and test context
-- Organized by test phase and severity level
+- Desktop: [DESKTOP_PATH]
+- Mobile: [MOBILE_PATH]
+  [Additional screenshots only if issues found]
 
 ---
 
-**Report Generated**: [TIMESTAMP]
-**Architecture**: MCP-native Playwright implementation
+**[TIMESTAMP]** | **MCP-native Playwright**
 ```
 
 ---
 
-## Success Criteria & Validation
+## Success Criteria
 
-**Quality Gates for Production Readiness**:
+**Production Ready**:
 
-- ✅ **Visual Quality Score ≥ 85/100** (maximum 1 CRITICAL issue)
-- ✅ **Maximum 1 CRITICAL severity issue** in critical user flows
-- ✅ **Mobile compatibility ≥ 95%** (minimal viewport overflow)
-- ✅ **Console errors ≤ 2 unique types** (no functionality blockers)
-- ✅ **Interactive Testing Coverage ≥ 90%** (all critical journeys tested)
-- ✅ **MCP Tool Utilization = 100%** (all required Playwright tools used)
-- ✅ **Evidence Documentation = 100%** (screenshot per test step)
+- Score ≥ 85/100
+- 0 CRITICAL issues
+- ≤ 2 HIGH PRIORITY issues
 
-**Validation Metrics**:
+**Report Requirements**:
 
-- **Detection Accuracy**: Real issues impacting users (not superficial)
-- **Executive Value**: Business stakeholder ready reports
-- **Technical Precision**: Actionable fix guidance with exact selectors
-- **Architecture Integrity**: 100% MCP native, 0% JavaScript hybrid
-- **Graceful Degradation**: Functions with or without edge cases
-
-**Mandatory Deliverables**:
-
-- ✅ **Executive report file**: `.claude/reviews/[app-name]-qa-[timestamp].md`
-- ✅ **Cross-device screenshots**: Desktop (1440x900) + Mobile (390x844)
-- ✅ **Accessibility snapshots**: Native browser accessibility tree analysis
-- ✅ **Business cost estimates**: Fix time recommendations and impact analysis
-- ✅ **MCP utilization evidence**: Required Playwright MCP tools used
+- Focus on actionable issues only
+- Include exact selectors for fixes
+- Provide time estimates for corrections
+- Evidence screenshots only when issues found
 
 ---
 
