@@ -76,19 +76,9 @@ npx playwright test --list --reporter=json > /tmp/config-validation.json 2>&1
 
 # Step 2: Analyze validation results for context mismatches
 if grep -q '"suites":\s*\[\s*\]' /tmp/config-validation.json 2>/dev/null; then
-    echo "⚠️  No tests detected - Analyzing project structure for optimal config..."
-
-    # Detect static files vs dynamic server needs
-    if [ -d "public" ] || [ -d "dist" ] || [ -d "build" ]; then
-        echo "✅ Static files detected - Using file:// baseURL"
-        CONFIG_MODE="static"
-    else
-        echo "✅ Server-based project detected - Using http:// baseURL"
-        CONFIG_MODE="server"
-    fi
+    echo "⚠️  No tests detected - Will auto-detect project structure in config..."
 else
     echo "✅ Existing config valid - Enhancing with 2025 best practices"
-    CONFIG_MODE="enhance"
 fi
 
 rm -f /tmp/config-validation.json
@@ -446,7 +436,7 @@ test.describe("{Feature} Navigation Flow", () => {
 
 ```bash
 # Gate 1: Verify NO deprecated methods in templates
-grep -r "\.type(" . --include="*.md" && echo "❌ DEPRECATED .type() in templates" || echo "✅ Templates use modern .fill()"
+grep -r "\.type(" tests/ --include="*.ts" && echo "❌ DEPRECATED .type() in templates" || echo "✅ Templates use modern .fill()"
 
 # Gate 2: Verify all required placeholders documented
 REQUIRED_PLACEHOLDERS=("{feature}" "{TARGET_PATH}" "{element_type}" "{input_name}")
@@ -487,10 +477,7 @@ grep -q "≤50 lines" . && echo "✅ Atomic principle documented" || echo "❌ M
 # Step 2: Validate generated code follows templates
 grep -r "\.type(" tests/ && echo "❌ DEPRECATED .type() DETECTED - MUST FIX" || echo "✅ Modern .fill() patterns confirmed"
 
-# Step 3: REMOVED REDUNDANT EXECUTION - Tests will be executed in Step 3.3
-
-# Step 4: Generate comprehensive reports after validation
-# npx playwright show-report (moved to Step 4.1)
+# Step 3: Tests will be executed and validated in Step 3.3
 ```
 
 ### Step 3.3: Reality-Test Validation Loop
@@ -592,8 +579,7 @@ npx playwright test
 # Generate comprehensive reports
 npx playwright show-report
 
-# Verify report generation completed successfully
-[ -f "test-results/results.json" ] && echo "✅ JSON report generated" || echo "⚠️ JSON report missing"
+# Verify HTML report generation
 [ -d "playwright-report" ] && echo "✅ HTML report generated" || echo "⚠️ HTML report missing"
 ```
 
