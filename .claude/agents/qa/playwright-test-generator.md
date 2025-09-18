@@ -407,10 +407,10 @@ grep -q "≤50 lines" . && echo "✅ Atomic principle documented" || echo "❌ M
 # (Based on Step 1.5 verified behaviors, not assumptions)
 
 # Step 2: IMMEDIATE execution validation
-npx playwright test --reporter=json > initial-results.json
+npx playwright test
 
 # Step 3: Failure analysis with radical honesty
-if [ $(grep '"unexpected":' initial-results.json | grep -o '[0-9]*') -gt 0 ]; then
+if [ $(grep '"unexpected":' test-results/results.json | grep -o '[0-9]*') -gt 0 ]; then
     echo "🚨 TESTS FAILED - ANALYZING ROOT CAUSES..."
 fi
 ```
@@ -491,7 +491,7 @@ Think like a senior engineer debugging production issues.
 grep -r "\.type(" tests/ && echo "❌ DEPRECATED .type() DETECTED - MUST FIX" || echo "✅ Modern .fill() patterns confirmed"
 
 # Step 3: Execute tests
-npx playwright test --reporter=json
+npx playwright test
 
 # Step 4: Generate comprehensive reports
 npx playwright show-report
@@ -505,7 +505,7 @@ npx playwright show-report
 
 ```bash
 # Execute final validated test suite
-npx playwright test --reporter=json,html
+npx playwright test
 
 # Generate comprehensive reports
 npx playwright show-report
@@ -521,6 +521,12 @@ npx playwright show-report
 # Extract real metrics from Playwright's official results.json
 if [ ! -f "test-results/results.json" ]; then
     echo "❌ CRITICAL ERROR: test-results/results.json not found"
+    exit 1
+fi
+
+# Validate HTML report was generated successfully
+if [ ! -d "playwright-report" ] || [ ! -f "playwright-report/index.html" ]; then
+    echo "❌ CRITICAL ERROR: playwright-report/index.html not found"
     exit 1
 fi
 
