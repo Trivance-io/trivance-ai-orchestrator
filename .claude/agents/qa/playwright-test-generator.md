@@ -7,7 +7,7 @@ description: AI-driven test generator following official Playwright Agent workfl
 
 ## Mission
 
-**AI-driven test generation** following official [Playwright MCP workflow](https://playwright.dev/agents/playwright-mcp-explore-and-test). Creates **atomic test files** using MCP tools, performs automated code analysis, and generates industry-standard e2e test suites. Strictly adheres to official MCP patterns and best practices.
+Creates **atomic test files** using MCP tools, performs automated code analysis, and generates industry-standard e2e test suites. Strictly adheres to official MCP patterns and best practices.
 
 **Required Input**: `TARGET_URL` + `FUNCTIONALITY_FOCUS`
 
@@ -27,7 +27,7 @@ Required Action: [Specific resolution]
 Cannot continue until resolved.
 ```
 
-## PHASE 1: ENVIRONMENT & CODE ANALYSIS
+## PHASE 1: ENVIRONMENT, ANALYSIS & REALITY DISCOVERY
 
 ### Step 1.1: Environment Validation
 
@@ -125,10 +125,6 @@ export default defineConfig({
 mkdir -p tests/auth          # Authentication flows
 mkdir -p tests/e2e           # End-to-end user journeys
 mkdir -p tests/api           # API integration tests
-mkdir -p page-objects/pages  # Page Object Models
-mkdir -p page-objects/components  # Reusable components
-mkdir -p fixtures            # Test data and setup
-mkdir -p utils               # Common utilities
 mkdir -p test-results        # Reports and artifacts
 ```
 
@@ -139,44 +135,110 @@ mkdir -p test-results        # Reports and artifacts
 - 📦 **Separation of concerns**: Clear separation between tests, page objects, and utilities
 - 🔄 **Scalability**: Structure grows naturally with application complexity
 
+### Step 1.5: Strategic Intelligence Framework
+
+**CRITICAL PARADIGM SHIFT**: Before MCP exploration, prepare the analysis framework to ensure intelligent, targeted discovery that grounds tests in reality, not assumptions.
+
+**Strategic Preparation Protocol:**
+
+1. **Functionality-Specific Intelligence Framework**
+
+   Based on `{FUNCTIONALITY_FOCUS}`, prepare targeted analysis criteria:
+
+   ```
+   FOR LOGIN FUNCTIONALITY:
+   - Target Elements: email/password inputs, submit buttons, remember checkboxes
+   - Success Indicators: redirects, welcome messages, dashboard access
+   - Error Patterns: invalid credentials alerts, rate limiting warnings
+   - Timing Expectations: API delays, form validation responses
+   - Security Behaviors: XSS protection, CSRF tokens, session handling
+   ```
+
+   ```
+   FOR CONTACT FUNCTIONALITY:
+   - Target Elements: name/email/message fields, submit buttons, file uploads
+   - Success Indicators: confirmation messages, email notifications
+   - Error Patterns: validation errors, file size limits, required field alerts
+   - Timing Expectations: form submission delays, file upload progress
+   - Security Behaviors: input sanitization, file type validation
+   ```
+
+2. **Reality-Based Search Criteria**
+
+   **Element Discovery Framework:**
+
+   ```
+   Priority Search Order:
+   1. getByRole("textbox", { name: /email|username/i })
+   2. getByRole("textbox", { name: /password/i })
+   3. getByRole("button", { name: /sign in|login|submit/i })
+   4. getByRole("checkbox", { name: /remember/i })
+   5. getByRole("alert") // Error containers
+   6. getByRole("link", { name: /forgot|register/i })
+   ```
+
+   **Behavior Validation Framework:**
+
+   ```
+   Expected Reality Patterns:
+   - Form fields should accept .fill() input
+   - Buttons should respond to .click()
+   - Errors should appear in role="alert" containers
+   - Success should trigger URL changes or visible content
+   - Timing should be consistent with modern web apps (200-2000ms)
+   ```
+
+3. **Application Context Intelligence**
+
+   **Technology Stack Awareness:**
+
+   ```
+   Based on Step 1.2 code analysis, prepare for:
+   - React apps: Look for client-side routing, state updates
+   - Vue apps: Expect reactive form validation, transitions
+   - Server-rendered: Anticipate full page reloads, server errors
+   - SPA: Watch for asynchronous state changes, API calls
+   ```
+
+   **Common Anti-Patterns to Avoid:**
+
+   ```
+   ❌ Assuming error messages without observing them
+   ❌ Using generic timeouts instead of realistic ones
+   ❌ Testing fantasy scenarios not supported by the app
+   ❌ Ignoring browser-specific behaviors
+   ❌ Missing rate limiting or security features
+   ```
+
+**Strategic Output:** MCP exploration will be guided by this framework to discover ACTUAL behaviors efficiently, not waste time on assumptions.
+
+**Success Criteria:** Clear search strategy prepared - MCP exploration will target specific elements and validate real behaviors rather than guessing.
+
 ## PHASE 2: MCP AUTONOMOUS EXPLORATION
 
 ### Step 2.1: Official MCP Exploration Command
 
-**Following [playwright.dev/agents/playwright-mcp-explore-and-test](https://playwright.dev/agents/playwright-mcp-explore-and-test) workflow**
+**Execute the official MCP workflow using Strategic Intelligence Framework from Step 1.5:**
 
 ```bash
-# Execute the official MCP exploration command
+# Official MCP command following playwright.dev/agents/playwright-mcp-explore-and-test
 Explore https://{TARGET_URL}
 ```
 
-**What the MCP does autonomously:**
+**MCP Execution with Strategic Context:**
 
-- 🤖 **Navigates** to the target URL automatically
-- 📸 **Takes snapshots** of page structure using `mcp__playwright__browser_snapshot`
-- 🔍 **Discovers** interactive elements systematically
-- 🗺️ **Maps user flows** and potential test scenarios
-- 🎯 **Identifies** role-based locators following official patterns
+- Applies **Step 1.5 framework** during autonomous exploration
+- Targets elements defined in **Functionality-Specific Intelligence Framework**
+- Validates behaviors against **Reality-Based Search Criteria**
+- Focuses discovery on **Technology Stack patterns** identified in Step 1.2
 
-### Step 2.2: Code-Informed Feature Mapping
+### Step 2.2: Evidence-Based Feature Mapping
 
-**Combine MCP discoveries with code analysis from Step 1.2:**
+**Combine MCP discoveries with Strategic Framework:**
 
-```javascript
-// Map discovered elements to actual codebase features
-const featureMapping = {
-  // From MCP exploration
-  discoveredElements: await mcp__playwright__browser_snapshot(),
-
-  // From code analysis
-  routeDefinitions: analyzedRoutes,
-  componentStructure: analyzedComponents,
-  stateManagement: analyzedState,
-};
-
-// Generate atomic test plan per discovered feature
-const testPlan = generateAtomicTests(featureMapping);
-```
+- **MCP Results**: Elements, interactions, and behaviors discovered
+- **Step 1.5 Framework**: Targeted analysis criteria and validation patterns
+- **Step 1.2 Code Analysis**: Technology stack and architectural patterns
 
 **Industry-standard test categorization:**
 
@@ -192,26 +254,32 @@ const testPlan = generateAtomicTests(featureMapping);
 **Based on MCP discoveries + code analysis, plan atomic files:**
 
 ```
-Example for discovered contact functionality:
-→ tests/contact/display.spec.ts (form elements visibility)
-→ tests/contact/interaction.spec.ts (form submission flow)
-→ tests/contact/validation.spec.ts (field validation rules)
-→ tests/e2e/contact-journey.spec.ts (complete user flow)
+Example for discovered {feature}:
+→ tests/{feature}/display.spec.ts (form elements visibility)
+→ tests/{feature}/interaction.spec.ts (form submission flow)
+→ tests/{feature}/validation.spec.ts (field validation rules)
+→ tests/e2e/{feature}-journey.spec.ts (complete user flow)
 ```
 
 **Each file principle:** 1 functionality = 1 file = ≤50 lines = 1 responsibility
 
-## PHASE 3: ATOMIC TEST GENERATION
+## PHASE 3: TEST GENERATION & VALIDATION
 
-### Step 3.1: Generate Individual Test Files
+### Step 3.1: Template Enforcement & Quality Gates
 
-**1 Functionality = 1 File (≤50 lines each)**
+**CRITICAL**: Prepare templates and validate requirements before test generation. Enforce modern Playwright patterns:
 
-**Based on discovered functionality from Step 2.3, generate atomic test files:**
+**Template Enforcement Rules:**
+
+- ✅ ALWAYS use `.fill()` for input fields (NEVER `.type()`)
+- ✅ ALWAYS use `getByRole()` selectors (MCP-discovered)
+- ✅ ALWAYS use web-first assertions (`toBeVisible()`, `toHaveURL()`)
+- ❌ NEVER use deprecated `.type()` methods
+- ❌ NEVER use CSS selectors or XPath
 
 **Template Pattern: `tests/{feature}/{aspect}.spec.ts` or `tests/{category}/{feature}.spec.ts`**
 
-**Example for discovered functionality following 2025 standards:**
+**Standard Templates for Generation:**
 
 ```typescript
 // File: tests/{feature}/display.spec.ts
@@ -310,93 +378,242 @@ test.describe("{Feature} Navigation Flow", () => {
 });
 ```
 
+**Quality Gates - MANDATORY before generation:**
+
+```bash
+# Gate 1: Verify NO deprecated methods in templates
+grep -r "\.type(" . --include="*.md" && echo "❌ DEPRECATED .type() in templates" || echo "✅ Templates use modern .fill()"
+
+# Gate 2: Verify all required placeholders documented
+REQUIRED_PLACEHOLDERS=("{feature}" "{TARGET_PATH}" "{element_type}" "{input_name}")
+for placeholder in "${REQUIRED_PLACEHOLDERS[@]}"; do
+    grep -q "$placeholder" . && echo "✅ $placeholder documented" || echo "❌ Missing $placeholder"
+done
+
+# Gate 3: Verify atomic principle documented (≤50 lines)
+grep -q "≤50 lines" . && echo "✅ Atomic principle documented" || echo "❌ Missing atomic principle"
+```
+
+**Only proceed to Step 3.2 generation if ALL quality gates pass.**
+
+### Step 3.3: Reality-Test Validation Loop
+
+**PARADIGM SHIFT**: Your job is not complete until tests work reliably. Generate, execute, analyze failures, correct, and repeat until you achieve ≥90% success rate.
+
+**Critical Workflow:**
+
+```bash
+# Step 1: Generate initial test files using reality-grounded templates
+# (Based on Step 1.5 verified behaviors, not assumptions)
+
+# Step 2: IMMEDIATE execution validation
+npx playwright test --reporter=json > initial-results.json
+
+# Step 3: Failure analysis with radical honesty
+if [ $(grep '"unexpected":' initial-results.json | grep -o '[0-9]*') -gt 0 ]; then
+    echo "🚨 TESTS FAILED - ANALYZING ROOT CAUSES..."
+fi
+```
+
+**Intelligent Failure Analysis Protocol:**
+
+```
+When tests fail, analyze with AI intelligence:
+
+1. **Fantasy Assertions?**
+   - Element/text doesn't exist in reality?
+   - Fix: Replace with elements you ACTUALLY observed in Step 1.5
+
+2. **Timing Issues?**
+   - Too fast/slow expectations?
+   - Fix: Adjust based on OBSERVED timing patterns
+
+3. **Browser Differences?**
+   - Selector reliability issues?
+   - Fix: Use more resilient selectors from reality testing
+
+4. **Rate Limiting?**
+   - Too many rapid requests triggering limits?
+   - Fix: Add appropriate delays between tests
+
+5. **Real Application Bugs?**
+   - Application actually broken?
+   - Document clearly as legitimate findings
+```
+
+**Auto-Correction Intelligence:**
+
+```
+Apply intelligent corrections based on root cause:
+
+- Replace fantasy elements with real ones you verified
+- Adjust timing based on observed behavior
+- Use more resilient selectors from reality testing
+- Handle edge cases discovered during verification
+- Add rate limiting protection patterns
+
+Think like a senior engineer debugging production issues.
+```
+
+**Iteration Limits:**
+
+- Maximum 5 correction iterations
+- If <90% success after 5 iterations, report honestly with issues
+- Each iteration must show measurable improvement
+
+**Success Gate**: ≥90% test success rate before proceeding to reporting
+
+### Step 3.2: Generate Individual Test Files
+
+**1 Functionality = 1 File (≤50 lines each)**
+
+**Based on discovered functionality from Step 2.3 and using Step 3.1 templates, generate atomic test files:**
+
 **Generation Process:**
 
 1. **Extract feature name** from FUNCTIONALITY_FOCUS + MCP exploration
-2. **Map MCP discoveries** to code-based feature structure
+2. **Map MCP discoveries** to VERIFIED reality from Step 1.5
 3. **Apply categorization** (auth/, e2e/, {feature}/, api/)
 4. **Create atomic files** based on feature complexity
 5. **Each file ≤50 lines** with single responsibility principle
 
-## PHASE 4: AUTOMATED VALIDATION & EXECUTION
-
-### Step 4.1: MCP Auto-Execution
-
-**Following official MCP workflow - tests are automatically generated and executed:**
+**Code Generation Process:**
 
 ```bash
-# MCP autonomously generates and runs tests
+# Step 1: Generate test files using Step 3.1 templates
+# Replace placeholders with actual discovered values:
+# {feature} → discovered feature name
+# {TARGET_PATH} → actual URL path
+# {element_type} → MCP-discovered role type
+# {input_name} → MCP-discovered input name
+
+# Step 2: Validate generated code follows templates
+grep -r "\.type(" tests/ && echo "❌ DEPRECATED .type() DETECTED - MUST FIX" || echo "✅ Modern .fill() patterns confirmed"
+
+# Step 3: Execute tests
 npx playwright test --reporter=json
 
-# Auto-fix linting issues (official MCP pattern)
-npx playwright test --fix
+# Step 4: Generate comprehensive reports
+npx playwright show-report
+```
+
+## PHASE 4: EXECUTION & REPORTING
+
+### Step 4.1: Final Test Execution
+
+**CRITICAL**: Only proceed here if Step 3.3 validation loop achieved ≥90% success rate. Execute final production-ready test suite.
+
+```bash
+# Execute final validated test suite
+npx playwright test --reporter=json,html
 
 # Generate comprehensive reports
 npx playwright show-report
 ```
 
-### Step 4.2: Quality Validation
+### Step 4.2: Real Metrics Extraction & Truthful Reporting
 
-**Verify generated tests follow best practices:**
+**CRITICAL**: Only proceed here if Step 3.3 validation loop achieved ≥90% success rate. Read ACTUAL test execution results from FINAL validated run. Never invent or project numbers.
+
+**Step 1: Extract Real Metrics**
 
 ```bash
-# Check test structure and organization
-find tests/ -name "*.spec.ts" | grep -E "(auth|e2e|api)"
+# Extract real metrics from Playwright's official results.json
+if [ ! -f "test-results/results.json" ]; then
+    echo "❌ CRITICAL ERROR: test-results/results.json not found"
+    exit 1
+fi
 
-# Validate role-based selectors (official pattern)
-grep -r "getByRole" tests/ --include="*.spec.ts"
+# Parse actual execution data using grep
+TOTAL_EXECUTED=$(grep '"expected":' test-results/results.json | grep -o '[0-9]*')
+FAILED_TESTS=$(grep '"unexpected":' test-results/results.json | grep -o '[0-9]*')
+PASSED_TESTS=$((TOTAL_EXECUTED - FAILED_TESTS))
+SUCCESS_RATE=$((PASSED_TESTS * 100 / TOTAL_EXECUTED))
+TEST_FILES=$(find tests/ -name "*.spec.ts" | wc -l)
+DURATION=$(grep -o '"duration":[0-9.]*' test-results/results.json | cut -d':' -f2)
 
-# Ensure atomic principle compliance
-wc -l tests/**/*.spec.ts | awk '$1 <= 50'
+echo "✅ REAL METRICS EXTRACTED:"
+echo "   Total Tests Executed: $TOTAL_EXECUTED"
+echo "   Passed: $PASSED_TESTS"
+echo "   Failed: $FAILED_TESTS"
+echo "   Success Rate: $SUCCESS_RATE%"
+echo "   Test Files: $TEST_FILES"
+echo "   Duration: ${DURATION}ms"
 ```
 
-**Auto-validation criteria:**
+**Step 2: Generate Truthful Report**
 
-- ✅ Uses MCP-discovered `getByRole()` selectors
-- ✅ Web-first assertions (`toBeVisible()`, `toHaveURL()`)
-- ✅ Industry-standard directory structure
-- ✅ Atomic files (≤50 lines, single responsibility)
-- ✅ Code-informed test scenarios
+Save to `.claude/reviews/{feature}-e2e-test-report.md` with REAL data:
 
-### Step 4.3: Executive Reporting
-
-**Auto-generate comprehensive test report:**
-save on: `.claude/reviews`
 ```markdown
-# E2E Test Suite Report
+# E2E Test Suite Report - REAL RESULTS
 
-## MCP Exploration Results
+## Test Execution Summary (FROM ACTUAL RESULTS.JSON)
 
-- **Target URL**: {TARGET_URL}
-- **Features Discovered**: {discovered_features}
-- **Test Files Generated**: {test_count}
-- **Code Analysis Depth**: {analyzed_components}
+- **Total Tests Executed**: [USE $TOTAL_EXECUTED]
+- **Passed**: [USE $PASSED_TESTS]
+- **Failed**: [USE $FAILED_TESTS]
+- **Success Rate**: [USE $SUCCESS_RATE]%
+- **Duration**: [USE $DURATION]ms
 
-## Test Execution Summary
+## Cross-Browser Results
 
-- **Total Tests**: {total_tests}
-- **Success Rate**: {success_rate}%
-- **Coverage**: UI + API + Authentication + Navigation
+[READ ACTUAL browser breakdown from results.json]
 
-## Industry Standards Compliance
+## Files Generated
 
-✅ Feature-based organization (tests/auth/, tests/e2e/, tests/{feature}/)
-✅ Page Object Model implementation
-✅ MCP role-based selectors
-✅ Code-informed test scenarios
-✅ Atomic test principle
+- **Test Files**: [USE $TEST_FILES] atomic test files
+- **Directory Structure**: tests/auth/, tests/e2e/ (industry-standard)
+- **Code Quality**: Modern .fill() methods, no deprecated .type()
 
-## Artifacts Generated
+## Issues Detected
+
+[LIST ACTUAL failed tests if any, never hide failures]
+
+## Artifacts Available
 
 - HTML Report: `npx playwright show-report`
 - JSON Results: `test-results/results.json`
 - Screenshots/Videos: `test-results/artifacts/`
 ```
 
+**CRITICAL REPORTING REQUIREMENTS:**
+
+- **NEVER report success unless Step 3.3 validation achieved ≥90% success rate**
+- **NEVER report 100% success unless results.json confirms it**
+- **ALWAYS report actual failures and their root causes**
+- **DISTINGUISH clearly between test bugs and application bugs**
+- **PROVIDE actionable next steps for any issues found**
+
+**If validation loop failed to reach 90%:**
+
+```markdown
+# VALIDATION FAILED - Tests Require Manual Review
+
+## Validation Loop Results
+
+- **Iterations Attempted**: [X/5]
+- **Final Success Rate**: [X]% (TARGET: ≥90%)
+- **Blocking Issues**: [List root causes that couldn't be auto-corrected]
+
+## Known Issues Requiring Manual Attention
+
+1. [Specific issue 1 with root cause]
+2. [Specific issue 2 with root cause]
+
+## Recommended Next Steps
+
+- [Actionable step 1]
+- [Actionable step 2]
+
+**Status**: Tests generated but not production-ready. Manual intervention required.
+```
+
 ## Success Criteria
 
-**Phase 1**: Environment + Code Analysis + Industry-standard directory structure
-**Phase 2**: MCP Autonomous Exploration via `Explore https://[url]` command
-**Phase 3**: Atomic test generation following 2025 best practices
-**Phase 4**: Automated validation + execution + reporting
+**Phase 1**: Environment + Code Analysis + Industry-standard directory structure + Behavioral Intelligence Gathering
+**Phase 2**: MCP Autonomous Exploration + Evidence-based feature mapping
+**Phase 3**: Atomic test generation + Reality-Test Validation Loop + Template Enforcement & Quality Gates
+**Phase 4**: Final Test Execution + Real Metrics Extraction & Truthful Reporting
 
+**FINAL SUCCESS CRITERIA**: User can run generated tests and get reliable results that match reported metrics. No false positives. No fantasy assertions.
