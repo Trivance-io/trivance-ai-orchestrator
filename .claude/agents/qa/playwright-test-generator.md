@@ -32,6 +32,10 @@ Cannot continue until resolved.
 ### Step 1.1: Environment Validation
 
 ```bash
+# Clean previous playwright processes to prevent port conflicts
+pkill -f "playwright.*show-report" 2>/dev/null || true
+lsof -ti:9323 | xargs kill -9 2>/dev/null || true
+
 npx playwright --version
 ```
 
@@ -64,8 +68,46 @@ grep -r "export.*function\|export.*class\|export.*const.*=" --include="*.ts" --i
 
 **Target**: Modify `playwright.config.ts` for 2025 best practices
 
+**CRITICAL**: Pre-validate project context BEFORE creating playwright.config.ts to prevent configuration errors.
+
+```bash
+# Step 1: Quick pre-validation to detect existing config issues (< 2s)
+npx playwright test --list --reporter=json > /tmp/config-validation.json 2>&1
+
+# Step 2: Analyze validation results for context mismatches
+if grep -q '"suites":\s*\[\s*\]' /tmp/config-validation.json 2>/dev/null; then
+    echo "⚠️  No tests detected - Analyzing project structure for optimal config..."
+
+    # Detect static files vs dynamic server needs
+    if [ -d "public" ] || [ -d "dist" ] || [ -d "build" ]; then
+        echo "✅ Static files detected - Using file:// baseURL"
+        CONFIG_MODE="static"
+    else
+        echo "✅ Server-based project detected - Using http:// baseURL"
+        CONFIG_MODE="server"
+    fi
+else
+    echo "✅ Existing config valid - Enhancing with 2025 best practices"
+    CONFIG_MODE="enhance"
+fi
+
+rm -f /tmp/config-validation.json
+```
+
+**Generate dynamic configuration based on CONFIG_MODE detected:**
+
 ```typescript
 import { defineConfig, devices } from "@playwright/test";
+import path from "path";
+import fs from "fs";
+
+// Auto-detect project mode
+const hasStaticFiles =
+  fs.existsSync("public") ||
+  fs.existsSync("dist") ||
+  fs.existsSync("build") ||
+  fs.existsSync("demo-app/public");
+const isStaticMode = hasStaticFiles;
 
 export default defineConfig({
   testDir: "./tests",
@@ -74,8 +116,18 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
 
-  // NATIVE REPORTING SETUP
+  // FAIL-FAST CONFIGURATION - Early error detection
+  maxFailures: 3,
+
+  // OPTIMIZED TIMEOUTS - Quick feedback
+  timeout: 10 * 1000,
+  expect: {
+    timeout: 3 * 1000,
+  },
+
+  // ENHANCED REPORTING - Real-time progress
   reporter: [
+    ["line"], // Real-time progress
     [
       "html",
       {
@@ -89,13 +141,20 @@ export default defineConfig({
         outputFile: "test-results/results.json",
       },
     ],
-    ["list"],
   ],
 
   outputDir: "test-results/artifacts",
 
   use: {
-    baseURL: "http://localhost:8000",
+    // CONTEXT-AWARE baseURL configuration
+    baseURL: isStaticMode
+      ? `file://${path.resolve(__dirname, hasStaticFiles && fs.existsSync("demo-app/public") ? "demo-app/public" : "public")}`
+      : "http://localhost:8000",
+
+    // FAST FEEDBACK CONFIGURATION
+    actionTimeout: 3 * 1000,
+    navigationTimeout: 5 * 1000,
+
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
@@ -107,12 +166,17 @@ export default defineConfig({
     { name: "webkit", use: { ...devices["Desktop Safari"] } },
   ],
 
-  webServer: {
-    command: "npm start",
-    url: "http://localhost:8000",
-    reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
-  },
+  // CONDITIONAL webServer - only for server-based projects
+  ...(isStaticMode
+    ? {}
+    : {
+        webServer: {
+          command: "npm start",
+          url: "http://localhost:8000",
+          reuseExistingServer: !process.env.CI,
+          timeout: 120 * 1000,
+        },
+      }),
 });
 ```
 
@@ -396,6 +460,39 @@ grep -q "≤50 lines" . && echo "✅ Atomic principle documented" || echo "❌ M
 
 **Only proceed to Step 3.2 generation if ALL quality gates pass.**
 
+### Step 3.2: Generate Individual Test Files
+
+**1 Functionality = 1 File (≤50 lines each)**
+
+**Based on discovered functionality from Step 2.3 and using Step 3.1 templates, generate atomic test files:**
+
+**Generation Process:**
+
+1. **Extract feature name** from FUNCTIONALITY_FOCUS + MCP exploration
+2. **Map MCP discoveries** to VERIFIED reality from Step 1.5
+3. **Apply categorization** (auth/, e2e/, {feature}/, api/)
+4. **Create atomic files** based on feature complexity
+5. **Each file ≤50 lines** with single responsibility principle
+
+**Code Generation Process:**
+
+```bash
+# Step 1: Generate test files using Step 3.1 templates
+# Replace placeholders with actual discovered values:
+# {feature} → discovered feature name
+# {TARGET_PATH} → actual URL path
+# {element_type} → MCP-discovered role type
+# {input_name} → MCP-discovered input name
+
+# Step 2: Validate generated code follows templates
+grep -r "\.type(" tests/ && echo "❌ DEPRECATED .type() DETECTED - MUST FIX" || echo "✅ Modern .fill() patterns confirmed"
+
+# Step 3: REMOVED REDUNDANT EXECUTION - Tests will be executed in Step 3.3
+
+# Step 4: Generate comprehensive reports after validation
+# npx playwright show-report (moved to Step 4.1)
+```
+
 ### Step 3.3: Reality-Test Validation Loop
 
 **PARADIGM SHIFT**: Your job is not complete until tests work reliably. Generate, execute, analyze failures, correct, and repeat until you achieve ≥90% success rate.
@@ -406,11 +503,30 @@ grep -q "≤50 lines" . && echo "✅ Atomic principle documented" || echo "❌ M
 # Step 1: Generate initial test files using reality-grounded templates
 # (Based on Step 1.5 verified behaviors, not assumptions)
 
-# Step 2: IMMEDIATE execution validation
-npx playwright test
+# Step 2: IMMEDIATE pre-validation to catch config errors (< 2s vs 120s timeout)
+echo "🔍 Pre-validating test configuration..."
+npx playwright test --list --reporter=json > test-validation.json 2>&1
 
-# Step 3: Failure analysis with radical honesty
-if [ $(grep '"unexpected":' test-results/results.json | grep -o '[0-9]*') -gt 0 ]; then
+if grep -q '"suites":\s*\[\s*\]' test-validation.json; then
+    echo "❌ CRITICAL: No tests detected - Configuration error (detected in <2s)"
+    echo "💡 Check: file paths, baseURL, testDir settings"
+    exit 1
+fi
+
+echo "✅ Configuration valid - Proceeding with execution..."
+rm -f test-validation.json
+
+# Step 3: IMMEDIATE execution with fail-fast
+npx playwright test --max-failures=1 --reporter=line
+
+# Step 3.1: Verify results.json generation
+if [ ! -f "test-results/results.json" ]; then
+    echo "⚠️ WARNING: results.json not generated - checking for reporter issues"
+    npx playwright test --reporter=json --dry-run > test-results/results.json 2>/dev/null || echo "❌ JSON reporter failed"
+fi
+
+# Step 4: Failure analysis with radical honesty
+if [ -f "test-results/results.json" ] && [ $(grep '"unexpected":' test-results/results.json | grep -o '[0-9]*' 2>/dev/null || echo "0") -gt 0 ]; then
     echo "🚨 TESTS FAILED - ANALYZING ROOT CAUSES..."
 fi
 ```
@@ -463,40 +579,6 @@ Think like a senior engineer debugging production issues.
 
 **Success Gate**: ≥90% test success rate before proceeding to reporting
 
-### Step 3.2: Generate Individual Test Files
-
-**1 Functionality = 1 File (≤50 lines each)**
-
-**Based on discovered functionality from Step 2.3 and using Step 3.1 templates, generate atomic test files:**
-
-**Generation Process:**
-
-1. **Extract feature name** from FUNCTIONALITY_FOCUS + MCP exploration
-2. **Map MCP discoveries** to VERIFIED reality from Step 1.5
-3. **Apply categorization** (auth/, e2e/, {feature}/, api/)
-4. **Create atomic files** based on feature complexity
-5. **Each file ≤50 lines** with single responsibility principle
-
-**Code Generation Process:**
-
-```bash
-# Step 1: Generate test files using Step 3.1 templates
-# Replace placeholders with actual discovered values:
-# {feature} → discovered feature name
-# {TARGET_PATH} → actual URL path
-# {element_type} → MCP-discovered role type
-# {input_name} → MCP-discovered input name
-
-# Step 2: Validate generated code follows templates
-grep -r "\.type(" tests/ && echo "❌ DEPRECATED .type() DETECTED - MUST FIX" || echo "✅ Modern .fill() patterns confirmed"
-
-# Step 3: Execute tests
-npx playwright test
-
-# Step 4: Generate comprehensive reports
-npx playwright show-report
-```
-
 ## PHASE 4: EXECUTION & REPORTING
 
 ### Step 4.1: Final Test Execution
@@ -509,6 +591,10 @@ npx playwright test
 
 # Generate comprehensive reports
 npx playwright show-report
+
+# Verify report generation completed successfully
+[ -f "test-results/results.json" ] && echo "✅ JSON report generated" || echo "⚠️ JSON report missing"
+[ -d "playwright-report" ] && echo "✅ HTML report generated" || echo "⚠️ HTML report missing"
 ```
 
 ### Step 4.2: Real Metrics Extraction & Truthful Reporting
@@ -530,13 +616,28 @@ if [ ! -d "playwright-report" ] || [ ! -f "playwright-report/index.html" ]; then
     exit 1
 fi
 
-# Parse actual execution data using grep
-TOTAL_EXECUTED=$(grep '"expected":' test-results/results.json | grep -o '[0-9]*')
-FAILED_TESTS=$(grep '"unexpected":' test-results/results.json | grep -o '[0-9]*')
+# Parse actual execution data using grep with error handling
+TOTAL_EXECUTED=$(grep '"expected":' test-results/results.json | grep -o '[0-9]*' || echo "0")
+FAILED_TESTS=$(grep '"unexpected":' test-results/results.json | grep -o '[0-9]*' || echo "0")
 PASSED_TESTS=$((TOTAL_EXECUTED - FAILED_TESTS))
-SUCCESS_RATE=$((PASSED_TESTS * 100 / TOTAL_EXECUTED))
-TEST_FILES=$(find tests/ -name "*.spec.ts" | wc -l)
-DURATION=$(grep -o '"duration":[0-9.]*' test-results/results.json | cut -d':' -f2)
+
+# Safe division with zero protection
+if [ "$TOTAL_EXECUTED" -gt 0 ]; then
+    SUCCESS_RATE=$((PASSED_TESTS * 100 / TOTAL_EXECUTED))
+else
+    SUCCESS_RATE=0
+    echo "⚠️  WARNING: No tests executed - SUCCESS_RATE set to 0"
+fi
+
+# Robust test files count with directory existence check
+if [ -d "tests" ]; then
+    TEST_FILES=$(find tests/ -name "*.spec.ts" 2>/dev/null | wc -l | tr -d ' ')
+else
+    TEST_FILES=0
+    echo "⚠️  WARNING: tests/ directory not found - TEST_FILES set to 0"
+fi
+
+DURATION=$(grep -o '"duration":[0-9.]*' test-results/results.json | cut -d':' -f2 || echo "0")
 
 echo "✅ REAL METRICS EXTRACTED:"
 echo "   Total Tests Executed: $TOTAL_EXECUTED"
