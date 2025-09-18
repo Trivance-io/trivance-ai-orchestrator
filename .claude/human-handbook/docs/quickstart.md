@@ -3,36 +3,43 @@
 ## 📋 Requisitos
 
 - Claude Code CLI instalado
-- Python 3.8+ 
+- Python 3.8+
 - Git configurado
 - Acceso a GitHub
 
 ## ⚡ Instalación
 
 ### 1. 🤖 Modelo
+
 El proyecto usa `"model": "opusplan"` (Opus 4.1 para planificación, Sonnet 4 para ejecución)
 
 ### 2. 🔗 MCP GitHub
+
 ```bash
 gh auth login
 gh auth status
 ```
+
 Habilita herramientas GitHub nativas (`mcp__github__*`)
 
 ### 3. 🔔 Notificaciones
 
 #### macOS
+
 ```bash
 brew install terminal-notifier
 ```
+
 **Sistema** → **Notificaciones** → **Terminal** → Habilitar
 
 #### Windows
+
 ```powershell
 winget install Microsoft.PowerToys
 ```
 
 #### Linux
+
 ```bash
 sudo apt install notify-send libnotify-bin  # Ubuntu/Debian
 sudo dnf install notify-send libnotify      # Fedora
@@ -54,7 +61,8 @@ cp .github/workflows/security.yml tu-proyecto/.github/workflows/
 
 **Configurar secret**: `CLAUDE_CODE_OAUTH_TOKEN` en GitHub repo settings.
 
-**Resultado**: 
+**Resultado**:
+
 - 🤖 Review automático en PRs (Opus 4.1)
 - 💬 Interacción `@claude` en issues/comments
 - 🔒 Security scanning automático
@@ -86,7 +94,7 @@ echo "test" > test.txt && claude "/commit"
 /workflow:session-start
 # Elegir: "Desarrollo" → te guía automáticamente a crear worktree
 
-# 2. Context Mapping (3 min) - ESENCIAL  
+# 2. Context Mapping (3 min) - ESENCIAL
 /understand
 # Mapea arquitectura completa del proyecto automáticamente
 
@@ -106,8 +114,9 @@ echo "test" > test.txt && claude "/commit"
 **🏆 Resultado esperado:** PR funcional con implementación completa, tests pasando, y quality checks en 15 minutos.
 
 **💡 Lo que aprendes:**
+
 - **Context-awareness**: `/understand` previene horas de refactoring
-- **Automation power**: `/implement` reemplaza desarrollo manual  
+- **Automation power**: `/implement` reemplaza desarrollo manual
 - **Quality by design**: `/review` previene fixes costosos post-merge
 - **Zero friction**: De idea a PR en minutos, no horas
 
@@ -119,28 +128,31 @@ echo "test" > test.txt && claude "/commit"
 
 ## 📚 Siguiente Paso: Domina el Workflow
 
-### 🎯 **Primero**: [Tu Primera Sesión](#tu-primera-sesión-ai-first-15-minutos) 
+### 🎯 **Primero**: [Tu Primera Sesión](#tu-primera-sesión-ai-first-15-minutos)
+
 **Completa el workflow de 15 minutos** para experimentar el poder de automatización.
 
 ### 📖 **Después**: Profundiza tu expertise
 
 #### 🔥 [`ai-first-workflow.md`](ai-first-workflow.md) - **ESENCIAL**
+
 **Workflow completo**: PR → Review → Issues → Resolución → Merge  
 **Incluye**: [Comandos de Alto Valor](ai-first-workflow.md#-comandos-de-alto-valor) - la clave de productividad 10x
 
-#### ⚡ [`commands-guide.md`](commands-guide.md) - **REFERENCIA COMPLETA**  
+#### ⚡ [`commands-guide.md`](commands-guide.md) - **REFERENCIA COMPLETA**
+
 **30+ comandos organizados por impacto**: `/understand`, `/implement`, `/review`, `/test` + todos los demás
 
 #### 🧠 [`ai-first-best-practices.md`](ai-first-best-practices.md) - **MASTERY**
+
 **Evolución mental**: De desarrollo manual a orquestación inteligente
 
 ### 🎯 Ruta de Aprendizaje Recomendada:
+
 ```
 1. Completa tu primera sesión (15 min)
 2. Lee ai-first-workflow.md (enfócate en Comandos de Alto Valor)
 3. Experimenta con comandos de impacto en tu proyecto
 4. Consulta commands-guide.md como referencia
-5. Lee best-practices.md cuando busques dominio avanzado
+5. Lee ai-first-best-practices.md cuando busques dominio avanzado
 ```
-
-
