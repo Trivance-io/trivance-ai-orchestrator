@@ -31,8 +31,10 @@ Cannot continue until resolved.
 
 ### Step 1.1: Environment Validation
 
+**MANDATORY** Clean previous playwright processes to prevent port conflicts
+
 ```bash
-# Clean previous playwright processes to prevent port conflicts
+
 pkill -f "playwright.*show-report" 2>/dev/null || true
 lsof -ti:9323 | xargs kill -9 2>/dev/null || true
 
@@ -106,8 +108,8 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
 
-  // FAIL-FAST CONFIGURATION - Early error detection
-  maxFailures: 3,
+  // FAIL-FAST CONFIGURATION - Systematic issue detection
+  maxFailures: process.env.CI ? 3 : undefined, // No limit in dev to detect systematic issues
 
   // OPTIMIZED TIMEOUTS - Quick feedback
   timeout: 10 * 1000,
@@ -446,6 +448,12 @@ done
 
 # Gate 3: Verify atomic principle documented (≤50 lines)
 grep -q "≤50 lines" . && echo "✅ Atomic principle documented" || echo "❌ Missing atomic principle"
+
+# Gate 4: Verify timing expectations are realistic (prevents systematic timing failures)
+if [ -d "tests" ]; then
+    TIMING_ISSUES=$(grep -r "toBeVisible\|toHaveText" tests/ --include="*.ts" 2>/dev/null | grep -v "await.*\(fill\|click\|focus\|blur\)" | wc -l | tr -d ' ')
+    [ "$TIMING_ISSUES" -eq 0 ] && echo "✅ Realistic timing patterns" || echo "⚠️ $TIMING_ISSUES immediate assertions detected"
+fi
 ```
 
 **Only proceed to Step 3.2 generation if ALL quality gates pass.**
@@ -527,9 +535,11 @@ When tests fail, analyze with AI intelligence:
    - Element/text doesn't exist in reality?
    - Fix: Replace with elements you ACTUALLY observed in Step 1.5
 
-2. **Timing Issues?**
-   - Too fast/slow expectations?
-   - Fix: Adjust based on OBSERVED timing patterns
+2. **Timing Issues? (SYSTEMATIC FAILURE PATTERN)**
+   - Immediate assertions on dynamic content? (Check for toBeVisible without await interaction)
+   - Cross-browser timing inconsistencies? (Same test fails in multiple browsers)
+   - Error state timing mismatches? (Expecting error text vs actual DOM elements)
+   - Fix: Use DOM state selectors (e.g., '#element.show') instead of text content
 
 3. **Browser Differences?**
    - Selector reliability issues?
@@ -573,14 +583,15 @@ Think like a senior engineer debugging production issues.
 **CRITICAL**: Only proceed here if Step 3.3 validation loop achieved ≥90% success rate. Execute final production-ready test suite.
 
 ```bash
-# Execute final validated test suite
+# Execute final validated test suite (auto-generates HTML report via config)
 npx playwright test
 
-# Generate comprehensive reports
-npx playwright show-report
+# Verify HTML report was generated
+[ -f "playwright-report/index.html" ] && echo "✅ HTML report generated" || echo "⚠️ HTML report missing"
 
-# Verify HTML report generation
-[ -d "playwright-report" ] && echo "✅ HTML report generated" || echo "⚠️ HTML report missing"
+# Clean port conflicts and display report
+pkill -f "playwright.*show-report" 2>/dev/null || true
+npx playwright show-report playwright-report
 ```
 
 ### Step 4.2: Real Metrics Extraction & Truthful Reporting
