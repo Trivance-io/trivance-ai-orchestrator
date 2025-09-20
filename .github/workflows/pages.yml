@@ -37,6 +37,7 @@ jobs:
         run: ruby scripts/migrate_content.rb
 
       - name: Setup Pages
+        id: pages
         uses: actions/configure-pages@v3
 
       - name: Build Jekyll
