@@ -121,3 +121,12 @@ _If you expect to exceed the budget: **stop and ask**._
 - **Contextual Suggestions**: Suggest proactively specialists based on challenge type, never mandate usage.
 - **Orchestrator Priority**: Use `tech-lead-orchestrator` for multi-step challenges and strategic coordination.
 - **Specialist Selection**: Core specialists for quality, framework specialists for implementation.
+
+### Documentation Site Context
+
+- **GitHub Pages Setup**: Documentation site hosted via Jekyll on GitHub Pages from `/docs` directory.
+- **Content Source**: Documentation files located in `.claude/human-handbook/docs/` converted to responsive web format.
+- **Jekyll Structure**: Standard Jekyll layout with \_layouts, \_includes, assets/css, assets/js for responsive documentation site.
+- **Search Implementation**: Client-side JavaScript search with JSON index generated at build time.
+- **Performance Targets**: <3s load time, Lighthouse score >90, mobile-first responsive design.
+- **Build Pipeline**: Automatic GitHub Pages deployment on push to main branch, Jekyll 4.x compatible.

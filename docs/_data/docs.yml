@@ -1,0 +1,126 @@
+# Documentation structure data file
+# This file defines the organization and metadata for the Claude Code documentation site
+
+site_info:
+  title: "Documentación Claude Code"
+  subtitle: "Guía completa para desarrollo AI-first"
+  description: "Aprende a usar comandos, agentes y workflows de Claude Code para desarrollo profesional con IA"
+  version: "1.0.0"
+  last_updated: "2025-09-20"
+
+# Main navigation sections
+sections:
+  - id: "commands"
+    title: "Comandos Claude Code"
+    description: "Guía práctica de comandos de alto valor y workflows automatizados"
+    icon: "terminal"
+    order: 1
+    color_theme: "#2563eb"
+    url: "/commands/"
+    pages:
+      - id: "commands-guide"
+        title: "Guía Práctica de Comandos"
+        source: "commands-guide.md"
+        excerpt: "Comandos organizados por importancia y impacto en productividad"
+        order: 1
+        tags: ["comandos", "CLI", "productividad"]
+
+  - id: "agents"
+    title: "Agentes Especialistas"
+    description: "33+ agentes organizados por valor y caso de uso específico"
+    icon: "users"
+    order: 2
+    color_theme: "#dc2626"
+    url: "/agents/"
+    pages:
+      - id: "agents-guide"
+        title: "Guía de Agentes"
+        source: "agents-guide.md"
+        excerpt: "Agentes especializados para cada tipo de desarrollo y desafío"
+        order: 1
+        tags: ["agentes", "especialistas", "AI"]
+
+  - id: "workflows"
+    title: "Workflows AI-First"
+    description: "Metodologías y flujos de trabajo para desarrollo con IA"
+    icon: "workflow"
+    order: 3
+    color_theme: "#059669"
+    url: "/workflows/"
+    pages:
+      - id: "ai-first-workflow"
+        title: "Workflow AI-First"
+        source: "ai-first-workflow.md"
+        excerpt: "Metodología completa para desarrollo dirigido por IA"
+        order: 1
+        tags: ["workflow", "metodología", "AI-first"]
+
+  - id: "best-practices"
+    title: "Mejores Prácticas"
+    description: "Patrones, técnicas y recomendaciones para desarrollo efectivo"
+    icon: "best-practices"
+    order: 4
+    color_theme: "#7c3aed"
+    url: "/best-practices/"
+    pages:
+      - id: "ai-first-best-practices"
+        title: "Mejores Prácticas AI-First"
+        source: "ai-first-best-practices.md"
+        excerpt: "Técnicas avanzadas y patrones recomendados"
+        order: 1
+        tags: ["mejores-prácticas", "patrones", "técnicas"]
+      - id: "quickstart"
+        title: "Guía de Inicio Rápido"
+        source: "quickstart.md"
+        excerpt: "Primeros pasos y configuración básica"
+        order: 2
+        tags: ["inicio", "configuración", "guía"]
+
+# Search configuration
+search_config:
+  enabled: true
+  placeholder: "Buscar comandos, agentes, workflows..."
+  categories:
+    - id: "commands"
+      label: "Comandos"
+    - id: "agents"
+      label: "Agentes"
+    - id: "workflows"
+      label: "Workflows"
+    - id: "best-practices"
+      label: "Mejores Prácticas"
+
+# Navigation configuration
+navigation:
+  show_breadcrumbs: true
+  mobile_breakpoint: 768
+  max_depth: 3
+
+# Content settings
+content:
+  excerpt_length: 150
+  reading_time: true
+  last_modified: true
+
+# Social and external links
+external_links:
+  github:
+    url: "https://github.com/trivance-ai/trivance-ai-orchestrator"
+    label: "GitHub"
+  documentation:
+    url: "https://docs.trivance.ai"
+    label: "Documentación Completa"
+
+# Feature flags
+features:
+  search: true
+  dark_mode: false
+  analytics: false
+  comments: false
+
+# Performance settings
+performance:
+  lazy_loading: true
+  image_optimization: true
+  css_minification: true
+  js_minification: true
