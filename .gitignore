@@ -35,13 +35,9 @@ ccnotify.log
 
 # Claude Code directories (generados automáticamente)
 .claude/logs/
-!.claude/logs/.gitkeep
 .claude/reviews/
-!.claude/reviews/.gitkeep
 .claude/implementations/
-!.claude/implementations/.gitkeep
 .claude/uix-designs/
-!.claude/uix-designs/.gitkeep
 
 # Runtime data
 pids/
