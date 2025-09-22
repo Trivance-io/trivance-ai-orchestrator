@@ -75,6 +75,13 @@ _If you expect to exceed the budget: **stop and ask**._
 - Anti-over-engineering principles and complexity budget enforcement
 - Systematic approach to ensure production-ready solutions
 
+**Design Principles**: @docs/design-principles.md
+
+- S-Tier SaaS dashboard design checklist (Stripe/Airbnb/Linear standards)
+- Complete design system foundation and UI component specifications
+- Module-specific design tactics for data tables, moderation, and configuration
+- CSS architecture and responsive design best practices
+
 ## guidelines for code review (claude bot review)
 
 - Priority: **SECURITY**, **BUG**, **RELIABILITY**, **PERFORMANCE** with production impact.
