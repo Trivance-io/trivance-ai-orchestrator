@@ -59,33 +59,19 @@ _If you expect to exceed the budget: **stop and ask**._
 
 **Essential guides for Claude Code ecosystem:**
 
-**Commands**: @.claude/human-handbook/commands-guide.md
-
-- High-value commands (understand, implement, review, test)
-- Workflow commands (session-start, pr, commit)
-- Specialized commands (todos, worktree, security-scan)
-- Practical usage flows and ROI metrics
-
-**Agents**: @.claude/human-handbook/agents-guide.md
-
-- 33+ specialist agents organized by value and use case
-- Strategic orchestration and framework-specific expertise
-- Quality assurance and design enhancement capabilities
-- Agent combination patterns and selection principles
-
-**Workflow**: @.claude/human-handbook/ai-first-workflow.md
-
-- Complete PR lifecycle from code to merge
-- Findings resolution with specialist delegation
-- Authorization workflows and iterative improvement
-- High-impact command sequences and best practices
-
 **Constitution**: @.specify/memory/constitution.md
 
 - AI-first workflow principles and governance framework
 - Value/complexity ratio requirements and complexity budgets
 - Test-first development methodology (TDD mandatory)
 - Quality standards and implementation rules
+
+**Always Works™**: @.claude/scripts/utils/aw.md
+
+- Comprehensive testing methodology and implementation validation
+- 30-second reality check for functionality and simplicity
+- Anti-over-engineering principles and complexity budget enforcement
+- Systematic approach to ensure production-ready solutions
 
 ## guidelines for code review (claude bot review)
 
