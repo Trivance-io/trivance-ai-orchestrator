@@ -18,6 +18,8 @@ Testing automatizado de aplicaciones web desde Claude Code.
 
 ## ⚡ Configuración MCP (Interactivo)
 
+**Configuración simplificada:** Una sola instancia estable con cambios de viewport dinámicos
+
 **Paso 1:** Ejecutar setup
 
 ```bash
@@ -28,10 +30,20 @@ bash .claude/dev-tools/playwright/mcp/setup-mcp.sh
 
 ### 🎯 Uso MCP - Comandos Naturales
 
+**Navegación y testing:**
+
 ```
 Claude, ve a localhost:3000/login, llena el formulario con usuario 'admin' y contraseña '123' y haz click en enviar
 Claude, navega a mi app y toma una captura de pantalla del dashboard
-Claude, cambia a vista móvil y verifica que el menú funcione correctamente
+```
+
+**Cambios de viewport dinámicos:**
+
+```
+Claude, redimensiona el navegador a 375x812 para vista móvil
+Claude, cambia a vista tablet (768x1024) y verifica el menú
+Claude, redimensiona a 1366x768 para vista laptop
+Claude, vuelve a escritorio (1920x1080)
 ```
 
 ## 🧪 Configuración Framework (Sistemático)
