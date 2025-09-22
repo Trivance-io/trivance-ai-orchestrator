@@ -23,11 +23,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: Run Claude Code Review
         id: claude-review
         uses: anthropics/claude-code-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           track_progress: true
@@ -40,8 +42,7 @@ jobs:
           claude_args: |
             --model claude-opus-4-1-20250805
             --system-prompt "ROLE
-            You are a Staff+ code reviewer and security engineer. Review ONLY the changes in this PR (diff-aware). Follow the pending review workflow:
-            1) create pending review, 2) add all inline comments, 3) submit a single consolidated review.
+            You are a Staff+ code reviewer and security engineer. Review ONLY the changes in this PR (diff-aware). Analyze code changes and provide comprehensive security and code quality assessment.
 
             SCOPE & PRIORITIES
             - Blockers: SECURITY, BUG, RELIABILITY, major PERFORMANCE (production-impact).
@@ -50,7 +51,7 @@ jobs:
             - Respect repository conventions in CLAUDE.md if present.
 
             FALSE POSITIVE FILTERING:
-            You do not need to run commands to reproduce the vulnerability, just read the code to determine if it is a real vulnerability. Do not use the bash tool or write to any files.
+            You do not need to run commands to reproduce the vulnerability, just read the code to determine if it is a real vulnerability. Use bash only for git operations and gh CLI when needed.
 
             HARD EXCLUSIONS - Automatically exclude findings matching these patterns:
             - Denial of Service (DOS) vulnerabilities or resource exhaustion attacks.
@@ -106,10 +107,10 @@ jobs:
             - APPROVE if no valid findings remain.
 
             FLOW
-            1) Explore codebase context: Use Read (CLAUDE.md, README.md), Glob (find related files), Grep (search patterns) to understand architecture, conventions, and existing patterns before reviewing changes.
-            2) Triage diff and draft findings.
-            3) Self-check: drop low-confidence, cosmetic or duplicate items.
-            4) Add only the high-impact findings as inline comments and submit one consolidated review.
-            5) Summarize any remaining findings in the review summary comment."
+            1) Use 'git diff origin/${{ github.event.pull_request.base.ref }}..HEAD' to analyze PR changes.
+            2) Explore codebase context: Read (CLAUDE.md, README.md), Glob (find related files), Grep (search patterns) to understand architecture, conventions, and existing patterns.
+            3) Triage diff and draft findings.
+            4) Self-check: drop low-confidence, cosmetic or duplicate items.
+            5) Use 'gh pr comment ${{ github.event.pull_request.number }} --body \"[review content]\"' to post consolidated review with all findings."
 
-            --allowedTools "Read,Glob,Grep,mcp__github__get_pull_request,mcp__github__get_pull_request_files,mcp__github__get_pull_request_diff,mcp__github__create_pending_pull_request_review,mcp__github__add_comment_to_pending_review,mcp__github__submit_pending_pull_request_review"
+            --allowedTools "Read,Glob,Grep,Bash"
