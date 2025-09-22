@@ -19,6 +19,8 @@
    | M | ≤ 250 | ≤ 3 | ≤ 1 | ≤ 3 % |
    | L | ≤ 600 | ≤ 5 | ≤ 2 | ≤ 5 % |
 
+   **Δ LOC = additions - deletions** (net change in lines of code)
+
 _If you expect to exceed the budget: **stop and ask**._
 
 4. **Guided exploration**

@@ -31,7 +31,7 @@ TDD mandatory: Tests written → User approved → Tests fail → Then implement
 
 ### IV. Complexity Budget (NON-NEGOTIABLE)
 
-Size S ≤ 80 LOC, 1 file, 0 deps, ≤1% CPU/RAM; Size M ≤ 250 LOC, 3 files, 1 dep, ≤3% CPU/RAM; Size L ≤ 600 LOC, 5 files, 2 deps, ≤5% CPU/RAM; Anti-Abstraction enforcement: maximum 3 projects for initial implementation, use framework features directly, avoid unnecessary abstraction layers; Stop and ask if exceeding budget; Self-audit against metrics mandatory.
+Size S ≤ 80 Δ LOC, 1 file, 0 deps, ≤1% CPU/RAM; Size M ≤ 250 Δ LOC, 3 files, 1 dep, ≤3% CPU/RAM; Size L ≤ 600 Δ LOC, 5 files, 2 deps, ≤5% CPU/RAM; Where **Δ LOC = additions - deletions** (net change in lines of code); Anti-Abstraction enforcement: maximum 3 projects for initial implementation, use framework features directly, avoid unnecessary abstraction layers; Stop and ask if exceeding budget; Self-audit against metrics mandatory.
 
 ### V. Reuse First & Simplicity
 
