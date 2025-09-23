@@ -1,17 +1,17 @@
+
 # Implementation Plan: [FEATURE]
 
 **Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
 **Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
 
 ## Execution Flow (/plan command scope)
-
 ```
 1. Load feature spec from Input path
    → If not found: ERROR "No feature spec at {path}"
 2. Fill Technical Context (scan for NEEDS CLARIFICATION)
    → Detect Project Type from context (web=frontend+backend, mobile=app+api)
    → Set Structure Decision based on project type
-3. Fill the Constitution Check section based on Constitution v2.0.0 Constitutional Tests and Rights Framework.
+3. Fill the Constitution Check section based on the content of the constitution document.
 4. Evaluate Constitution Check section below
    → If violations exist: Document in Complexity Tracking
    → If no justification possible: ERROR "Simplify approach first"
@@ -27,16 +27,13 @@
 ```
 
 **IMPORTANT**: The /plan command STOPS at step 7. Phases 2-4 are executed by other commands:
-
 - Phase 2: /tasks command creates tasks.md
 - Phase 3-4: Implementation execution (manual or via tools)
 
 ## Summary
-
 [Extract from feature spec: primary requirement + technical approach from research]
 
 ## Technical Context
-
 **Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
 **Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
 **Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
@@ -48,28 +45,13 @@
 **Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
 
 ## Constitution Check
+*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-_GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
-
-### Constitutional Tests (All must pass)
-
-- [ ] **Legibility Test**: Can a new contributor understand the intent and behavior in one sitting?
-- [ ] **User Value Test**: Does it improve measurable user outcomes and reduce time-to-value?
-- [ ] **Simplicity Test**: Is there a simpler alternative delivering ≥80% of the value?
-- [ ] **Safety Test**: Are privacy, security, and abuse vectors addressed?
-- [ ] **AI-First Test**: Can an AI agent operate or assist via a text/JSON interface without human glue?
-- [ ] **Reversibility Test**: Is rollback or "off-switch" feasible within one deployment cycle?
-
-### Rights Framework Verification
-
-- [ ] **User Rights**: Does design respect User Bill of Rights (clarity, speed, accessibility, safety, control, consistency, help, graceful failure)?
-- [ ] **Developer Rights**: Does plan provide stable constraints, fit-for-purpose tooling, and reasoned time?
-- [ ] **AI Agent Rights**: Are AI agent contracts explicit with inputs, outputs, guardrails, and human oversight?
+[Gates determined based on constitution file]
 
 ## Project Structure
 
 ### Documentation (this feature)
-
 ```
 specs/[###-feature]/
 ├── plan.md              # This file (/plan command output)
@@ -81,7 +63,6 @@ specs/[###-feature]/
 ```
 
 ### Source Code (repository root)
-
 ```
 # Option 1: Single project (DEFAULT)
 src/
@@ -121,14 +102,12 @@ ios/ or android/
 **Structure Decision**: [DEFAULT to Option 1 unless Technical Context indicates web/mobile app]
 
 ## Phase 0: Outline & Research
-
 1. **Extract unknowns from Technical Context** above:
    - For each NEEDS CLARIFICATION → research task
    - For each dependency → best practices task
    - For each integration → patterns task
 
 2. **Generate and dispatch research agents**:
-
    ```
    For each unknown in Technical Context:
      Task: "Research {unknown} for {feature context}"
@@ -144,8 +123,7 @@ ios/ or android/
 **Output**: research.md with all NEEDS CLARIFICATION resolved
 
 ## Phase 1: Design & Contracts
-
-_Prerequisites: research.md complete_
+*Prerequisites: research.md complete*
 
 1. **Extract entities from feature spec** → `data-model.md`:
    - Entity name, fields, relationships
@@ -175,24 +153,21 @@ _Prerequisites: research.md complete_
    - Keep under 150 lines for token efficiency
    - Output to repository root
 
-**Output**: data-model.md, /contracts/\*, failing tests, quickstart.md, agent-specific file
+**Output**: data-model.md, /contracts/*, failing tests, quickstart.md, agent-specific file
 
 ## Phase 2: Task Planning Approach
-
-_This section describes what the /tasks command will do - DO NOT execute during /plan_
+*This section describes what the /tasks command will do - DO NOT execute during /plan*
 
 **Task Generation Strategy**:
-
 - Load `.specify/templates/tasks-template.md` as base
 - Generate tasks from Phase 1 design docs (contracts, data model, quickstart)
 - Each contract → contract test task [P]
-- Each entity → model creation task [P]
+- Each entity → model creation task [P] 
 - Each user story → integration test task
 - Implementation tasks to make tests pass
 
 **Ordering Strategy**:
-
-- TDD order: Tests before implementation
+- TDD order: Tests before implementation 
 - Dependency order: Models before services before UI
 - Mark [P] for parallel execution (independent files)
 
@@ -201,28 +176,25 @@ _This section describes what the /tasks command will do - DO NOT execute during 
 **IMPORTANT**: This phase is executed by the /tasks command, NOT by /plan
 
 ## Phase 3+: Future Implementation
-
-_These phases are beyond the scope of the /plan command_
+*These phases are beyond the scope of the /plan command*
 
 **Phase 3**: Task execution (/tasks command creates tasks.md)  
 **Phase 4**: Implementation (execute tasks.md following constitutional principles)  
 **Phase 5**: Validation (run tests, execute quickstart.md, performance validation)
 
 ## Complexity Tracking
+*Fill ONLY if Constitution Check has violations that must be justified*
 
-_Fill ONLY if Constitution Check has violations that must be justified_
+| Violation | Why Needed | Simpler Alternative Rejected Because |
+|-----------|------------|-------------------------------------|
+| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
+| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
 
-| Violation                  | Why Needed         | Simpler Alternative Rejected Because |
-| -------------------------- | ------------------ | ------------------------------------ |
-| [e.g., 4th project]        | [current need]     | [why 3 projects insufficient]        |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient]  |
 
 ## Progress Tracking
-
-_This checklist is updated during execution flow_
+*This checklist is updated during execution flow*
 
 **Phase Status**:
-
 - [ ] Phase 0: Research complete (/plan command)
 - [ ] Phase 1: Design complete (/plan command)
 - [ ] Phase 2: Task planning complete (/plan command - describe approach only)
@@ -231,12 +203,10 @@ _This checklist is updated during execution flow_
 - [ ] Phase 5: Validation passed
 
 **Gate Status**:
-
 - [ ] Initial Constitution Check: PASS
 - [ ] Post-Design Constitution Check: PASS
 - [ ] All NEEDS CLARIFICATION resolved
 - [ ] Complexity deviations documented
 
 ---
-
-_Based on Constitution v2.0.0 - See `.specify/memory/constitution.md`_
+*Based on Constitution v2.1.1 - See `/memory/constitution.md`*
