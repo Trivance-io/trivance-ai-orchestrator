@@ -95,7 +95,7 @@
     ],
     "PreToolUse": [
       {
-        "matcher": "Task|Edit|MultiEdit|Write|Bash|WebFetch|WebSearch",
+        "matcher": "Task",
         "hooks": [
           {
             "type": "command",

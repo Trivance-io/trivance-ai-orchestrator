@@ -21,43 +21,26 @@ def find_project_root():
         path = path.parent
     raise RuntimeError("Project root with .claude directory not found")
 
-def find_aw_md_path():
-    """Locate aw.md file in .claude/scripts/utils/"""
-    try:
-        project_root = find_project_root()
-        aw_path = project_root / '.claude' / 'scripts' / 'utils' / 'aw.md'
-        
-        if aw_path.exists():
-            return aw_path
-        else:
-            # Fallback: search in .claude/commands/ for backward compatibility
-            fallback_path = project_root / '.claude' / 'commands' / 'aw.md'
-            if fallback_path.exists():
-                return fallback_path
-                
-        return None
-    except Exception:
-        return None
 
-def log_result(success, aw_path):
-    """Log methodology injection result with descriptive context"""
+def log_result(success, context_path):
+    """Log project context injection result with descriptive context"""
     try:
         project_root = find_project_root()
         log_dir = project_root / '.claude' / 'logs' / datetime.now().strftime('%Y-%m-%d')
         log_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Generate more descriptive log entry
         log_entry = {
             "timestamp": datetime.now().isoformat(),
             "hook": "pre-tool-use",
-            "action": "always_works_methodology_injection",
+            "action": "project_context_injection",
             "status": "success" if success else "failed",
-            "methodology_injected": success,
-            "aw_md_path": str(aw_path) if aw_path else "not_found",
-            "content_size": aw_path.stat().st_size if aw_path and aw_path.exists() else 0,
-            "reason": "file_found_and_loaded" if success else "aw_md_file_not_accessible"
+            "context_injected": success,
+            "project_context_path": str(context_path) if context_path else "not_found",
+            "content_size": context_path.stat().st_size if context_path and context_path.exists() else 0,
+            "reason": "file_found_and_loaded" if success else "project_context_file_not_accessible"
         }
-        
+
         with open(log_dir / 'pre_tool_use.jsonl', 'a') as f:
             f.write(json.dumps(log_entry) + '\n')
     except Exception as e:
@@ -66,13 +49,30 @@ def log_result(success, aw_path):
             import sys
             fallback_log = {
                 "timestamp": datetime.now().isoformat(),
-                "hook": "pre-tool-use", 
+                "hook": "pre-tool-use",
                 "error": "logging_failed",
                 "reason": str(e)[:100]  # Truncate error message
             }
             sys.stderr.write(f"HOOK_LOG_ERROR: {json.dumps(fallback_log)}\n")
         except:
             pass  # Ultimate fallback - truly silent only if stderr also fails
+
+def is_task_tool_invocation(data):
+    """Check if this is a Task tool invocation for sub-agents"""
+    try:
+        tool_input = data.get("tool_input", {})
+        return tool_input.get("subagent_type") is not None
+    except (AttributeError, TypeError):
+        return False
+
+def find_project_context_path():
+    """Locate project-context.md file in .claude/scripts/utils/"""
+    try:
+        project_root = find_project_root()
+        context_path = project_root / '.claude' / 'scripts' / 'utils' / 'project-context.md'
+        return context_path if context_path.exists() else None
+    except Exception:
+        return None
 
 def main():
     try:
@@ -84,33 +84,42 @@ def main():
             data = {}
     except Exception:
         data = {}
-    
-    # Locate and read aw.md file
-    aw_path = find_aw_md_path()
-    
-    if not aw_path or not aw_path.exists():
-        log_result(False, aw_path)
-        print("# Always Works™ methodology: aw.md not found")
+
+    # Check if this is a Task tool invocation requiring project context
+    is_task_tool = is_task_tool_invocation(data)
+
+    # Only provide context for Task tool invocations (sub-agents)
+    if not is_task_tool:
+        # For non-Task tools, provide no context injection
+        log_result(True, None)
         sys.exit(0)
-    
+
+    # Locate and read project-context.md file for Task tools
+    context_path = find_project_context_path()
+
+    if not context_path or not context_path.exists():
+        log_result(False, context_path)
+        print("# Project Governance: project-context.md not found")
+        sys.exit(0)
+
     try:
-        # Read and output aw.md content with reasonable limit
-        with open(aw_path, 'r', encoding='utf-8') as f:
-            content = f.read(65536)  # 64KB limit (sufficient for methodology files)
-            
+        # Read project context content
+        with open(context_path, 'r', encoding='utf-8') as f:
+            content = f.read(65536)  # 64KB limit
+
         # Output content for Claude Code context injection
         print(content)
-        
-        log_result(True, aw_path)
-        
+
+        log_result(True, context_path)
+
     except (OSError, UnicodeDecodeError) as e:
-        log_result(False, aw_path)
+        log_result(False, context_path)
         # Log error for observability
         try:
-            sys.stderr.write(f"HOOK_ERROR: Failed to read {aw_path}: {str(e)}\n")
+            sys.stderr.write(f"HOOK_ERROR: Failed to read {context_path}: {str(e)}\n")
         except:
             pass
-        print(f"# Always Works™ methodology: Error reading aw.md - {str(e)}")
+        print(f"# Project Governance: Error reading project-context.md - {str(e)}")
         sys.exit(0)
 
 if __name__ == "__main__":
