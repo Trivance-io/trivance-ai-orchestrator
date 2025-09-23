@@ -1,22 +1,32 @@
-# Understand Project
+---
+description: Deep analysis of project architecture, patterns, and relationships for comprehensive understanding
+argument-hint: "specific area to focus on (optional)"
+allowed-tools: Read, Glob, Grep, LS, TodoWrite
+---
 
-I'll analyze your entire application to understand its architecture, patterns, and how everything works together.
+# Project Understanding
 
-**Phase 1: Project Discovery**
+**Comprehensive analysis for deep understanding:** $ARGUMENTS
+
+## Phase 1: Project Discovery
+
 Using native tools for comprehensive analysis:
+
 - **Glob** to map entire project structure
 - **Read** key files (README, docs, configs)
 - **Grep** to identify technology patterns
 - **Read** entry points and main files
 
-I'll discover:
+Discover:
+
 - Project type and main technologies
 - Architecture patterns (MVC, microservices, etc.)
 - Directory structure and organization
 - Dependencies and external integrations
 - Build and deployment setup
 
-**Phase 2: Code Architecture Analysis**
+## Phase 2: Code Architecture Analysis
+
 - **Entry points**: Main files, index files, app initializers
 - **Core modules**: Business logic organization
 - **Data layer**: Database, models, repositories
@@ -25,8 +35,10 @@ I'll discover:
 - **Configuration**: Environment setup, constants
 - **Testing**: Test structure and coverage
 
-**Phase 3: Pattern Recognition**
-I'll identify established patterns:
+## Phase 3: Pattern Recognition
+
+Identify established patterns:
+
 - Naming conventions for files and functions
 - Code style and formatting rules
 - Error handling approaches
@@ -34,7 +46,8 @@ I'll identify established patterns:
 - State management strategy
 - Communication patterns between modules
 
-**Phase 4: Dependency Mapping**
+## Phase 4: Dependency Mapping
+
 - Internal dependencies between modules
 - External library usage patterns
 - Service integrations
@@ -42,24 +55,18 @@ I'll identify established patterns:
 - Database relationships
 - Asset and resource management
 
-**Phase 5: Documentation Synthesis**
-After analysis, I'll provide:
-- **Architecture diagram** (in text/markdown)
-- **Key components** and their responsibilities
-- **Data flow** through the application
-- **Important patterns** to follow
-- **Tech stack summary**
-- **Development workflow**
+## Phase 5: Integration Analysis
 
-**Integration Points:**
-I'll identify how components interact:
+Identify how components interact:
+
 - API endpoints and their consumers
 - Database queries and their callers
 - Event systems and listeners
 - Shared utilities and helpers
 - Cross-cutting concerns (logging, auth)
 
-**Output Format:**
+## Output Format
+
 ```
 PROJECT OVERVIEW
 ├── Architecture: [Type]
@@ -77,12 +84,19 @@ COMPONENT MAP
 └── Tests
     └── [Test strategy]
 
+INTEGRATION POINTS
+├── API Endpoints: [List]
+├── Data Flow: [Description]
+├── Dependencies: [Internal/External]
+└── Cross-cutting: [Logging, Auth, etc.]
+
 KEY INSIGHTS
 - [Important finding 1]
 - [Important finding 2]
 - [Unique patterns]
+- [Potential issues]
 ```
 
-When the analysis is large, I'll create a todo list to explore specific areas in detail.
+When analysis is large, create todo list to explore specific areas in detail.
 
-This gives you a complete mental model of how your application works.
+This provides complete understanding to prevent biased assumptions.
