@@ -60,6 +60,15 @@ AGENT_TYPE="${1:-}"
 
 # Agent-specific file paths  
 CLAUDE_FILE="$REPO_ROOT/CLAUDE.md"
+GEMINI_FILE="$REPO_ROOT/GEMINI.md"
+COPILOT_FILE="$REPO_ROOT/.github/copilot-instructions.md"
+CURSOR_FILE="$REPO_ROOT/.cursor/rules/specify-rules.mdc"
+QWEN_FILE="$REPO_ROOT/QWEN.md"
+AGENTS_FILE="$REPO_ROOT/AGENTS.md"
+WINDSURF_FILE="$REPO_ROOT/.windsurf/rules/specify-rules.md"
+KILOCODE_FILE="$REPO_ROOT/.kilocode/rules/specify-rules.md"
+AUGGIE_FILE="$REPO_ROOT/.augment/rules/specify-rules.md"
+ROO_FILE="$REPO_ROOT/.roo/rules/specify-rules.md"
 
 # Template file
 TEMPLATE_FILE="$REPO_ROOT/.specify/templates/agent-file-template.md"
@@ -541,9 +550,39 @@ update_specific_agent() {
         claude)
             update_agent_file "$CLAUDE_FILE" "Claude Code"
             ;;
+        gemini)
+            update_agent_file "$GEMINI_FILE" "Gemini CLI"
+            ;;
+        copilot)
+            update_agent_file "$COPILOT_FILE" "GitHub Copilot"
+            ;;
+        cursor)
+            update_agent_file "$CURSOR_FILE" "Cursor IDE"
+            ;;
+        qwen)
+            update_agent_file "$QWEN_FILE" "Qwen Code"
+            ;;
+        opencode)
+            update_agent_file "$AGENTS_FILE" "opencode"
+            ;;
+        codex)
+            update_agent_file "$AGENTS_FILE" "Codex CLI"
+            ;;
+        windsurf)
+            update_agent_file "$WINDSURF_FILE" "Windsurf"
+            ;;
+        kilocode)
+            update_agent_file "$KILOCODE_FILE" "Kilo Code"
+            ;;
+        auggie)
+            update_agent_file "$AUGGIE_FILE" "Auggie CLI"
+            ;;
+        roo)
+            update_agent_file "$ROO_FILE" "Roo Code"
+            ;;
         *)
             log_error "Unknown agent type '$agent_type'"
-            log_error "Expected: claude"
+            log_error "Expected: claude|gemini|copilot|cursor|qwen|opencode|codex|windsurf|kilocode|auggie|roo"
             exit 1
             ;;
     esac
@@ -558,6 +597,50 @@ update_all_existing_agents() {
         found_agent=true
     fi
     
+    if [[ -f "$GEMINI_FILE" ]]; then
+        update_agent_file "$GEMINI_FILE" "Gemini CLI"
+        found_agent=true
+    fi
+    
+    if [[ -f "$COPILOT_FILE" ]]; then
+        update_agent_file "$COPILOT_FILE" "GitHub Copilot"
+        found_agent=true
+    fi
+    
+    if [[ -f "$CURSOR_FILE" ]]; then
+        update_agent_file "$CURSOR_FILE" "Cursor IDE"
+        found_agent=true
+    fi
+    
+    if [[ -f "$QWEN_FILE" ]]; then
+        update_agent_file "$QWEN_FILE" "Qwen Code"
+        found_agent=true
+    fi
+    
+    if [[ -f "$AGENTS_FILE" ]]; then
+        update_agent_file "$AGENTS_FILE" "Codex/opencode"
+        found_agent=true
+    fi
+    
+    if [[ -f "$WINDSURF_FILE" ]]; then
+        update_agent_file "$WINDSURF_FILE" "Windsurf"
+        found_agent=true
+    fi
+    
+    if [[ -f "$KILOCODE_FILE" ]]; then
+        update_agent_file "$KILOCODE_FILE" "Kilo Code"
+        found_agent=true
+    fi
+
+    if [[ -f "$AUGGIE_FILE" ]]; then
+        update_agent_file "$AUGGIE_FILE" "Auggie CLI"
+        found_agent=true
+    fi
+    
+    if [[ -f "$ROO_FILE" ]]; then
+        update_agent_file "$ROO_FILE" "Roo Code"
+        found_agent=true
+    fi
     
     # If no agent files exist, create a default Claude file
     if [[ "$found_agent" == false ]]; then
@@ -582,7 +665,7 @@ print_summary() {
     fi
     
     echo
-    log_info "Usage: $0 [claude]"
+    log_info "Usage: $0 [claude|gemini|copilot|cursor|qwen|opencode|codex|windsurf|kilocode|auggie|roo]"
 }
 
 #==============================================================================
