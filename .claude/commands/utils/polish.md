@@ -8,6 +8,33 @@ allowed-tools: Read, Write, Edit, MultiEdit, Bash, Grep, LS, Glob, Task, TodoWri
 
 **Systematic refinement for AI-generated content:** $ARGUMENTS
 
+## ⚠️ CRITICAL DISCLAIMER - MANDATORY COMPLIANCE
+
+**POLISHING ≠ SCOPE REDUCTION**
+
+This command is for **REFINEMENT**, not **FUNCTIONAL REDUCTION**. Before any changes:
+
+1. **ANALYZE PURPOSE FIRST** - Understand the file's core mission and intended scope
+2. **PRESERVE 100% FUNCTIONALITY** - Never sacrifice features for brevity
+3. **DISTINGUISH POLISH FROM SIMPLIFY** - Format improvements ≠ capability reduction
+4. **WHEN IN DOUBT, DON'T REDUCE** - Err on the side of preserving functionality
+
+**EXAMPLES OF CORRECT POLISHING:**
+
+- Fix syntax errors, inconsistent formatting, broken links
+- Eliminate promotional language, redundant explanations
+- Standardize naming conventions, improve clarity
+- Remove duplicate information, optimize structure
+
+**EXAMPLES OF INCORRECT REDUCTION:**
+
+- Removing methodology sections from analysis commands
+- Cutting algorithm logic for "brevity"
+- Eliminating core features to "simplify"
+- Reducing command capabilities for "efficiency"
+
+**MANDATE: If file serves critical user workflow (daily use, core functionality), prioritize COMPLETE PRESERVATION over optimization.**
+
 ## Universal Polishing Protocol
 
 Execute systematically across all file types:
@@ -52,15 +79,11 @@ Execute systematically across all file types:
 
 ## File-Type Specific Considerations
 
-**Documentation Files** (.md, .rst, .txt): Header hierarchy, link validity, list consistency, promotional language elimination
-
-**Configuration Files** (.json, .yaml, .toml, .env): Syntax validation, setting conflicts, security risks, missing dependencies
-
-**Data Files** (.csv, .sql, .xml, .json): Format compliance, type consistency, constraint validation, encoding issues
-
-**Scripts & Templates** (.sh, .ps1, .html, .css): Command syntax, error handling, security validation, accessibility compliance
-
-**Code Files** (any language): Language-specific syntax, import optimization, logic validation, architecture compliance
+- **Documentation Files** (.md, .rst, .txt): Header hierarchy, link validity, list consistency, promotional language elimination
+- **Configuration Files** (.json, .yaml, .toml, .env): Syntax validation, setting conflicts, security risks, missing dependencies
+- **Data Files** (.csv, .sql, .xml, .json): Format compliance, type consistency, constraint validation, encoding issues
+- **Scripts & Templates** (.sh, .ps1, .html, .css): Command syntax, error handling, security validation, accessibility compliance
+- **Code Files** (any language): Language-specific syntax, import optimization, logic validation, architecture compliance
 
 ## Execution Process
 
@@ -109,8 +132,4 @@ Execute systematically across all file types:
 
 **Execution Protocol:**
 
-1. Analyze file type and purpose
-2. Apply relevant standards
-3. Execute five phases sequentially
-4. Validate improvements
-5. Document changes and results
+Follow the systematic 5-step Execution Process detailed above, ensuring all phases are completed sequentially with full documentation of improvements.

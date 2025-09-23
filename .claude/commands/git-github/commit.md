@@ -1,15 +1,22 @@
+---
+description: Intelligent git commit with automatic grouping and quality checks
+argument-hint: "commit message or 'all changes'"
+allowed-tools: Bash, Read, Grep, TodoWrite
+---
+
 # Smart Git Commit
 
-I'll intelligently analyze your changes and create meaningful commits. When you have diverse changes across different areas, I'll automatically group them into logical, separate commits for better project history.
+**Intelligently analyze and commit changes:** $ARGUMENTS
 
-**Pre-Commit Quality Checks:**
-Before committing, I'll verify:
-- Build passes (if build command exists)
-- Tests pass (if test command exists)
-- Linter passes (if lint command exists)
-- No obvious errors in changed files
+Automatically groups diverse changes into logical, separate commits for better project history.
 
-First, let me check if this is a git repository and what's changed:
+## Pre-Commit Quality Checks
+
+Verifies build, tests, and linter pass before committing.
+
+## Process
+
+Check repository status and analyze changes:
 
 ```bash
 # Verify we're in a git repository
@@ -33,15 +40,7 @@ git diff --cached --stat
 git diff --stat
 ```
 
-Now I'll analyze the changes to determine:
-1. What files were modified
-2. The nature of changes (feature, fix, refactor, etc.)
-3. The scope/component affected
-
-If the analysis or commit encounters errors:
-- I'll explain what went wrong
-- Suggest how to resolve it
-- Ensure no partial commits occur
+Analyzes files, change types, and scope. Handles errors with explanations and ensures no partial commits.
 
 ```bash
 # If nothing is staged, I'll stage modified files (not untracked)
@@ -93,7 +92,7 @@ done
 # Execute smart commit strategy
 if [[ $significant_groups -ge 2 ]]; then
     echo "🔄 Creating $significant_groups logical commits..."
-    
+
     # Create individual commits by group
     for group in config docs security test main; do
         if [[ -n "${file_groups[$group]}" ]]; then
@@ -102,7 +101,7 @@ if [[ $significant_groups -ge 2 ]]; then
                 # Stage and commit this group
                 git reset > /dev/null 2>&1  # Unstage all
                 git add ${files[@]}
-                
+
                 # Generate appropriate commit message for group
                 case "$group" in
                     config) git commit -m "feat(config): update configuration and commands" ;;
@@ -115,7 +114,7 @@ if [[ $significant_groups -ge 2 ]]; then
             fi
         fi
     done
-    
+
     echo "🎯 Created $significant_groups logical commits automatically"
     exit 0
 fi
@@ -124,52 +123,22 @@ fi
 echo "📦 Creating single commit for all changes..."
 ```
 
-Based on the analysis, I'll create a conventional commit message:
-- **Type**: feat|fix|docs|style|refactor|test|chore
-- **Scope**: component or area affected (optional)
-- **Subject**: clear description in present tense
-- **Body**: why the change was made (if needed)
+Creates conventional commit messages (feat|fix|docs|style|refactor|test|chore) with appropriate scope and description.
 
 ```bash
-# I'll create the commit with the analyzed message
 # Example: git commit -m "fix(auth): resolve login timeout issue"
 ```
 
-The commit message will be concise, meaningful, and follow your project's conventions if I can detect them from recent commits.
+## Security & Authenticity
 
-**Important**: I will NEVER:
-- Add "Co-authored-by" or any Claude signatures
-- Include "Generated with Claude Code" or similar messages
-- Modify git config or user credentials
-- Add any AI/assistant attribution to the commit
-- Use emojis in commits, PRs, or git-related content
+- Uses only your existing git user configuration
+- No AI signatures, attributions, or generated markers
+- No git config modifications
+- Maintains full commit ownership and authenticity
 
-The commit will use only your existing git user configuration, maintaining full ownership and authenticity of your commits.
+## Auto-Grouping Logic
 
-## Intelligent Commit Grouping
-
-This command automatically detects when changes span multiple logical areas and creates separate commits:
-
-**Auto-grouping triggers when:**
-- 2+ groups with significant changes (2+ files each, or any security changes)
-- Different functional areas: config, docs, security, tests, main code
-
-**Groups created:**
-- **config**: `.claude/` files, `*.md` command files  
-- **docs**: `docs/`, `README`, `CHANGELOG` files
-- **security**: `scripts/`, `*setup*`, `*security*` files
-- **test**: `*test*`, `*spec*` files
-- **main**: all other code files
-
-**Fallback**: Single commit if grouping provides no benefit
-
-This ensures clean, logical commit history without manual intervention.
-
-## Commit Summary
-
-After creating commits, I'll show a summary of commits created in this session.
-
-This displays commits from this session with:
-- Commit hash and message  
-- Files modified in each commit
-- Only commits created during implementation
+- **Triggers**: 2+ groups with 2+ files each, or any security changes
+- **Groups**: config, docs, security, test, main
+- **Fallback**: Single commit when grouping provides no benefit
+- **Result**: Clean, logical commit history without manual intervention
