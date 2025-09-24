@@ -74,7 +74,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "npx -y ccstatusline@latest",
+    "command": "npx --yes ccstatusline@latest",
     "padding": 0
   },
 
