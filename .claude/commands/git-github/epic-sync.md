@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash, Read, Write, LS
+allowed-tools: Bash(test), Bash(sed), Bash(gh), Bash(date -u), Bash(git), Bash(cat), Read, Write, LS
 ---
 
 # Epic Sync
@@ -14,10 +14,7 @@ Push epic to GitHub as parent issue.
 
 ## Quick Check
 
-```bash
-# Verify epic exists
-test -f .claude/epics/$ARGUMENTS/epic.md || echo "❌ Epic not found. Run: /pm:prd-parse $ARGUMENTS"
-```
+!bash test -f .claude/epics/$ARGUMENTS/epic.md || echo "❌ Epic not found. Run: /pm:prd-parse $ARGUMENTS"
 
 ## Instructions
 
@@ -25,24 +22,11 @@ test -f .claude/epics/$ARGUMENTS/epic.md || echo "❌ Epic not found. Run: /pm:p
 
 Strip frontmatter and prepare GitHub issue body:
 
-```bash
-# Extract content without frontmatter
-sed '1,/^---$/d; 1,/^---$/d' .claude/epics/$ARGUMENTS/epic.md > /tmp/epic-body.md
+!bash sed '1,/^---$/d; 1,/^---$/d' .claude/epics/$ARGUMENTS/epic.md > /tmp/epic-body.md
 
-# Determine epic type (feature vs bug) from content
-if grep -qi "bug\|fix\|issue\|problem\|error" /tmp/epic-body.md; then
-  epic_type="bug"
-else
-  epic_type="feature"
-fi
+!bash if grep -qi "bug\|fix\|issue\|problem\|error" /tmp/epic-body.md; then epic_type="bug"; else epic_type="feature"; fi
 
-# Create parent issue with labels
-epic_number=$(gh issue create \
-  --title "$ARGUMENTS" \
-  --body-file /tmp/epic-body.md \
-  --label "epic,epic:$ARGUMENTS,$epic_type" \
-  --json number -q .number)
-```
+!bash epic_number=$(gh issue create --title "$ARGUMENTS" --body-file /tmp/epic-body.md --label "epic,epic:$ARGUMENTS,$epic_type" --json number -q .number)
 
 Store the returned issue number for epic frontmatter update.
 
@@ -50,49 +34,39 @@ Store the returned issue number for epic frontmatter update.
 
 Update the epic file with GitHub URL and timestamp:
 
-```bash
-# Get repo info
-repo=$(gh repo view --json nameWithOwner -q .nameWithOwner)
-epic_url="https://github.com/$repo/issues/$epic_number"
-current_date=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+!bash repo=$(gh repo view --json nameWithOwner -q .nameWithOwner)
+!bash epic_url="https://github.com/$repo/issues/$epic_number"
+!bash current_date=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-# Update epic frontmatter
-sed -i.bak "/^github:/c\github: $epic_url" .claude/epics/$ARGUMENTS/epic.md
-sed -i.bak "/^updated:/c\updated: $current_date" .claude/epics/$ARGUMENTS/epic.md
-rm .claude/epics/$ARGUMENTS/epic.md.bak
-```
+!bash sed -i.bak "/^github:/c\github: $epic_url" .claude/epics/$ARGUMENTS/epic.md
+!bash sed -i.bak "/^updated:/c\updated: $current_date" .claude/epics/$ARGUMENTS/epic.md
+!bash rm .claude/epics/$ARGUMENTS/epic.md.bak
 
 ### 3. Create Mapping File
 
 Create `.claude/epics/$ARGUMENTS/github-mapping.md`:
 
-```bash
-# Create mapping file
-cat > .claude/epics/$ARGUMENTS/github-mapping.md << EOF
+!bash cat > .claude/epics/$ARGUMENTS/github-mapping.md << EOF
+
 # GitHub Issue Mapping
 
-Epic: #${epic_number} - https://github.com/${repo}/issues/${epic_number}
+Epic: #\${epic_number} - https://github.com/\${repo}/issues/\${epic_number}
 
-Note: Sub-issues will be created by SDD workflow via /specify --from-issue ${epic_number}
+Note: Sub-issues will be created by SDD workflow via /specify --from-issue \${epic_number}
 
 Synced: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
 EOF
-```
 
 ### 4. Create Worktree
 
 Follow `/rules/worktree-operations.md` to create development worktree:
 
-```bash
-# Ensure main is current
-git checkout main
-git pull origin main
+!bash git checkout main
+!bash git pull origin main
 
-# Create worktree for epic
-git worktree add ../epic-$ARGUMENTS -b epic/$ARGUMENTS
+!bash git worktree add ../epic-$ARGUMENTS -b epic/$ARGUMENTS
 
-echo "✅ Created worktree: ../epic-$ARGUMENTS"
-```
+!bash echo "✅ Created worktree: ../epic-$ARGUMENTS"
 
 ### 5. Output
 

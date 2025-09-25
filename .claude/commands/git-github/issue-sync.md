@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash, Read, Write, LS
+allowed-tools: Bash(gh), Bash(date -u), Read, Write, LS
 ---
 
 # Issue Sync
@@ -24,11 +24,11 @@ Before proceeding, complete these validation steps.
 Do not bother the user with preflight checks progress ("I'm not going to ..."). Just do them and move on.
 
 1. **GitHub Authentication:**
-   - Run: `gh auth status`
+   - !bash gh auth status
    - If not authenticated, tell user: "❌ GitHub CLI not authenticated. Run: gh auth login"
 
 2. **Issue Validation:**
-   - Run: `gh issue view $ARGUMENTS --json state`
+   - !bash gh issue view $ARGUMENTS --json state
    - If issue doesn't exist, tell user: "❌ Issue #$ARGUMENTS not found"
    - If issue is closed and completion < 100%, warn: "⚠️ Issue is closed but work incomplete"
 
@@ -65,7 +65,7 @@ Collect all local updates for the issue:
 
 ### 2. Update Progress Tracking Frontmatter
 
-Get current datetime: `date -u +"%Y-%m-%dT%H:%M:%SZ"`
+!bash date -u +"%Y-%m-%dT%H:%M:%SZ"
 
 Update the progress.md file frontmatter:
 
@@ -133,13 +133,11 @@ _Progress: {completion}% | Synced from local updates at {timestamp}_
 
 Use GitHub CLI to add comment:
 
-```bash
-gh issue comment #$ARGUMENTS --body-file {temp_comment_file}
-```
+!bash gh issue comment #$ARGUMENTS --body-file {temp_comment_file}
 
 ### 6. Update Local Task File
 
-Get current datetime: `date -u +"%Y-%m-%dT%H:%M:%SZ"`
+!bash date -u +"%Y-%m-%dT%H:%M:%SZ"
 
 Update the task file frontmatter with sync information:
 
