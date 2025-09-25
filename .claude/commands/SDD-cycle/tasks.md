@@ -188,4 +188,13 @@ rm -rf "$temp_dir"
 
 echo "✅ GitHub sub-issues created and tasks.md updated with issue numbers"
 echo "🔗 Parent Issue: https://github.com/$(gh repo view --json nameWithOwner -q .nameWithOwner)/issues/$parent_issue"
+echo ""
+echo "🚀 Next Step: Execute implementation tasks"
+echo "Run: /SDD-cycle:implement"
+echo ""
+echo "This unified SDD command will:"
+echo "  - Execute tasks with intelligent parallelization"
+echo "  - Launch specialized Task agents based on coordination plan"
+echo "  - Follow TDD methodology with enhanced coordination"
+echo "  - Provide distributed progress tracking"
 ```

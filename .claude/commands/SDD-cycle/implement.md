@@ -24,29 +24,51 @@ $ARGUMENTS
    - **Task details**: ID, description, file paths, parallel markers [P]
    - **Execution flow**: Order and dependency requirements
 
-4. Execute implementation following the task plan:
-   - **Phase-by-phase execution**: Complete each phase before moving to the next
-   - **Respect dependencies**: Run sequential tasks in order, parallel tasks [P] can run together  
-   - **Follow TDD approach**: Execute test tasks before their corresponding implementation tasks
-   - **File-based coordination**: Tasks affecting the same files must run sequentially
-   - **Validation checkpoints**: Verify each phase completion before proceeding
+4. Load coordination plan from prior analysis (if available):
+   - **Check for analysis output**: Look for previous `/analyze` execution results or parallel execution plan
+   - **Agent assignments**: Map tasks to optimal specialized agents (test-automator, backend-architect, frontend-developer, etc.)
+   - **Stream coordination**: Identify which tasks can run in parallel vs sequential
+   - **File conflict detection**: Note shared files that require coordination between agents
+   - **Fallback**: If no coordination plan available, proceed with single-agent sequential execution
 
-5. Implementation execution rules:
+5. Execute implementation with intelligent parallelization:
+   - **Phase-by-phase execution**: Complete each phase before moving to the next (PRESERVED)
+   - **TDD approach**: Execute test tasks before their corresponding implementation tasks (PRESERVED)
+   - **Intelligent agent dispatch**:
+     - For parallel tasks [P] with different files: Launch specialized Task agents simultaneously
+     - For sequential dependencies: Execute one agent at a time in dependency order
+     - Use agent assignments from coordination plan (test-automator, backend-architect, etc.)
+   - **Coordination management**:
+     - Monitor shared file access across parallel streams
+     - Implement coordination checkpoints for file conflicts
+     - Synchronize agents at phase boundaries
+   - **Validation checkpoints**: Verify each phase completion before proceeding (PRESERVED)
+
+6. Implementation execution rules:
    - **Setup first**: Initialize project structure, dependencies, configuration
    - **Tests before code**: If you need to write tests for contracts, entities, and integration scenarios
    - **Core development**: Implement models, services, CLI commands, endpoints
    - **Integration work**: Database connections, middleware, logging, external services
    - **Polish and validation**: Unit tests, performance optimization, documentation
 
-6. Progress tracking and error handling:
-   - Report progress after each completed task
-   - Halt execution if any non-parallel task fails
-   - For parallel tasks [P], continue with successful tasks, report failed ones
-   - Provide clear error messages with context for debugging
-   - Suggest next steps if implementation cannot proceed
-   - **IMPORTANT** For completed tasks, make sure to mark the task off as [X] in the tasks file.
+7. Progress tracking and error handling:
+   - **Sequential tasks**: Report progress after each completed task (PRESERVED)
+   - **Parallel agent coordination**:
+     - Monitor progress across multiple Task agents simultaneously
+     - Aggregate status reports from parallel streams
+     - Track completion of coordination checkpoints
+   - **Error handling strategy**:
+     - Halt execution if any non-parallel task fails (PRESERVED)
+     - For parallel tasks [P], continue with successful tasks, report failed ones (PRESERVED)
+     - Handle agent coordination failures gracefully
+     - Provide clear error messages with context for debugging (PRESERVED)
+   - **Task completion tracking**:
+     - Mark completed tasks as [X] in tasks.md (PRESERVED)
+     - Update task status for both sequential and parallel execution
+     - Synchronize task file updates across agents
+   - Suggest next steps if implementation cannot proceed (PRESERVED)
 
-7. Completion validation:
+8. Completion validation:
    - Verify all required tasks are completed
    - Check that implemented features match the original specification
    - Validate that tests pass and coverage meets requirements
