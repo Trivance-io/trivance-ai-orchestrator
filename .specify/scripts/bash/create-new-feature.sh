@@ -72,7 +72,21 @@ WORDS=$(echo "$BRANCH_NAME" | tr '-' '\n' | grep -v '^$' | head -3 | tr '\n' '-'
 BRANCH_NAME="${FEATURE_NUM}-${WORDS}"
 
 if [ "$HAS_GIT" = true ]; then
-    git checkout -b "$BRANCH_NAME"
+    # Check if we're in the main repository by comparing with first worktree path
+    MAIN_WORKTREE=$(git worktree list | head -1 | awk '{print $1}')
+    CURRENT_PATH=$(pwd)
+
+    if [ "$CURRENT_PATH" = "$MAIN_WORKTREE" ]; then
+        # We're in main repo - create worktree
+        WORKTREE_DIR="../feature-$BRANCH_NAME"
+        git worktree add "$WORKTREE_DIR" -b "$BRANCH_NAME"
+        echo "✅ Created worktree: $WORKTREE_DIR"
+        echo "📁 Switch to worktree: cd $WORKTREE_DIR"
+    else
+        # We're already in a worktree - just create branch
+        git checkout -b "$BRANCH_NAME"
+        echo "✅ Created branch: $BRANCH_NAME"
+    fi
 else
     >&2 echo "[specify] Warning: Git repository not detected; skipped branch creation for $BRANCH_NAME"
 fi

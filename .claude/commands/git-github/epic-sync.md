@@ -26,7 +26,9 @@ Strip frontmatter and prepare GitHub issue body:
 
 !bash if grep -qi "bug\|fix\|issue\|problem\|error" /tmp/epic-body.md; then epic_type="bug"; else epic_type="feature"; fi
 
-!bash epic_number=$(gh issue create --title "$ARGUMENTS" --body-file /tmp/epic-body.md --label "epic,epic:$ARGUMENTS,$epic_type" --json number -q .number)
+!bash gh issue create --title "$ARGUMENTS" --body-file /tmp/epic-body.md --label "$epic_type" > /tmp/gh_output.txt
+
+!bash epic_number=$(basename "$(cat /tmp/gh_output.txt)")
 
 Store the returned issue number for epic frontmatter update.
 
@@ -57,16 +59,9 @@ Note: Sub-issues will be created by SDD workflow via /specify --from-issue \${ep
 Synced: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
 EOF
 
-### 4. Create Worktree
+### 4. Cleanup
 
-Follow `/rules/worktree-operations.md` to create development worktree:
-
-!bash git checkout main
-!bash git pull origin main
-
-!bash git worktree add ../epic-$ARGUMENTS -b epic/$ARGUMENTS
-
-!bash echo "✅ Created worktree: ../epic-$ARGUMENTS"
+!bash rm -f /tmp/epic-body.md /tmp/gh_output.txt
 
 ### 5. Output
 
@@ -74,7 +69,6 @@ Follow `/rules/worktree-operations.md` to create development worktree:
 ✅ Synced to GitHub
   - Epic: #{epic_number} - {epic_title}
   - Parent Issue created for business-level tracking
-  - Worktree: ../epic-$ARGUMENTS
 
 Next steps:
   - Technical breakdown: /specify --from-issue {epic_number}
