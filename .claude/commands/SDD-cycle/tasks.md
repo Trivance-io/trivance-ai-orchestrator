@@ -71,7 +71,7 @@ The tasks.md should be immediately executable - each task must be specific enoug
 
 **ONLY execute this if step 8 detected a parent issue in spec.md**
 
-### 1. Extract Parent Issue Number
+### 1. Extract Parent Issue and Milestone Information
 
 ```bash
 # Read spec.md to extract parent issue number
@@ -82,6 +82,14 @@ if [ -f "$spec_file" ] && grep -q "GitHub Issue #" "$spec_file"; then
 else
   echo "ℹ️ No parent issue detected, skipping GitHub sub-issues creation"
   exit 0
+fi
+
+# Use milestone if available (optional enhancement)
+epic_file="$FEATURE_DIR/epic.md"
+milestone_number=""
+if [ -f "$epic_file" ]; then
+  milestone_number=$(grep "^milestone:" "$epic_file" 2>/dev/null | awk '{print $2}')
+  [ -n "$milestone_number" ] && [ "$milestone_number" != "null" ] && echo "📝 Using milestone: #$milestone_number"
 fi
 ```
 
@@ -188,6 +196,10 @@ rm -rf "$temp_dir"
 
 echo "✅ GitHub sub-issues created and tasks.md updated with issue numbers"
 echo "🔗 Parent Issue: https://github.com/$(gh repo view --json nameWithOwner -q .nameWithOwner)/issues/$parent_issue"
+if [ -n "$milestone_number" ]; then
+  milestone_url=$(grep "^milestone_url:" "$epic_file" | cut -d' ' -f2)
+  echo "🎯 Milestone: #$milestone_number - $milestone_url"
+fi
 echo ""
 echo "🚀 Next Step: Execute implementation tasks"
 echo "Run: /SDD-cycle:implement"
