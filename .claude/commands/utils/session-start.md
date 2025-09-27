@@ -61,7 +61,7 @@ Para desarrollo, usamos worktrees para mantener branches limpias:
 
 1. Crear worktree: /worktree:create <purpose> <parent-branch>
 2. Cambiar directorio: cd ../worktree-<purpose>
-3. Nueva sesión Claude: claude /workflow:session-start
+3. Nueva sesión Claude: claude /utils:session-start
 
 Comandos típicos:
 /worktree:create feature-auth develop     # Feature desde develop
