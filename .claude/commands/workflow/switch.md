@@ -1,94 +1,155 @@
 ---
-allowed-tools: Bash(git *)
+allowed-tools: Bash(git *), Bash(gh), Bash(command)
 description: Cambia de rama temporal a rama objetivo validando PR mergeado
 ---
 
 # Switch Branch
 
-Cambia de rama temporal a rama objetivo, valida que PR asociado esté mergeado y elimina la rama temporal local.
+Cambia de rama temporal a rama objetivo, valida que PR asociado esté mergeado y elimina la rama temporal local usando natural language instructions.
 
 ## Uso
+
 ```bash
-/switch <target_branch>  # Argumento obligatorio
+/workflow:switch <target_branch>  # Argumento obligatorio
 ```
 
 ## Ejemplos
+
 ```bash
-/switch main        # Salir de temporal → ir a main
-/switch develop     # Salir de temporal → ir a develop  
-/switch feature/123 # Salir de temporal → ir a feature branch
+/workflow:switch main        # Salir de temporal → ir a main
+/workflow:switch develop     # Salir de temporal → ir a develop
+/workflow:switch feature/123 # Salir de temporal → ir a feature branch
 ```
 
-## Ejecución
+## User Input
 
-Cuando ejecutes este comando con el argumento `$ARGUMENTS`, sigue estos pasos:
+$ARGUMENTS
 
-### 1. Validación de entrada
-- Si no se proporciona argumento, mostrar error: "❌ Error: Target branch requerido. Uso: /switch <target_branch>"
-- Capturar target_branch del argumento
-- Mostrar: "Switching from temporal branch to: <target_branch>"
+## Instructions
 
-### 2. Validación de cambios pendientes
-- Ejecutar: `git status --porcelain` para verificar cambios sin commitear
-- Si hay output (cambios pendientes):
-  - Mostrar error: "❌ Error: Hay cambios sin commitear. El switch está bloqueado."
-  - Mostrar: "Debes resolver los cambios primero:"
-  - Mostrar: "  • git add . && git commit -m 'mensaje'  (para guardar cambios)"
-  - Mostrar: "  • git stash  (para guardar temporalmente)"
-  - Mostrar: "  • git checkout -- .  (para descartar cambios)"
-  - TERMINAR proceso completamente
-- Si no hay cambios, mostrar: "✓ Working directory clean, proceeding..."
+### 1. Parse Arguments and Validate Input
 
-### 3. Captura de rama temporal actual
-- Ejecutar: `git branch --show-current` para obtener rama temporal actual
-- Capturar nombre de la rama temporal (de donde venimos)
-- Mostrar: "Leaving temporal branch: <temporal_branch>"
+**Parse the arguments** from `$ARGUMENTS`:
 
-### 3.5 Validación de PR asociado (si existe)
-- Ejecutar: `command -v gh >/dev/null 2>&1` - si falla, continuar al paso 4
-- Ejecutar: `command -v jq >/dev/null 2>&1` - si falla, continuar al paso 4
-- Ejecutar: `pr_data=$(gh pr list --head "<temporal_branch>" --state all --json number,state,title 2>/dev/null)`
-- Si pr_data está vacío o es "[]", continuar al paso 4
-- Si pr_data contiene datos JSON:
-  - Ejecutar: `pr_number=$(echo "$pr_data" | jq -r '.[0].number')`
-  - Ejecutar: `pr_state=$(echo "$pr_data" | jq -r '.[0].state')`
-  - Ejecutar: `pr_title=$(echo "$pr_data" | jq -r '.[0].title')`
-  - Si pr_state != "merged":
-    - Mostrar error: "❌ Error: PR asociado a esta rama no está mergeado. El switch está bloqueado."
-    - Mostrar: "PR encontrado: #$pr_number - $pr_title"
-    - Mostrar: "Estado actual: $pr_state"
-    - Mostrar: "El PR debe ser mergeado primero en GitHub antes de hacer switch."
-    - TERMINAR proceso completamente
-  - Si pr_state == "merged":
-    - Mostrar: "✓ PR mergeado verificado, continuando switch..."
+- **Target branch**: Extract the branch name (required argument)
+- If no argument provided, show error: "❌ Error: Target branch requerido. Uso: /workflow:switch <target_branch>"
+- Display: "Switching from temporal branch to: <target_branch>"
 
-### 4. Switch a rama objetivo
-- Ejecutar: `git checkout "$target_branch"`
-- Si el comando falla, mostrar error: "❌ Error: No se pudo cambiar a '$target_branch'" y terminar
-- Confirmar: "Switched to: <target_branch>"
+### 2. Validate Working Directory
 
-### 5. Actualización desde remoto
-- Ejecutar: `git pull` para actualizar rama objetivo
-- Si pull falla, mostrar warning: "⚠️ No se pudo actualizar desde remoto" pero continuar
-- Si pull exitoso, mostrar: "Updated from remote"
+**Check for uncommitted changes** using simple bash command:
 
-### 6. Eliminación de rama temporal
-- Ejecutar: `git branch -D "<temporal_branch>"` para eliminar rama temporal local (usando nombre capturado en paso 3)
-- Si eliminación exitosa, mostrar: "🗑️ Deleted temporal branch: <temporal_branch>"
-- Si falla, mostrar: "⚠️ Could not delete temporal branch: <temporal_branch>"
+- Execute: `git status --porcelain`
+- If command returns any output (uncommitted changes exist):
+  - Show error: "❌ Error: Hay cambios sin commitear. El switch está bloqueado."
+  - Show guidance: "Debes resolver los cambios primero:"
+  - Show options: " • git add . && git commit -m 'mensaje' (para guardar cambios)"
+  - Show options: " • git stash (para guardar temporalmente)"
+  - Show options: " • git checkout -- . (para descartar cambios)"
+  - **STOP process completely**
+- If no output, show: "✓ Working directory clean, proceeding..."
 
-### 7. Status final
-- Verificar branch actual: `git branch --show-current`
-- Mostrar estado final:
+### 3. Capture Current Temporal Branch
+
+**Get current branch name** using atomic bash command:
+
+- Execute: `git branch --show-current`
+- Store the branch name as temporal_branch for later cleanup
+- Display: "Leaving temporal branch: <temporal_branch>"
+
+### 4. Check Associated PR Status (if exists)
+
+**Check for GitHub CLI availability**:
+
+- Execute: `command -v gh >/dev/null 2>&1` - if fails, continue to step 5
+- Execute: `command -v jq >/dev/null 2>&1` - if fails, continue to step 5
+
+**Check for associated PR**:
+
+- Execute: `gh pr list --head "<temporal_branch>" --state all --json number,state,title 2>/dev/null`
+- If output is empty or "[]", continue to step 5
+- If output contains JSON data, parse using separate commands:
+  - Execute: `gh pr list --head "<temporal_branch>" --state all --json number,state,title 2>/dev/null | jq -r '.[0].number'` to get PR number
+  - Execute: `gh pr list --head "<temporal_branch>" --state all --json number,state,title 2>/dev/null | jq -r '.[0].state'` to get PR state
+  - Execute: `gh pr list --head "<temporal_branch>" --state all --json number,state,title 2>/dev/null | jq -r '.[0].title'` to get PR title
+  - If state is not "MERGED":
+    - Show error: "❌ Error: PR asociado a esta rama no está mergeado. El switch está bloqueado."
+    - Show details: "PR encontrado: #<pr_number> - <pr_title>"
+    - Show status: "Estado actual: <pr_state>"
+    - Show requirement: "El PR debe ser mergeado primero en GitHub antes de hacer switch."
+    - **STOP process completely**
+  - If state is "MERGED":
+    - Show: "✓ PR mergeado verificado, continuando switch..."
+
+### 5. Switch to Target Branch
+
+**Perform branch switch** using atomic bash command:
+
+- Execute: `git checkout "<target_branch>"`
+- If command fails, show error: "❌ Error: No se pudo cambiar a '<target_branch>'" and stop
+- If successful, show: "Switched to: <target_branch>"
+
+### 6. Update from Remote
+
+**Update target branch** using atomic bash command:
+
+- Execute: `git pull`
+- If command fails, show warning: "⚠️ No se pudo actualizar desde remoto" but continue
+- If successful, show: "Updated from remote"
+
+### 7. Delete Temporal Branch
+
+**Clean up temporal branch** using atomic bash command:
+
+- Execute: `git branch -D "<temporal_branch>"` (using name captured in step 3)
+- If successful, show: "🗑️ Deleted temporal branch: <temporal_branch>"
+- If fails, show: "⚠️ Could not delete temporal branch: <temporal_branch>"
+
+### 8. Report Final Status
+
+**Verify final state**:
+
+- Execute: `git branch --show-current` to confirm current branch
+- Display final status:
   ```
   ✅ Switch completed:
   - Current branch: <current_branch>
   - Temporal branch deleted: <temporal_branch>
   ```
 
-**IMPORTANTE**:
-- No solicitar confirmación al usuario en ningún paso
-- Ejecutar todos los pasos secuencialmente
-- Si algún paso crítico falla, detener ejecución y mostrar error claro
-- Comando optimizado para workflow: temporal → objetivo → cleanup
-- Para actualizar CHANGELOG.md usar: `/workflow:changelog --pr <number>`
+## Error Handling
+
+- **If working directory has changes**: Block switch completely, show resolution options
+- **If target branch doesn't exist**: Git will show error, command stops
+- **If PR not merged**: Block switch completely, require merge first
+- **If remote update fails**: Show warning but continue with cleanup
+- **If branch deletion fails**: Show warning but don't block completion
+
+## Important Notes
+
+- Trust git CLI operations (no pre-auth checks)
+- Use atomic bash commands only, avoid complex piping
+- Each step is independent and verifiable
+- No user confirmation prompts during execution
+- Sequential execution, stop on critical failures
+- Optimized for temporal → target → cleanup workflow
+- For CHANGELOG updates use: `/workflow:changelog --pr <number>`
+
+## Implementation Approach
+
+This command uses **natural language instructions** processed by Claude Code's native capabilities rather than complex bash scripting. Claude will:
+
+1. **Parse arguments** intelligently from `$ARGUMENTS`
+2. **Execute atomic bash commands** using the Bash tool
+3. **Handle GitHub operations** using simple gh commands
+4. **Process JSON output** using separate jq commands
+5. **Manage flow control** through natural language logic
+
+This approach is more robust than complex bash scripting because:
+
+- No variable persistence issues between commands
+- No complex pipe chaining with failure points
+- Leverages Claude's natural language processing
+- More maintainable and debuggable
+- Handles edge cases intelligently
+- Each command is atomic and verifiable
