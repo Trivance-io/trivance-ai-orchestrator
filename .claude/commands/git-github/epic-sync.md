@@ -129,7 +129,7 @@ Add these fields after the `created:` line in frontmatter.
 Milestone: #<milestone_number> - <milestone_url>
 Epic: #<issue_number> - <issue_url>
 
-Note: Sub-issues will be created by SDD workflow via /specify --from-issue <issue_number>
+Note: Sub-issues will be created by SDD workflow via /SDD-cycle:specify --from-issue <issue_number>
 
 Synced: <current_timestamp>
 ```
@@ -145,7 +145,7 @@ Synced: <current_timestamp>
   - Parent Issue created and assigned to milestone
 
 Next steps:
-  - Technical breakdown: /specify --from-issue <issue_number>
+  - Technical breakdown: /SDD-cycle:specify --from-issue <issue_number>
   - View milestone: <milestone_url>
   - View epic: <issue_url>
 ```

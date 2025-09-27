@@ -10,8 +10,8 @@ $ARGUMENTS
 
 The user input can be either:
 
-- **Natural language**: `/specify "Create user authentication system"`
-- **GitHub Issue**: `/specify --from-issue 456`
+- **Natural language**: `/SDD-cycle:specify "Create user authentication system"`
+- **GitHub Issue**: `/SDD-cycle:specify --from-issue 456`
 
 Assume you always have it available in this conversation even if `$ARGUMENTS` appears literally below. Do not ask the user to repeat it unless they provided an empty command.
 
