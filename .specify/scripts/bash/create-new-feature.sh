@@ -51,7 +51,6 @@ fi
 cd "$REPO_ROOT"
 
 SPECS_DIR="$REPO_ROOT/specs"
-mkdir -p "$SPECS_DIR"
 
 HIGHEST=0
 if [ -d "$SPECS_DIR" ]; then
@@ -82,14 +81,20 @@ if [ "$HAS_GIT" = true ]; then
         git worktree add "$WORKTREE_DIR" -b "$BRANCH_NAME"
         echo "✅ Created worktree: $WORKTREE_DIR"
         echo "📁 Switch to worktree: cd $WORKTREE_DIR"
+        # Use specs in the worktree, not main repo
+        SPECS_DIR="$WORKTREE_DIR/specs"
     else
         # We're already in a worktree - just create branch
         git checkout -b "$BRANCH_NAME"
         echo "✅ Created branch: $BRANCH_NAME"
+        # Use specs in current worktree
+        SPECS_DIR="$(pwd)/specs"
     fi
 else
     >&2 echo "[specify] Warning: Git repository not detected; skipped branch creation for $BRANCH_NAME"
 fi
+
+mkdir -p "$SPECS_DIR"
 
 FEATURE_DIR="$SPECS_DIR/$BRANCH_NAME"
 mkdir -p "$FEATURE_DIR"
