@@ -25,7 +25,7 @@ class ClaudePromptTracker:
         from datetime import datetime
         
         # Get project root and create logs dir for today
-        project_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+        project_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         today = datetime.now().strftime('%Y-%m-%d')
         logs_dir = os.path.join(project_dir, '.claude', 'logs', today)
         os.makedirs(logs_dir, exist_ok=True)
