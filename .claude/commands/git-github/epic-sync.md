@@ -1,183 +1,189 @@
 ---
-allowed-tools: Bash(test), Bash(sed), Bash(gh), Bash(date -u), Bash(git), Bash(cat), Bash(jq), Read, Write, LS
+allowed-tools: Read, Edit, Write, Bash(gh), Bash(date)
+description: Push epic to GitHub as parent issue with intelligent milestone tracking
 ---
 
 # Epic Sync
 
-Push epic to GitHub as parent issue with milestone tracking.
+Push epic to GitHub as parent issue with milestone tracking using intelligent PRD analysis.
 
 ## Usage
 
 ```
-/pm:epic-sync <feature_name>
-/pm:epic-sync <feature_name> --milestone <number>
+/git-github:epic-sync <feature_name>
+/git-github:epic-sync <feature_name> --milestone <number>
 ```
 
-## Arguments Parsing
+## User Input
 
-!bash epic_name="$ARGUMENTS"; milestone_number=""; use_existing_milestone=false
-
-!bash if echo "$ARGUMENTS" | grep -q -- '--milestone'; then milestone_number=$(echo "$ARGUMENTS" | sed 's/.*--milestone *\([0-9]*\).*/\1/'); epic_name=$(echo "$ARGUMENTS" | sed 's/ *--milestone [0-9]*//'); use_existing_milestone=true; echo "🔄 Using existing milestone #$milestone_number for epic: $epic_name"; else echo "🆕 Creating new milestone for epic: $epic_name"; fi
-
-## Quick Check
-
-!bash test -f .claude/epics/$epic_name/epic.md || echo "❌ Epic not found. Run: /pm:prd-parse $epic_name"
+$ARGUMENTS
 
 ## Instructions
 
-### 1. Milestone Handling
+### 1. Parse Arguments and Validate Files
 
-Handle milestone creation or reuse:
+**Parse the arguments** from `$ARGUMENTS`:
 
-!bash test -f .claude/prds/$epic_name.md || echo "❌ PRD not found. Run: /pm:prd-new $epic_name"
+- **Epic name**: Extract the feature name (remove `--milestone <number>` if present)
+- **Milestone mode**: Check if `--milestone <number>` is provided for reuse
+- **Milestone number**: Extract number if provided
 
-!bash repo=$(gh repo view --json nameWithOwner -q .nameWithOwner)
+**Validate required files exist**:
 
-!bash if [ "$use_existing_milestone" = "true" ]; then echo "🔄 Using existing milestone #$milestone_number"; gh api repos/$repo/milestones/$milestone_number > /tmp/milestone_response.json; else echo "🤖 Generating intelligent milestone name from PRD..."; echo "🎯 Creating milestone description from PRD key sections..."; fi
+- `.claude/epics/<epic_name>/epic.md`
+- `.claude/prds/<epic_name>.md`
 
-!bash if [ "$use_existing_milestone" = "false" ]; then sed -n '/## Executive Summary/,/## [^E]/p' .claude/prds/$epic_name.md > /tmp/executive-summary.md; sed -n '/### Métricas Primarias/,/### [^M]/p' .claude/prds/$epic_name.md > /tmp/success-metrics.md; fi
+If either file missing, show error and stop.
 
-!bash if [ "$use_existing_milestone" = "false" ]; then echo "## Objetivo" > /tmp/prd-body.md; sed -n '3,6p' /tmp/executive-summary.md | tr '\n' ' ' | sed 's/\*\*[^*]_\*\*: //g' >> /tmp/prd-body.md; echo "" >> /tmp/prd-body.md; echo "## Valor Esperado" >> /tmp/prd-body.md; grep "Valor esperado" /tmp/executive-summary.md | sed 's/._: //' >> /tmp/prd-body.md; echo "" >> /tmp/prd-body.md; echo "## Métricas de Éxito" >> /tmp/prd-body.md; grep -E "^- \*\*.\*:" /tmp/success-metrics.md | head -3 >> /tmp/prd-body.md; fi
+### 2. Milestone Handling
 
-## Generate Intelligent Milestone Name
+**If milestone number provided** (format: `--milestone 5`):
 
-When `use_existing_milestone=false`, read the PRD content and generate a short, intuitive milestone name that represents a broader business objective. The milestone should:
+- Use existing milestone #5
+- Get milestone details via GitHub API
 
-- **NOT be the same as the epic name**: `$epic_name`
-- **Include a clear objective word** (e.g., "Onboarding", "Enhancement", "Modernization", "Performance")
-- **Represent a broader initiative** that could logically group multiple related epics
-- **Be concise** (2-4 words maximum)
-- **Focus on business value** rather than technical implementation
+**If no milestone provided**:
 
-Examples of good milestone names with clear objectives:
+- Create intelligent milestone based on PRD analysis
+- Follow the process below
 
-- "Developer Onboarding" (for reducing time-to-productivity, workflow adoption)
-- "Documentation Modernization" (for obsolete docs, knowledge gaps, process clarity)
-- "User Experience Enhancement" (for usability improvements, interface optimization)
-- "Platform Performance" (for speed optimization, monitoring, reliability)
+### 3. Intelligent Milestone Creation
 
-Read `.claude/prds/$epic_name.md` and generate milestone_title variable based on analysis:
+**Read and analyze** `.claude/prds/<epic_name>.md` to understand:
 
-**IMPORTANT**: Claude must analyze the PRD content and set the milestone_title variable dynamically. Consider the problem domain, business value, and target outcome to create a 2-4 word milestone name with a clear objective word.
+- Problem domain and business value
+- Target outcomes and success metrics
+- Main business objective
 
-# Example analysis process:
+**Generate milestone name** (2-4 words) with clear objective word:
 
-# - If PRD focuses on developer experience → "Developer Experience"
+- **NOT the same as epic name**
+- **Include objective word**: "Onboarding", "Enhancement", "Modernization", "Performance"
+- **Focus on business value**, not technical implementation
 
-# - If PRD focuses on user onboarding → "User Onboarding"
+**Examples of good milestone names**:
 
-# - If PRD focuses on documentation → "Documentation Modernization"
+- "Developer Onboarding" (for reducing time-to-productivity)
+- "Documentation Modernization" (for obsolete docs, knowledge gaps)
+- "User Experience Enhancement" (for usability improvements)
+- "Platform Performance" (for speed optimization, monitoring)
 
-# - If PRD focuses on performance → "Platform Performance"
+**Create milestone description** using this template:
 
-# Set milestone_title based on your analysis of the PRD content
+```yaml
+milestone_description_template: |
+  ## Objetivo
+  [Main business objective from Executive Summary - first paragraph, clean format]
 
-**Based on PRD analysis for `refactor-human-documentation`**: The PRD focuses on reducing developer onboarding time by 80% and improving workflow adoption. Therefore:
+  ## Valor Esperado
+  [Extract the "Valor esperado" line from Executive Summary]
 
-!bash milestone_title="Developer Onboarding"
+  ## Métricas de Éxito
+  [Extract first 3 metrics from "Métricas Primarias" section]
+```
 
-!bash if [ "$use_existing_milestone" = "false" ]; then echo "📝 Using milestone name: $milestone_title"; echo "🆕 Creating new milestone from PRD"; gh api repos/$repo/milestones --method POST --field title="$milestone_title" --field description="$(cat /tmp/prd-body.md)" > /tmp/milestone_response.json 2>/dev/null || gh api repos/$repo/milestones --jq '.[] | select(.title=="'$milestone_title'")' > /tmp/milestone_response.json; fi
+**Create the milestone** via GitHub API with the generated name and description.
 
-!bash if [ -f /tmp/milestone_response.json ]; then milestone_number=$(jq -r '.number' /tmp/milestone_response.json); milestone_title=$(jq -r '.title' /tmp/milestone_response.json); milestone_url=$(jq -r '.html_url' /tmp/milestone_response.json); if [ -n "$milestone_number" ] && [ "$milestone_number" != "null" ]; then echo "✅ Milestone: #$milestone_number - $milestone_title"; else echo "❌ CRITICAL: milestone_number extraction failed"; exit 1; fi; else echo "❌ CRITICAL: milestone_response.json not found"; exit 1; fi
+### 4. Create GitHub Issue
 
-### 2. Create Parent Issue
+**Prepare issue content**:
 
-Strip frontmatter and prepare GitHub issue body:
+- Read `.claude/epics/<epic_name>/epic.md`
+- Strip the frontmatter (everything between `---` lines)
+- Use clean epic content as issue body
 
-!bash sed '1,/^---$/d; 1,/^---$/d' .claude/epics/$epic_name/epic.md > /tmp/epic-body.md
+**Create GitHub issue**:
 
-!bash gh issue create --title "$epic_name" --body-file /tmp/epic-body.md > /tmp/gh_output.txt
+- Title: `<epic_name>`
+- Body: Clean epic content without frontmatter
+- Assign to the milestone (either existing or newly created)
 
-!bash if [ -f /tmp/gh_output.txt ]; then issue_url=$(cat /tmp/gh_output.txt); epic_number=$(echo "$issue_url" | sed 's|.*/issues/||'); if [ -n "$epic_number" ] && [ "$epic_number" != "$issue_url" ]; then echo "✅ Epic issue created: #$epic_number"; echo "🔗 URL: $issue_url"; else echo "❌ CRITICAL: Failed to extract issue number from: $issue_url"; exit 1; fi; else echo "❌ CRITICAL: gh_output.txt not found"; exit 1; fi
+### 5. Update Epic File
 
-!bash echo "🔗 Assigning issue #$epic_number to milestone #$milestone_number..." && if gh issue edit "$epic_number" --milestone "$milestone_title"; then echo "✅ Milestone assigned using title: $milestone_title"; elif gh issue edit "$epic_number" --milestone "$milestone_number"; then echo "✅ Milestone assigned using number: $milestone_number"; else echo "❌ CRITICAL: Milestone assignment failed for issue #$epic_number to milestone #$milestone_number"; exit 1; fi
+**Update** `.claude/epics/<epic_name>/epic.md` frontmatter with:
 
-### 3. Update Epic File
+- `github: <issue_url>`
+- `updated: <current_timestamp>`
+- `milestone: <milestone_number>`
+- `milestone_url: <milestone_url>`
 
-Update the epic file with GitHub URL, milestone info and timestamp:
+Use current timestamp in ISO format: `YYYY-MM-DDTHH:MM:SSZ`
 
-!bash epic_url="https://github.com/$repo/issues/$epic_number" && current_date=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+### 6. Update PRD File
 
-!bash sed -i.bak "s/^github:.\*/github: $epic_url/" .claude/epics/$epic_name/epic.md
-!bash sed -i.bak "s/^updated:.\*/updated: $current_date/" .claude/epics/$epic_name/epic.md
+**Update** `.claude/prds/<epic_name>.md` frontmatter with:
 
-Add milestone information to epic frontmatter:
+- `milestone: <milestone_number>`
+- `milestone_url: <milestone_url>`
+- `github_synced: <current_timestamp>`
 
-!bash sed -i.bak "/^updated:/a milestone: $milestone_number" .claude/epics/$epic_name/epic.md
+Add these fields after the `created:` line in frontmatter.
 
-!bash sed -i "/^milestone: $milestone_number/a milestone_url: $milestone_url" .claude/epics/$epic_name/epic.md
+### 7. Create GitHub Mapping File
 
-!bash rm .claude/epics/$epic_name/epic.md.bak
+**Create** `.claude/epics/<epic_name>/github-mapping.md` with this content:
 
-### 4. Update PRD File
-
-Update the PRD file with milestone information:
-
-!bash sed -i.bak "/^created:/a milestone: $milestone_number" .claude/prds/$epic_name.md
-
-!bash sed -i "/^milestone: $milestone_number/a milestone_url: $milestone_url" .claude/prds/$epic_name.md
-
-!bash sed -i "/^milestone_url:/a github_synced: $current_date" .claude/prds/$epic_name.md
-
-!bash rm .claude/prds/$epic_name.md.bak
-
-### 5. Create Mapping File
-
-Create `.claude/epics/$epic_name/github-mapping.md`:
-
-!bash cat > .claude/epics/$epic_name/github-mapping.md << EOF
-
+```markdown
 # GitHub Issue Mapping
 
-Milestone: #$milestone_number - $milestone_url
-Epic: #$epic_number - https://github.com/$repo/issues/$epic_number
+Milestone: #<milestone_number> - <milestone_url>
+Epic: #<issue_number> - <issue_url>
 
-Note: Sub-issues will be created by SDD workflow via /specify --from-issue $epic_number
+Note: Sub-issues will be created by SDD workflow via /specify --from-issue <issue_number>
 
-Synced: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
-EOF
+Synced: <current_timestamp>
+```
 
-### 6. Cleanup
+### 8. Output Results
 
-!bash rm -f /tmp/epic-body.md /tmp/gh_output.txt /tmp/prd-body.md /tmp/milestone_response.json /tmp/executive-summary.md /tmp/success-metrics.md
-
-### 7. Output
+**Display success message**:
 
 ```
 ✅ Synced to GitHub
-  - Milestone: #$milestone_number - $milestone_url
-  - Epic: #$epic_number - $epic_name
+  - Milestone: #<milestone_number> - <milestone_title>
+  - Epic: #<issue_number> - <epic_name>
   - Parent Issue created and assigned to milestone
 
 Next steps:
-  - Technical breakdown: /specify --from-issue $epic_number
-  - View milestone: $milestone_url
-  - View epic: https://github.com/$repo/issues/$epic_number
+  - Technical breakdown: /specify --from-issue <issue_number>
+  - View milestone: <milestone_url>
+  - View epic: <issue_url>
 ```
 
 ## Error Handling
 
-Follow `/rules/github-operations.md` for GitHub CLI errors.
-
-If milestone creation fails:
-
-- Check if milestone already exists with same name
-- If exists, use existing milestone
-- Report what succeeded and continue with issue creation
-
-If parent issue creation fails:
-
-- Report what succeeded (milestone may have been created)
-- Note what failed
-- Don't attempt rollback (partial sync is fine)
+- **If epic.md not found**: Show clear error message with correct path
+- **If PRD.md not found**: Show clear error message with correct path
+- **If milestone creation fails**: Try to find existing milestone with same name
+- **If issue creation fails**: Report what succeeded, don't rollback
+- **If file updates fail**: Report specific file and continue with others
 
 ## Important Notes
 
-- Trust GitHub CLI authentication
-- Milestone uses PRD content as description for comprehensive tracking
+- Trust GitHub CLI authentication (no pre-auth checks)
+- Milestone description uses PRD content for comprehensive tracking
 - Don't pre-check for duplicates (let GitHub handle conflicts)
-- Update frontmatter only after successful creation
-- Keep operations simple and atomic
-- Sub-issues are handled by SDD workflow, not PRD workflow
-- Milestone provides business-level progress tracking for the entire PRD
-- Use `--milestone N` to reuse existing milestones across multiple epics
+- Update files only after successful GitHub operations
+- Keep operations atomic and simple
+- Sub-issues handled by SDD workflow, not this command
+- Milestone provides business-level progress tracking
+- Use `--milestone N` to reuse existing milestones across epics
+
+## Implementation Approach
+
+This command uses **natural language instructions** processed by Claude Code's native capabilities rather than complex bash scripting. Claude will:
+
+1. **Parse arguments** intelligently from `$ARGUMENTS`
+2. **Read PRD content** using the Read tool
+3. **Analyze content** to generate appropriate milestone names
+4. **Execute GitHub operations** using simple Bash commands
+5. **Update files** using Edit tool for surgical changes
+6. **Create new files** using Write tool when needed
+
+This approach is more robust than bash scripting because:
+
+- No variable persistence issues between commands
+- No temporary file dependencies
+- Leverages Claude's natural language processing
+- More maintainable and debuggable
+- Handles edge cases intelligently
