@@ -43,10 +43,60 @@ Handle milestone creation or reuse:
 echo "🔄 Using existing milestone #$milestone_number"
     gh api repos/$repo/milestones/$milestone_number > /tmp/milestone_response.json
 else
+echo "🤖 Generating intelligent milestone name from PRD..."
+echo "🎯 Creating milestone description from PRD key sections..."
+
+    # Extract Executive Summary section
+    sed -n '/## Executive Summary/,/## /p' .claude/prds/$epic_name.md | head -n -1 > /tmp/executive-summary.md
+
+    # Extract Success Criteria -> Métricas Primarias
+    sed -n '/### Métricas Primarias/,/### /p' .claude/prds/$epic_name.md | head -n -1 > /tmp/success-metrics.md
+
+    # Build milestone description using template
+    echo "## Objetivo" > /tmp/prd-body.md
+    # Get main objective from Executive Summary (skip header, take first paragraph)
+    sed -n '3,6p' /tmp/executive-summary.md | tr '\n' ' ' | sed 's/\*\*[^*]*\*\*: //g' | head -c 200 >> /tmp/prd-body.md
+    echo "..." >> /tmp/prd-body.md
+    echo "" >> /tmp/prd-body.md
+
+    echo "## Valor Esperado" >> /tmp/prd-body.md
+    # Extract the "Valor esperado" line
+    grep "Valor esperado" /tmp/executive-summary.md | sed 's/.*: //' >> /tmp/prd-body.md
+    echo "" >> /tmp/prd-body.md
+
+    echo "## Métricas de Éxito" >> /tmp/prd-body.md
+    # Get the first 3 metrics from Métricas Primarias
+    grep -E "^- \*\*.*:" /tmp/success-metrics.md | head -3 >> /tmp/prd-body.md
+
+fi
+
+## Generate Intelligent Milestone Name
+
+When `use_existing_milestone=false`, read the PRD content and generate a short, intuitive milestone name that represents a broader business objective. The milestone should:
+
+- **NOT be the same as the epic name**: `$epic_name`
+- **Include a clear objective word** (e.g., "Onboarding", "Enhancement", "Modernization", "Performance")
+- **Represent a broader initiative** that could logically group multiple related epics
+- **Be concise** (2-4 words maximum)
+- **Focus on business value** rather than technical implementation
+
+Examples of good milestone names with clear objectives:
+
+- "Developer Onboarding" (for reducing time-to-productivity, workflow adoption)
+- "Documentation Modernization" (for obsolete docs, knowledge gaps, process clarity)
+- "User Experience Enhancement" (for usability improvements, interface optimization)
+- "Platform Performance" (for speed optimization, monitoring, reliability)
+
+Read `.claude/prds/$epic_name.md` and generate milestone_title variable based on analysis:
+
+milestone_title="Developer Onboarding" # Replace with Claude-generated name based on PRD analysis
+
+!bash if [ "$use_existing_milestone" = "false" ]; then # Use Claude-generated milestone name from above analysis
+echo "📝 Using milestone name: $milestone_title"
     echo "🆕 Creating new milestone from PRD"
-    sed '1,/^---$/d; 1,/^---$/d' .claude/prds/$epic_name.md > /tmp/prd-body.md # Try to create milestone, if it exists, get existing one
-gh api repos/$repo/milestones --method POST --field title="$epic_name" --field description="$(cat /tmp/prd-body.md)" > /tmp/milestone_response.json 2>/dev/null || \
-    gh api repos/$repo/milestones --jq '.[] | select(.title=="'$epic_name'")' > /tmp/milestone_response.json
+    # Try to create milestone with intelligent name, if exists get existing one
+    gh api repos/$repo/milestones --method POST --field title="$milestone_title" --field description="$(cat /tmp/prd-body.md)" > /tmp/milestone_response.json 2>/dev/null || \
+ gh api repos/$repo/milestones --jq '.[] | select(.title=="'$milestone_title'")' > /tmp/milestone_response.json
 fi
 
 !bash if [ -f /tmp/milestone_response.json ]; then
@@ -147,7 +197,7 @@ EOF
 
 ### 6. Cleanup
 
-!bash rm -f /tmp/epic-body.md /tmp/gh_output.txt /tmp/prd-body.md /tmp/milestone_response.json
+!bash rm -f /tmp/epic-body.md /tmp/gh_output.txt /tmp/prd-body.md /tmp/milestone_response.json /tmp/executive-summary.md /tmp/success-metrics.md
 
 ### 7. Output
 
