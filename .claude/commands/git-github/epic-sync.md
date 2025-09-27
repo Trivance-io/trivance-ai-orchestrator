@@ -15,14 +15,15 @@ Push epic to GitHub as parent issue with milestone tracking.
 
 ## Arguments Parsing
 
-!bash if echo "$ARGUMENTS" | grep -q '\--milestone'; then
-    milestone_number=$(echo "$ARGUMENTS" | sed 's/.*--milestone \([0-9]*\).*/\1/')
+!bash epic_name="$ARGUMENTS"; milestone_number=""; use_existing_milestone=false
+
+!bash if echo "$ARGUMENTS" | grep -q -- '--milestone'; then
+    milestone_number=$(echo "$ARGUMENTS" | sed 's/.*--milestone *\([0-9]*\).*/\1/')
     epic_name=$(echo "$ARGUMENTS" | sed 's/ *--milestone [0-9]*//')
     use_existing_milestone=true
+    echo "🔄 Using existing milestone #$milestone_number for epic: $epic_name"
 else
-    epic_name="$ARGUMENTS"
-milestone_number=""
-use_existing_milestone=false
+echo "🆕 Creating new milestone for epic: $epic_name"
 fi
 
 ## Quick Check
@@ -46,11 +47,11 @@ else
 echo "🤖 Generating intelligent milestone name from PRD..."
 echo "🎯 Creating milestone description from PRD key sections..."
 
-    # Extract Executive Summary section
-    sed -n '/## Executive Summary/,/## /p' .claude/prds/$epic_name.md | head -n -1 > /tmp/executive-summary.md
+    # Extract Executive Summary section (macOS compatible)
+    sed -n '/## Executive Summary/,/## [^E]/p' .claude/prds/$epic_name.md > /tmp/executive-summary.md
 
-    # Extract Success Criteria -> Métricas Primarias
-    sed -n '/### Métricas Primarias/,/### /p' .claude/prds/$epic_name.md | head -n -1 > /tmp/success-metrics.md
+    # Extract Success Criteria -> Métricas Primarias (macOS compatible)
+    sed -n '/### Métricas Primarias/,/### [^M]/p' .claude/prds/$epic_name.md > /tmp/success-metrics.md
 
     # Build milestone description using template
     echo "## Objetivo" > /tmp/prd-body.md
@@ -126,9 +127,10 @@ Strip frontmatter and prepare GitHub issue body:
 
 !bash if [ -f /tmp/gh_output.txt ]; then
 issue_url=$(cat /tmp/gh_output.txt)
-    if [[ "$issue_url" =~ /issues/([0-9]+)$ ]]; then
-epic_number="${BASH_REMATCH[1]}"
-        echo "✅ Epic issue created: #$epic_number"
+    epic_number=$(echo "$issue_url" | sed 's|.*/issues/||')
+    if [ -n "$epic_number" ] && [ "$epic_number" != "$issue_url" ]; then
+echo "✅ Epic issue created: #$epic_number"
+echo "🔗 URL: $issue_url"
 else
 echo "❌ CRITICAL: Failed to extract issue number from: $issue_url"
 exit 1
