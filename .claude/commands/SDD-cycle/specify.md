@@ -36,13 +36,14 @@ Given that input, do this:
    This enables the tasks workflow to create GitHub sub-issues under the parent issue.
 
 5. Open IDE automatically to enhance developer experience:
-   - Detect available IDE by executing commands in order:
-     - `which code > /dev/null 2>&1` para VS Code
-     - `which cursor > /dev/null 2>&1` para Cursor
-   - If IDE is found, execute `(cd "." && [IDE_COMMAND] . --new-window)` where [IDE_COMMAND] is `code` or `cursor`
-   - Si IDE se abre exitosamente, mostrar: "✅ IDE abierto en nueva ventana para especificación"
-   - Si no se encuentra IDE disponible, mostrar: "⚠️ No se encontró IDE compatible. Abre manualmente: [IDE] ."
-   - If fails to open IDE, show warning: "⚠️ No se pudo abrir IDE automáticamente" but continue
+   - **Primary IDE (VS Code)**: Check if VS Code is available using `which code > /dev/null 2>&1`
+     - If found, verify permissions: `timeout 3 code --version >/dev/null 2>&1`
+     - If accessible, execute: `(cd "." && code . --new-window)`
+     - If successful, show: "✅ IDE abierto en nueva ventana para especificación"
+   - **Alternative IDEs**: If VS Code is not available, attempt to open the worktree in any other available IDE
+     - Try to open the worktree directory in a new window using the detected IDE
+     - If this fails or no alternative IDE is found, show: "⚠️ Asegúrate de abrir manualmente el worktree en tu IDE preferido y continuar allí"
+   - **Fallback**: If all IDE attempts fail, continue with the workflow and advise manual opening
 
 6. Report completion with branch name, spec file path, IDE status, and readiness for the next phase:
 
