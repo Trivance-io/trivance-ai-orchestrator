@@ -10,66 +10,113 @@ Push epic to GitHub as parent issue with milestone tracking.
 
 ```
 /pm:epic-sync <feature_name>
+/pm:epic-sync <feature_name> --milestone <number>
 ```
+
+## Arguments Parsing
+
+!bash if echo "$ARGUMENTS" | grep -q '\--milestone'; then
+    milestone_number=$(echo "$ARGUMENTS" | sed 's/.*--milestone \([0-9]*\).*/\1/')
+    epic_name=$(echo "$ARGUMENTS" | sed 's/ *--milestone [0-9]*//')
+    use_existing_milestone=true
+else
+    epic_name="$ARGUMENTS"
+milestone_number=""
+use_existing_milestone=false
+fi
 
 ## Quick Check
 
-!bash test -f .claude/epics/$ARGUMENTS/epic.md || echo "❌ Epic not found. Run: /pm:prd-parse $ARGUMENTS"
+!bash test -f .claude/epics/$epic_name/epic.md || echo "❌ Epic not found. Run: /pm:prd-parse $epic_name"
 
 ## Instructions
 
-### 1. Create GitHub Milestone
+### 1. Milestone Handling
 
-First, create or find the milestone using PRD content:
+Handle milestone creation or reuse:
 
-!bash test -f .claude/prds/$ARGUMENTS.md || echo "❌ PRD not found. Run: /pm:prd-new $ARGUMENTS"
+!bash test -f .claude/prds/$epic_name.md || echo "❌ PRD not found. Run: /pm:prd-new $epic_name"
 
-Extract PRD content for milestone description:
+!bash repo=$(gh repo view --json nameWithOwner -q .nameWithOwner)
 
-!bash sed '1,/^---$/d; 1,/^---$/d' .claude/prds/$ARGUMENTS.md > /tmp/prd-body.md
+!bash if [ "$use_existing_milestone" = "true" ]; then
+echo "🔄 Using existing milestone #$milestone_number"
+    gh api repos/$repo/milestones/$milestone_number > /tmp/milestone_response.json
+else
+    echo "🆕 Creating new milestone from PRD"
+    sed '1,/^---$/d; 1,/^---$/d' .claude/prds/$epic_name.md > /tmp/prd-body.md # Try to create milestone, if it exists, get existing one
+gh api repos/$repo/milestones --method POST --field title="$epic_name" --field description="$(cat /tmp/prd-body.md)" > /tmp/milestone_response.json 2>/dev/null || \
+    gh api repos/$repo/milestones --jq '.[] | select(.title=="'$epic_name'")' > /tmp/milestone_response.json
+fi
 
-Create milestone with 2-week due date:
+!bash if [ -f /tmp/milestone_response.json ]; then
+milestone_number=$(jq -r '.number' /tmp/milestone_response.json)
+    milestone_title=$(jq -r '.title' /tmp/milestone_response.json)
+milestone_url=$(jq -r '.html_url' /tmp/milestone_response.json)
 
-!bash milestone_due_date=$(date -v+2w +%Y-%m-%dT%H:%M:%SZ)
+    if [ -n "$milestone_number" ] && [ "$milestone_number" != "null" ]; then
+        echo "✅ Milestone: #$milestone_number - $milestone_title"
+    else
+        echo "❌ CRITICAL: milestone_number extraction failed"
+        exit 1
+    fi
 
-!bash gh api repos/{owner}/{repo}/milestones --method POST --field title="$ARGUMENTS" --field description="$(cat /tmp/prd-body.md)" --field due_on="$milestone_due_date" > /tmp/milestone_response.json 2>/dev/null || gh api repos/{owner}/{repo}/milestones --jq '.[] | select(.title=="'$ARGUMENTS'")' > /tmp/milestone_response.json
-
-!bash milestone_number=$(cat /tmp/milestone_response.json | jq -r '.number')
-
-!bash milestone_url=$(cat /tmp/milestone_response.json | jq -r '.html_url')
+else
+echo "❌ CRITICAL: milestone_response.json not found"
+exit 1
+fi
 
 ### 2. Create Parent Issue
 
 Strip frontmatter and prepare GitHub issue body:
 
-!bash sed '1,/^---$/d; 1,/^---$/d' .claude/epics/$ARGUMENTS/epic.md > /tmp/epic-body.md
+!bash sed '1,/^---$/d; 1,/^---$/d' .claude/epics/$epic_name/epic.md > /tmp/epic-body.md
 
-!bash if grep -qi "bug\|fix\|issue\|problem\|error" /tmp/epic-body.md; then epic_type="bug"; else epic_type="feature"; fi
+!bash gh issue create --title "$epic_name" --body-file /tmp/epic-body.md > /tmp/gh_output.txt
 
-!bash gh issue create --title "$ARGUMENTS" --body-file /tmp/epic-body.md --label "$epic_type" --milestone "$milestone_number" > /tmp/gh_output.txt
+!bash if [ -f /tmp/gh_output.txt ]; then
+issue_url=$(cat /tmp/gh_output.txt)
+    if [[ "$issue_url" =~ /issues/([0-9]+)$ ]]; then
+epic_number="${BASH_REMATCH[1]}"
+        echo "✅ Epic issue created: #$epic_number"
+else
+echo "❌ CRITICAL: Failed to extract issue number from: $issue_url"
+exit 1
+fi
+else
+echo "❌ CRITICAL: gh_output.txt not found"
+exit 1
+fi
 
-!bash epic_number=$(basename "$(cat /tmp/gh_output.txt)")
-
-Store the returned issue number for epic frontmatter update.
+!bash echo "🔗 Assigning issue #$epic_number to milestone #$milestone_number..."
+if gh issue edit "$epic_number" --milestone "$milestone_title"; then
+echo "✅ Milestone assigned using title: $milestone_title"
+elif gh issue edit "$epic_number" --milestone "$milestone_number"; then
+    echo "✅ Milestone assigned using number: $milestone_number"
+else
+    echo "❌ CRITICAL: Milestone assignment failed for issue #$epic_number to milestone #$milestone_number"
+exit 1
+fi
 
 ### 3. Update Epic File
 
 Update the epic file with GitHub URL, milestone info and timestamp:
 
-!bash repo=$(gh repo view --json nameWithOwner -q .nameWithOwner)
-!bash epic_url="https://github.com/$repo/issues/$epic_number"
-!bash current_date=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+!bash epic_url="https://github.com/$repo/issues/$epic_number" && \
+current_date=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-!bash sed -i.bak "/^github:/c\github: $epic_url" .claude/epics/$ARGUMENTS/epic.md
-!bash sed -i.bak "/^updated:/c\updated: $current_date" .claude/epics/$ARGUMENTS/epic.md
+!bash sed -i.bak "/^github:/c\\
+github: $epic_url" .claude/epics/$epic_name/epic.md
+!bash sed -i.bak "/^updated:/c\\
+updated: $current_date" .claude/epics/$epic_name/epic.md
 
 Add milestone information to epic frontmatter:
 
 !bash sed -i.bak "/^updated:/a\\
 milestone: $milestone_number\\
-milestone_url: $milestone_url" .claude/epics/$ARGUMENTS/epic.md
+milestone_url: $milestone_url" .claude/epics/$epic_name/epic.md
 
-!bash rm .claude/epics/$ARGUMENTS/epic.md.bak
+!bash rm .claude/epics/$epic_name/epic.md.bak
 
 ### 4. Update PRD File
 
@@ -78,22 +125,22 @@ Update the PRD file with milestone information:
 !bash sed -i.bak "/^created:/a\\
 milestone: $milestone_number\\
 milestone_url: $milestone_url\\
-github_synced: $current_date" .claude/prds/$ARGUMENTS.md
+github_synced: $current_date" .claude/prds/$epic_name.md
 
-!bash rm .claude/prds/$ARGUMENTS.md.bak
+!bash rm .claude/prds/$epic_name.md.bak
 
 ### 5. Create Mapping File
 
-Create `.claude/epics/$ARGUMENTS/github-mapping.md`:
+Create `.claude/epics/$epic_name/github-mapping.md`:
 
-!bash cat > .claude/epics/$ARGUMENTS/github-mapping.md << EOF
+!bash cat > .claude/epics/$epic_name/github-mapping.md << EOF
 
 # GitHub Issue Mapping
 
-Milestone: #\${milestone_number} - \${milestone_url}
-Epic: #\${epic_number} - https://github.com/\${repo}/issues/\${epic_number}
+Milestone: #$milestone_number - $milestone_url
+Epic: #$epic_number - https://github.com/$repo/issues/$epic_number
 
-Note: Sub-issues will be created by SDD workflow via /specify --from-issue \${epic_number}
+Note: Sub-issues will be created by SDD workflow via /specify --from-issue $epic_number
 
 Synced: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
 EOF
@@ -106,14 +153,14 @@ EOF
 
 ```
 ✅ Synced to GitHub
-  - Milestone: #{milestone_number} - {milestone_url}
-  - Epic: #{epic_number} - {epic_title}
+  - Milestone: #$milestone_number - $milestone_url
+  - Epic: #$epic_number - $epic_name
   - Parent Issue created and assigned to milestone
 
 Next steps:
-  - Technical breakdown: /specify --from-issue {epic_number}
-  - View milestone: {milestone_url}
-  - View epic: https://github.com/{owner}/{repo}/issues/{epic_number}
+  - Technical breakdown: /specify --from-issue $epic_number
+  - View milestone: $milestone_url
+  - View epic: https://github.com/$repo/issues/$epic_number
 ```
 
 ## Error Handling
@@ -141,3 +188,4 @@ If parent issue creation fails:
 - Keep operations simple and atomic
 - Sub-issues are handled by SDD workflow, not PRD workflow
 - Milestone provides business-level progress tracking for the entire PRD
+- Use `--milestone N` to reuse existing milestones across multiple epics
