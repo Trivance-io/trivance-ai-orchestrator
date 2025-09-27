@@ -9,7 +9,7 @@ Push local updates as GitHub issue comments for transparent audit trail.
 ## Usage
 
 ```
-/pm:issue-sync <issue_number>
+/git-github:issue-sync <issue_number>
 ```
 
 ## Required Rules

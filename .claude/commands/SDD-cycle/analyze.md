@@ -8,7 +8,7 @@ User input:
 
 $ARGUMENTS
 
-Goal: Identify inconsistencies, duplications, ambiguities, and underspecified items across the three core artifacts (`spec.md`, `plan.md`, `tasks.md`) before implementation. This command MUST run only after `/tasks` has successfully produced a complete `tasks.md`.
+Goal: Identify inconsistencies, duplications, ambiguities, and underspecified items across the three core artifacts (`spec.md`, `plan.md`, `tasks.md`) before implementation. This command MUST run only after `/SDD-cycle:tasks` has successfully produced a complete `tasks.md`.
 
 STRICTLY READ-ONLY: Do **not** modify any files. Output a structured analysis report. Offer an optional remediation plan (user must explicitly approve before any follow-up editing commands would be invoked manually).
 
@@ -122,9 +122,9 @@ Execution steps:
      - **Parallelization Factor** (estimated speedup)
 
 8. At end of report, output a concise Next Actions block:
-   - If CRITICAL issues exist: Recommend resolving before `/implement`.
+   - If CRITICAL issues exist: Recommend resolving before `/SDD-cycle:implement`.
    - If only LOW/MEDIUM: User may proceed, but provide improvement suggestions.
-   - Provide explicit command suggestions: e.g., "Run /specify with refinement", "Run /plan to adjust architecture", "Manually edit tasks.md to add coverage for 'performance-metrics'".
+   - Provide explicit command suggestions: e.g., "Run /SDD-cycle:specify with refinement", "Run /SDD-cycle:plan to adjust architecture", "Manually edit tasks.md to add coverage for 'performance-metrics'".
 
 9. Ask the user: "Would you like me to suggest concrete remediation edits for the top N issues?" (Do NOT apply them automatically.)
 

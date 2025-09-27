@@ -25,7 +25,7 @@ $ARGUMENTS
    - **Execution flow**: Order and dependency requirements
 
 4. Load coordination plan from prior analysis (if available):
-   - **Check for analysis output**: Look for previous `/analyze` execution results or parallel execution plan
+   - **Check for analysis output**: Look for previous `/SDD-cycle:analyze` execution results or parallel execution plan
    - **Agent assignments**: Map tasks to optimal specialized agents (test-automator, backend-architect, frontend-developer, etc.)
    - **Stream coordination**: Identify which tasks can run in parallel vs sequential
    - **File conflict detection**: Note shared files that require coordination between agents
@@ -75,4 +75,4 @@ $ARGUMENTS
    - Confirm the implementation follows the technical plan
    - Report final status with summary of completed work
 
-Note: This command assumes a complete task breakdown exists in tasks.md. If tasks are incomplete or missing, suggest running `/tasks` first to regenerate the task list.
+Note: This command assumes a complete task breakdown exists in tasks.md. If tasks are incomplete or missing, suggest running `/SDD-cycle:tasks` first to regenerate the task list.
