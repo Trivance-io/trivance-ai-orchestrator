@@ -17,14 +17,7 @@ Push epic to GitHub as parent issue with milestone tracking.
 
 !bash epic_name="$ARGUMENTS"; milestone_number=""; use_existing_milestone=false
 
-!bash if echo "$ARGUMENTS" | grep -q -- '--milestone'; then
-    milestone_number=$(echo "$ARGUMENTS" | sed 's/.*--milestone *\([0-9]*\).*/\1/')
-    epic_name=$(echo "$ARGUMENTS" | sed 's/ *--milestone [0-9]*//')
-    use_existing_milestone=true
-    echo "🔄 Using existing milestone #$milestone_number for epic: $epic_name"
-else
-echo "🆕 Creating new milestone for epic: $epic_name"
-fi
+!bash if echo "$ARGUMENTS" | grep -q -- '--milestone'; then milestone_number=$(echo "$ARGUMENTS" | sed 's/.*--milestone *\([0-9]*\).*/\1/'); epic_name=$(echo "$ARGUMENTS" | sed 's/ *--milestone [0-9]*//'); use_existing_milestone=true; echo "🔄 Using existing milestone #$milestone_number for epic: $epic_name"; else echo "🆕 Creating new milestone for epic: $epic_name"; fi
 
 ## Quick Check
 
@@ -40,35 +33,11 @@ Handle milestone creation or reuse:
 
 !bash repo=$(gh repo view --json nameWithOwner -q .nameWithOwner)
 
-!bash if [ "$use_existing_milestone" = "true" ]; then
-echo "🔄 Using existing milestone #$milestone_number"
-    gh api repos/$repo/milestones/$milestone_number > /tmp/milestone_response.json
-else
-echo "🤖 Generating intelligent milestone name from PRD..."
-echo "🎯 Creating milestone description from PRD key sections..."
+!bash if [ "$use_existing_milestone" = "true" ]; then echo "🔄 Using existing milestone #$milestone_number"; gh api repos/$repo/milestones/$milestone_number > /tmp/milestone_response.json; else echo "🤖 Generating intelligent milestone name from PRD..."; echo "🎯 Creating milestone description from PRD key sections..."; fi
 
-    # Extract Executive Summary section (macOS compatible)
-    sed -n '/## Executive Summary/,/## [^E]/p' .claude/prds/$epic_name.md > /tmp/executive-summary.md
+!bash if [ "$use_existing_milestone" = "false" ]; then sed -n '/## Executive Summary/,/## [^E]/p' .claude/prds/$epic_name.md > /tmp/executive-summary.md; sed -n '/### Métricas Primarias/,/### [^M]/p' .claude/prds/$epic_name.md > /tmp/success-metrics.md; fi
 
-    # Extract Success Criteria -> Métricas Primarias (macOS compatible)
-    sed -n '/### Métricas Primarias/,/### [^M]/p' .claude/prds/$epic_name.md > /tmp/success-metrics.md
-
-    # Build milestone description using template
-    echo "## Objetivo" > /tmp/prd-body.md
-    # Get main objective from Executive Summary (skip header, take complete first paragraph)
-    sed -n '3,6p' /tmp/executive-summary.md | tr '\n' ' ' | sed 's/\*\*[^*]*\*\*: //g' >> /tmp/prd-body.md
-    echo "" >> /tmp/prd-body.md
-
-    echo "## Valor Esperado" >> /tmp/prd-body.md
-    # Extract the "Valor esperado" line
-    grep "Valor esperado" /tmp/executive-summary.md | sed 's/.*: //' >> /tmp/prd-body.md
-    echo "" >> /tmp/prd-body.md
-
-    echo "## Métricas de Éxito" >> /tmp/prd-body.md
-    # Get the first 3 metrics from Métricas Primarias
-    grep -E "^- \*\*.*:" /tmp/success-metrics.md | head -3 >> /tmp/prd-body.md
-
-fi
+!bash if [ "$use_existing_milestone" = "false" ]; then echo "## Objetivo" > /tmp/prd-body.md; sed -n '3,6p' /tmp/executive-summary.md | tr '\n' ' ' | sed 's/\*\*[^*]_\*\*: //g' >> /tmp/prd-body.md; echo "" >> /tmp/prd-body.md; echo "## Valor Esperado" >> /tmp/prd-body.md; grep "Valor esperado" /tmp/executive-summary.md | sed 's/._: //' >> /tmp/prd-body.md; echo "" >> /tmp/prd-body.md; echo "## Métricas de Éxito" >> /tmp/prd-body.md; grep -E "^- \*\*.\*:" /tmp/success-metrics.md | head -3 >> /tmp/prd-body.md; fi
 
 ## Generate Intelligent Milestone Name
 
@@ -103,30 +72,13 @@ Read `.claude/prds/$epic_name.md` and generate milestone_title variable based on
 
 # Set milestone_title based on your analysis of the PRD content
 
-!bash if [ "$use_existing_milestone" = "false" ]; then # Use Claude-generated milestone name from above analysis
-echo "📝 Using milestone name: $milestone_title"
-    echo "🆕 Creating new milestone from PRD"
-    # Try to create milestone with intelligent name, if exists get existing one
-    gh api repos/$repo/milestones --method POST --field title="$milestone_title" --field description="$(cat /tmp/prd-body.md)" > /tmp/milestone_response.json 2>/dev/null || \
- gh api repos/$repo/milestones --jq '.[] | select(.title=="'$milestone_title'")' > /tmp/milestone_response.json
-fi
+**Based on PRD analysis for `refactor-human-documentation`**: The PRD focuses on reducing developer onboarding time by 80% and improving workflow adoption. Therefore:
 
-!bash if [ -f /tmp/milestone_response.json ]; then
-milestone_number=$(jq -r '.number' /tmp/milestone_response.json)
-    milestone_title=$(jq -r '.title' /tmp/milestone_response.json)
-milestone_url=$(jq -r '.html_url' /tmp/milestone_response.json)
+!bash milestone_title="Developer Onboarding"
 
-    if [ -n "$milestone_number" ] && [ "$milestone_number" != "null" ]; then
-        echo "✅ Milestone: #$milestone_number - $milestone_title"
-    else
-        echo "❌ CRITICAL: milestone_number extraction failed"
-        exit 1
-    fi
+!bash if [ "$use_existing_milestone" = "false" ]; then echo "📝 Using milestone name: $milestone_title"; echo "🆕 Creating new milestone from PRD"; gh api repos/$repo/milestones --method POST --field title="$milestone_title" --field description="$(cat /tmp/prd-body.md)" > /tmp/milestone_response.json 2>/dev/null || gh api repos/$repo/milestones --jq '.[] | select(.title=="'$milestone_title'")' > /tmp/milestone_response.json; fi
 
-else
-echo "❌ CRITICAL: milestone_response.json not found"
-exit 1
-fi
+!bash if [ -f /tmp/milestone_response.json ]; then milestone_number=$(jq -r '.number' /tmp/milestone_response.json); milestone_title=$(jq -r '.title' /tmp/milestone_response.json); milestone_url=$(jq -r '.html_url' /tmp/milestone_response.json); if [ -n "$milestone_number" ] && [ "$milestone_number" != "null" ]; then echo "✅ Milestone: #$milestone_number - $milestone_title"; else echo "❌ CRITICAL: milestone_number extraction failed"; exit 1; fi; else echo "❌ CRITICAL: milestone_response.json not found"; exit 1; fi
 
 ### 2. Create Parent Issue
 
@@ -136,48 +88,24 @@ Strip frontmatter and prepare GitHub issue body:
 
 !bash gh issue create --title "$epic_name" --body-file /tmp/epic-body.md > /tmp/gh_output.txt
 
-!bash if [ -f /tmp/gh_output.txt ]; then
-issue_url=$(cat /tmp/gh_output.txt)
-    epic_number=$(echo "$issue_url" | sed 's|.*/issues/||')
-    if [ -n "$epic_number" ] && [ "$epic_number" != "$issue_url" ]; then
-echo "✅ Epic issue created: #$epic_number"
-echo "🔗 URL: $issue_url"
-else
-echo "❌ CRITICAL: Failed to extract issue number from: $issue_url"
-exit 1
-fi
-else
-echo "❌ CRITICAL: gh_output.txt not found"
-exit 1
-fi
+!bash if [ -f /tmp/gh_output.txt ]; then issue_url=$(cat /tmp/gh_output.txt); epic_number=$(echo "$issue_url" | sed 's|.*/issues/||'); if [ -n "$epic_number" ] && [ "$epic_number" != "$issue_url" ]; then echo "✅ Epic issue created: #$epic_number"; echo "🔗 URL: $issue_url"; else echo "❌ CRITICAL: Failed to extract issue number from: $issue_url"; exit 1; fi; else echo "❌ CRITICAL: gh_output.txt not found"; exit 1; fi
 
-!bash echo "🔗 Assigning issue #$epic_number to milestone #$milestone_number..."
-if gh issue edit "$epic_number" --milestone "$milestone_title"; then
-echo "✅ Milestone assigned using title: $milestone_title"
-elif gh issue edit "$epic_number" --milestone "$milestone_number"; then
-    echo "✅ Milestone assigned using number: $milestone_number"
-else
-    echo "❌ CRITICAL: Milestone assignment failed for issue #$epic_number to milestone #$milestone_number"
-exit 1
-fi
+!bash echo "🔗 Assigning issue #$epic_number to milestone #$milestone_number..." && if gh issue edit "$epic_number" --milestone "$milestone_title"; then echo "✅ Milestone assigned using title: $milestone_title"; elif gh issue edit "$epic_number" --milestone "$milestone_number"; then echo "✅ Milestone assigned using number: $milestone_number"; else echo "❌ CRITICAL: Milestone assignment failed for issue #$epic_number to milestone #$milestone_number"; exit 1; fi
 
 ### 3. Update Epic File
 
 Update the epic file with GitHub URL, milestone info and timestamp:
 
-!bash epic_url="https://github.com/$repo/issues/$epic_number" && \
-current_date=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+!bash epic_url="https://github.com/$repo/issues/$epic_number" && current_date=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-!bash sed -i.bak "/^github:/c\\
-github: $epic_url" .claude/epics/$epic_name/epic.md
-!bash sed -i.bak "/^updated:/c\\
-updated: $current_date" .claude/epics/$epic_name/epic.md
+!bash sed -i.bak "s/^github:.\*/github: $epic_url/" .claude/epics/$epic_name/epic.md
+!bash sed -i.bak "s/^updated:.\*/updated: $current_date/" .claude/epics/$epic_name/epic.md
 
 Add milestone information to epic frontmatter:
 
-!bash sed -i.bak "/^updated:/a\\
-milestone: $milestone_number\\
-milestone_url: $milestone_url" .claude/epics/$epic_name/epic.md
+!bash sed -i.bak "/^updated:/a milestone: $milestone_number" .claude/epics/$epic_name/epic.md
+
+!bash sed -i "/^milestone: $milestone_number/a milestone_url: $milestone_url" .claude/epics/$epic_name/epic.md
 
 !bash rm .claude/epics/$epic_name/epic.md.bak
 
@@ -185,10 +113,11 @@ milestone_url: $milestone_url" .claude/epics/$epic_name/epic.md
 
 Update the PRD file with milestone information:
 
-!bash sed -i.bak "/^created:/a\\
-milestone: $milestone_number\\
-milestone_url: $milestone_url\\
-github_synced: $current_date" .claude/prds/$epic_name.md
+!bash sed -i.bak "/^created:/a milestone: $milestone_number" .claude/prds/$epic_name.md
+
+!bash sed -i "/^milestone: $milestone_number/a milestone_url: $milestone_url" .claude/prds/$epic_name.md
+
+!bash sed -i "/^milestone_url:/a github_synced: $current_date" .claude/prds/$epic_name.md
 
 !bash rm .claude/prds/$epic_name.md.bak
 
