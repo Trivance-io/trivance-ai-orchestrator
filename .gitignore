@@ -38,6 +38,8 @@ ccnotify.log
 .claude/reviews/
 .claude/implementations/
 .claude/uix-designs/
+.claude/epics/
+.claude/prds/
 
 # Runtime data
 pids/
