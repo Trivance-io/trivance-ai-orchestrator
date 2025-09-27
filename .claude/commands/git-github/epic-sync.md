@@ -55,9 +55,8 @@ echo "🎯 Creating milestone description from PRD key sections..."
 
     # Build milestone description using template
     echo "## Objetivo" > /tmp/prd-body.md
-    # Get main objective from Executive Summary (skip header, take first paragraph)
-    sed -n '3,6p' /tmp/executive-summary.md | tr '\n' ' ' | sed 's/\*\*[^*]*\*\*: //g' | head -c 200 >> /tmp/prd-body.md
-    echo "..." >> /tmp/prd-body.md
+    # Get main objective from Executive Summary (skip header, take complete first paragraph)
+    sed -n '3,6p' /tmp/executive-summary.md | tr '\n' ' ' | sed 's/\*\*[^*]*\*\*: //g' >> /tmp/prd-body.md
     echo "" >> /tmp/prd-body.md
 
     echo "## Valor Esperado" >> /tmp/prd-body.md
@@ -90,7 +89,19 @@ Examples of good milestone names with clear objectives:
 
 Read `.claude/prds/$epic_name.md` and generate milestone_title variable based on analysis:
 
-milestone_title="Developer Onboarding" # Replace with Claude-generated name based on PRD analysis
+**IMPORTANT**: Claude must analyze the PRD content and set the milestone_title variable dynamically. Consider the problem domain, business value, and target outcome to create a 2-4 word milestone name with a clear objective word.
+
+# Example analysis process:
+
+# - If PRD focuses on developer experience → "Developer Experience"
+
+# - If PRD focuses on user onboarding → "User Onboarding"
+
+# - If PRD focuses on documentation → "Documentation Modernization"
+
+# - If PRD focuses on performance → "Platform Performance"
+
+# Set milestone_title based on your analysis of the PRD content
 
 !bash if [ "$use_existing_milestone" = "false" ]; then # Use Claude-generated milestone name from above analysis
 echo "📝 Using milestone name: $milestone_title"
