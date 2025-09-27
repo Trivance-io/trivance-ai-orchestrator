@@ -10,15 +10,15 @@ Cambia de rama temporal a rama objetivo, valida que PR asociado esté mergeado y
 ## Uso
 
 ```bash
-/workflow:switch <target_branch>  # Argumento obligatorio
+/utils:switch <target_branch>  # Argumento obligatorio
 ```
 
 ## Ejemplos
 
 ```bash
-/workflow:switch main        # Salir de temporal → ir a main
-/workflow:switch develop     # Salir de temporal → ir a develop
-/workflow:switch feature/123 # Salir de temporal → ir a feature branch
+/utils:switch main        # Salir de temporal → ir a main
+/utils:switch develop     # Salir de temporal → ir a develop
+/utils:switch feature/123 # Salir de temporal → ir a feature branch
 ```
 
 ## User Input
@@ -32,7 +32,7 @@ $ARGUMENTS
 **Parse the arguments** from `$ARGUMENTS`:
 
 - **Target branch**: Extract the branch name (required argument)
-- If no argument provided, show error: "❌ Error: Target branch requerido. Uso: /workflow:switch <target_branch>"
+- If no argument provided, show error: "❌ Error: Target branch requerido. Uso: /utils:switch <target_branch>"
 - Display: "Switching from temporal branch to: <target_branch>"
 
 ### 2. Validate Working Directory
