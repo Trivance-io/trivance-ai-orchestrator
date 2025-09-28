@@ -79,7 +79,7 @@ Create a comprehensive PRD with these sections:
 **Functional Requirements**
 
 - Core features and capabilities
-- User interactions and flows
+- UX/UI interactions and flows
 
 **Non-Functional Requirements**
 

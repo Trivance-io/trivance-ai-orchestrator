@@ -1,11 +1,11 @@
 ---
 allowed-tools: Read, Edit, Write, Bash(gh), Bash(date)
-description: Push epic to GitHub as parent issue with intelligent milestone tracking
+description: Push epic to GitHub as parent issue with optional milestone assignment
 ---
 
 # Epic Sync
 
-Push epic to GitHub as parent issue with milestone tracking using intelligent PRD analysis.
+Push epic to GitHub as parent issue with optional milestone assignment.
 
 ## Usage
 
@@ -17,6 +17,13 @@ Push epic to GitHub as parent issue with milestone tracking using intelligent PR
 ## User Input
 
 $ARGUMENTS
+
+## Required Rules
+
+**IMPORTANT:** Before executing this command, read and follow:
+
+- `.claude/rules/datetime.md` - For getting real current date/time
+- `.claude/rules/github-operations.md` - For GitHub CLI operations
 
 ## Instructions
 
@@ -44,47 +51,10 @@ If either file missing, show error and stop.
 
 **If no milestone provided**:
 
-- Create intelligent milestone based on PRD analysis
-- Follow the process below
+- Continue without milestone assignment
+- Skip milestone-related operations
 
-### 3. Intelligent Milestone Creation
-
-**Read and analyze** `.claude/prds/<epic_name>.md` to understand:
-
-- Problem domain and business value
-- Target outcomes and success metrics
-- Main business objective
-
-**Generate milestone name** (2-4 words) with clear objective word:
-
-- **NOT the same as epic name**
-- **Include objective word**: "Onboarding", "Enhancement", "Modernization", "Performance"
-- **Focus on business value**, not technical implementation
-
-**Examples of good milestone names**:
-
-- "Developer Onboarding" (for reducing time-to-productivity)
-- "Documentation Modernization" (for obsolete docs, knowledge gaps)
-- "User Experience Enhancement" (for usability improvements)
-- "Platform Performance" (for speed optimization, monitoring)
-
-**Create milestone description** using this template:
-
-```yaml
-milestone_description_template: |
-  ## Objetivo
-  [Main business objective from Executive Summary - first paragraph, clean format]
-
-  ## Valor Esperado
-  [Extract the "Valor esperado" line from Executive Summary]
-
-  ## Métricas de Éxito
-  [Extract first 3 metrics from "Métricas Primarias" section]
-```
-
-**Create the milestone** via GitHub API with the generated name and description.
-
-### 4. Create GitHub Issue
+### 3. Create GitHub Issue
 
 **Prepare issue content**:
 
@@ -96,37 +66,38 @@ milestone_description_template: |
 
 - Title: `<epic_name>`
 - Body: Clean epic content without frontmatter
-- Assign to the milestone (either existing or newly created)
+- Assign to milestone only if milestone number was provided
 
-### 5. Update Epic File
+### 4. Update Epic File
 
 **Update** `.claude/epics/<epic_name>/epic.md` frontmatter with:
 
 - `github: <issue_url>`
 - `updated: <current_timestamp>`
-- `milestone: <milestone_number>`
-- `milestone_url: <milestone_url>`
+- `milestone: <milestone_number>` (only if milestone provided)
+- `milestone_url: <milestone_url>` (only if milestone provided)
 
 Use current timestamp in ISO format: `YYYY-MM-DDTHH:MM:SSZ`
 
-### 6. Update PRD File
+### 5. Update PRD File
 
 **Update** `.claude/prds/<epic_name>.md` frontmatter with:
 
-- `milestone: <milestone_number>`
-- `milestone_url: <milestone_url>`
+- `milestone: <milestone_number>` (only if milestone provided)
+- `milestone_url: <milestone_url>` (only if milestone provided)
 - `github_synced: <current_timestamp>`
 
 Add these fields after the `created:` line in frontmatter.
 
-### 7. Create GitHub Mapping File
+### 6. Create GitHub Mapping File
 
 **Create** `.claude/epics/<epic_name>/github-mapping.md` with this content:
 
 ```markdown
 # GitHub Issue Mapping
 
-Milestone: #<milestone_number> - <milestone_url>
+[If milestone provided] Milestone: #<milestone_number> - <milestone_url>
+[If no milestone] No milestone assigned
 Epic: #<issue_number> - <issue_url>
 
 Note: Sub-issues will be created by SDD workflow via /SDD-cycle:specify --from-issue <issue_number>
@@ -134,19 +105,20 @@ Note: Sub-issues will be created by SDD workflow via /SDD-cycle:specify --from-i
 Synced: <current_timestamp>
 ```
 
-### 8. Output Results
+### 7. Output Results
 
 **Display success message**:
 
 ```
 ✅ Synced to GitHub
-  - Milestone: #<milestone_number> - <milestone_title>
+  [If milestone provided] - Milestone: #<milestone_number> - <milestone_title>
   - Epic: #<issue_number> - <epic_name>
-  - Parent Issue created and assigned to milestone
+  [If milestone provided] - Parent Issue created and assigned to milestone
+  [If no milestone] - Parent Issue created (no milestone assigned)
 
 Next steps:
   - Technical breakdown: /SDD-cycle:specify --from-issue <issue_number>
-  - View milestone: <milestone_url>
+  [If milestone provided] - View milestone: <milestone_url>
   - View epic: <issue_url>
 ```
 
@@ -154,31 +126,29 @@ Next steps:
 
 - **If epic.md not found**: Show clear error message with correct path
 - **If PRD.md not found**: Show clear error message with correct path
-- **If milestone creation fails**: Try to find existing milestone with same name
+- **If milestone number invalid**: Show error that milestone doesn't exist
 - **If issue creation fails**: Report what succeeded, don't rollback
 - **If file updates fail**: Report specific file and continue with others
 
 ## Important Notes
 
 - Trust GitHub CLI authentication (no pre-auth checks)
-- Milestone description uses PRD content for comprehensive tracking
 - Don't pre-check for duplicates (let GitHub handle conflicts)
 - Update files only after successful GitHub operations
 - Keep operations atomic and simple
 - Sub-issues handled by SDD workflow, not this command
-- Milestone provides business-level progress tracking
-- Use `--milestone N` to reuse existing milestones across epics
+- Use `--milestone N` to assign epic to existing milestone
+- Milestones provide optional business-level progress tracking
 
 ## Implementation Approach
 
 This command uses **natural language instructions** processed by Claude Code's native capabilities rather than complex bash scripting. Claude will:
 
 1. **Parse arguments** intelligently from `$ARGUMENTS`
-2. **Read PRD content** using the Read tool
-3. **Analyze content** to generate appropriate milestone names
-4. **Execute GitHub operations** using simple Bash commands
-5. **Update files** using Edit tool for surgical changes
-6. **Create new files** using Write tool when needed
+2. **Read epic content** using the Read tool
+3. **Execute GitHub operations** using simple Bash commands (issue creation, optional milestone assignment)
+4. **Update files** using Edit tool for surgical changes
+5. **Create new files** using Write tool when needed
 
 This approach is more robust than bash scripting because:
 
