@@ -58,7 +58,15 @@ Execution steps:
    - Conflicting requirements (e.g., one requires to use Next.js while other says to use Vue as the framework).
 
 5. Parallel Stream Analysis:
-   A. Task categorization by agent expertise:
+   **DELEGATE TO SPECIALIST**: Use Task tool to invoke `agent-assignment-analyzer` with tasks.md content to generate intelligent agent assignments and parallel execution recommendations.
+
+   Use Task tool: `agent-assignment-analyzer` → Analyze tasks.md content and generate:
+   - Task-to-agent intelligent mapping
+   - File dependency conflict detection
+   - Parallel execution streams identification
+   - Coordination points analysis
+   - Parallelization optimization recommendations
+     A. Task categorization by agent expertise:
    - Setup tasks → general-purpose
    - Test tasks (unit/integration) → test-automator
    - API/Service tasks → backend-architect
