@@ -30,13 +30,13 @@ Do not bother the user with preflight checks progress ("I'm not going to ..."). 
    - Stop execution if <feature_name> was not provided
 
 2. **Verify PRD exists:**
-   - Check if `.claude/prds/$ARGUMENTS.md` exists
+   - Check if `.claude/prds/$ARGUMENTS/prd.md` exists
    - If not found, tell user: "❌ PRD not found: $ARGUMENTS. First create it with: /PRD-cycle:prd-new $ARGUMENTS"
    - Stop execution if PRD doesn't exist
 
 3. **Validate PRD frontmatter:**
    - Verify PRD has valid frontmatter with: name, description, status, created
-   - If frontmatter is invalid or missing, tell user: "❌ Invalid PRD frontmatter. Please check: .claude/prds/$ARGUMENTS.md"
+   - If frontmatter is invalid or missing, tell user: "❌ Invalid PRD frontmatter. Please check: .claude/prds/$ARGUMENTS/prd.md"
    - Show what's missing or invalid
 
 4. **Check for existing SDD-input:**
@@ -55,7 +55,7 @@ You are a product analyst optimizing a Product Requirements Document for SDD-cyc
 
 ### 1. Read the PRD
 
-- Load the PRD from `.claude/prds/$ARGUMENTS.md`
+- Load the PRD from `.claude/prds/$ARGUMENTS/prd.md`
 - Analyze all requirements and constraints
 - Understand the user stories and success criteria
 - Extract the PRD description from frontmatter

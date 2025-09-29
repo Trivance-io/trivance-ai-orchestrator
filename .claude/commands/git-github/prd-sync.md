@@ -37,7 +37,7 @@ $ARGUMENTS
 
 **Validate required files exist**:
 
-- `.claude/prds/<feature_name>.md`
+- `.claude/prds/<feature_name>/prd.md`
 - `.claude/prds/<feature_name>/sdd-input.md` (optional, created by prd-parse)
 
 If PRD file missing, show error and stop.
@@ -58,7 +58,7 @@ If PRD file missing, show error and stop.
 
 **Prepare issue content**:
 
-- Read `.claude/prds/<feature_name>.md`
+- Read `.claude/prds/<feature_name>/prd.md`
 - Strip the frontmatter (everything between `---` lines)
 - Use clean PRD content as issue body
 
@@ -71,7 +71,7 @@ If PRD file missing, show error and stop.
 
 ### 4. Update PRD File
 
-**Update** `.claude/prds/<feature_name>.md` frontmatter with:
+**Update** `.claude/prds/<feature_name>/prd.md` frontmatter with:
 
 - `github: <issue_url>`
 - `github_synced: <current_timestamp>`

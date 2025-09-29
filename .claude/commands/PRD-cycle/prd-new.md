@@ -32,15 +32,14 @@ Do not bother the user with preflight checks progress ("I'm not going to ..."). 
    - If invalid, tell user: "❌ Feature name must be kebab-case (lowercase letters, numbers, hyphens only). Examples: user-auth, payment-v2, notification-system"
 
 2. **Check for existing PRD:**
-   - Check if `.claude/prds/$ARGUMENTS.md` already exists
+   - Check if `.claude/prds/$ARGUMENTS/prd.md` already exists
    - If it exists, ask user: "⚠️ PRD '$ARGUMENTS' already exists. Do you want to overwrite it? (yes/no)"
    - Only proceed with explicit 'yes' confirmation
    - If user says no, suggest: "Use a different name or run: /PRD-cycle:prd-parse $ARGUMENTS to create SDD-ready description from the existing PRD"
 
 3. **Verify directory structure:**
-   - Check if `.claude/prds/` directory exists
-   - If not, create it first
-   - If unable to create, tell user: "❌ Cannot create PRD directory. Please manually create: .claude/prds/"
+   - Ensure `.claude/prds/$ARGUMENTS/` directory exists or can be created
+   - If cannot create, tell user: "❌ Cannot create PRD directory. Please check permissions."
 
 ## Instructions
 
@@ -109,7 +108,7 @@ Create a comprehensive PRD with these sections:
 
 ### 3. File Format with Frontmatter
 
-Save the completed PRD to: `.claude/prds/$ARGUMENTS.md` with this exact structure:
+Save the completed PRD to: `.claude/prds/$ARGUMENTS/prd.md` with this exact structure:
 
 ```markdown
 ---
@@ -155,7 +154,7 @@ Before saving the PRD, verify:
 
 After successfully creating the PRD:
 
-1. Confirm: "✅ PRD created: .claude/prds/$ARGUMENTS.md"
+1. Confirm: "✅ PRD created: .claude/prds/$ARGUMENTS/prd.md"
 2. Show brief summary of what was captured
 3. Suggest next step: "Ready to create SDD-ready description? Run: /PRD-cycle:prd-parse $ARGUMENTS"
 
