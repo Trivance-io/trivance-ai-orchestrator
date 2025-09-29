@@ -35,7 +35,7 @@ Do not bother the user with preflight checks progress ("I'm not going to ..."). 
    - Check if `.claude/prds/$ARGUMENTS.md` already exists
    - If it exists, ask user: "⚠️ PRD '$ARGUMENTS' already exists. Do you want to overwrite it? (yes/no)"
    - Only proceed with explicit 'yes' confirmation
-   - If user says no, suggest: "Use a different name or run: /PRD-cycle:prd-parse $ARGUMENTS to create an epic from the existing PRD"
+   - If user says no, suggest: "Use a different name or run: /PRD-cycle:prd-parse $ARGUMENTS to create SDD-ready description from the existing PRD"
 
 3. **Verify directory structure:**
    - Check if `.claude/prds/` directory exists
@@ -157,7 +157,7 @@ After successfully creating the PRD:
 
 1. Confirm: "✅ PRD created: .claude/prds/$ARGUMENTS.md"
 2. Show brief summary of what was captured
-3. Suggest next step: "Ready to create implementation epic? Run: /PRD-cycle:prd-parse $ARGUMENTS"
+3. Suggest next step: "Ready to create SDD-ready description? Run: /PRD-cycle:prd-parse $ARGUMENTS"
 
 ## Error Recovery
 
