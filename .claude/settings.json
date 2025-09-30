@@ -2,7 +2,8 @@
   "cleanupPeriodDays": 7,
   "enableAllProjectMcpServers": true,
   "includeCoAuthoredBy": false,
-  "model": "opusplan",
+  "model": "sonnet",
+  "alwaysThinkingEnabled": true,
 
   "permissions": {
     "defaultMode": "bypassPermissions",

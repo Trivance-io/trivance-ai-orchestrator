@@ -84,11 +84,7 @@
 
 [CONCURRENT_ACCESS_DATA_CONFLICTS]
 
-## Technical Constraints (Constitutional)
-
-### Platform & Framework Decisions
-
-[TECHNOLOGY_STACK_DECISIONS_FROM_PRD]
+## Constraints (Constitutional)
 
 ### Complexity Budget Compliance
 
@@ -100,27 +96,12 @@
 
 [SECURITY_REQUIREMENTS_FROM_PRD]
 
-## Implementation Guidance (SDD Hints)
-
-### Reuse Opportunities
-
-[EXISTING_COMPONENTS_TO_REUSE_FROM_PRD]
-
-### Anti-Patterns to Avoid
-
-[EXPLICIT_WHAT_NOT_TO_BUILD]
-
-### Testing Strategy Hints
-
-[TEST_APPROACH_FROM_PRD_ACCEPTANCE_CRITERIA]
-
 ## Constitutional Pre-Check Results
 
 - ✅ **AI-First**: [VALIDATION_RESULT_FROM_PRD]
 - ✅ **Value/Complexity**: ROI = [SCORE_FROM_PRD] ≥ 2
 - ✅ **Test-First**: Testable acceptance criteria defined
 - ✅ **Complexity Budget**: [SIZE_CLASS] classification validated
-- ✅ **Reuse First**: [REUSE_COMPONENTS_IDENTIFIED]
 
 ---
 

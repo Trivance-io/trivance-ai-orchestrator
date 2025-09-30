@@ -86,7 +86,7 @@ Create the SDD-input file at: `.claude/prds/$ARGUMENTS/sdd-input.md` using the t
 - **Functional Requirements** → SDD-Ready Requirements (testable format)
 - **Success Criteria** → Measurable Success Targets (quantified)
 - **Dependencies** → Integration Approach (explicit failure modes)
-- **Constraints** → Technical Constraints (constitutional compliance)
+- **Constraints** → Business Constraints (complexity budget, timeline, compliance)
 
 **Pre-Resolve Clarify Categories:**
 
@@ -94,7 +94,7 @@ Create the SDD-input file at: `.claude/prds/$ARGUMENTS/sdd-input.md` using the t
 - **Non-Functional Quality**: Quantify vague terms (fast→<200ms, scalable→10k users)
 - **Integration Dependencies**: Make external services and failure modes explicit
 - **Edge Cases & Failure Handling**: Extract error scenarios from user stories
-- **Constraints & Tradeoffs**: Document technology choices and rejected alternatives
+- **Constraints & Tradeoffs**: Document business constraints (budget, timeline, team size, compliance requirements) and explicit business tradeoffs (not technical decisions)
 
 ### 5. Output Location
 
