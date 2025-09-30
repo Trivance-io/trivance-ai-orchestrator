@@ -26,6 +26,13 @@ Crea PR usando branch actual hacia el target branch especificado.
 ### 1. Validación del target branch
 
 - Si no se proporciona argumento, mostrar error: "❌ Error: Target branch requerido. Uso: /pr <target_branch>"
+- Validar formato del target branch:
+  ```bash
+  if [[ ! "$target_branch" =~ ^[a-zA-Z0-9/_-]+$ ]]; then
+      echo "❌ Error: Nombre de target branch inválido"
+      exit 1
+  fi
+  ```
 - Ejecutar `git fetch origin`
 - Verificar que el branch objetivo existe: `git branch -r | grep origin/<target_branch>`
 - Si no existe, mostrar error y terminar
@@ -56,9 +63,9 @@ Ejecutar simultáneamente:
 - Comandos git combinados:
   ```bash
   git_data=$(git log --pretty=format:"%h %s" "origin/$target_branch..HEAD")
-  files_data=$(git diff --name-only --numstat "origin/$target_branch..HEAD")
-  commit_count=$(echo "$git_data" | wc -l)
-  files_changed=$(echo "$files_data" | wc -l)
+  files_data=$(git diff --numstat "origin/$target_branch..HEAD")
+  commit_count=$(git rev-list --count "origin/$target_branch..HEAD")
+  files_changed=$(git diff --name-only "origin/$target_branch..HEAD" | wc -l)
   ```
 - Variables preparadas para uso posterior
 
@@ -79,7 +86,33 @@ Ejecutar simultáneamente:
   - Si elige "2": continuar con paso 4
 - Si no existe PR o está cerrado: continuar con paso 4
 
-### 4. Completar análisis
+### 4. Detectar contexto de worktree
+
+- Ejecutar:
+  ```bash
+  if git worktree list --porcelain | grep -qF "worktree $(pwd)"; then
+      is_worktree="yes"
+  else
+      is_worktree="no"
+  fi
+  ```
+
+### 5. Completar análisis y crear/usar rama
+
+**SI es worktree ($is_worktree = "yes"):**
+
+- Capturar rama actual: `branch_name=$(git branch --show-current)`
+- Mostrar: "📍 Detectado worktree - usando rama existente: $branch_name"
+- Push a remoto:
+  ```bash
+  if ! git config "branch.$branch_name.remote" > /dev/null 2>&1; then
+      git push origin "$branch_name" --set-upstream
+  else
+      git push origin "$branch_name"
+  fi
+  ```
+
+**SI NO es worktree ($is_worktree = "no"):**
 
 - Usar datos del paso 2: `git_data`, `files_data`, `commit_count`, `files_changed`
 - Extraer commits: `commits=$(echo "$git_data")`
@@ -92,21 +125,6 @@ Ejecutar simultáneamente:
   - Si tema claro: `branch_name="${tema_central}-${timestamp}"`
   - Si no tema claro: `branch_name="${primary_type}-improvements-${timestamp}"`
 - Validar: `[[ "$branch_name" =~ ^[a-zA-Z0-9_-]+$ ]] || { echo "❌ Error: Branch name inválido"; exit 1; }`
-
-### 5. Crear rama temporal (context-aware)
-
-**Detectar contexto de worktree:**
-
-- Ejecutar: `is_worktree=$(git worktree list --porcelain | grep -qF "worktree $(pwd)" && echo "yes" || echo "no")`
-
-**SI es worktree ($is_worktree = "yes"):**
-
-- Capturar rama actual: `branch_name=$(git branch --show-current)`
-- Mostrar: "📍 Detectado worktree - usando rama existente: $branch_name"
-- Push a remoto (silencia error si upstream existe): `git push origin "$branch_name" --set-upstream 2>/dev/null || git push origin "$branch_name"`
-
-**SI NO es worktree ($is_worktree = "no"):**
-
 - Ejecutar `git checkout -b "$branch_name"`
 - Ejecutar `git push origin "$branch_name" --set-upstream`
 - Si algún comando falla, mostrar error y terminar
