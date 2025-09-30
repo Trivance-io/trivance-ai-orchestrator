@@ -1,36 +1,84 @@
-# 🚀 Ecosistema AI-First: Guía de Instalación
+# 🚀 Claude Code Ecosystem: Installation & First Session
 
-## 📋 Requisitos
+**Complete setup guide** from zero to productive AI-first development in 30 minutes.
 
-- Claude Code CLI instalado
-- Python 3.8+
-- Git configurado
-- Acceso a GitHub
+---
 
-## ⚡ Instalación
+## 📋 Step 1: Validate Your System (5 min)
 
-### 1. 🤖 Modelo
+Clone the repository and run the initialization validator:
 
-El proyecto usa `"model": "opusplan"` (Opus 4.1 para planificación, Sonnet 4 para ejecución)
+```bash
+git clone https://github.com/Trivance-io/trivance-ai-orchestrator.git
+cd trivance-ai-orchestrator
+./scripts/init.sh
+```
 
-### 2. 🔗 MCP GitHub
+The script validates **all dependencies** and categorizes them:
+
+### **CRITICAL** (Blockers - Must Install)
+
+| Dependency          | Installation                                        | Official Docs                                                                        |
+| ------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| **Claude Code CLI** | Platform-specific installer                         | [📖 Installation Guide](https://docs.anthropic.com/en/docs/claude-code/installation) |
+| **Git**             | `brew install git` / `sudo apt install git`         | [📖 Downloads](https://git-scm.com/downloads)                                        |
+| **Python 3.8+**     | `brew install python3` / `sudo apt install python3` | [📖 Downloads](https://www.python.org/downloads/)                                    |
+
+### **ESSENTIAL** (Full Functionality - Strongly Recommended)
+
+| Dependency            | Installation                                    | Official Docs                                                                     |
+| --------------------- | ----------------------------------------------- | --------------------------------------------------------------------------------- |
+| **GitHub CLI**        | `brew install gh` / `sudo apt install gh`       | [📖 Installation](https://cli.github.com/)                                        |
+| **Node.js 18+**       | `brew install node` / `sudo apt install nodejs` | [📖 Downloads](https://nodejs.org/)                                               |
+| **terminal-notifier** | `brew install terminal-notifier` (macOS only)   | [📖 GitHub](https://github.com/julienXX/terminal-notifier#install)                |
+| **notify-send**       | `sudo apt install libnotify-bin` (Linux only)   | [📖 Arch Wiki](https://wiki.archlinux.org/title/Desktop_notifications)            |
+| **Black**             | `pip install black` or `pipx install black`     | [📖 Getting Started](https://black.readthedocs.io/en/stable/getting_started.html) |
+
+### **RECOMMENDED** (Enhanced Experience)
+
+| Dependency | Installation                                                        | Official Docs                                        |
+| ---------- | ------------------------------------------------------------------- | ---------------------------------------------------- |
+| **shfmt**  | `brew install shfmt` / `go install mvdan.cc/sh/v3/cmd/shfmt@latest` | [📖 GitHub](https://github.com/mvdan/sh#shfmt)       |
+| **jq**     | `brew install jq` / `sudo apt install jq`                           | [📖 Download](https://jqlang.github.io/jq/download/) |
+
+### **OPTIONAL** (Specific Use Cases)
+
+**Playwright MCP** - Web testing & automation
+
+- Already configured in `.mcp.json`
+- Uses `npx @playwright/mcp@latest` (no install needed)
+- [📖 Playwright MCP Docs](https://github.com/microsoft/playwright-mcp)
+
+**Shadcn MCP** - UI component development
+
+- Already configured in `.mcp.json`
+- Uses `npx @jpisnice/shadcn-ui-mcp-server` (no install needed)
+- [📖 Shadcn/ui Official](https://ui.shadcn.com)
+
+---
+
+## ⚡ Step 2: System Configuration (10 min)
+
+### **2.1 GitHub CLI Authentication**
 
 ```bash
 gh auth login
-gh auth status
+gh auth status  # Verify authentication
 ```
 
-Habilita herramientas GitHub nativas (`mcp__github__*`)
+**Why required:** Enables git/github slash commands (`/pr`, `/commit`, `/issue-sync`)
 
-### 3. 🔔 Notificaciones
+### **2.2 Enable System Notifications**
 
 #### macOS
 
 ```bash
+# Install notifier
 brew install terminal-notifier
-```
 
-**Sistema** → **Notificaciones** → **Terminal** → Habilitar
+# Enable in System Settings
+# → Notifications → Terminal → Enable
+```
 
 #### Windows
 
@@ -41,118 +89,235 @@ winget install Microsoft.PowerToys
 #### Linux
 
 ```bash
-sudo apt install notify-send libnotify-bin  # Ubuntu/Debian
-sudo dnf install notify-send libnotify      # Fedora
+sudo apt install libnotify-bin notify-send  # Ubuntu/Debian
+sudo dnf install libnotify notify-send      # Fedora
 ```
 
-### 4. 🔧 GitHub Workflows
+**Why required:** Get notified when Claude finishes tasks or needs input.
 
-**⚠️ CRÍTICO**: Copiar estos archivos a tu proyecto para activar el ecosistema AI-first completo:
+### **2.3 Verify Installation**
+
+Re-run the validator to confirm all dependencies:
 
 ```bash
-# Crear directorio workflows
-mkdir -p .github/workflows
-
-# Copiar configuraciones desde este repo
-cp .github/workflows/claude-code-review.yml tu-proyecto/.github/workflows/
-cp .github/workflows/claude.yml tu-proyecto/.github/workflows/
-cp .github/workflows/security.yml tu-proyecto/.github/workflows/
+./scripts/init.sh
 ```
 
-**Configurar secret**: `CLAUDE_CODE_OAUTH_TOKEN` en GitHub repo settings.
+Expected output:
 
-**Resultado**:
-
-- 🤖 Review automático en PRs (Opus 4.1)
-- 💬 Interacción `@claude` en issues/comments
-- 🔒 Security scanning automático
-
-### 5. ✅ Verificación
-
-```bash
-claude --version
-gh repo view
-terminal-notifier -title "Test" -message "Funcionando"  # macOS
-notify-send "Test" "Funcionando"                        # Linux
-
-# Test completo en directorio del proyecto
-claude "dame un resumen del proyecto"
-claude "lista los últimos 3 PRs"
-echo "test" > test.txt && claude "/commit"
 ```
+✓ All critical and essential dependencies are installed!
+✓ All recommended dependencies installed!
 
-**Esperado**: Claude responde con información del proyecto, PRs, y notificación de commit
+Your Claude Code ecosystem is ready to use! 🚀
+```
 
 ---
 
-## 🎯 Tu Primera Sesión AI-First (15 minutos)
+## 📦 Step 3: Deploy to Your Project (5 min)
 
-**Experimenta el workflow completo en tu primer uso:**
+### **Option A: General Project**
+
+Copy `.claude/` to your project:
 
 ```bash
-# 1. Setup Inicial (2 min)
-/workflow:session-start
-# Elegir: "Desarrollo" → te guía automáticamente a crear worktree
-
-# 2. Context Mapping (3 min) - ESENCIAL
-/understand
-# Mapea arquitectura completa del proyecto automáticamente
-
-# 3. Implementation Engine (5 min)
-/implement "pequeña mejora o fix específico"
-# Motor completo: planning → coding → testing → documentation
-
-# 4. Quality Assurance (3 min) - CRÍTICO
-/review
-# Análisis multi-especialista automático (security, performance, code quality)
-
-# 5. Integration (2 min)
-/pr
-# PR automático con metadata completa
+cp -r .claude/ /path/to/your/project/
+cd /path/to/your/project
+claude  # Start Claude Code
 ```
 
-**🏆 Resultado esperado:** PR funcional con implementación completa, tests pasando, y quality checks en 15 minutos.
+### **Option B: Trivance Community (Multi-Repo)**
 
-**💡 Lo que aprendes:**
+Run the Trivance-specific setup:
 
-- **Context-awareness**: `/understand` previene horas de refactoring
-- **Automation power**: `/implement` reemplaza desarrollo manual
-- **Quality by design**: `/review` previene fixes costosos post-merge
-- **Zero friction**: De idea a PR en minutos, no horas
+```bash
+./scripts/core/setup.sh
+```
 
-## 🚨 Problemas Comunes
+This creates a multi-repo workspace with shared `.claude/` configuration.
 
-**Claude no responde**: `claude --reset-config`
-**MCP GitHub falla**: `gh auth logout && gh auth login`
-**Sin notificaciones**: Verificar permisos del sistema
+---
 
-## 📚 Siguiente Paso: Domina el Workflow
+## 🎯 Step 4: Your First AI-First Session (15 min)
 
-### 🎯 **Primero**: [Tu Primera Sesión](#tu-primera-sesión-ai-first-15-minutos)
+**Experience the complete workflow** from zero to production-ready PR.
 
-**Completa el workflow de 15 minutos** para experimentar el poder de automatización.
+### **4.1 Context Mapping (3 min) - CRITICAL**
 
-### 📖 **Después**: Profundiza tu expertise
+```bash
+claude
+> /understand
+```
 
-#### 🔥 [`ai-first-workflow.md`](ai-first-workflow.md) - **ESENCIAL**
+**What it does:**
 
-**Workflow completo**: PR → Review → Issues → Resolución → Merge  
-**Incluye**: [Comandos de Alto Valor](ai-first-workflow.md#-comandos-de-alto-valor) - la clave de productividad 10x
+- Maps entire project architecture
+- Identifies patterns, dependencies, and entry points
+- Prevents hours of refactoring by understanding context first
 
-#### ⚡ [`commands-guide.md`](commands-guide.md) - **REFERENCIA COMPLETA**
+**Output:** Complete project analysis with component map and integration points.
 
-**30+ comandos organizados por impacto**: `/understand`, `/implement`, `/review`, `/test` + todos los demás
+### **4.2 Implementation Engine (5 min)**
 
-#### 🧠 [`ai-first-best-practices.md`](ai-first-best-practices.md) - **MASTERY**
+```bash
+> /implement "add input validation to user registration form"
+```
 
-**Evolución mental**: De desarrollo manual a orquestación inteligente
+**What it does:**
 
-### 🎯 Ruta de Aprendizaje Recomendada:
+- Automated planning → coding → testing → documentation
+- TDD enforcement (tests first, then implementation)
+- Constitutional compliance (complexity budget, ROI validation)
+
+**Output:** Complete feature with tests passing and documentation.
+
+### **4.3 Quality Assurance (3 min) - CRITICAL**
+
+```bash
+> /review
+```
+
+**What it does:**
+
+- Multi-specialist analysis (security, performance, code quality)
+- Architectural integrity validation
+- Edge case detection
+
+**Output:** Comprehensive review with actionable improvements.
+
+### **4.4 Integration (2 min)**
+
+```bash
+> /commit "feat: add registration form validation with tests"
+> /pr
+```
+
+**What it does:**
+
+- Smart commit with conventional commit format
+- Auto-generated PR with complete metadata
+- Links to issues, generates test plan
+
+**Output:** Production-ready PR with GitHub Actions integration.
+
+### **4.5 Verify End-to-End (2 min)**
+
+Check your PR on GitHub:
+
+- ✅ CI/CD running (Claude Code Review, security scan)
+- ✅ Complete description with test plan
+- ✅ All checks passing
+
+---
+
+## 💡 What You've Learned
+
+| Capability            | Value                                         |
+| --------------------- | --------------------------------------------- |
+| **Context-awareness** | `/understand` prevents costly refactoring     |
+| **Automation power**  | `/implement` replaces manual development      |
+| **Quality by design** | `/review` prevents expensive post-merge fixes |
+| **Zero friction**     | Idea → PR in 15 minutes, not hours            |
+
+---
+
+## 🚨 Common Issues & Solutions
+
+### **"Claude no responde"**
+
+```bash
+claude --reset-config
+```
+
+### **"GitHub CLI falla"**
+
+```bash
+gh auth logout && gh auth login
+```
+
+### **"Sin notificaciones"**
+
+- macOS: Check System Settings → Notifications → Terminal
+- Linux: Run `notify-send "Test" "Works"` to verify
+- Windows: Check PowerToys notification settings
+
+### **"MCPs no funcionan"**
+
+1. Verify `.mcp.json` exists in project root
+2. Restart Claude Code completely
+3. Check Node.js is installed: `node -v`
+
+### **"Script init.sh falla"**
+
+- Make sure it's executable: `chmod +x scripts/init.sh`
+- Run with verbose output: `bash -x scripts/init.sh`
+- Ask Claude for help: `claude "Help me debug init.sh"`
+
+---
+
+## 📚 Next Steps: Deep Dive
+
+### **🔥 Essential Reading (Priority Order)**
+
+1. **[ai-first-workflow.md](ai-first-workflow.md)** - Complete workflow from PR to merge
+   - Focus on: [Comandos de Alto Valor](ai-first-workflow.md#-comandos-de-alto-valor)
+   - 10x productivity multipliers
+
+2. **[commands-guide.md](commands-guide.md)** - 30+ commands organized by impact
+   - High-impact commands you'll use daily
+   - Complete reference for all slash commands
+
+3. **[agents-guide.md](agents-guide.md)** - 40+ specialized AI agents
+   - When to use each agent type
+   - Orchestration strategies
+
+4. **[ai-first-best-practices.md](ai-first-best-practices.md)** - Advanced mastery
+   - Mental model evolution
+   - Expert orchestration techniques
+
+### **🎯 Recommended Learning Path**
 
 ```
-1. Completa tu primera sesión (15 min)
-2. Lee ai-first-workflow.md (enfócate en Comandos de Alto Valor)
-3. Experimenta con comandos de impacto en tu proyecto
-4. Consulta commands-guide.md como referencia
-5. Lee ai-first-best-practices.md cuando busques dominio avanzado
+Week 1: Master high-impact commands
+├── /understand (context mapping)
+├── /implement (feature development)
+└── /review (quality assurance)
+
+Week 2: Integrate workflow commands
+├── /commit (smart commits)
+├── /pr (automated PRs)
+└── /issue-sync (GitHub integration)
+
+Week 3: Explore specialist agents
+├── Use agents proactively in /implement
+├── Experiment with specialized workflows
+└── Develop orchestration strategies
+
+Week 4+: Master advanced patterns
+├── Multi-agent coordination
+├── Custom workflow optimization
+└── Constitutional governance
 ```
+
+---
+
+## 🎓 Support & Community
+
+**Need help?**
+
+```bash
+claude "Help me with [specific issue]"
+```
+
+Claude Code can assist with:
+
+- Debugging installation issues
+- Configuring specific dependencies
+- Understanding workflow patterns
+- Troubleshooting errors
+
+**Trivance Community members:** Commercial support available via dedicated channels.
+
+---
+
+**🎉 Congratulations!** You're now part of the AI-First development revolution.

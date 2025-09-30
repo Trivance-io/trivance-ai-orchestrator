@@ -1,14 +1,53 @@
-# Trivance Workspace Setup
+# Claude Code Ecosystem - AI-First Development Configuration
 
-Clona repositorios Trivance y configura workspace Claude Code.
+**Master orchestrator repository** containing production-ready `.claude/` configuration system for AI-first development workflows.
 
-## Funcionalidad
+---
 
-1. Clona repositorios listados en `.specify/memory/trivance-repos.md`
-2. Actualiza repositorios existentes con `git fetch && git pull --ff-only`
-3. Copia configuración `.claude/` al workspace usando operación atómica
+## 🎯 What Is This?
 
-## Uso
+This repository provides a **complete Claude Code ecosystem** with:
+
+- ✅ **Constitutional governance** (AI-First, TDD, Value/Complexity ratio)
+- ✅ **Intelligent hooks** (security guards, code formatters, notifications)
+- ✅ **Specialized agents** (40+ expert AI agents for every task)
+- ✅ **Slash commands** (workflow automation, git/github integration)
+- ✅ **MCP servers** (Playwright, Shadcn/ui)
+- ✅ **Human handbook** (comprehensive guides and best practices)
+
+**The `.claude/` system is framework-agnostic** and works with any tech stack.
+
+---
+
+## 🚀 Quick Start
+
+### **For General Use (Any Project)**
+
+Clone this repo and run the initialization validator:
+
+```bash
+git clone https://github.com/Trivance-io/trivance-ai-orchestrator.git
+cd trivance-ai-orchestrator
+./scripts/init.sh
+```
+
+The script will:
+
+1. ✅ Validate all required dependencies
+2. 📋 Show what's missing with installation links
+3. 🤖 Offer Claude Code assistance for setup
+
+**Then copy `.claude/` to your project:**
+
+```bash
+cp -r .claude/ /path/to/your/project/
+cd /path/to/your/project
+claude  # Start using the ecosystem
+```
+
+### **For Trivance Community (Multi-Repo Workspace)**
+
+The `setup.sh` script is **specific to Trivance Community** multi-repo workspace:
 
 ```bash
 git clone https://github.com/Trivance-io/trivance-ai-orchestrator.git
@@ -16,77 +55,100 @@ cd trivance-ai-orchestrator
 ./scripts/core/setup.sh
 ```
 
-## Prerequisitos
+This will:
 
-**Básicos (obligatorios):**
+1. Clone all 5 Trivance repositories
+2. Update existing repos with `git pull --ff-only`
+3. Copy shared `.claude/` configuration to workspace root
 
-- Git instalado
-- Permisos de escritura en directorio padre
-
-**Claude Code (esencial):**
-
-- Claude Code CLI
-- GitHub CLI: `gh auth login`
-- Python 3.8+
-
-**Utilidades (opcional):**
-
-- `jq`, `terminal-notifier`/`notify-send`
-
-## Estructura Resultante
+**Workspace structure after setup:**
 
 ```
 workspace/
-├── trivance-ai-orchestrator/
-│   ├── .claude/
-│   ├── .specify/memory/trivance-repos.md
-│   └── scripts/core/setup.sh
-├── trivance-mobile/
-├── trivance_auth/
-├── trivance_management/
-├── trivance_backoffice/
-└── .claude/                     # Configuración Claude Code
+├── trivance-ai-orchestrator/    # Master config (this repo)
+├── trivance-mobile/              # Mobile app
+├── trivance_auth/                # Auth service
+├── trivance_management/          # Management backend
+├── trivance_backoffice/          # Admin panel
+└── .claude/                      # Shared Claude Code config
 ```
 
-## Comportamiento
+---
 
-**Repositorio no existe**: Lo clona
-**Repositorio existe**: Ejecuta `git fetch && git pull --ff-only`
-**Falla actualización**: Continúa con advertencia
+## 📋 Prerequisites
 
-## Instalación de Dependencias
+### **Critical (Required)**
 
-### Herramientas Esenciales
+- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code/installation)
+- [Git](https://git-scm.com/downloads)
+- [Python 3.8+](https://www.python.org/downloads/)
 
-```bash
-# GitHub CLI
-brew install gh                    # macOS
-sudo apt install gh                # Ubuntu/Debian
-winget install GitHub.cli          # Windows
+### **Essential (Full Functionality)**
 
-gh auth login                       # Autenticación
+- [GitHub CLI](https://cli.github.com/) (for git/github commands)
+- [Node.js 18+](https://nodejs.org/) (for MCPs and formatters)
+- Notifications:
+  - macOS: [terminal-notifier](https://github.com/julienXX/terminal-notifier)
+  - Linux: `notify-send` (libnotify)
+- [Black](https://black.readthedocs.io/) (Python formatter)
 
-# Python 3.8+
-brew install python3               # macOS
-sudo apt install python3-pip       # Ubuntu/Debian
-winget install Python.Python.3     # Windows
-```
+### **Recommended (Enhanced Experience)**
 
-## Solución de Problemas
+- [shfmt](https://github.com/mvdan/sh#shfmt) (Bash formatter)
+- [jq](https://jqlang.github.io/jq/) (JSON processor)
 
-| Error                                         | Solución                                    |
-| --------------------------------------------- | ------------------------------------------- |
-| "Git not found"                               | Instalar Git: https://git-scm.com/downloads |
-| ".specify/memory/trivance-repos.md not found" | Ejecutar desde `scripts/core/`              |
-| ".claude directory not found"                 | Clonar repositorio completo                 |
-| "Claude no responde"                          | `claude --reset-config`                     |
+### **Optional (Specific Use Cases)**
 
-## Documentación AI-First
+- Playwright MCP: Enabled via `.mcp.json` (no install needed)
+- Shadcn MCP: Enabled via `.mcp.json` (no install needed)
+- Framework setup scripts in `dev-tools/` if needed
 
-Después del setup, consultar `.claude/human-handbook/`:
+**💡 Tip:** Run `./scripts/init.sh` to validate your setup automatically.
 
-- **`quickstart.md`** - Inicio rápido con comandos y agentes
-- **`commands-guide.md`** - Comandos especializados organizados por importancia
-- **`agents-guide.md`** - Agentes AI especializados por casos de uso
-- **`ai-first-workflow.md`** - Workflow completo de desarrollo AI-first
-- **`ai-first-best-practices.md`** - Mejores prácticas para desarrollo con AI
+---
+
+## 📚 Documentation
+
+After setup, explore the **Human Handbook** at `human-handbook/docs/`:
+
+| Guide                                                                            | Purpose                               |
+| -------------------------------------------------------------------------------- | ------------------------------------- |
+| **[quickstart.md](human-handbook/docs/quickstart.md)**                           | Your first 15-minute AI-first session |
+| **[ai-first-workflow.md](human-handbook/docs/ai-first-workflow.md)**             | Complete workflow from PR to merge    |
+| **[commands-guide.md](human-handbook/docs/commands-guide.md)**                   | 30+ commands organized by impact      |
+| **[agents-guide.md](human-handbook/docs/agents-guide.md)**                       | 40+ specialized AI agents             |
+| **[ai-first-best-practices.md](human-handbook/docs/ai-first-best-practices.md)** | Advanced mastery techniques           |
+
+---
+
+## 🎯 Core Principles (Constitutional)
+
+This system enforces **5 non-negotiable principles**:
+
+1. **AI-First**: Everything executable by AI with human oversight
+2. **Value/Complexity Ratio**: ROI ≥ 2x implementation complexity
+3. **Test-First Development**: TDD mandatory (Red-Green-Refactor)
+4. **Complexity Budget**: S≤80LOC | M≤250LOC | L≤600LOC
+5. **Reuse First**: Library-first, avoid abstractions <30% justification
+
+📖 Full governance: [.specify/memory/constitution.md](.specify/memory/constitution.md)
+
+---
+
+## 🔧 Troubleshooting
+
+| Issue                   | Solution                                       |
+| ----------------------- | ---------------------------------------------- |
+| "Claude no responde"    | `claude --reset-config`                        |
+| "GitHub CLI falla"      | `gh auth logout && gh auth login`              |
+| "Sin notificaciones"    | Verificar permisos sistema                     |
+| "Script falla en setup" | Ejecutar `./scripts/init.sh` para diagnosticar |
+| "MCPs no funcionan"     | Reiniciar Claude Code, verificar `.mcp.json`   |
+
+---
+
+## 📄 License
+
+This configuration system is open source and available under the MIT License.
+
+**Commercial support available for Trivance Community members.**
