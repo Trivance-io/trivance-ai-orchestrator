@@ -1,5 +1,27 @@
 #!/usr/bin/env python3
-"""Minimal Thinking Hook - Proactive behavioral guidelines injection"""
+"""
+Minimal Thinking Hook - Anti-Drift Behavioral Gate
+
+PROBLEM SOLVED:
+  Context window drift in long sessions causes Claude to:
+  - Lose adherence to core principles (minimalism, objectivity)
+  - Revert to default verbose/agreeable behavior
+  - Forget validation requirements
+
+SOLUTION:
+  Inject behavioral guidelines on EVERY prompt (not just session start)
+  to ensure consistency regardless of context window state.
+
+DESIGN RATIONALE:
+  - CLAUDE.md only read at session start (vulnerable to context loss)
+  - This hook executes per-prompt (immune to context window rotation)
+  - 6 principles ensure consistent behavior in prompts 1, 50, 100, 1000+
+
+ARCHITECTURAL NECESSITY:
+  Without this hook, consistency degrades after ~50 prompts as CLAUDE.md
+  exits the context window. This mechanism guarantees behavioral invariants
+  throughout the entire session lifecycle.
+"""
 import sys, json
 from pathlib import Path
 from datetime import datetime

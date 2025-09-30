@@ -66,10 +66,10 @@ def is_task_tool_invocation(data):
         return False
 
 def find_project_context_path():
-    """Locate project-context.md file in docs/"""
+    """Locate project-context.md file in .claude/rules/"""
     try:
         project_root = find_project_root()
-        context_path = project_root / 'docs' / 'project-context.md'
+        context_path = project_root / '.claude' / 'rules' / 'project-context.md'
         return context_path if context_path.exists() else None
     except Exception:
         return None
@@ -99,7 +99,7 @@ def main():
 
     if not context_path or not context_path.exists():
         log_result(False, context_path)
-        print("# Project Governance: project-context.md not found")
+        print("# Project Governance: .claude/rules/project-context.md not found")
         sys.exit(0)
 
     try:
@@ -119,7 +119,7 @@ def main():
             sys.stderr.write(f"HOOK_ERROR: Failed to read {context_path}: {str(e)}\n")
         except:
             pass
-        print(f"# Project Governance: Error reading project-context.md - {str(e)}")
+        print(f"# Project Governance: Error reading .claude/rules/project-context.md - {str(e)}")
         sys.exit(0)
 
 if __name__ == "__main__":

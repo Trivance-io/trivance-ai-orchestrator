@@ -1,158 +1,129 @@
-# 🚀 Ecosistema AI-First: Guía de Instalación
+# 🚀 Quickstart: 15 Minutes to Productive
 
-## 📋 Requisitos
-
-- Claude Code CLI instalado
-- Python 3.8+
-- Git configurado
-- Acceso a GitHub
-
-## ⚡ Instalación
-
-### 1. 🤖 Modelo
-
-El proyecto usa `"model": "opusplan"` (Opus 4.1 para planificación, Sonnet 4 para ejecución)
-
-### 2. 🔗 MCP GitHub
+## Step 1: Validate System (2 min)
 
 ```bash
-gh auth login
-gh auth status
+git clone https://github.com/Trivance-io/trivance-ai-orchestrator.git
+cd trivance-ai-orchestrator
+./scripts/init.sh
 ```
 
-Habilita herramientas GitHub nativas (`mcp__github__*`)
+**What it checks:** Claude Code CLI, Git, Python, GitHub CLI, Node.js, formatters, notifications.
 
-### 3. 🔔 Notificaciones
+**If something fails:** Follow the links provided. The script tells you exactly what's missing and where to get it.
 
-#### macOS
-
-```bash
-brew install terminal-notifier
-```
-
-**Sistema** → **Notificaciones** → **Terminal** → Habilitar
-
-#### Windows
-
-```powershell
-winget install Microsoft.PowerToys
-```
-
-#### Linux
-
-```bash
-sudo apt install notify-send libnotify-bin  # Ubuntu/Debian
-sudo dnf install notify-send libnotify      # Fedora
-```
-
-### 4. 🔧 GitHub Workflows
-
-**⚠️ CRÍTICO**: Copiar estos archivos a tu proyecto para activar el ecosistema AI-first completo:
-
-```bash
-# Crear directorio workflows
-mkdir -p .github/workflows
-
-# Copiar configuraciones desde este repo
-cp .github/workflows/claude-code-review.yml tu-proyecto/.github/workflows/
-cp .github/workflows/claude.yml tu-proyecto/.github/workflows/
-cp .github/workflows/security.yml tu-proyecto/.github/workflows/
-```
-
-**Configurar secret**: `CLAUDE_CODE_OAUTH_TOKEN` en GitHub repo settings.
-
-**Resultado**:
-
-- 🤖 Review automático en PRs (Opus 4.1)
-- 💬 Interacción `@claude` en issues/comments
-- 🔒 Security scanning automático
-
-### 5. ✅ Verificación
-
-```bash
-claude --version
-gh repo view
-terminal-notifier -title "Test" -message "Funcionando"  # macOS
-notify-send "Test" "Funcionando"                        # Linux
-
-# Test completo en directorio del proyecto
-claude "dame un resumen del proyecto"
-claude "lista los últimos 3 PRs"
-echo "test" > test.txt && claude "/commit"
-```
-
-**Esperado**: Claude responde con información del proyecto, PRs, y notificación de commit
+**Full dependency list:** [README.md](../../README.md#-prerequisites)
 
 ---
 
-## 🎯 Tu Primera Sesión AI-First (15 minutos)
+## Step 2: Configure (5 min)
 
-**Experimenta el workflow completo en tu primer uso:**
+### GitHub CLI
 
 ```bash
-# 1. Setup Inicial (2 min)
-/workflow:session-start
-# Elegir: "Desarrollo" → te guía automáticamente a crear worktree
+gh auth login
+```
 
-# 2. Context Mapping (3 min) - ESENCIAL
+### MCP Servers
+
+```bash
+cp .mcp.json.example .mcp.json
+```
+
+Enables Playwright (testing) and Shadcn (UI components).
+
+### Verify
+
+```bash
+./scripts/init.sh  # Should show all ✓
+```
+
+---
+
+## Step 3: Deploy (3 min)
+
+**For any project:**
+
+```bash
+cp -r .claude/ /path/to/your/project/
+cd /path/to/your/project
+claude
+```
+
+**For Trivance multi-repo:**
+
+```bash
+./scripts/core/setup.sh
+```
+
+---
+
+## Step 4: First Session (5 min)
+
+### Map Context
+
+```
 /understand
-# Mapea arquitectura completa del proyecto automáticamente
+```
 
-# 3. Implementation Engine (5 min)
-/implement "pequeña mejora o fix específico"
-# Motor completo: planning → coding → testing → documentation
+**Why:** Prevents hours of refactoring. Claude learns your entire codebase first.
 
-# 4. Quality Assurance (3 min) - CRÍTICO
+### Implement Feature
+
+```
+/implement "add input validation to registration form"
+```
+
+**What happens:** Planning → TDD tests → Implementation → Documentation. Done.
+
+### Quality Check
+
+```
 /review
-# Análisis multi-especialista automático (security, performance, code quality)
+```
 
-# 5. Integration (2 min)
+**What happens:** Security + Performance + Code Quality analysis with actionable fixes.
+
+### Create PR
+
+```
+/commit "feat: add registration validation"
 /pr
-# PR automático con metadata completa
 ```
 
-**🏆 Resultado esperado:** PR funcional con implementación completa, tests pasando, y quality checks en 15 minutos.
+**Result:** Production-ready PR with description, test plan, and CI/CD integration.
 
-**💡 Lo que aprendes:**
+---
 
-- **Context-awareness**: `/understand` previene horas de refactoring
-- **Automation power**: `/implement` reemplaza desarrollo manual
-- **Quality by design**: `/review` previene fixes costosos post-merge
-- **Zero friction**: De idea a PR en minutos, no horas
+## Common Issues
 
-## 🚨 Problemas Comunes
+| Problem              | Solution                                    |
+| -------------------- | ------------------------------------------- |
+| "Claude no responde" | `claude --reset-config`                     |
+| "GitHub CLI falla"   | `gh auth logout && gh auth login`           |
+| "MCPs no funcionan"  | Verify `.mcp.json` exists, restart Claude   |
+| "Init script falla"  | `chmod +x scripts/init.sh`, run with `bash` |
+| "Sin notificaciones" | Check system notification permissions       |
 
-**Claude no responde**: `claude --reset-config`
-**MCP GitHub falla**: `gh auth logout && gh auth login`
-**Sin notificaciones**: Verificar permisos del sistema
+---
 
-## 📚 Siguiente Paso: Domina el Workflow
+## Next Steps
 
-### 🎯 **Primero**: [Tu Primera Sesión](#tu-primera-sesión-ai-first-15-minutos)
+1. **[ai-first-workflow.md](ai-first-workflow.md)** - Complete workflow patterns
+2. **[commands-guide.md](commands-guide.md)** - All 30+ commands
+3. **[agents-guide.md](agents-guide.md)** - 40+ specialist agents
 
-**Completa el workflow de 15 minutos** para experimentar el poder de automatización.
+---
 
-### 📖 **Después**: Profundiza tu expertise
-
-#### 🔥 [`ai-first-workflow.md`](ai-first-workflow.md) - **ESENCIAL**
-
-**Workflow completo**: PR → Review → Issues → Resolución → Merge  
-**Incluye**: [Comandos de Alto Valor](ai-first-workflow.md#-comandos-de-alto-valor) - la clave de productividad 10x
-
-#### ⚡ [`commands-guide.md`](commands-guide.md) - **REFERENCIA COMPLETA**
-
-**30+ comandos organizados por impacto**: `/understand`, `/implement`, `/review`, `/test` + todos los demás
-
-#### 🧠 [`ai-first-best-practices.md`](ai-first-best-practices.md) - **MASTERY**
-
-**Evolución mental**: De desarrollo manual a orquestación inteligente
-
-### 🎯 Ruta de Aprendizaje Recomendada:
+## Learning Path
 
 ```
-1. Completa tu primera sesión (15 min)
-2. Lee ai-first-workflow.md (enfócate en Comandos de Alto Valor)
-3. Experimenta con comandos de impacto en tu proyecto
-4. Consulta commands-guide.md como referencia
-5. Lee ai-first-best-practices.md cuando busques dominio avanzado
+Week 1: Commands → /understand, /implement, /review
+Week 2: Workflow → /commit, /pr, /issue-sync
+Week 3: Agents → Explore specialists
+Week 4+: Mastery → Multi-agent coordination
 ```
+
+---
+
+**Need help?** `claude "Help me with [issue]"` - Claude assists with setup, debugging, and workflow patterns.

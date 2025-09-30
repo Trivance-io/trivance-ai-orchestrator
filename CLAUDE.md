@@ -34,7 +34,19 @@ _If you expect to exceed the budget: **stop and ask**._
 - **TDD loop** — red → green → refactor.
 - **Self-audit** — confirm §3 metrics are met.
 
-6. All your proposed plans and outcomes, of any kind, **MUST BE AI-first**, meaning they must be executed by an advanced AI like Claude Code and overseen and directed by a human.
+6. **Parallel-first execution (MANDATORY)**
+
+- **Use Task tool for parallel execution** when tasks are independent.
+- **Launch multiple agents concurrently** in a single message with multiple tool uses.
+- **Examples of parallelizable tasks:**
+  - Multiple file reads/searches (Read, Grep, Glob in parallel)
+  - Independent code reviews (security + performance + quality agents)
+  - Separate feature implementations (frontend + backend agents)
+  - Multi-repo operations (clone/update repositories)
+- **When NOT to parallelize:** Sequential dependencies (must read before editing, must test before committing).
+- **Default mindset:** "Can these tasks run simultaneously?" If yes → parallel. If unsure → ask.
+
+7. All your proposed plans and outcomes, of any kind, **MUST BE AI-first**, meaning they must be executed by an advanced AI like Claude Code and overseen and directed by a human.
 
 ## Interaction Language
 
@@ -68,14 +80,14 @@ _If you expect to exceed the budget: **stop and ask**._
 - Test-first development methodology (TDD mandatory)
 - Quality standards and implementation rules
 
-**Always Works™**: @docs/project-context.md
+**Always Works™**: @.claude/rules/project-context.md
 
 - Comprehensive testing methodology and implementation validation
 - 30-second reality check for functionality and simplicity
 - Anti-over-engineering principles and complexity budget enforcement
 - Systematic approach to ensure production-ready solutions
 
-**Design Principles**: @docs/design-principles.md
+**Design Principles**: @.specify/memory/design-principles.md
 
 - S-Tier SaaS dashboard design checklist (Stripe/Airbnb/Linear standards)
 - Complete design system foundation and UI component specifications
