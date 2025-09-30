@@ -15,7 +15,7 @@ if [[ -z "$WORKSPACE_DIR" || ! -d "$WORKSPACE_DIR" ]]; then
     exit 1
 fi
 
-REPOS_FILE="$SCRIPT_DIR/../../docs/trivance-repos.md"
+REPOS_FILE="$SCRIPT_DIR/../../.specify/memory/trivance-repos.md"
 CLAUDE_SOURCE="$SCRIPT_DIR/../../.claude"  
 CLAUDE_TARGET="$WORKSPACE_DIR/.claude"
 GITIGNORE_SOURCE="$SCRIPT_DIR/../../.gitignore"
@@ -28,7 +28,7 @@ if ! command -v git &>/dev/null; then
 fi
 
 if [[ ! -f "$REPOS_FILE" ]]; then
-    echo "❌ docs/trivance-repos.md not found" >&2
+    echo "❌ .specify/memory/trivance-repos.md not found" >&2
     exit 1
 fi
 
