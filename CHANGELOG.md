@@ -4,6 +4,51 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2025-09-30]
+
+### Added
+- feat(commands): add context-aware PR creation and proactive git sync (PR #207)
+
+### Changed
+- docs(config): consolidate documentation, configuration, and hooks improvements (PR #206)
+
+
+## [2025-09-27]
+
+### Fixed
+- fix(commands): standardize command references and enhance development toolkit (PR #205)
+
+
+## [2025-09-22]
+
+### Added
+- feat(config): enhance SDD-cycle commands and documentation infrastructure (PR #195)
+
+
+## [2025-09-18]
+
+### Added
+- feat(qa): comprehensive QA system enhancement and documentation consistency (PR #193)
+
+
+## [2025-09-09]
+
+### Added
+- feat: integrate Playwright MCP for comprehensive E2E testing automation (PR #181)
+
+
+## [2025-09-08]
+
+### Added
+- feat(mcp): migrate GitHub integration from MCP server to CLI (PR #180)
+
+
+## [2025-09-07]
+
+### Fixed
+- fix(workflow): optimize session-start branch sync performance (PR #175)
+
+
 ## [2025-09-06]
 
 ### Changed
