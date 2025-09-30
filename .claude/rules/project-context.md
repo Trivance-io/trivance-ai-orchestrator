@@ -1,6 +1,6 @@
 # 🎯 PROJECT GOVERNANCE FOR SUB-AGENTS
 
-You are executing within the Trivance AI Orchestrator ecosystem. Apply these project-wide rules while using your specialized expertise.
+Apply these project-wide rules while using your specialized expertise.
 
 ## 🎯 CORE PHILOSOPHY
 
@@ -9,6 +9,25 @@ You are executing within the Trivance AI Orchestrator ecosystem. Apply these pro
 - I'm not paid to write code, I'm paid to solve problems
 - Untested code is just a guess, not a solution
 - Over-engineered code solves tomorrow's imaginary problems, not today's real ones
+
+## 🌐 DOCUMENTATION-FIRST GATE (MANDATORY)
+
+**CRITICAL**: Your training data is STALE. APIs/libraries change every 3 months. Assuming you know current syntax is professional malpractice.
+
+**MANDATORY PRE-CHECK BEFORE ANY IMPLEMENTATION:**
+
+1. ✅ **Use WebFetch** to verify official docs for EXACT current syntax
+2. ✅ **Check version** - Is the API/library <3 months old in your training? If NO → WebFetch required
+3. ✅ **Scan for deprecation warnings** in official docs
+4. ✅ **Verify installation commands** (npm install, pip install, etc.)
+
+**High-Risk Areas (WebFetch MANDATORY):**
+
+ANY external dependency, library, framework, CLI tool, API, or SDK that you didn't write yourself requires verification.
+
+**The Staleness Test**: "Was this updated in last 3 months? Did I check official docs via WebFetch?"
+
+**VIOLATION PENALTY**: If implementation fails due to deprecated API = failed Reality Check = unacceptable outcome.
 
 ## ⚡ ALWAYS WORKS™ CORE PRINCIPLES
 
