@@ -28,47 +28,60 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+
 def find_project_root():
     """Find project root by searching upward for .claude directory"""
     path = Path(__file__).resolve()
     while path.parent != path:
-        if (path / '.claude').exists():
+        if (path / ".claude").exists():
             return path
         path = path.parent
     raise RuntimeError("Project root with .claude directory not found")
+
 
 # Security patterns - CRITICAL issues block tool execution
 # Aligned with official Claude Code security recommendations
 CRITICAL_PATTERNS = [
     # Hardcoded credentials (only strings >= 16 chars to reduce false positives)
     {
-        "regex": re.compile(r"(password|secret|api_?key|token|private_?key)\s*[=:]\s*['\"][\w\-/+=]{16,}['\"]", re.I),
+        "regex": re.compile(
+            r"(password|secret|api_?key|token|private_?key)\s*[=:]\s*['\"][\w\-/+=]{16,}['\"]",
+            re.I,
+        ),
         "message": "CRITICAL: Hardcoded credential detected (16+ chars)",
-        "severity": "critical"
+        "severity": "critical",
     },
     # eval() with variables (high injection risk)
     {
         "regex": re.compile(r"eval\s*\([^)]*[\w\[\]\.]+[^)]*\)", re.I),
         "message": "CRITICAL: eval() with variable input",
-        "severity": "critical"
+        "severity": "critical",
     },
-    # SQL injection via f-strings (limited to 500 chars to prevent ReDoS)
+    # SQL injection via f-strings (optimized to prevent ReDoS)
     {
-        "regex": re.compile(r'f["\'].{0,500}?(SELECT|INSERT|UPDATE|DELETE).{0,200}?(FROM|INTO|WHERE|SET).{0,200}?\{', re.I | re.DOTALL),
+        "regex": re.compile(
+            r'f["\'][^"\']{0,200}(SELECT|INSERT|UPDATE|DELETE)[^"\']{0,100}(FROM|INTO|WHERE|SET)[^"\']{0,100}\{',
+            re.I,
+        ),
         "message": "CRITICAL: SQL injection risk (f-string in query)",
-        "severity": "critical"
+        "severity": "critical",
     },
     # Command injection via subprocess with variables
     {
-        "regex": re.compile(r'subprocess\.(run|call|Popen|check_output)\s*\([^)]*\{', re.I),
+        "regex": re.compile(
+            r"subprocess\.(run|call|Popen|check_output)\s*\((?:[^)]*\{|[^)]*\w+\[|[^)]*\w+\.\w+|\s*\w+(?:\s|,|\)))",
+            re.I,
+        ),
         "message": "CRITICAL: Command injection risk (dynamic subprocess input)",
-        "severity": "critical"
+        "severity": "critical",
     },
     # Path traversal (recommended by official docs: "Block path traversal")
     {
-        "regex": re.compile(r'\b(open|read|write|unlink|remove)\s*\([^)]{0,200}?f["\'][^"\']*\{', re.I),
+        "regex": re.compile(
+            r'\b(open|read|write|unlink|remove)\s*\([^)]{0,200}?f["\'][^"\']*\{', re.I
+        ),
         "message": "CRITICAL: Path traversal risk (dynamic file path)",
-        "severity": "critical"
+        "severity": "critical",
     },
 ]
 
@@ -78,21 +91,22 @@ WARNING_PATTERNS = [
     {
         "regex": re.compile(r":\s*any\b"),
         "message": "WARNING: TypeScript 'any' type reduces type safety",
-        "severity": "warning"
+        "severity": "warning",
     },
     # TODO/FIXME
     {
         "regex": re.compile(r"(TODO|FIXME|HACK|XXX):", re.I),
         "message": "WARNING: Unresolved TODO/FIXME",
-        "severity": "warning"
+        "severity": "warning",
     },
     # Console statements
     {
         "regex": re.compile(r"console\.(log|warn|info|debug)", re.I),
         "message": "WARNING: Debug console statement",
-        "severity": "warning"
+        "severity": "warning",
     },
 ]
+
 
 def analyze(content):
     """Analyze content against security patterns"""
@@ -103,27 +117,32 @@ def analyze(content):
     for pattern in CRITICAL_PATTERNS:
         matches = pattern["regex"].finditer(content)
         for match in matches:
-            line_num = content[:match.start()].count('\n') + 1
-            critical_issues.append({
-                "line": line_num,
-                "message": pattern["message"],
-                "severity": pattern["severity"],
-                "match": match.group()[:50]  # Truncate for security
-            })
+            line_num = content[: match.start()].count("\n") + 1
+            critical_issues.append(
+                {
+                    "line": line_num,
+                    "message": pattern["message"],
+                    "severity": pattern["severity"],
+                    "match": match.group()[:50],  # Truncate for security
+                }
+            )
 
     # Check warning patterns (won't block execution)
     for pattern in WARNING_PATTERNS:
         matches = pattern["regex"].finditer(content)
         for match in matches:
-            line_num = content[:match.start()].count('\n') + 1
-            warnings.append({
-                "line": line_num,
-                "message": pattern["message"],
-                "severity": pattern["severity"],
-                "match": match.group()[:30]  # Shorter truncation for warnings
-            })
+            line_num = content[: match.start()].count("\n") + 1
+            warnings.append(
+                {
+                    "line": line_num,
+                    "message": pattern["message"],
+                    "severity": pattern["severity"],
+                    "match": match.group()[:30],  # Shorter truncation for warnings
+                }
+            )
 
     return critical_issues, warnings
+
 
 def main():
     try:
@@ -132,13 +151,17 @@ def main():
         data = json.loads(raw) if raw else {}
     except (json.JSONDecodeError, MemoryError):
         # On error, allow tool execution
-        print(json.dumps({
-            "hookSpecificOutput": {
-                "hookEventName": "PreToolUse",
-                "permissionDecision": "allow",
-                "permissionDecisionReason": "Hook error - defaulting to allow"
-            }
-        }))
+        print(
+            json.dumps(
+                {
+                    "hookSpecificOutput": {
+                        "hookEventName": "PreToolUse",
+                        "permissionDecision": "allow",
+                        "permissionDecisionReason": "Hook error - defaulting to allow",
+                    }
+                }
+            )
+        )
         sys.exit(0)
 
     # Extract tool information
@@ -147,13 +170,17 @@ def main():
 
     # Only analyze Edit, Write, and MultiEdit tools
     if tool_name not in ["Edit", "Write", "MultiEdit"]:
-        print(json.dumps({
-            "hookSpecificOutput": {
-                "hookEventName": "PreToolUse",
-                "permissionDecision": "allow",
-                "permissionDecisionReason": f"Tool {tool_name} not analyzed"
-            }
-        }))
+        print(
+            json.dumps(
+                {
+                    "hookSpecificOutput": {
+                        "hookEventName": "PreToolUse",
+                        "permissionDecision": "allow",
+                        "permissionDecisionReason": f"Tool {tool_name} not analyzed",
+                    }
+                }
+            )
+        )
         sys.exit(0)
 
     # Extract content from tool parameters
@@ -162,13 +189,17 @@ def main():
 
     if not content:
         # No content to analyze - allow
-        print(json.dumps({
-            "hookSpecificOutput": {
-                "hookEventName": "PreToolUse",
-                "permissionDecision": "allow",
-                "permissionDecisionReason": "No content to analyze"
-            }
-        }))
+        print(
+            json.dumps(
+                {
+                    "hookSpecificOutput": {
+                        "hookEventName": "PreToolUse",
+                        "permissionDecision": "allow",
+                        "permissionDecisionReason": "No content to analyze",
+                    }
+                }
+            )
+        )
         sys.exit(0)
 
     # Analyze content
@@ -177,36 +208,50 @@ def main():
     # Logging (with stderr fallback for observability)
     try:
         project_root = find_project_root()
-        log_dir = Path(project_root) / '.claude' / 'logs' / datetime.now().strftime('%Y-%m-%d')
+        log_dir = (
+            Path(project_root)
+            / ".claude"
+            / "logs"
+            / datetime.now().strftime("%Y-%m-%d")
+        )
         log_dir.mkdir(parents=True, exist_ok=True)
-        with open(log_dir / 'security.jsonl', 'a') as f:
-            f.write(json.dumps({
-                "timestamp": datetime.now().isoformat(),
-                "tool_name": tool_name,
-                "file_path": file_path,
-                "content_size": len(content),
-                "critical_issues": len(critical_issues),
-                "warnings": len(warnings)
-            }) + '\n')
+        with open(log_dir / "security.jsonl", "a") as f:
+            f.write(
+                json.dumps(
+                    {
+                        "timestamp": datetime.now().isoformat(),
+                        "tool_name": tool_name,
+                        "file_path": file_path,
+                        "content_size": len(content),
+                        "critical_issues": len(critical_issues),
+                        "warnings": len(warnings),
+                    }
+                )
+                + "\n"
+            )
     except OSError as e:
         # Log to stderr for observability (similar to pre-tool-use.py)
         try:
-            sys.stderr.write(f"HOOK_LOG_ERROR: {json.dumps({
+            sys.stderr.write(
+                f"HOOK_LOG_ERROR: {json.dumps({
                 'timestamp': datetime.now().isoformat(),
                 'hook': 'security_guard',
                 'error': 'logging_failed',
                 'reason': str(e)[:100]
-            })}\n")
+            })}\n"
+            )
         except:
             pass  # Ultimate fallback - only if stderr also fails
 
     # Block if critical security issues found
     if critical_issues:
         # Format issues for clear user feedback
-        issues_summary = "\n".join([
-            f"  Line {issue['line']}: {issue['message']}"
-            for issue in critical_issues[:5]  # Limit to 5 for readability
-        ])
+        issues_summary = "\n".join(
+            [
+                f"  Line {issue['line']}: {issue['message']}"
+                for issue in critical_issues[:5]  # Limit to 5 for readability
+            ]
+        )
 
         reason = (
             f"SECURITY BLOCK: {len(critical_issues)} critical issue(s) detected\n"
@@ -216,13 +261,17 @@ def main():
         if len(critical_issues) > 5:
             reason += f"\n  ... and {len(critical_issues) - 5} more issue(s)"
 
-        print(json.dumps({
-            "hookSpecificOutput": {
-                "hookEventName": "PreToolUse",
-                "permissionDecision": "deny",
-                "permissionDecisionReason": reason
-            }
-        }))
+        print(
+            json.dumps(
+                {
+                    "hookSpecificOutput": {
+                        "hookEventName": "PreToolUse",
+                        "permissionDecision": "deny",
+                        "permissionDecisionReason": reason,
+                    }
+                }
+            )
+        )
         sys.exit(1)  # Exit with error code to signal blocking
 
     # Allow if no critical issues (warnings are logged but don't block)
@@ -230,14 +279,19 @@ def main():
     if warnings:
         reason += f" ({len(warnings)} warning(s) logged)"
 
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "PreToolUse",
-            "permissionDecision": "allow",
-            "permissionDecisionReason": reason
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "PreToolUse",
+                    "permissionDecision": "allow",
+                    "permissionDecisionReason": reason,
+                }
+            }
+        )
+    )
     sys.exit(0)
+
 
 if __name__ == "__main__":
     main()

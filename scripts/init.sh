@@ -67,14 +67,8 @@ check_python_version() {
 	local version=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')
 	local required="$MIN_PYTHON_VERSION"
 
-	# Compare versions: major.minor format
-	local ver_major=$(echo "$version" | cut -d. -f1)
-	local ver_minor=$(echo "$version" | cut -d. -f2)
-	local req_major=$(echo "$required" | cut -d. -f1)
-	local req_minor=$(echo "$required" | cut -d. -f2)
-
-	if [ "$ver_major" -gt "$req_major" ] ||
-		([ "$ver_major" -eq "$req_major" ] && [ "$ver_minor" -ge "$req_minor" ]); then
+	# Use Python's native tuple comparison (more robust than bash string parsing)
+	if python3 -c "import sys; req_ver = tuple(map(int, '$required'.split('.'))); sys.exit(0 if sys.version_info[:2] >= req_ver else 1)"; then
 		echo -e "${GREEN}✓${NC} Python $version (>= $required required)"
 		return 0
 	else
