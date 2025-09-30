@@ -271,4 +271,4 @@ npx shadcn@latest add separator accordion collapsible
 - [Shadcn/ui Official](https://ui.shadcn.com)
 - [Shadcn MCP](https://github.com/RafalWilinski/shadcn-mcp)
 - [Claude Code + MCP](https://docs.anthropic.com/en/docs/claude-code/mcp)
-- [Design Principles](../../docs/design-principles.md)
+- [Design Principles](../../.specify/memory/design-principles.md)

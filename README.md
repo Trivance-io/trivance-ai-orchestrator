@@ -4,7 +4,7 @@ Clona repositorios Trivance y configura workspace Claude Code.
 
 ## Funcionalidad
 
-1. Clona repositorios listados en `docs/trivance-repos.md`
+1. Clona repositorios listados en `.specify/memory/trivance-repos.md`
 2. Actualiza repositorios existentes con `git fetch && git pull --ff-only`
 3. Copia configuración `.claude/` al workspace usando operación atómica
 
@@ -39,7 +39,7 @@ cd trivance-ai-orchestrator
 workspace/
 ├── trivance-ai-orchestrator/
 │   ├── .claude/
-│   ├── docs/trivance-repos.md
+│   ├── .specify/memory/trivance-repos.md
 │   └── scripts/core/setup.sh
 ├── trivance-mobile/
 ├── trivance_auth/
@@ -74,12 +74,12 @@ winget install Python.Python.3     # Windows
 
 ## Solución de Problemas
 
-| Error                              | Solución                                    |
-| ---------------------------------- | ------------------------------------------- |
-| "Git not found"                    | Instalar Git: https://git-scm.com/downloads |
-| "docs/trivance-repos.md not found" | Ejecutar desde `scripts/core/`              |
-| ".claude directory not found"      | Clonar repositorio completo                 |
-| "Claude no responde"               | `claude --reset-config`                     |
+| Error                                         | Solución                                    |
+| --------------------------------------------- | ------------------------------------------- |
+| "Git not found"                               | Instalar Git: https://git-scm.com/downloads |
+| ".specify/memory/trivance-repos.md not found" | Ejecutar desde `scripts/core/`              |
+| ".claude directory not found"                 | Clonar repositorio completo                 |
+| "Claude no responde"                          | `claude --reset-config`                     |
 
 ## Documentación AI-First
 
