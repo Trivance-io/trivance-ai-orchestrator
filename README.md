@@ -99,9 +99,18 @@ workspace/
 
 ### **Optional (Specific Use Cases)**
 
-- Playwright MCP: Enabled via `.mcp.json` (no install needed)
-- Shadcn MCP: Enabled via `.mcp.json` (no install needed)
-- Framework setup scripts in `dev-tools/` if needed
+**MCP Servers** - Extend Claude Code with specialized capabilities:
+
+```bash
+cp .mcp.json.example .mcp.json
+```
+
+Configured servers:
+
+- **Playwright**: Web testing & automation
+- **Shadcn**: UI component development
+
+Add more: [MCP Registry](https://github.com/modelcontextprotocol/servers)
 
 **💡 Tip:** Run `./scripts/init.sh` to validate your setup automatically.
 
