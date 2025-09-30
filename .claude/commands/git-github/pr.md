@@ -97,13 +97,13 @@ Ejecutar simultáneamente:
 
 **Detectar contexto de worktree:**
 
-- Ejecutar: `is_worktree=$(git worktree list --porcelain | grep -q "worktree $(pwd)" && echo "yes" || echo "no")`
+- Ejecutar: `is_worktree=$(git worktree list --porcelain | grep -qF "worktree $(pwd)" && echo "yes" || echo "no")`
 
 **SI es worktree ($is_worktree = "yes"):**
 
 - Capturar rama actual: `branch_name=$(git branch --show-current)`
 - Mostrar: "📍 Detectado worktree - usando rama existente: $branch_name"
-- Push a remoto: `git push origin "$branch_name" --set-upstream 2>/dev/null || git push origin "$branch_name"`
+- Push a remoto (silencia error si upstream existe): `git push origin "$branch_name" --set-upstream 2>/dev/null || git push origin "$branch_name"`
 
 **SI NO es worktree ($is_worktree = "no"):**
 
