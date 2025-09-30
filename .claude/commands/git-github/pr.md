@@ -93,7 +93,19 @@ Ejecutar simultáneamente:
   - Si no tema claro: `branch_name="${primary_type}-improvements-${timestamp}"`
 - Validar: `[[ "$branch_name" =~ ^[a-zA-Z0-9_-]+$ ]] || { echo "❌ Error: Branch name inválido"; exit 1; }`
 
-### 5. Crear rama temporal
+### 5. Crear rama temporal (context-aware)
+
+**Detectar contexto de worktree:**
+
+- Ejecutar: `is_worktree=$(git worktree list --porcelain | grep -q "worktree $(pwd)" && echo "yes" || echo "no")`
+
+**SI es worktree ($is_worktree = "yes"):**
+
+- Capturar rama actual: `branch_name=$(git branch --show-current)`
+- Mostrar: "📍 Detectado worktree - usando rama existente: $branch_name"
+- Push a remoto: `git push origin "$branch_name" --set-upstream 2>/dev/null || git push origin "$branch_name"`
+
+**SI NO es worktree ($is_worktree = "no"):**
 
 - Ejecutar `git checkout -b "$branch_name"`
 - Ejecutar `git push origin "$branch_name" --set-upstream`

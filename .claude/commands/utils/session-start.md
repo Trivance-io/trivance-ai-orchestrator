@@ -32,6 +32,29 @@ Mostrar exactamente este texto:
 - Ejecutar: `git branch --show-current` para rama actual
 - Ejecutar: `git fetch --quiet 2>/dev/null` para actualizar referencias remotas (ignorar errores)
 
+### 3.5. Sincronización proactiva con remoto
+
+**Detectar rama padre:**
+
+- Ejecutar: `parent_branch=$(git show-ref --heads | grep -E "main|develop|master" | head -1 | sed 's|.*/||')`
+- Si comando falla o no hay output: continuar sin sincronización (repositorio sin remoto o sin internet)
+
+**Intentar sincronización (solo si hay rama padre detectada):**
+
+- Ejecutar: `git pull --ff-only origin "$parent_branch" 2>&1`
+- Capturar exit code: `sync_status=$?`
+
+**Mostrar resultado:**
+
+- Si `sync_status = 0`: agregar a output del paso 4: "✅ Sincronizado con origin/$parent_branch"
+- Si `sync_status != 0`: agregar a output del paso 4: "⚠️ No se pudo sincronizar - verificar: git status"
+- Si no hay rama padre: no mostrar nada (continuar silenciosamente)
+
+**IMPORTANTE:**
+
+- NO bloquear ejecución si sincronización falla
+- Continuar con pasos 4-8 normalmente
+
 ### 4. Mostrar situación del trabajo actual
 
 - Ejecutar: `gh issue list --assignee @me --state open --limit 6` si gh está disponible
