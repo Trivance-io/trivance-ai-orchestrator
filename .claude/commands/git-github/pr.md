@@ -36,6 +36,14 @@ Crea PR usando branch actual hacia el target branch especificado.
 - Ejecutar `git fetch origin`
 - Verificar que el branch objetivo existe: `git branch -r | grep origin/<target_branch>`
 - Si no existe, mostrar error y terminar
+- Verificar divergencia:
+  ```bash
+  commits_behind=$(git rev-list --count HEAD..origin/$target_branch 2>/dev/null || echo "0")
+  if [[ "$commits_behind" -gt 0 ]]; then
+      echo "⚠️  Tu rama está $commits_behind commits atrás de origin/$target_branch"
+      echo "   GitHub puede detectar conflictos al intentar mergear"
+  fi
+  ```
 
 ### 2. Operaciones en paralelo
 
