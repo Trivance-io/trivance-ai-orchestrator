@@ -103,6 +103,15 @@
             "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/pre-tool-use.py"
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/security_guard.py"
+          }
+        ]
       }
     ],
     "Stop": [
@@ -129,10 +138,6 @@
       {
         "matcher": "Task|Edit|MultiEdit|Write|Bash",
         "hooks": [
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/security_guard.py"
-          },
           {
             "type": "command",
             "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/clean_code.py"

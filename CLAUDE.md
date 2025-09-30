@@ -68,14 +68,14 @@ _If you expect to exceed the budget: **stop and ask**._
 - Test-first development methodology (TDD mandatory)
 - Quality standards and implementation rules
 
-**Always Works™**: @docs/project-context.md
+**Always Works™**: @.claude/rules/project-context.md
 
 - Comprehensive testing methodology and implementation validation
 - 30-second reality check for functionality and simplicity
 - Anti-over-engineering principles and complexity budget enforcement
 - Systematic approach to ensure production-ready solutions
 
-**Design Principles**: @docs/design-principles.md
+**Design Principles**: @.specify/memory/design-principles.md
 
 - S-Tier SaaS dashboard design checklist (Stripe/Airbnb/Linear standards)
 - Complete design system foundation and UI component specifications
