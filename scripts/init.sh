@@ -184,6 +184,30 @@ validate_essential_dependencies() {
 		ESSENTIAL_ITEMS+=("Black|https://black.readthedocs.io/en/stable/getting_started.html")
 	fi
 
+	# Additional Python formatters (optional but recommended)
+	if command -v python3 &>/dev/null; then
+		if python3 -m ruff --version &>/dev/null 2>&1; then
+			echo -e "${GREEN}✓${NC} Ruff (Python linter/formatter)"
+		else
+			echo -e "${YELLOW}⚠${NC} Ruff (Python linter/formatter - recommended)"
+		fi
+
+		if python3 -m autopep8 --version &>/dev/null 2>&1; then
+			echo -e "${GREEN}✓${NC} autopep8 (Python formatter)"
+		else
+			echo -e "${YELLOW}⚠${NC} autopep8 (Python formatter - optional)"
+		fi
+	fi
+
+	# ESLint check (optional for JS/TS projects)
+	if command -v npx &>/dev/null; then
+		if npx eslint --version &>/dev/null 2>&1; then
+			echo -e "${GREEN}✓${NC} ESLint (JS/TS linter - optional)"
+		else
+			echo -e "${YELLOW}⚠${NC} ESLint (JS/TS linter - optional, install if needed)"
+		fi
+	fi
+
 	# MCP Servers configuration
 	if [ -f ".mcp.json" ]; then
 		echo -e "${GREEN}✓${NC} MCP Servers configured (.mcp.json exists)"

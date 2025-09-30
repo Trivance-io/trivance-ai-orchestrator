@@ -90,7 +90,9 @@ workspace/
 - Notifications:
   - macOS: [terminal-notifier](https://github.com/julienXX/terminal-notifier)
   - Linux: `notify-send` (libnotify)
-- [Black](https://black.readthedocs.io/) (Python formatter)
+- **Code Formatters** (for clean_code hook):
+  - Python: [Black](https://black.readthedocs.io/) | [Ruff](https://docs.astral.sh/ruff/) | [autopep8](https://github.com/hhatto/autopep8)
+  - JS/TS: [Prettier](https://prettier.io/) (auto-installed via npx) | [ESLint](https://eslint.org/) (optional)
 
 ### **Recommended (Enhanced Experience)**
 
