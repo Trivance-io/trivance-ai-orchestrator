@@ -1,153 +1,269 @@
 ---
 name: playwright-test-generator
-description: AI-driven test generator following official Playwright Agent workflow. Creates atomic tests, performs code review, debugging, and native reporting.
+description: AI agent for autonomous E2E test generation using Playwright MCP visual exploration. Follows Anthropic context engineering principles.
+version: 3.0.0
 ---
 
-# Playwright AI Test Generator
+# Playwright E2E Test Generator
 
-## Mission
+**Mission**: Generate production-ready E2E tests through autonomous visual exploration using MCP tools.
 
-Creates **atomic test files** using MCP tools, performs automated code analysis, and generates industry-standard e2e test suites. Strictly adheres to official MCP patterns and best practices.
+**Core Capability**: Uses screenshots + accessibility snapshots to discover comprehensive test scenarios.
 
-**Required Input**: `TARGET_URL` + `FUNCTIONALITY_FOCUS`
+**Required Input**: `TARGET` (URL or file path)
 
-**Official MCP Workflow**: `Explore https://[url]` → autonomous navigation → code analysis → atomic test generation → validation
+**Output**: Test files in tests/ + HTML report + results.json
 
-## Error Handling
+---
 
-**HALT on ANY step failure:**
+## Principles (Anthropic Context Engineering)
 
-```
-❌ STEP FAILURE: [Step name] failed
+**Golden Rule**: Smallest set of high-signal tokens for desired outcome
 
-Error: [Exact error message]
-Context: [What was being executed]
-Required Action: [Specific resolution]
+**Execution**:
 
-Cannot continue until resolved.
-```
+- Progressive visual discovery (layer by layer)
+- Just-in-time context loading (not exhaustive upfront)
+- Structured note-taking (NOTES.md for persistent memory)
+- Token-efficient tool usage (visual processing over text)
 
-## PHASE 1: ENVIRONMENT, ANALYSIS & REALITY DISCOVERY
+---
 
-### Step 1.1: Environment Validation
+## Workflow
 
-**MANDATORY** Clean previous playwright processes to prevent port conflicts
+### PHASE 1: Environment & Context Detection
+
+**Goal**: Verify setup and detect target type
 
 ```bash
+# 1.1 Verify Playwright
+npx playwright --version || exit 1
 
+# 1.2 Clean previous processes
 pkill -f "playwright.*show-report" 2>/dev/null || true
-lsof -ti:9323 | xargs kill -9 2>/dev/null || true
 
-npx playwright --version
-```
-
-**If missing**: Exit with error - Playwright required
-
-### Step 1.2: Code Analysis & Understanding
-
-**CRITICAL**: Before generating any tests, thoroughly analyze the codebase to understand:
-
-```bash
-# Analyze project structure
-find . -name "*.ts" -o -name "*.js" -o -name "*.tsx" -o -name "*.jsx" | grep -E "(src/|app/|pages/|components/)" | head -20
-
-# Understand routing structure
-grep -r "router\|route\|path" --include="*.ts" --include="*.js" --include="*.tsx" src/ app/ 2>/dev/null | head -10
-
-# Identify main components and features
-grep -r "export.*function\|export.*class\|export.*const.*=" --include="*.ts" --include="*.tsx" src/ app/ 2>/dev/null | head -15
-```
-
-**Analysis Requirements:**
-
-- 📁 **File Structure**: Understand component organization
-- 🔗 **Routing Logic**: Identify navigation patterns
-- 🎯 **Core Features**: Map main functionalities
-- 📝 **State Management**: Detect Redux/Context/Zustand usage
-- 🎨 **UI Framework**: Identify React/Vue/Angular patterns
-
-### Step 1.3: Configure Playwright for Industry Standards
-
-**Target**: Modify `playwright.config.ts` for 2025 best practices
-
-**CRITICAL**: Pre-validate project context BEFORE creating playwright.config.ts to prevent configuration errors.
-
-```bash
-# Step 1: Quick pre-validation to detect existing config issues (< 2s)
-npx playwright test --list --reporter=json > /tmp/config-validation.json 2>&1
-
-# Step 2: Analyze validation results for context mismatches
-if grep -q '"suites":\s*\[\s*\]' /tmp/config-validation.json 2>/dev/null; then
-    echo "⚠️  No tests detected - Will auto-detect project structure in config..."
-else
-    echo "✅ Existing config valid - Enhancing with 2025 best practices"
+# 1.3 Validate TARGET
+if [ -z "$TARGET" ]; then
+    echo "ERROR: TARGET not set. Usage: TARGET='https://example.com' <agent-command>"
+    exit 1
 fi
 
-rm -f /tmp/config-validation.json
+# 1.4 Detect target type
+if [[ "$TARGET" =~ ^https?:// ]]; then
+    TARGET_TYPE="webapp"
+else
+    TARGET_TYPE="static"
+fi
 ```
 
-**Generate dynamic configuration based on CONFIG_MODE detected:**
+**Note to Memory**:
+
+```markdown
+# NOTES.md
+
+## Target Context
+
+- Type: [webapp/static]
+- URL/Path: [target]
+- Timestamp: [start time]
+```
+
+---
+
+### PHASE 2: Visual Discovery (MCP)
+
+**Goal**: Explore target visually to discover all testable flows
+
+**MCP Tools Used**:
+
+1. `browser_navigate` - Navigate to target
+2. `browser_take_screenshot` - Capture full visual context
+3. `browser_snapshot` - Get accessibility tree
+4. `browser_console_messages` - Check for errors
+5. `browser_evaluate` - Extract dynamic info if needed
+
+**Discovery Process**:
+
+```
+Step 1: Initial Visual Scan
+├─ Navigate to target
+├─ Take screenshot (full page)
+├─ Get accessibility snapshot
+└─ Analyze BOTH simultaneously
+
+Step 2: Identify Interactive Elements
+├─ Screenshot shows: Visual prominence, layout, CTAs
+├─ Snapshot provides: Roles, labels, structure
+└─ Prioritize by visual hierarchy
+
+Step 3: Discover Flows
+├─ Primary CTAs (large, prominent buttons)
+├─ Forms (input fields, validation)
+├─ Navigation (links, menus, tabs)
+├─ Error states (visible warnings, alerts)
+└─ Edge cases (secondary actions, cancels)
+
+Step 4: Progressive Exploration
+├─ Click primary elements
+├─ Take screenshot of new states
+├─ Discover modals, dropdowns, transitions
+└─ Map complete user journeys
+```
+
+**Visual Context Analysis**:
+
+```
+Screenshot: "Login button is large, blue, top-right.
+            Email/password fields below.
+            'Forgot password?' link small at bottom.
+            'Create account' button secondary style."
+
+Accessibility tree:
+  button[role=button, name="Sign In"]
+  textbox[role=textbox, name="Email"]
+  textbox[role=textbox, name="Password"]
+  link[role=link, name="Forgot password?"]
+```
+
+**Intelligent Decisions**:
+
+- **Visual prominence** → Priority tests (Sign In button is primary CTA)
+- **Layout context** → User flow order (Email → Password → Submit)
+- **Visual cues** → Error cases (saw red asterisks = required fields)
+- **Secondary elements** → Edge case tests (Forgot password, Create account)
+
+**Note to Memory**:
+
+```markdown
+# NOTES.md
+
+## Visual Discovery Results
+
+### Primary Flow (Visually Prominent)
+
+- Sign In form: Email + Password + Submit button
+- Location: Top-right, large blue CTA
+
+### Secondary Flows
+
+- Forgot password (link, bottom of form)
+- Create account (secondary button)
+
+### Validation Elements
+
+- Required field indicators (red asterisks)
+- Error container (role=alert, initially hidden)
+
+### Test Scenarios Identified
+
+1. Happy path: Valid login
+2. Error: Invalid email format
+3. Error: Empty required fields
+4. Edge: Forgot password flow
+5. Edge: Create account redirect
+```
+
+---
+
+### PHASE 3: Test Generation
+
+**Goal**: Generate atomic test files based on visual discoveries
+
+**Modern Playwright Patterns**:
+
+- ✅ `.fill()` (not deprecated `.type()`)
+- ✅ `getByRole()` (accessibility-first)
+- ✅ Web-first assertions (`toBeVisible()`, `toHaveURL()`)
+- ✅ Atomic files (≤60 lines, single responsibility)
+
+**Generation Strategy**:
+
+```
+Prioritization (based on visual analysis):
+1. Primary flows (prominent CTAs)
+2. Form validations (saw error indicators)
+3. Error cases (discovered error containers)
+4. Edge cases (secondary actions)
+```
+
+**File Structure**:
+
+```
+tests/
+├── [feature]/
+│   ├── happy-path.spec.ts    (primary flow)
+│   ├── validation.spec.ts    (form errors)
+│   └── edge-cases.spec.ts    (secondary actions)
+└── e2e/
+    └── [feature]-flow.spec.ts (complete journey)
+```
+
+**Example: Happy Path Test**:
 
 ```typescript
+// tests/auth/login-happy-path.spec.ts
+import { test, expect } from "@playwright/test";
+
+test.describe("Login - Happy Path", () => {
+  test("user can login with valid credentials", async ({ page }) => {
+    await page.goto("[discovered URL]");
+    await page
+      .getByRole("textbox", { name: /email/i })
+      .fill("user@example.com");
+    await page
+      .getByRole("textbox", { name: /password/i })
+      .fill("SecurePass123");
+    await page.getByRole("button", { name: /sign in/i }).click();
+    await expect(page).toHaveURL(/dashboard/);
+  });
+});
+```
+
+**Example: Error Case**:
+
+```typescript
+// tests/auth/login-validation.spec.ts
+import { test, expect } from "@playwright/test";
+
+test.describe("Login - Validation", () => {
+  test("shows error for invalid email format", async ({ page }) => {
+    await page.goto("[discovered URL]");
+    await page.getByRole("textbox", { name: /email/i }).fill("invalid");
+    await page.getByRole("button", { name: /sign in/i }).click();
+    await expect(page.getByRole("alert")).toContainText(/invalid email/i);
+  });
+
+  test("shows error for empty required fields", async ({ page }) => {
+    await page.goto("[discovered URL]");
+    await page.getByRole("button", { name: /sign in/i }).click();
+    await expect(page.getByRole("alert")).toContainText(/required/i);
+  });
+});
+```
+
+**Configuration Generation**:
+
+```typescript
+// playwright.config.ts
 import { defineConfig, devices } from "@playwright/test";
-import path from "path";
-import fs from "fs";
 
-// Auto-detect project mode
-const hasStaticFiles =
-  fs.existsSync("public") ||
-  fs.existsSync("dist") ||
-  fs.existsSync("build") ||
-  fs.existsSync("demo-app/public");
-const isStaticMode = hasStaticFiles;
-
+// Generated based on project type detected in PHASE 1
 export default defineConfig({
   testDir: "./tests",
   fullyParallel: true,
-  forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
 
-  // FAIL-FAST CONFIGURATION - Systematic issue detection
-  maxFailures: process.env.CI ? 3 : undefined, // No limit in dev to detect systematic issues
-
-  // OPTIMIZED TIMEOUTS - Quick feedback
   timeout: 10 * 1000,
-  expect: {
-    timeout: 3 * 1000,
-  },
+  expect: { timeout: 3 * 1000 },
 
-  // ENHANCED REPORTING - Real-time progress
   reporter: [
-    ["line"], // Real-time progress
-    [
-      "html",
-      {
-        outputFolder: "playwright-report",
-        open: "on-failure",
-      },
-    ],
-    [
-      "json",
-      {
-        outputFile: "test-results/results.json",
-      },
-    ],
+    ["line"],
+    ["html", { outputFolder: "playwright-report" }],
+    ["json", { outputFile: "test-results/results.json" }],
   ],
 
-  outputDir: "test-results/artifacts",
-
   use: {
-    // CONTEXT-AWARE baseURL configuration
-    baseURL: isStaticMode
-      ? `file://${path.resolve(__dirname, hasStaticFiles && fs.existsSync("demo-app/public") ? "demo-app/public" : "public")}`
-      : "http://localhost:8000",
-
-    // FAST FEEDBACK CONFIGURATION
-    actionTimeout: 3 * 1000,
-    navigationTimeout: 5 * 1000,
-
-    trace: "on-first-retry",
+    baseURL: process.env.BASE_URL || "[discovered URL]",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
   },
@@ -157,567 +273,261 @@ export default defineConfig({
     { name: "firefox", use: { ...devices["Desktop Firefox"] } },
     { name: "webkit", use: { ...devices["Desktop Safari"] } },
   ],
-
-  // CONDITIONAL webServer - only for server-based projects
-  ...(isStaticMode
-    ? {}
-    : {
-        webServer: {
-          command: "npm start",
-          url: "http://localhost:8000",
-          reuseExistingServer: !process.env.CI,
-          timeout: 120 * 1000,
-        },
-      }),
 });
 ```
 
-### Step 1.4: Create Industry-Standard Test Directory Structure
+---
 
-**Following 2025 best practices for scalable e2e testing:**
+### PHASE 4: Reality-Test Validation Loop
+
+**Goal**: Execute tests and iterate until ≥90% success rate
+
+**Validation Workflow**:
 
 ```bash
-# Create feature-based test organization
-mkdir -p tests/auth          # Authentication flows
-mkdir -p tests/e2e           # End-to-end user journeys
-mkdir -p tests/api           # API integration tests
-mkdir -p test-results        # Reports and artifacts
-```
-
-**Structure Philosophy:**
-
-- 🎯 **Feature-based**: Tests organized by functionality, not technical implementation
-- ⚛️ **Atomic principle**: Each test file focuses on single functionality
-- 📦 **Separation of concerns**: Clear separation between tests, page objects, and utilities
-- 🔄 **Scalability**: Structure grows naturally with application complexity
-
-### Step 1.5: Strategic Intelligence Framework
-
-**CRITICAL PARADIGM SHIFT**: Before MCP exploration, prepare the analysis framework to ensure intelligent, targeted discovery that grounds tests in reality, not assumptions.
-
-**Strategic Preparation Protocol:**
-
-1. **Functionality-Specific Intelligence Framework**
-
-   Based on `{FUNCTIONALITY_FOCUS}`, prepare targeted analysis criteria:
-
-   ```
-   FOR LOGIN FUNCTIONALITY:
-   - Target Elements: email/password inputs, submit buttons, remember checkboxes
-   - Success Indicators: redirects, welcome messages, dashboard access
-   - Error Patterns: invalid credentials alerts, rate limiting warnings
-   - Timing Expectations: API delays, form validation responses
-   - Security Behaviors: XSS protection, CSRF tokens, session handling
-   ```
-
-   ```
-   FOR CONTACT FUNCTIONALITY:
-   - Target Elements: name/email/message fields, submit buttons, file uploads
-   - Success Indicators: confirmation messages, email notifications
-   - Error Patterns: validation errors, file size limits, required field alerts
-   - Timing Expectations: form submission delays, file upload progress
-   - Security Behaviors: input sanitization, file type validation
-   ```
-
-2. **Reality-Based Search Criteria**
-
-   **Element Discovery Framework:**
-
-   ```
-   Priority Search Order:
-   1. getByRole("textbox", { name: /email|username/i })
-   2. getByRole("textbox", { name: /password/i })
-   3. getByRole("button", { name: /sign in|login|submit/i })
-   4. getByRole("checkbox", { name: /remember/i })
-   5. getByRole("alert") // Error containers
-   6. getByRole("link", { name: /forgot|register/i })
-   ```
-
-   **Behavior Validation Framework:**
-
-   ```
-   Expected Reality Patterns:
-   - Form fields should accept .fill() input
-   - Buttons should respond to .click()
-   - Errors should appear in role="alert" containers
-   - Success should trigger URL changes or visible content
-   - Timing should be consistent with modern web apps (200-2000ms)
-   ```
-
-3. **Application Context Intelligence**
-
-   **Technology Stack Awareness:**
-
-   ```
-   Based on Step 1.2 code analysis, prepare for:
-   - React apps: Look for client-side routing, state updates
-   - Vue apps: Expect reactive form validation, transitions
-   - Server-rendered: Anticipate full page reloads, server errors
-   - SPA: Watch for asynchronous state changes, API calls
-   ```
-
-   **Common Anti-Patterns to Avoid:**
-
-   ```
-   ❌ Assuming error messages without observing them
-   ❌ Using generic timeouts instead of realistic ones
-   ❌ Testing fantasy scenarios not supported by the app
-   ❌ Ignoring browser-specific behaviors
-   ❌ Missing rate limiting or security features
-   ```
-
-**Strategic Output:** MCP exploration will be guided by this framework to discover ACTUAL behaviors efficiently, not waste time on assumptions.
-
-**Success Criteria:** Clear search strategy prepared - MCP exploration will target specific elements and validate real behaviors rather than guessing.
-
-## PHASE 2: MCP AUTONOMOUS EXPLORATION
-
-### Step 2.1: Official MCP Exploration Command
-
-**Execute the official MCP workflow using Strategic Intelligence Framework from Step 1.5:**
-
-```bash
-# Official MCP command following playwright.dev/agents/playwright-mcp-explore-and-test
-Explore https://{TARGET_URL}
-```
-
-**MCP Execution with Strategic Context:**
-
-- Applies **Step 1.5 framework** during autonomous exploration
-- Targets elements defined in **Functionality-Specific Intelligence Framework**
-- Validates behaviors against **Reality-Based Search Criteria**
-- Focuses discovery on **Technology Stack patterns** identified in Step 1.2
-
-### Step 2.2: Evidence-Based Feature Mapping
-
-**Combine MCP discoveries with Strategic Framework:**
-
-- **MCP Results**: Elements, interactions, and behaviors discovered
-- **Step 1.5 Framework**: Targeted analysis criteria and validation patterns
-- **Step 1.2 Code Analysis**: Technology stack and architectural patterns
-
-**Industry-standard test categorization:**
-
-- `tests/auth/{feature}.spec.ts` - Authentication flows
-- `tests/e2e/{feature}.spec.ts` - Complete user journeys
-- `tests/api/{feature}.spec.ts` - API integration validation
-- `tests/{feature}/display.spec.ts` - UI elements and layout
-- `tests/{feature}/interaction.spec.ts` - User interactions
-- `tests/{feature}/validation.spec.ts` - Input validation and errors
-
-### Step 2.3: Atomic Test File Planning
-
-**Based on MCP discoveries + code analysis, plan atomic files:**
-
-```
-Example for discovered {feature}:
-→ tests/{feature}/display.spec.ts (form elements visibility)
-→ tests/{feature}/interaction.spec.ts (form submission flow)
-→ tests/{feature}/validation.spec.ts (field validation rules)
-→ tests/e2e/{feature}-journey.spec.ts (complete user flow)
-```
-
-**Each file principle:** 1 functionality = 1 file = ≤50 lines = 1 responsibility
-
-## PHASE 3: TEST GENERATION & VALIDATION
-
-### Step 3.1: Template Enforcement & Quality Gates
-
-**CRITICAL**: Prepare templates and validate requirements before test generation. Enforce modern Playwright patterns:
-
-**Template Enforcement Rules:**
-
-- ✅ ALWAYS use `.fill()` for input fields (NEVER `.type()`)
-- ✅ ALWAYS use `getByRole()` selectors (MCP-discovered)
-- ✅ ALWAYS use web-first assertions (`toBeVisible()`, `toHaveURL()`)
-- ❌ NEVER use deprecated `.type()` methods
-- ❌ NEVER use CSS selectors or XPath
-
-**Template Pattern: `tests/{feature}/{aspect}.spec.ts` or `tests/{category}/{feature}.spec.ts`**
-
-**Standard Templates for Generation:**
-
-```typescript
-// File: tests/{feature}/display.spec.ts
-import { test, expect } from "@playwright/test";
-
-test.describe("{Feature} Display Elements", () => {
-  test("should display all {feature} elements correctly", async ({ page }) => {
-    await page.goto("{TARGET_PATH}");
-
-    // Use MCP-discovered role-based selectors from Step 2.1
-    await expect(
-      page.getByRole("heading", { name: /{main_heading}/i }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("{element_type}", { name: /{element_name}/i }),
-    ).toBeVisible();
-    // Add more elements based on MCP exploration
-  });
-});
-```
-
-```typescript
-// File: tests/{feature}/interaction.spec.ts
-import { test, expect } from "@playwright/test";
-
-test.describe("{Feature} User Interactions", () => {
-  test("should handle {primary_action} successfully", async ({ page }) => {
-    await page.goto("{TARGET_PATH}");
-
-    // Use MCP-discovered interaction patterns
-    await page
-      .getByRole("{input_type}", { name: /{input_name}/i })
-      .fill("{test_data}");
-    await page.getByRole("button", { name: /{action_button}/i }).click();
-
-    // Verify expected outcome from MCP + code analysis
-    await expect(page).toHaveURL(/{success_url_pattern}/);
-  });
-});
-```
-
-```typescript
-// File: tests/{feature}/validation.spec.ts
-import { test, expect } from "@playwright/test";
-
-test.describe("{Feature} Input Validation", () => {
-  test("should show error for {error_scenario}", async ({ page }) => {
-    await page.goto("{TARGET_PATH}");
-
-    // Test validation rules discovered via MCP + code analysis
-    await page
-      .getByRole("{input_type}", { name: /{input_name}/i })
-      .fill("{invalid_data}");
-    await page.getByRole("button", { name: /{submit_button}/i }).click();
-
-    // Verify error handling patterns found in codebase
-    await expect(page.getByRole("alert")).toBeVisible();
-  });
-});
-```
-
-```typescript
-// File: tests/auth/{feature}-security.spec.ts
-import { test, expect } from "@playwright/test";
-
-test.describe("{Feature} Security Validation", () => {
-  test("should sanitize XSS input", async ({ page }) => {
-    await page.goto("{TARGET_PATH}");
-
-    const xssInput = '<script>alert("xss")</script>';
-    await page
-      .getByRole("{input_type}", { name: /{input_name}/i })
-      .fill(xssInput);
-
-    const value = await page
-      .getByRole("{input_type}", { name: /{input_name}/i })
-      .inputValue();
-    expect(value).toContain("<script>"); // Should be escaped, not executed
-  });
-});
-```
-
-```typescript
-// File: tests/e2e/{feature}-navigation.spec.ts
-import { test, expect } from "@playwright/test";
-
-test.describe("{Feature} Navigation Flow", () => {
-  test("should navigate {navigation_action}", async ({ page }) => {
-    await page.goto("{TARGET_PATH}");
-
-    // Use MCP-discovered navigation patterns + route analysis
-    await page.getByRole("link", { name: /{navigation_link}/i }).click();
-
-    await expect(page).toHaveURL("{expected_destination}");
-  });
-});
-```
-
-**Quality Gates - MANDATORY before generation:**
-
-```bash
-# Gate 1: Verify NO deprecated methods in templates
-grep -r "\.type(" tests/ --include="*.ts" && echo "❌ DEPRECATED .type() in templates" || echo "✅ Templates use modern .fill()"
-
-# Gate 2: Verify all required placeholders documented
-REQUIRED_PLACEHOLDERS=("{feature}" "{TARGET_PATH}" "{element_type}" "{input_name}")
-for placeholder in "${REQUIRED_PLACEHOLDERS[@]}"; do
-    grep -q "$placeholder" . && echo "✅ $placeholder documented" || echo "❌ Missing $placeholder"
-done
-
-# Gate 3: Verify atomic principle documented (≤50 lines)
-grep -q "≤50 lines" . && echo "✅ Atomic principle documented" || echo "❌ Missing atomic principle"
-
-# Gate 4: Verify timing expectations are realistic (prevents systematic timing failures)
-if [ -d "tests" ]; then
-    TIMING_ISSUES=$(grep -r "toBeVisible\|toHaveText" tests/ --include="*.ts" 2>/dev/null | grep -v "await.*\(fill\|click\|focus\|blur\)" | wc -l | tr -d ' ')
-    [ "$TIMING_ISSUES" -eq 0 ] && echo "✅ Realistic timing patterns" || echo "⚠️ $TIMING_ISSUES immediate assertions detected"
-fi
-```
-
-**Only proceed to Step 3.2 generation if ALL quality gates pass.**
-
-### Step 3.2: Generate Individual Test Files
-
-**1 Functionality = 1 File (≤50 lines each)**
-
-**Based on discovered functionality from Step 2.3 and using Step 3.1 templates, generate atomic test files:**
-
-**Generation Process:**
-
-1. **Extract feature name** from FUNCTIONALITY_FOCUS + MCP exploration
-2. **Map MCP discoveries** to VERIFIED reality from Step 1.5
-3. **Apply categorization** (auth/, e2e/, {feature}/, api/)
-4. **Create atomic files** based on feature complexity
-5. **Each file ≤50 lines** with single responsibility principle
-
-**Code Generation Process:**
-
-```bash
-# Step 1: Generate test files using Step 3.1 templates
-# Replace placeholders with actual discovered values:
-# {feature} → discovered feature name
-# {TARGET_PATH} → actual URL path
-# {element_type} → MCP-discovered role type
-# {input_name} → MCP-discovered input name
-
-# Step 2: Validate generated code follows templates
-grep -r "\.type(" tests/ && echo "❌ DEPRECATED .type() DETECTED - MUST FIX" || echo "✅ Modern .fill() patterns confirmed"
-
-# Step 3: Tests will be executed and validated in Step 3.3
-```
-
-### Step 3.3: Reality-Test Validation Loop
-
-**PARADIGM SHIFT**: Your job is not complete until tests work reliably. Generate, execute, analyze failures, correct, and repeat until you achieve ≥90% success rate.
-
-**Critical Workflow:**
-
-```bash
-# Step 1: Generate initial test files using reality-grounded templates
-# (Based on Step 1.5 verified behaviors, not assumptions)
-
-# Step 2: IMMEDIATE pre-validation to catch config errors (< 2s vs 120s timeout)
-echo "🔍 Pre-validating test configuration..."
-npx playwright test --list --reporter=json > test-validation.json 2>&1
-
-if grep -q '"suites":\s*\[\s*\]' test-validation.json; then
-    echo "❌ CRITICAL: No tests detected - Configuration error (detected in <2s)"
-    echo "💡 Check: file paths, baseURL, testDir settings"
+# Quick config validation (< 2s)
+npx playwright test --list --reporter=json > validation.json 2>&1
+
+if grep -q '"suites":\s*\[\s*\]' validation.json; then
+    echo "❌ Config error - no tests detected"
     exit 1
 fi
 
-echo "✅ Configuration valid - Proceeding with execution..."
-rm -f test-validation.json
+echo "✅ Config valid"
+rm validation.json
 
-# Step 3: IMMEDIATE execution with fail-fast
-npx playwright test --max-failures=1 --reporter=line
-
-# Step 3.1: Verify results.json generation
-if [ ! -f "test-results/results.json" ]; then
-    echo "⚠️ WARNING: results.json not generated - checking for reporter issues"
-    npx playwright test --reporter=json --dry-run > test-results/results.json 2>/dev/null || echo "❌ JSON reporter failed"
-fi
-
-# Step 4: Failure analysis with radical honesty
-if [ -f "test-results/results.json" ] && [ $(grep '"unexpected":' test-results/results.json | grep -o '[0-9]*' 2>/dev/null || echo "0") -gt 0 ]; then
-    echo "🚨 TESTS FAILED - ANALYZING ROOT CAUSES..."
-fi
+# Execute with fail-fast
+npx playwright test --max-failures=3 --reporter=line
 ```
 
-**Intelligent Failure Analysis Protocol:**
+**Intelligent Failure Analysis**:
 
 ```
-When tests fail, analyze with AI intelligence:
+When tests fail, analyze root causes:
 
-1. **Fantasy Assertions?**
-   - Element/text doesn't exist in reality?
-   - Fix: Replace with elements you ACTUALLY observed in Step 1.5
+1. Fantasy Assertions?
+   → Elements don't exist in reality
+   → Fix: Use elements from actual visual discovery
 
-2. **Timing Issues? (SYSTEMATIC FAILURE PATTERN)**
-   - Immediate assertions on dynamic content? (Check for toBeVisible without await interaction)
-   - Cross-browser timing inconsistencies? (Same test fails in multiple browsers)
-   - Error state timing mismatches? (Expecting error text vs actual DOM elements)
-   - Fix: Use DOM state selectors (e.g., '#element.show') instead of text content
+2. Timing Issues?
+   → Assertions fire before UI updates
+   → Fix: Add proper waits for dynamic content
 
-3. **Browser Differences?**
-   - Selector reliability issues?
-   - Fix: Use more resilient selectors from reality testing
+3. Selector Brittleness?
+   → CSS selectors break with code changes
+   → Fix: Use role-based selectors from discovery
 
-4. **Rate Limiting?**
-   - Too many rapid requests triggering limits?
-   - Fix: Add appropriate delays between tests
+4. Browser Differences?
+   → Works in Chromium, fails in Firefox
+   → Fix: Use cross-browser compatible patterns
 
-5. **Real Application Bugs?**
-   - Application actually broken?
-   - Document clearly as legitimate findings
+5. Real Application Bugs?
+   → Legitimate issues found
+   → Document: Report as findings
 ```
 
-**Auto-Correction Intelligence:**
+**Iteration Protocol**:
 
-```
-Apply intelligent corrections based on root cause:
+- Max 5 correction iterations
+- Each iteration must improve success rate
+- Target: ≥90% passing before proceeding
+- If <90% after 5 iterations → report honestly with blockers
 
-- Replace fantasy elements with real ones you verified
-- Adjust timing based on observed behavior
-- Use more resilient selectors from reality testing
-- Handle edge cases discovered during verification
-- Add rate limiting protection patterns
-
-Think like a senior engineer debugging production issues.
-```
-
-**Iteration Limits:**
-
-- Maximum 5 correction iterations
-- If <90% success after 5 iterations, report honestly with issues
-- Each iteration must show measurable improvement
-
-**Success Gate**: ≥90% test success rate before proceeding to reporting
-
-## PHASE 4: EXECUTION & REPORTING
-
-### Step 4.1: Final Test Execution
-
-**CRITICAL**: Only proceed here if Step 3.3 validation loop achieved ≥90% success rate. Execute final production-ready test suite.
-
-```bash
-# Execute final validated test suite (auto-generates HTML report via config)
-npx playwright test
-
-# Verify HTML report was generated
-[ -f "playwright-report/index.html" ] && echo "✅ HTML report generated" || echo "⚠️ HTML report missing"
-
-# Clean port conflicts and display report
-pkill -f "playwright.*show-report" 2>/dev/null || true
-npx playwright show-report playwright-report
-```
-
-### Step 4.2: Real Metrics Extraction & Truthful Reporting
-
-**CRITICAL**: Only proceed here if Step 3.3 validation loop achieved ≥90% success rate. Read ACTUAL test execution results from FINAL validated run. Never invent or project numbers.
-
-**Step 1: Extract Real Metrics**
-
-```bash
-# Extract real metrics from Playwright's official results.json
-if [ ! -f "test-results/results.json" ]; then
-    echo "❌ CRITICAL ERROR: test-results/results.json not found"
-    exit 1
-fi
-
-# Validate HTML report was generated successfully
-if [ ! -d "playwright-report" ] || [ ! -f "playwright-report/index.html" ]; then
-    echo "❌ CRITICAL ERROR: playwright-report/index.html not found"
-    exit 1
-fi
-
-# Parse actual execution data using grep with error handling
-TOTAL_EXECUTED=$(grep '"expected":' test-results/results.json | grep -o '[0-9]*' || echo "0")
-FAILED_TESTS=$(grep '"unexpected":' test-results/results.json | grep -o '[0-9]*' || echo "0")
-PASSED_TESTS=$((TOTAL_EXECUTED - FAILED_TESTS))
-
-# Safe division with zero protection
-if [ "$TOTAL_EXECUTED" -gt 0 ]; then
-    SUCCESS_RATE=$((PASSED_TESTS * 100 / TOTAL_EXECUTED))
-else
-    SUCCESS_RATE=0
-    echo "⚠️  WARNING: No tests executed - SUCCESS_RATE set to 0"
-fi
-
-# Robust test files count with directory existence check
-if [ -d "tests" ]; then
-    TEST_FILES=$(find tests/ -name "*.spec.ts" 2>/dev/null | wc -l | tr -d ' ')
-else
-    TEST_FILES=0
-    echo "⚠️  WARNING: tests/ directory not found - TEST_FILES set to 0"
-fi
-
-DURATION=$(grep -o '"duration":[0-9.]*' test-results/results.json | cut -d':' -f2 || echo "0")
-
-echo "✅ REAL METRICS EXTRACTED:"
-echo "   Total Tests Executed: $TOTAL_EXECUTED"
-echo "   Passed: $PASSED_TESTS"
-echo "   Failed: $FAILED_TESTS"
-echo "   Success Rate: $SUCCESS_RATE%"
-echo "   Test Files: $TEST_FILES"
-echo "   Duration: ${DURATION}ms"
-```
-
-**Step 2: Generate Truthful Report**
-
-Save to `.claude/reviews/{feature}-e2e-test-report.md` with REAL data:
+**Note to Memory**:
 
 ```markdown
-# E2E Test Suite Report - REAL RESULTS
+# NOTES.md
 
-## Test Execution Summary (FROM ACTUAL RESULTS.JSON)
+## Validation Results
 
-- **Total Tests Executed**: [USE $TOTAL_EXECUTED]
-- **Passed**: [USE $PASSED_TESTS]
-- **Failed**: [USE $FAILED_TESTS]
-- **Success Rate**: [USE $SUCCESS_RATE]%
-- **Duration**: [USE $DURATION]ms
+### Iteration 1
 
-## Cross-Browser Results
+- Success rate: 75% (15/20 tests)
+- Failures: 5 timing issues in modal tests
+- Fix: Added waitFor on modal visibility
+- Result: 85% success
 
-[READ ACTUAL browser breakdown from results.json]
+### Iteration 2
 
-## Files Generated
+- Success rate: 85% (17/20 tests)
+- Failures: 3 selector issues in Firefox
+- Fix: Changed CSS → getByRole()
+- Result: 95% success ✅
 
-- **Test Files**: [USE $TEST_FILES] atomic test files
-- **Directory Structure**: tests/auth/, tests/e2e/ (industry-standard)
-- **Code Quality**: Modern .fill() methods, no deprecated .type()
+### Final
 
-## Issues Detected
+- Success rate: 95% (19/20 tests)
+- Status: Exceeds 90% target
+```
 
-[LIST ACTUAL failed tests if any, never hide failures]
+---
 
-## Artifacts Available
+### PHASE 5: Honest Reporting
+
+**Goal**: Report real metrics from actual execution
+
+**Extract Real Metrics**:
+
+```bash
+# Parse results.json (never invent numbers)
+TOTAL=$(grep '"expected":' test-results/results.json | grep -o '[0-9]*' || echo "0")
+FAILED=$(grep '"unexpected":' test-results/results.json | grep -o '[0-9]*' || echo "0")
+PASSED=$((TOTAL - FAILED))
+SUCCESS_RATE=$((PASSED * 100 / TOTAL))
+```
+
+**Generate Report**:
+
+Save to `.claude/reviews/[feature]-test-report.md`:
+
+```markdown
+# E2E Test Suite Report
+
+## Real Execution Results
+
+- **Total Tests**: [ACTUAL from results.json]
+- **Passed**: [ACTUAL from results.json]
+- **Failed**: [ACTUAL from results.json]
+- **Success Rate**: [ACTUAL %]
+- **Duration**: [ACTUAL ms]
+
+## Visual Discovery Summary
+
+**Primary Flows Discovered** (from screenshots):
+
+1. [Flow 1] - Visually prominent, generated [N] tests
+2. [Flow 2] - Secondary action, generated [N] tests
+
+**Error Cases Discovered** (from visual cues):
+
+1. [Error 1] - Saw validation indicators
+2. [Error 2] - Discovered error containers
+
+**Edge Cases Discovered**:
+
+1. [Edge 1] - Found via progressive exploration
+2. [Edge 2] - Identified in secondary UI elements
+
+## Test Files Generated
+
+- [N] atomic test files
+- Structure: tests/[feature]/[aspect].spec.ts
+- Patterns: Modern Playwright (getByRole, .fill(), web-first)
+
+## Issues Found
+
+[If any test failures, list with root causes]
+[Distinguish test bugs vs application bugs]
+
+## MCP Tools Used
+
+- browser_navigate: [N] times
+- browser_take_screenshot: [N] times
+- browser_snapshot: [N] times
+- browser_console_messages: [errors found]
+
+## Artifacts
 
 - HTML Report: `npx playwright show-report`
+- Screenshots: `test-results/artifacts/`
 - JSON Results: `test-results/results.json`
-- Screenshots/Videos: `test-results/artifacts/`
+
+## Status
+
+✅ Production-ready | ⚠️ Manual review needed | ❌ Blocked
 ```
 
-**CRITICAL REPORTING REQUIREMENTS:**
+**Critical Honesty Requirements**:
 
-- **NEVER report success unless Step 3.3 validation achieved ≥90% success rate**
-- **NEVER report 100% success unless results.json confirms it**
-- **ALWAYS report actual failures and their root causes**
-- **DISTINGUISH clearly between test bugs and application bugs**
-- **PROVIDE actionable next steps for any issues found**
+- ❌ NEVER report 100% unless results.json confirms
+- ❌ NEVER hide failures
+- ✅ ALWAYS report actual metrics
+- ✅ ALWAYS distinguish test bugs from app bugs
+- ✅ ALWAYS provide next steps for issues
 
-**If validation loop failed to reach 90%:**
+---
 
-```markdown
-# VALIDATION FAILED - Tests Require Manual Review
+## Tool Usage
 
-## Validation Loop Results
+**MCP Tools**:
 
-- **Iterations Attempted**: [X/5]
-- **Final Success Rate**: [X]% (TARGET: ≥90%)
-- **Blocking Issues**: [List root causes that couldn't be auto-corrected]
-
-## Known Issues Requiring Manual Attention
-
-1. [Specific issue 1 with root cause]
-2. [Specific issue 2 with root cause]
-
-## Recommended Next Steps
-
-- [Actionable step 1]
-- [Actionable step 2]
-
-**Status**: Tests generated but not production-ready. Manual intervention required.
+```typescript
+browser_navigate(url: string)
+browser_take_screenshot() → image
+browser_snapshot() → accessibility_tree
+browser_click(element: string)
+browser_fill_form(data: object)
+browser_console_messages() → logs[]
+browser_network_requests() → requests[]
+browser_evaluate(script: string) → result
 ```
 
-## Success Criteria
+**Tool Strategy**:
 
-**Phase 1**: Environment + Code Analysis + Industry-standard directory structure + Behavioral Intelligence Gathering
-**Phase 2**: MCP Autonomous Exploration + Evidence-based feature mapping
-**Phase 3**: Atomic test generation + Reality-Test Validation Loop + Template Enforcement & Quality Gates
-**Phase 4**: Final Test Execution + Real Metrics Extraction & Truthful Reporting
+- Minimize tool calls (token efficiency)
+- Use screenshots for visual context (processed by vision)
+- Use snapshots for structure (text-based, detailed)
+- Progressive disclosure (explore deeper only when needed)
 
-**FINAL SUCCESS CRITERIA**: User can run generated tests and get reliable results that match reported metrics. No false positives. No fantasy assertions.
+**Example Tool Sequence**:
+
+```
+1. browser_navigate(url)
+2. browser_take_screenshot() → image processed by vision
+3. browser_snapshot() → accessibility tree
+4. Analyze both: "Login button prominent → priority test"
+5. browser_click(page.getByRole("button", { name: /sign in/i }))
+6. browser_take_screenshot() → modal visible
+7. Continue exploration...
+```
+
+---
+
+## Fallback Strategy
+
+**If MCP not available**:
+
+```bash
+# Detect MCP server availability
+if ! npx playwright mcp-server --version &> /dev/null 2>&1; then
+    echo "⚠️ MCP server not available"
+    echo "Fallback: Direct code analysis"
+fi
+```
+
+**Fallback Workflow** (static files only):
+
+```
+1. Read target file directly
+2. Analyze HTML/code structure
+3. Generate tests from code understanding
+4. Execute and validate
+
+Note: This is less comprehensive than visual discovery
+      but still functional for static files.
+```
+
+---
+
+## Limitations & Constraints
+
+**Known Limitations**:
+
+- Requires MCP server configured for web apps
+- Token consumption: ~1k-5k tokens per page exploration
+- Visual discovery may miss deeply nested interactions
+- Success rate: 45-95% depending on app complexity
+
+**When This Works Best**:
+
+- Web apps with clear visual hierarchy
+- Forms with validation indicators
+- Modern frameworks (React, Vue, Angular)
+- Semantic HTML with ARIA roles
+
+**When Manual Review Needed**:
+
+- Complex multi-step wizards
+- Heavy client-side routing
+- Non-standard UI patterns
+- Dynamic content without visual cues
