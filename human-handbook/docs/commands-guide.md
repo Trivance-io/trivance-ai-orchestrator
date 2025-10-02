@@ -1,5 +1,7 @@
 # Guía de Comandos Claude Code
 
+**25 comandos disponibles** (22 principales + 3 comandos de sincronización)
+
 _Comandos organizados por flujo de desarrollo y frecuencia de uso_
 
 ---

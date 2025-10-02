@@ -134,7 +134,7 @@ _If you expect to exceed the budget: **stop and ask**._
 
 ### Agent Integration
 
-- **Design Requirements**: All agents MUST follow @.claude/rules/effective-agents-guide.md
+- **Design Requirements**: All agents SHOULD follow @.claude/rules/effective-agents-guide.md for optimal context efficiency
   - System prompts at "right altitude" (clear signals, not hardcoded logic)
   - Tools with unambiguous decisiveness (human must know which tool to use)
   - Just-in-time context loading (references, not full content)
