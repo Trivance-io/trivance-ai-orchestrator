@@ -263,6 +263,70 @@ En `.claude/settings.json`:
 - Peligroso en uso interactivo
 - Solo úsalo si confías completamente en el contexto
 
+## 🔍 Análisis de Code Review
+
+### Ver Hallazgos del Bot de Revisión
+
+Después de que Claude Bot revisa tu PR en GitHub, obtén los hallazgos directamente:
+
+```bash
+# Para el PR asociado al branch actual
+gh pr view --json comments --jq '.comments[] | select(.author.login=="claude") | .body'
+
+# Para un PR específico
+gh pr view 210 --json comments --jq '.comments[] | select(.author.login=="claude") | .body'
+```
+
+### Workflow de Análisis Objetivo
+
+**1. Fetch findings** (comando arriba)
+
+**2. Análisis conversacional**
+
+```text
+Analiza estos hallazgos objetivamente considerando:
+- ¿Es técnicamente válido?
+- ¿El contexto justifica el cambio?
+- ¿El ROI de la corrección es positivo?
+
+¿Qué hallazgos debo corregir?
+```
+
+**3. Aplicar correcciones** (proceso natural con Edit/Write)
+
+**4. Commit cambios**
+
+```bash
+/git-github:commit "fix(review): resolve PR findings"
+```
+
+### Evaluación Crítica de Hallazgos
+
+No todos los hallazgos requieren acción. Evalúa cada uno:
+
+**Preguntas clave:**
+
+- ¿El hallazgo malinterpreta el contexto?
+- ¿Sugiere corrección que viola principios del proyecto?
+- ¿La complejidad de la corrección > valor agregado?
+
+**Ejemplo:** Un hallazgo sobre "violación de complexity budget" en documentación estática es técnicamente inválido - el presupuesto aplica a código ejecutable, no a líneas de markdown.
+
+### Template de Análisis
+
+```text
+ultrathink analiza estos hallazgos del code review
+
+[pegar findings]
+
+Para cada hallazgo, evalúa:
+1. Validez técnica
+2. Contexto del cambio
+3. ROI de corrección
+
+Recomienda qué corregir y qué rechazar con justificación.
+```
+
 ## 🚀 Workflow Optimization
 
 ### Validación de Contexto
@@ -386,4 +450,4 @@ Tab (activar razonamiento)
 
 ---
 
-_Última actualización: 2025-10-01 | Claude Code Pro-Tips_
+_Última actualización: 2025-10-02 | Claude Code Pro-Tips_
