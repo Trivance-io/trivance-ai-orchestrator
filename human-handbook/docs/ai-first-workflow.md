@@ -1,364 +1,492 @@
 # Workflow AI-First
 
-*Guía paso a paso para workflow completo*
-
-## 🎯 Qué aprenderás
-
-- Configurar workspace con worktrees aislados
-- Implementar features con comandos de alto valor
-- Crear PRs con review automático
-- Resolver findings iterativamente
-- Cuándo usar agentes especialistas
-- Gestión de autorización cuando sea necesaria
+_Guía completa del ecosistema PRD → SDD → GitHub_
 
 ---
 
-## 📋 Setup Inicial (OBLIGATORIO)
+## 🎯 Arquitectura del Ecosistema
 
-**⚠️ ANTES DE EMPEZAR**: Este workflow requiere worktree aislado.
+El ecosistema está diseñado en 3 capas integradas:
 
-**Desde main/develop - dos opciones:**
-
-**A) Flujo directo** (si ya sabes qué implementar):
-```bash
-# 1. Crear worktree directamente
-/worktree:create "implementar OAuth" develop     # Features
-/worktree:create "fix bug pagos" main            # Hotfixes
-
-# 2. Cambiar al worktree  
-cd ../worktree-implementar-oauth
-
-# 3. Sesión en el worktree
-/workflow:session-start
+```
+📋 PRD-cycle (Business Layer)
+   ↓ Define WHAT to build
+🏗️ SDD-cycle (Engineering Layer)
+   ↓ Define HOW to build
+🔄 git-github (Delivery Layer)
+   ↓ Tracks and delivers
 ```
 
-**B) Flujo exploración** (si necesitas análisis):
-```bash
-# 1. Analizar situación actual
-/workflow:session-start
-# → Te mostrará issues activos y te sugerirá crear worktree
+### Flujo Completo
 
-# 2. Crear worktree según recomendación
-/worktree:create "feature-name" develop
+```mermaid
+graph TD
+    A[PRD: Business Requirements] --> B[SDD: Technical Specification]
+    B --> C[SDD: Implementation Plan]
+    C --> D[SDD: Executable Tasks]
+    D --> E[SDD: Automated Implementation]
+    E --> F[GitHub: PR + Review]
+    F --> G[GitHub: Merge + Changelog]
+```
+
+---
+
+## 📦 Setup Inicial (OBLIGATORIO)
+
+### Configuración de Workspace
+
+**Desde main/develop**:
+
+```bash
+# 1. Iniciar sesión
+/utils:session-start
+
+# 2. Crear worktree aislado
+/git-github:worktree:create "feature-oauth" develop
 
 # 3. Cambiar al worktree
-cd ../worktree-feature-name  
+cd ../worktree-feature-oauth
 
-# 4. Nueva sesión en el worktree
-/workflow:session-start
+# 4. Nueva sesión en worktree
+/utils:session-start
 ```
 
-**Validación - estás listo cuando:**
-```bash
-git branch    # Muestra: * feature-name (NO main/develop)
-pwd          # Muestra: .../worktree-feature-name
-```
- 
-### **PASO 1: Implementación Inteligente**
-
-💡 **Confirmación**: Estás en tu worktree de feature (NO en main/develop, etc...)
+**Validación - estás listo cuando**:
 
 ```bash
-# 1. Comprender contexto
-/understand                    # Mapea arquitectura y patrones existentes
-
-# 2. Implementación completa (MOTOR CENTRAL)
-/implement "autenticación OAuth"  # Planning → APROBACIÓN → Implementation → Testing → Quality Gates
-
-# 3. Crear PR
-/commit    # Commit semántico con validaciones
-/pr        # Pull request automático
-```
-
-**Comandos opcionales solo si necesarios:**
-```bash
-/test      # Solo si necesitas testing adicional específico
-/review    # Solo para review independiente (redundante con /implement)
-```
-
-**🎯 Fases de `/implement`:**
-- **Planning Phase**: `tech-lead-orchestrator` analiza y planifica
-- **Authorization Phase**: Usuario aprueba plan antes de proceder
-- **Implementation Phase**: Especialistas del framework ejecutan
-- **Quality Phase**: `security-reviewer` + `performance-optimizer` validan
-- **Documentation Phase**: Actualiza docs automáticamente
-
-**Auto-delegation interna:**
-- **Multi-step features** → `tech-lead-orchestrator` (automático)
-- **Security-sensitive** → `security-reviewer` (automático)  
-- **Performance-critical** → `performance-optimizer` (automático)
-
-**Manual override disponible:**
-```bash
-/agent:tech-lead-orchestrator    # Para análisis estratégico específico
-/agent:security-reviewer        # Para auditoría de seguridad enfocada
+git branch    # Muestra: * feature-oauth (NO main/develop)
+pwd           # Muestra: .../worktree-feature-oauth
 ```
 
 ---
 
-### **PASO 2: Review Automático y Findings**
-El PR generado activa review automático en GitHub. El equipo puede realizar review manual adicional según necesidad.
-Tipos de findings:
-- SECURITY, BUG, TODO, PERFORMANCE
+## 🔄 Ciclo Completo: PRD → SDD → GitHub
 
-**Si hay findings:**
+### OPCIÓN A: Desde Requisitos de Negocio (PRD)
+
+Para features nuevas que requieren planificación de negocio:
+
 ```bash
-/review pr <number>    # Analizar findings + plan implementación
-```
-Analiza findings y genera plan organizado por prioridad: CRÍTICO → ALTO → MEDIO → BAJO
+# === FASE 1: PRD (Business Layer) ===
+/PRD-cycle:prd-new <feature_name>
+# → Brainstorming completo
+# → Crea PRD estructurado en .claude/prds/<feature>/prd.md
 
-**Findings complejos** - usar especialistas:
-- **SECURITY findings** → `security-reviewer` → `/agent:security-reviewer`
-- **PERFORMANCE issues** → `performance-optimizer` → `/agent:performance-optimizer`
-- **LEGACY code problems** → `code-archaeologist` → `/agent:code-archaeologist`
+# Optimizar PRD para SDD
+/PRD-cycle:prd-parse <feature_name>
+# → Pre-resuelve ambigüedades
+# → Genera sdd-input.md optimizado
+
+# Sincronizar a GitHub (opcional)
+/git-github:prd-sync <feature_name>
+# → Crea parent issue en GitHub
+# → Trackea progreso de negocio
+
+# === FASE 2: SDD (Engineering Layer) ===
+/SDD-cycle:specify --from-issue <issue_number>
+# O usar sdd-input.md:
+/SDD-cycle:specify "$(cat .claude/prds/<feature>/sdd-input.md)"
+# → Crea especificación técnica
+# → Genera branch automáticamente
+# → Crea spec.md
+
+/SDD-cycle:clarify
+# → Detecta ambigüedades (5 preguntas max)
+# → Actualiza spec con respuestas
+# → CRÍTICO: reduce rework 70%
+
+/SDD-cycle:plan
+# → Genera artifacts de diseño
+# → research.md, data-model.md, contracts/, quickstart.md
+
+/SDD-cycle:tasks
+# → Genera tasks.md con dependency order
+# → Marca tareas paralelas [P]
+# → Crea GitHub sub-issues si hay parent
+
+/SDD-cycle:analyze
+# → Validación cross-artifact
+# → Detección de inconsistencias
+# → Plan de coordinación
+
+/SDD-cycle:implement
+# → Ejecución automática de tasks.md
+# → Parallelization inteligente
+# → TDD enforcement
+# → Validation checkpoints
+
+# === FASE 3: GitHub Integration ===
+/git-github:commit "all changes"
+# → Commits semánticos agrupados
+
+/git-github:pr develop
+# → Security review BLOCKING
+# → Crea PR con metadata completa
+# → Returns PR URL
+```
+
+### OPCIÓN B: Desarrollo Directo (Sin PRD)
+
+Para features técnicas o bug fixes que no requieren PRD:
+
+```bash
+# === FASE 1: SDD (Engineering Layer) ===
+/utils:understand
+# → Mapea arquitectura existente
+# → Identifica patrones y convenciones
+
+/SDD-cycle:specify "Implement OAuth authentication"
+# → Crea especificación técnica directamente
+# → Branch automático + spec.md
+
+# Continuar con ciclo SDD completo
+/SDD-cycle:clarify
+/SDD-cycle:plan
+/SDD-cycle:tasks
+/SDD-cycle:analyze
+/SDD-cycle:implement
+
+# === FASE 2: GitHub Integration ===
+/git-github:commit "all changes"
+/git-github:pr develop
+```
 
 ---
 
-### **PASO 3: Resolver Issues (si existen)**
+## 🔍 Análisis y Resolución de Findings
 
-⚠️ **Importante:** Usar el mismo PR, no crear uno nuevo.
+### Después del PR
 
-**4 opciones:**
-- **A:** Ya resueltos automáticamente (solo commitear)
-- **B:** Seguir plan como guía  
-- **C:** Resolver manualmente
-- **D:** 💡 **Delegar a especialista** para issues complejos
+El PR ejecuta security review automático. Tipos de findings:
 
-**Para issues complejos** - delegar a especialista:
-- **Complex architecture** → `tech-lead-orchestrator` → `/agent:tech-lead-orchestrator`
-- **Database optimization** → `database-expert` → `/agent:database-expert`
-- **API design** → `api-architect` → `/agent:api-architect`
-- **Framework-specific** → Usar agente especializado del stack
+- **CRITICAL**: Security vulnerabilities, architectural violations
+- **HIGH**: Technical debt, missing error handling
+- **MEDIUM**: Code quality, optimization opportunities
+- **LOW**: Style improvements, documentation
 
-Siempre usar `Closes #77` en commits para trazabilidad.
-
----
-
-### **PASO 4: Push y Re-Review**
+### Workflow de Resolución
 
 ```bash
-git push     # Push directo al branch remoto
-# O usar:
-/pr          # Detecta branch existente y pushea cambios
-```
+# 1. Analizar findings y generar plan
+/git-github:issue-manager <pr_number>
+# → Análisis detallado del issue/PR
+# → Complejidad estimada
+# → Archivos afectados
+# → Próximos pasos sugeridos
 
-**Casos posibles:**
-- ✅ Todo limpio → Listo para merge (requiere aprobación manual)
-- 🔄 Nuevos findings → Repetir pasos 3-4  
-- 🚨 Issues persistentes (4-5 iteraciones) → Pedir autorización
+# 2. Resolver findings
+# Opción A: Manual
+# Opción B: Delegar a especialista (ver sección Agentes)
 
----
-
-## 🚨 Casos Especiales
-
-### **Cuándo Pedir Autorización**
-
-**Después de 4-5 iteraciones sin resolver, o cuando hay:**
-- Issues de seguridad que requieren cambios arquitectónicos
-- Bloqueos críticos de +24 horas  
-- Conflictos técnicos complejos
-- Decisiones que afectan múltiples servicios
-
-**Antes de escalar** - consultar especialistas:
-- **Technical impact** → `tech-lead-orchestrator` → `/agent:tech-lead-orchestrator`
-- **Security assessment** → `security-reviewer` → `/agent:security-reviewer`
-- **Performance implications** → `performance-optimizer` → `/agent:performance-optimizer`
-
-### **Template Simple para Autorización**
-
-**Elementos obligatorios a incluir:**
-
-```
-Asunto: Autorización requerida - PR #[NUMERO] 
-
-Contexto:
-- PR: #[NUMERO] - "[DESCRIPCIÓN]"
-- Issue crítico: #[NUMERO] [TIPO] [DESCRIPCIÓN]
-- Intentos: [NÚMERO] iteraciones sin resolver
-
-Opciones:
-A) Merge con fix temporal + issue de seguimiento
-B) Bloquear hasta implementación completa  
-C) Fix mínimo aceptando riesgo residual
-
-Impacto:
-- Opción A: [IMPACTO_TIEMPO]
-- Opción B: [IMPACTO_DELAY] 
-- Opción C: [IMPACTO_RIESGO]
-
-Recomendación: [TU_RECOMENDACIÓN]
-
-Respuesta esperada: "AUTORIZADO: Opción [A/B/C]"
-```
-
-**Nota:** Usa tu propio lenguaje y estilo. Lo importante es incluir todos los elementos.
-
-### **Respuestas Típicas y Siguientes Pasos**
-
-**Si autorizado → implementar:**
-```bash
-gh issue create --title "[FOLLOWUP] Fix completo para [DESCRIPCIÓN]"
-/commit "fix: implementar solución temporal autorizada"
+# 3. Actualizar PR
+/git-github:commit "fix: resolve security findings"
 git push
-```
 
-**Si denegado → completar:**
-```bash
-"Claude, implementa la solución completa requerida"
-# Continuar hasta resolver completamente
-```
-
-### **Después de la Autorización**
-
-1. **Confirmar recepción**
-2. **Implementar según decisión autorizada**
-3. **Documentar en PR con comentario**
-4. **Crear follow-up issues si aplica**
-
----
-
-## 🔄 Flujo Resumido
-
-```bash
-0. Crear worktree (directo o via session-start)  # Setup inicial
-1. /understand            # Mapear contexto del proyecto
-2. /implement "feature"   # MOTOR CENTRAL - Incluye testing + quality gates
-3. /pr                    # Crear PR con metadata completa
-4. [Review automático]    # Findings aparecen en GitHub
-5. /review pr <number>    # Analizar findings + plan implementación
-6. Resolver issues        # Manual o con especialistas
-7. /commit + push         # Actualizar PR
-8. Re-review             # Validación final
-```
-
-**Casos:**
-- ✅ Aprobado → Merge → `/workflow:changelog <number>` + `/worktree:cleanup <worktree-name>` 
-- 🔄 Nuevos findings → Repetir pasos 6-8
-- 🚨 Issues persistentes → Pedir autorización
-
----
-
-## ✅ Buenas Prácticas
-
-### **DO (Hacer)**
-- ✅ Usar mismo PR para todos los fixes
-- ✅ Referencias issues en commits: `Closes #77`
-- ✅ Pedir autorización por email después de 4-5 iteraciones
-- ✅ Incluir stakeholders relevantes
-- ✅ Documentar intentos técnicos
-
-### **DON'T (No Hacer)**  
-- ❌ Crear PR nuevo para resolver findings
-- ❌ Mergear issues críticos sin autorización formal
-- ❌ Pedir autorización por comentarios en PR
-- ❌ Iteraciones infinitas sin escalar
-- ❌ Commits sin referencias a issues
-
----
-
-## 🎯 Comandos Esenciales
-
-### **Por Contexto de Trabajo:**
-
-**Desde main/develop:**
-```bash
-/workflow:session-start             # Análisis + orientación
-/worktree:create "feature" develop   # Crear worktree directo
-```
-
-**Desde worktree (desarrollo activo):**
-```bash
-/pr [target-branch]              # Crear PR
-/commit "fix: Closes #X"         # Commit con referencia  
-/review pr <number>              # Analizar + plan implementación
-```
-
-**Después de merge (desde worktree):**
-```bash
-/workflow:changelog <pr_number>  # Actualizar CHANGELOG
-/worktree:cleanup <worktree>     # Eliminar worktree (regresa automáticamente a main)
-```
-
-**Desde cualquier ubicación:**
-```bash
-gh pr view [PR]                  # Ver estado
-/workflow:switch <base_branch>   # Solo si necesitas cambiar contexto manualmente
+# 4. Validar resolución
+# GitHub re-ejecuta security review automáticamente
 ```
 
 ---
 
-## 🤖 Guía Rápida de Agentes
+## 🤖 Cuándo Usar Agentes Especialistas
 
-Los agentes especialistas aceleran la resolución y mejoran la calidad. Son **opcionales** pero **recomendados** para tasks complejos.
+**📖 Referencia completa**: Ver @human-handbook/docs/agents-guide.md para los 44 agentes especializados.
 
-### **🎯 Cuándo Usar Agentes**
+Los agentes aceleran resolución de findings complejos:
 
-**Orquestadores** (para coordination):
-- `tech-lead-orchestrator`: Multi-step features, decisiones arquitectónicas, coordination compleja
-
-**Core Specialists** (para quality):
-- `security-reviewer`: Security issues, code quality, vulnerability assessment
-- `performance-optimizer`: Bottlenecks, optimization, cost analysis
-- `code-archaeologist`: Legacy code, complex codebase exploration
-
-**Framework Specialists** (para implementation):
-- `react-component-architect`, `nestjs-backend-expert`, `database-expert`, etc.
-
-### **💡 Pattern de Uso**
+### Agentes Core (Quality Gates)
 
 ```bash
-# Identificar challenge type
-"Claude, implementa OAuth con roles"
+# Security findings
+/agent:security-reviewer
+# → Auditoría completa de seguridad
+# → Detección de vulnerabilidades
 
-# 💡 Suggestion aparece automáticamente
-Challenge: IMPLEMENTATION + Security → usar tech-lead-orchestrator
+# Performance issues
+/agent:performance-engineer
+# → Optimización de bottlenecks
+# → Análisis de recursos
 
-# One-click activation
-/agent:tech-lead-orchestrator
+# Code quality
+/agent:code-quality-reviewer
+# → Review de principios universales
+# → Prevención de deuda técnica
 
-# Continuar con workflow normal
-/pr
+# Architecture integrity
+/agent:architect-reviewer
+# → Validación de patrones arquitectónicos
+# → Review de diseño
 ```
 
-**Tip**: Los agentes se integran naturalmente en el workflow. Las suggestions aparecen contextualmente - simplemente úsalas cuando aporten value.
+### Agentes de Implementación
+
+```bash
+# Backend
+/agent:backend-architect
+# → Diseño de APIs y servicios
+
+# Frontend
+/agent:frontend-developer
+# → Componentes React/Vue
+# → State management
+
+# Database
+/agent:database-optimizer
+# → Query optimization
+# → Schema design
+
+# Testing
+/agent:test-automator
+# → Test automation strategy
+# → CI/CD integration
+```
+
+**Tip**: Los agentes se usan SOLO cuando findings son complejos o requieren expertise especializado.
 
 ---
 
-## Comandos Principales
+## 🔄 Post-Merge: Cleanup y Documentación
 
-### **`/understand` - Context Mapping**
-```bash
-/understand
-```
-- Mapea arquitectura completa del proyecto
-- Identifica patrones y convenciones existentes  
-- Previene inconsistencias costosas en refactoring posterior
+Después de aprobar y mergear el PR:
 
-### **`/implement` - Implementation Engine**
 ```bash
-/implement "autenticación OAuth con roles"
-```
-- Planning automático con `tech-lead-orchestrator`
-- Implementación con especialistas del stack
-- Testing y validación integrados
-- Automatiza planning, implementación y validación
+# 1. Actualizar CHANGELOG
+/utils:changelog <pr_number>
+# → Auto-detecta PRs faltantes
+# → Actualiza CHANGELOG.md
+# → Keep a Changelog format
 
-### **`/review` - Quality Assurance**
-```bash
-/review
-```
-- Detecta issues antes de PR
-- Security, performance, code quality simultáneamente
-- Detecta issues antes de PR para reducir iteraciones
+# 2. Limpiar worktree
+/git-github:worktree:cleanup worktree-feature-oauth
+# → Validación de ownership
+# → Triple cleanup (worktree/local/remote)
+# → Regresa automáticamente a main
 
-### **`/test` - Validation Engine**
-```bash
-/test
+# 3. Actualizar documentación (si necesario)
+/utils:docs
+# → Analiza docs existentes
+# → Actualiza README, API docs, etc.
 ```
-- Validación completa automatizada
-- Auto-fix inteligente de test failures comunes
 
-### **Workflow Principal**
+---
+
+## 📊 Flujos Resumidos por Caso de Uso
+
+### Feature Nueva con PRD
+
 ```bash
-/understand → /implement → /pr
+# Business Planning
+/PRD-cycle:prd-new feature-name
+/PRD-cycle:prd-parse feature-name
+/git-github:prd-sync feature-name
+
+# Engineering Implementation
+/SDD-cycle:specify --from-issue <number>
+/SDD-cycle:clarify
+/SDD-cycle:plan
+/SDD-cycle:tasks
+/SDD-cycle:analyze
+/SDD-cycle:implement
+
+# Delivery
+/git-github:commit "all changes"
+/git-github:pr develop
+
+# Post-Merge
+/utils:changelog <pr_number>
+/git-github:worktree:cleanup <worktree>
 ```
+
+### Feature Técnica (Sin PRD)
+
+```bash
+# Engineering Direct
+/utils:understand
+/SDD-cycle:specify "feature description"
+/SDD-cycle:clarify
+/SDD-cycle:plan
+/SDD-cycle:tasks
+/SDD-cycle:analyze
+/SDD-cycle:implement
+
+# Delivery
+/git-github:commit "all changes"
+/git-github:pr develop
+
+# Post-Merge
+/utils:changelog <pr_number>
+/git-github:worktree:cleanup <worktree>
+```
+
+### Bug Fix Urgente
+
+```bash
+# Setup
+/git-github:worktree:create fix-bug main
+cd ../worktree-fix-bug
+
+# Implementation
+/utils:understand "specific problem"
+/SDD-cycle:specify "fix bug description"
+/SDD-cycle:clarify
+/SDD-cycle:plan
+/SDD-cycle:tasks
+/SDD-cycle:analyze
+/SDD-cycle:implement
+
+# Delivery
+/git-github:commit "fix: description"
+/git-github:pr main
+```
+
+---
+
+## 🎯 Comandos Esenciales por Contexto
+
+### Desde main/develop
+
+```bash
+/utils:session-start                    # Análisis + issues activos
+/git-github:worktree:create <purpose> <parent-branch>
+```
+
+### Desde worktree (desarrollo activo)
+
+```bash
+/utils:understand                       # Context mapping
+/SDD-cycle:specify "feature"            # Inicia ciclo SDD
+/SDD-cycle:clarify                      # Reduce rework 70%
+/SDD-cycle:implement                    # Motor de implementación
+/git-github:commit "message"            # Commit semántico
+/git-github:pr <target-branch>          # Crear PR
+```
+
+### Resolución de Findings
+
+```bash
+/git-github:issue-manager <number>      # Analizar findings
+/agent:security-reviewer                # Security audit
+/agent:performance-engineer             # Performance optimization
+```
+
+### Post-Merge
+
+```bash
+/utils:changelog <pr_number>            # Actualizar changelog
+/git-github:worktree:cleanup <name>     # Cleanup completo
+```
+
+---
+
+## 💡 Tips y Buenas Prácticas
+
+### DO (Hacer)
+
+- ✅ Usar `/SDD-cycle:clarify` SIEMPRE (reduce rework 70%)
+- ✅ Ejecutar security review antes de PR (`/git-github:pr` lo hace automático)
+- ✅ Mantener un PR por worktree
+- ✅ Usar commits semánticos con referencias: `fix: Closes #77`
+- ✅ Limpiar worktrees después de merge
+
+### DON'T (No Hacer)
+
+- ❌ Saltarse `/SDD-cycle:clarify` (causa rework masivo)
+- ❌ Crear múltiples PRs para una feature
+- ❌ Desarrollar en main/develop directamente
+- ❌ Mergear sin security review aprobado
+- ❌ Dejar worktrees sin cleanup
+
+### Selección de Path
+
+**¿Cuándo usar PRD-cycle?**
+
+- Features nuevas con stakeholders de negocio
+- Cambios que requieren aprobación de producto
+- Features complejas con múltiples epics
+
+**¿Cuándo ir directo a SDD-cycle?**
+
+- Bug fixes técnicos
+- Refactorings internos
+- Features puramente técnicas
+- Mejoras de performance
+
+---
+
+## 🔗 Integración con GitHub
+
+### Sincronización de Artifacts
+
+```bash
+# PRD → GitHub Issue
+/git-github:prd-sync <feature_name>
+# → Crea parent issue
+# → Trackea progreso de negocio
+
+# Epic → GitHub Issue
+/git-github:epic-sync <epic_name>
+# → Crea parent issue para epic
+# → Milestone assignment opcional
+
+# Updates → GitHub Comments
+/git-github:issue-sync <issue_number>
+# → Push local updates como comments
+# → Audit trail transparente
+```
+
+### Gestión de Issues
+
+```bash
+# Dashboard de issues activos
+/git-github:issue-manager
+# → Categorización por prioridad/age/tipo
+# → Detección de issues stale
+# → Estimación de complejidad
+
+# Análisis profundo de issue específico
+/git-github:issue-manager <issue_number>
+# → Contexto completo
+# → Archivos afectados
+# → Próximos pasos sugeridos
+```
+
+---
+
+## 📚 Referencia Rápida de Comandos
+
+### PRD-cycle (Business Layer)
+
+| Comando                | Propósito             |
+| ---------------------- | --------------------- |
+| `/PRD-cycle:prd-new`   | Crear nuevo PRD       |
+| `/PRD-cycle:prd-parse` | PRD → SDD-ready input |
+
+### SDD-cycle (Engineering Layer)
+
+| Comando                   | Propósito                         |
+| ------------------------- | --------------------------------- |
+| `/SDD-cycle:specify`      | Crear especificación técnica      |
+| `/SDD-cycle:clarify`      | Clarificar ambigüedades (CRÍTICO) |
+| `/SDD-cycle:plan`         | Generar artifacts de diseño       |
+| `/SDD-cycle:tasks`        | Generar tareas ejecutables        |
+| `/SDD-cycle:analyze`      | Validación cross-artifact         |
+| `/SDD-cycle:implement`    | Motor de implementación           |
+| `/SDD-cycle:constitution` | Actualizar constitución           |
+
+### git-github (Delivery Layer)
+
+| Comando                        | Propósito                    |
+| ------------------------------ | ---------------------------- |
+| `/git-github:worktree:create`  | Crear worktree aislado       |
+| `/git-github:worktree:cleanup` | Limpiar worktrees            |
+| `/git-github:commit`           | Commits semánticos           |
+| `/git-github:pr`               | Crear PR con security review |
+| `/git-github:switch`           | Cambio seguro de rama        |
+| `/git-github:issue-manager`    | Gestionar issues             |
+| `/git-github:prd-sync`         | Sincronizar PRD              |
+| `/git-github:epic-sync`        | Sincronizar epic             |
+| `/git-github:issue-sync`       | Sincronizar updates          |
+
+---
+
+_Última actualización: 2025-10-01 | Ecosistema PRD-SDD-GitHub_

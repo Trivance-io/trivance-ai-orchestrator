@@ -1,396 +1,402 @@
-# Guía Práctica de Comandos Claude Code
+# Guía de Comandos Claude Code
 
-_Comandos organizados por importancia y impact en productividad_
-
-## ⚡ Comandos de Alto Valor (ESENCIALES)
-
-### 🎯 `/understand` - Context Mapping
-
-```bash
-/understand
-```
-
-**Qué hace**: Analiza todo el codebase y explica arquitectura, patrones y funcionamiento completo.
-**Cuándo usarlo**: SIEMPRE antes de implementar. Primera acción en cualquier proyecto.
-**ROI**: 30 min ahorran 3+ horas de refactoring por inconsistencias.
-
-### 🚀 `/implement` - Motor de Implementación Automática
-
-```bash
-/implement "nueva feature de dashboard con notificaciones"
-```
-
-**Qué hace**: Motor central - planifica e implementa features completas con especialistas automáticos.
-**Cuándo usarlo**: Para cualquier implementación nueva. Reemplaza desarrollo manual.
-**Flujo**: Planning (tech-lead-orchestrator) → **USER AUTHORIZATION** → Coding (specialists) → Testing → Documentation
-**ROI**: Reduce 4+ horas desarrollo manual a 20-30 minutos.
-
-### 🔍 `/review` - Quality Assurance Multi-Especialista
-
-```bash
-/review
-```
-
-**Qué hace**: Análisis simultáneo de security, performance, code quality con múltiples especialistas.
-**Cuándo usarlo**: Después de cualquier implementación, ANTES de hacer PR.
-**ROI**: 5 min previenen 2+ horas de fixes post-merge.
-
-### ✅ `/test` - Validation Engine
-
-```bash
-/test
-```
-
-**Qué hace**: Ejecuta todos los tests, detecta fallos y sugiere/aplica fixes automáticos.
-**Cuándo usarlo**: Después de cambios significativos, antes de commits importantes.
-**ROI**: Debugging de horas a minutos.
+_Comandos organizados por flujo de desarrollo y frecuencia de uso_
 
 ---
 
-## 🚀 Comandos Fundamentales
+## 🚀 Inicio de Sesión
 
-### 💾 `/commit` - Commits inteligentes
-
-```bash
-/commit "descripción del cambio"
-```
-
-**Qué hace**: Analiza tus cambios y crea commits semánticos con validaciones automáticas.
-**Cuándo usarlo**: Después de completar cualquier cambio en código.
-**Ejemplo**: `commit "fix user login validation"` → genera commit con mensaje optimizado.
-
-### `/format` - Formateo consistente
+### `/utils:session-start`
 
 ```bash
-/format
+/utils:session-start
 ```
 
-**Qué hace**: Formatea todo el código siguiendo las convenciones del proyecto.
-**Cuándo usarlo**: Antes de commits o cuando el código se ve inconsistente.
+**Qué hace**: Configura workspace, muestra issues activos, valida git y sincroniza con remoto.
+
+**Cuándo**: Primera acción en cada sesión de desarrollo.
 
 ---
 
-## 🔧 Comandos de Desarrollo
+## 📦 Gestión de Worktrees
 
-### 🔄 `/refactor` - Refactoring inteligente
-
-```bash
-/refactor "mejorar performance de consultas de base de datos"
-```
-
-**Qué hace**: Reestructura código manteniendo funcionalidad, mejorando calidad.
-**Cuándo usarlo**: Cuando el código funciona pero necesita mejoras estructurales.
-
-### `/make-it-pretty` - Mejora de legibilidad
+### `/git-github:worktree:create`
 
 ```bash
-/make-it-pretty
+/git-github:worktree:create "<objetivo>" <parent-branch>
 ```
 
-**Qué hace**: Mejora legibilidad del código preservando funcionalidad exacta (naming, organización).
-**Cuándo usarlo**: Cuando el código funciona pero es difícil de leer o mantener.
+**Qué hace**: Crea worktree aislado en directorio sibling con rama nueva y upstream configurado.
 
-### `/remove-comments` - Eliminar comentarios obvios
+**Cuándo**: SIEMPRE para desarrollo - mantiene workspace principal limpio.
+
+**Ejemplos**:
 
 ```bash
-/remove-comments
+/git-github:worktree:create "implementar OAuth" main
+/git-github:worktree:create "fix bug pagos" develop
 ```
 
-**Qué hace**: Limpia comentarios redundantes preservando los que añaden valor real.
-**Cuándo usarlo**: Para limpiar código con exceso de comentarios obvios o redundantes.
+### `/git-github:worktree:cleanup`
+
+```bash
+/git-github:worktree:cleanup              # Discovery mode
+/git-github:worktree:cleanup <worktree1>  # Cleanup específico
+```
+
+**Qué hace**: Elimina worktrees con validación de ownership y cleanup triple (worktree/local/remote).
+
+**Cuándo**: Después de mergear PRs.
 
 ---
 
-## 🔍 Comandos de Análisis
+## 🎯 Ciclo PRD
 
-### 🔒 `/agent:security-reviewer` - Auditoría de seguridad
-
-```bash
-/agent:security-reviewer
-```
-
-**Qué hace**: Escanea vulnerabilidades, credenciales expuestas y problemas de seguridad.
-**Cuándo usarlo**: Antes de deployments o periódicamente en código crítico.
-
-### 🧠 `/deep` - Razonamiento profundo
+### `/PRD-cycle:prd-new`
 
 ```bash
-/deep "problema complejo o decisión arquitectónica"
+/PRD-cycle:prd-new <feature_name>
 ```
 
-**Qué hace**: Activa análisis profundo para problemas complejos y decisiones estratégicas.
-**Cuándo usarlo**: Planificación estratégica, decisiones arquitectónicas críticas, auditorías profundas.
-**Flujo**: Análisis multi-perspectiva → Investigación de causa raíz → Pensamiento sistémico → Soluciones alternativas
+**Qué hace**: Brainstorming para crear Product Requirements Document estructurado.
+
+**Cuándo**: Planificación de nueva feature desde cero.
+
+### `/PRD-cycle:prd-parse`
+
+```bash
+/PRD-cycle:prd-parse <feature_name>
+```
+
+**Qué hace**: Convierte PRD a descripción SDD-ready, pre-resuelve ambigüedades.
+
+**Cuándo**: Después de aprobar PRD, antes de SDD-cycle.
 
 ---
 
-## 🧪 Comandos de QA y Testing
+## 🏗️ Ciclo SDD
 
-### 🎭 `/agent:qa-playwright` - E2E Testing & Visual Analysis
+### `/SDD-cycle:specify`
 
 ```bash
-/agent:qa-playwright
+/SDD-cycle:specify "Create authentication system"
+/SDD-cycle:specify --from-issue 456
 ```
 
-**Qué hace**: E2E testing con herramientas MCP nativas de Playwright, detección sistemática de edge cases y reportes ejecutivos.
-**Cuándo usarlo**: Testing visual comprehensivo, validación de workflows de usuario, detección de problemas de UI ocultos.
-**Flujo**: Exploración autónoma → Detección de edge cases → Reportes ejecutivos con impacto de negocio
-**ROI**: Detecta problemas críticos de UX antes de production con análisis cuantificado.
+**Qué hace**: Crea especificación técnica desde lenguaje natural o GitHub Issue.
+
+**Cuándo**: Primera fase SDD - convierte requisitos en spec técnica.
+
+### `/SDD-cycle:clarify`
+
+```bash
+/SDD-cycle:clarify
+```
+
+**Qué hace**: Detecta ambigüedades en spec, hace hasta 5 preguntas targeted.
+
+**Cuándo**: **ANTES** de `/SDD-cycle:plan` - reduce rework 70%.
+
+### `/SDD-cycle:plan`
+
+```bash
+/SDD-cycle:plan
+```
+
+**Qué hace**: Genera artifacts de diseño (research.md, data-model.md, contracts/, quickstart.md).
+
+**Cuándo**: Después de spec clarificada, antes de tasks.
+
+### `/SDD-cycle:tasks`
+
+```bash
+/SDD-cycle:tasks
+```
+
+**Qué hace**: Genera tasks.md dependency-ordered con markers [P] y GitHub sub-issues.
+
+**Cuándo**: Después de plan, antes de implement.
+
+### `/SDD-cycle:analyze`
+
+```bash
+/SDD-cycle:analyze
+```
+
+**Qué hace**: Análisis cross-artifact de consistency y quality, genera coordination plan.
+
+**Cuándo**: Después de tasks, validación pre-implementación.
+
+### `/SDD-cycle:implement`
+
+```bash
+/SDD-cycle:implement
+```
+
+**Qué hace**: Ejecuta tasks.md con parallelization, specialized agents y TDD enforcement.
+
+**Cuándo**: Motor central de implementación.
+
+### `/SDD-cycle:constitution`
+
+```bash
+/SDD-cycle:constitution
+```
+
+**Qué hace**: Crea/actualiza constitución del proyecto.
+
+**Cuándo**: Setup inicial o actualización de principios fundamentales.
+
+**⚠️ RESTRICCIÓN**: NO EJECUTAR sin autorización directa del usuario.
 
 ---
 
-## 📄 Comandos de Documentación
+## 🔄 Git & GitHub
 
-### 📚 `/docs` - Gestión de documentación
+### `/git-github:commit`
 
 ```bash
-/docs
+/git-github:commit "descripción"
+/git-github:commit "all changes"
 ```
 
-**Qué hace**: Analiza y actualiza TODA la documentación del proyecto automáticamente (README, CHANGELOG, docs/\*).
-**Cuándo usarlo**: Después de features, cambios importantes, para mantener documentación actualizada.
-**Flujo**: Analiza conversación → Lee documentación existente → Identifica cambios → Actualiza sistemáticamente
+**Qué hace**: Commits semánticos con grouping automático por categoría.
 
----
+**Cuándo**: Después de completar cambios.
 
-## 🗂️ Comandos de Workflow
-
-### 🔄 `/workflow:switch` - Cambio seguro de rama validando PR
+### `/git-github:pr`
 
 ```bash
-/workflow:switch <target_branch>
+/git-github:pr <target_branch>
+```
+
+**Qué hace**: Crea PR con security review BLOCKING, push seguro y metadata completa.
+
+**Cuándo**: Para crear PRs con estándares de calidad.
+
+**ROI**: Security review integrado previene vulnerabilidades.
+
+### `/git-github:switch`
+
+```bash
+/git-github:switch <target_branch>
 ```
 
 **Qué hace**: Valida PR mergeado, cambia a rama objetivo y limpia workspace temporal.
-**Cuándo usarlo**: Al finalizar PRs mergeados para cambiar a main/develop con cleanup completo.
-**Flujo**: Bloquea si PR no mergeado → Switch seguro → Limpieza
 
-### 📝 `/workflow:changelog` - Actualización inteligente de changelog
+**Cuándo**: Al finalizar PRs mergeados.
 
-```bash
-/workflow:changelog <pr_number>         # Single PR
-/workflow:changelog <pr1,pr2,pr3>       # Multiple PRs
-```
-
-**Qué hace**: Actualiza CHANGELOG.md con PRs mergeados, detecta duplicados automáticamente.
-**Cuándo usarlo**: Después de merge para documentar cambios en proyecto.
-**Flujo**: Valida PRs mergeados → Detecta duplicados → Actualización atómica con backup
-
-### `/workflow:session-start` - Iniciar sesión documentada
+### `/git-github:issue-manager`
 
 ```bash
-/workflow:session-start
+/git-github:issue-manager              # Dashboard de issues activos
+/git-github:issue-manager <number>     # Análisis profundo
 ```
 
-**Qué hace**: Inicia sesión de código documentada con objetivos claros y tracking.
-**Cuándo usarlo**: Al comenzar trabajo significativo para mantener continuidad.
+**Qué hace**: Dashboard inteligente o análisis detallado con complejidad, prioridad y próximos pasos.
+
+**Cuándo**: Visión de workload o análisis pre-implementación.
+
+### Sync a GitHub
+
+Comandos para sincronizar artifacts locales a GitHub:
+
+#### `/git-github:epic-sync`
+
+```bash
+/git-github:epic-sync <epic_name>
+/git-github:epic-sync <epic_name> --milestone <number>
+```
+
+Push epic como parent issue con optional milestone.
+
+#### `/git-github:prd-sync`
+
+```bash
+/git-github:prd-sync <feature_name>
+/git-github:prd-sync <feature_name> --milestone <number>
+```
+
+Push PRD como parent issue con optional milestone.
+
+#### `/git-github:issue-sync`
+
+```bash
+/git-github:issue-sync <issue_number>
+```
+
+Push local updates como GitHub issue comments para audit trail.
 
 ---
 
-## 📋 Gestión de TODOs
+## 🛠️ Utilidades
 
-### `/todos:create` - Crear TODOs contextuales
-
-```bash
-/todos:create
-```
-
-**Qué hace**: Convierte hallazgos de análisis en TODOs específicos en el código.
-**Cuándo usarlo**: Después de security-scan, review o cuando encuentras issues que no puedes arreglar inmediatamente.
-
-### `/todos:find` - Buscar TODOs existentes
+### `/utils:understand`
 
 ```bash
-/todos:find
+/utils:understand
+/utils:understand "specific area"
 ```
 
-**Qué hace**: Escanea y categoriza todos los TODOs/FIXMEs del proyecto.
-**Cuándo usarlo**: Para auditoría de deuda técnica o planificación de sprints.
+**Qué hace**: Análisis comprehensivo de arquitectura, patrones y dependencies.
 
-### `/todos:fix` - Resolver TODOs
+**Cuándo**: SIEMPRE antes de implementar feature compleja.
+
+**ROI**: 30 min ahorran 3+ horas de refactoring.
+
+### `/utils:three-experts`
 
 ```bash
-/todos:fix
+/utils:three-experts <goal>
 ```
 
-**Qué hace**: Encuentra y resuelve TODOs existentes de forma sistemática.
-**Cuándo usarlo**: Cuando quieres limpiar deuda técnica acumulada.
+**Qué hace**: Panel de 3 expertos (backend/frontend/security) genera plan consensuado.
 
-### `/todos:to-issues` - TODOs a issues GitHub
+**Cuándo**: Features complejas que requieren múltiples perspectivas.
+
+### `/utils:docs`
 
 ```bash
-/todos:to-issues
+/utils:docs                 # Analizar toda la docs
+/utils:docs README API      # Focus específico
 ```
 
-**Qué hace**: Escanea TODOs en código y crea issues profesionales en GitHub automáticamente.
-**Cuándo usarlo**: Para convertir deuda técnica en trabajo trackeable y organizado.
+**Qué hace**: Analiza y actualiza documentación usando specialist agents.
+
+**Cuándo**: Después de features o cambios importantes.
+
+### `/utils:polish`
+
+```bash
+/utils:polish <file_paths>
+```
+
+**Qué hace**: Polishing meticuloso de archivos AI-generated.
+
+**Cuándo**: Refinar contenido generado por AI.
+
+**⚠️ CRÍTICO**: Preserva 100% funcionalidad mientras mejora calidad.
+
+### `/utils:deep-research`
+
+```bash
+/utils:deep-research "<investigation topic>"
+```
+
+**Qué hace**: Professional audit con metodología sistemática y multi-source validation.
+
+**Cuándo**: Investigaciones complejas, due diligence, market research.
+
+**Protocolo**: Minimum 3 independent sources, anti-hallucination rules.
+
+### `/utils:changelog`
+
+```bash
+/utils:changelog                    # Auto-detectar PRs faltantes
+/utils:changelog <pr_number>        # Single PR
+/utils:changelog <pr1,pr2,pr3>     # Multiple PRs
+```
+
+**Qué hace**: Actualiza CHANGELOG.md con PRs mergeados (Keep a Changelog format), detecta duplicados.
+
+**Cuándo**: Después de merge para documentar cambios.
 
 ---
 
-## 🧹 Comandos de Mantenimiento
+## 🎯 Workflows Típicos
 
-### 🧽 `/cleanproject` - Limpieza integral
+### Feature Nueva (AI-First)
 
 ```bash
-/cleanproject
+# SETUP
+/utils:session-start
+/git-github:worktree:create feature-name develop
+cd ../worktree-feature-name
+claude /utils:session-start
+
+# CICLO SDD
+/SDD-cycle:specify "nueva feature"
+/SDD-cycle:clarify                  # CRÍTICO - reduce rework 70%
+/SDD-cycle:plan
+/SDD-cycle:tasks
+/SDD-cycle:analyze
+/SDD-cycle:implement
+
+# CALIDAD Y PR
+/git-github:commit "all changes"
+/git-github:pr develop
+# Merge + /utils:changelog
+/git-github:worktree:cleanup worktree-feature-name
 ```
 
-**Qué hace**: Limpia dead code, optimiza imports, remueve archivos innecesarios.
-**Cuándo usarlo**: Antes de releases o periódicamente para mantener el proyecto limpio.
+**⚡ Tiempo**: 30-60 min (vs 4-8h manual)
 
----
-
-## 🔗 Comandos GitHub
-
-### 🔄 `/pr` - Crear pull requests
+### Feature desde PRD
 
 ```bash
-/pr [target-branch]
-```
-
-**Qué hace**: Crea PRs con validación automática de branch, push seguro y metadata completa.
-**Cuándo usarlo**: Para crear PRs que faciliten review y mantengan estándares de calidad.
-**Flujo**: Valida target branch → **SECURITY REVIEW** → Pre-fetch remoto → Crea branch temporal → Push seguro → PR con metadata
-
-### 🎯 `Usando /review con PRs` - Smart PR Review & Implementation Plan
-
-```bash
-# Usar comando /review existente para PRs
-/review
-```
-
-**Qué hace**: El comando /review incluye análisis de PRs con especialistas AI y genera plan técnico detallado.
-**Cuándo usarlo**: Para revisar código y PRs obteniendo plan priorizado de mejoras.
-
-### `/issue-manager` - Gestionar y analizar issues de GitHub
-
-```bash
-/issue-manager                 # Resumen de issues activos asignados
-/issue-manager <issue_number>  # Análisis profundo de issue específico
-```
-
-**Qué hace**: Proporciona resumen inteligente de tus issues activos o análisis detallado de un issue individual con contexto, complejidad y próximos pasos.
-**Cuándo usarlo**: Para obtener visión general de workload o analizar issue específico antes de implementar.
-**Funcionalidades**: Dashboard con priorización inteligente, detección de issues stale, estimación de complejidad, archivos afectados
-
----
-
-## 🌳 Comandos Worktree
-
-### `/worktree:create` - Crear worktree aislado
-
-```bash
-/worktree:create <purpose> <parent-branch>
-```
-
-**Qué hace**: Crea worktree en directorio sibling con rama nueva y upstream remoto.
-**Cuándo usarlo**: SIEMPRE para desarrollo (features, bugs, refactoring).
-**Flujo**: Valida argumentos → Verifica parent branch → Crea worktree → Configura upstream → Guía para cambio de directorio
-
-### `/worktree:cleanup` - Limpiar worktrees
-
-```bash
-/worktree:cleanup <worktree1> [worktree2] [...]
-```
-
-**Qué hace**: Elimina worktrees específicos con validación de ownership y estado limpio.
-**Cuándo usarlo**: Después de mergear PRs o cuando worktrees ya no se necesiten.
-**Flujo**: Valida ownership → Verifica estado limpio → Confirmación → Triple cleanup (worktree/local/remote)
-
-**Estándar del equipo:**
-
-- Todo desarrollo se hace en worktrees aislados
-- Mantiene workspace principal siempre limpio
-- Permite sesiones Claude Code paralelas
-- Rollback instantáneo sin conflictos
-
----
-
-## 🎯 Flujos Típicos
-
-### **🏆 Workflow de Alto Impacto: Feature Nueva**
-
-```bash
-# SETUP (desde main/develop)
-1. /workflow:session-start               # Configurar workspace
-2. /worktree:create feature-name develop # Crear worktree aislado
-3. cd ../worktree-feature-name           # Cambiar al worktree
-
-# COMANDOS DE ALTO VALOR (el 80% del impacto)
-4. /understand                           # 🎯 Context mapping completo
-5. /implement "nueva feature"            # 🚀 Implementation engine
-6. /review                              # 🔍 Multi-specialist quality check
-7. /pr                                  # Crear PR automático
-
-# ITERACIÓN (si hay findings)
-8. /review pr <number>                  # Plan para resolver findings
-9. [Resolver según plan]                # Manual o con especialistas
-10. Merge + /workflow:changelog + cleanup
-```
-
-**⚡ Tiempo total con comandos de alto valor: 15-30 minutos** (vs 2-4 horas manual)
-
-> 📚 **Para workflow completo de PR + findings + issues:** Ver `ai-first-workflow.md`
-
-### **🏆 Workflow QA Integration: Feature con Testing**
-
-```bash
-# DEVELOPMENT (desde worktree)
-1. /understand                           # Context mapping
-2. /implement "nueva feature"            # Feature implementation
-3. /agent:qa-playwright                  # E2E testing & visual analysis
-4. /review                              # Multi-specialist review
-5. /pr                                  # PR con QA evidence
-
-# TESTING ESPECÍFICO
-6. /agent:qa-playwright localhost:3000                       # E2E testing & visual analysis
-7. /agent:qa-playwright localhost:3000 # E2E testing & visual analysis
+/PRD-cycle:prd-parse <feature_name>
+/SDD-cycle:specify --from-issue <number>
+# Continuar con workflow SDD desde clarify
 ```
 
 ### Bug Fix Urgente
 
 ```bash
-1. /worktree:create fix-bug-name main     # Worktree desde main
-2. cd ../worktree-fix-bug-name            # Cambiar al worktree
-3. claude /workflow:session-start         # Nueva sesión en worktree
-4. /understand                            # Entender el problema
-5. Arreglar el código
-6. /test                                 # Validar fix
-7. /commit "fix: descripción"            # Commit inmediato
+/git-github:worktree:create fix-bug main
+cd ../worktree-fix-bug
+claude /utils:session-start
+/utils:understand "problema"
+# Fix código
+/git-github:commit "fix: descripción"
+/git-github:pr main
 ```
 
-### Limpieza de Código
+### Análisis Workload
 
 ```bash
-1. /todos:find                  # Ver deuda técnica
-2. /todos:fix                   # Resolver pendientes
-3. /cleanproject  # Limpiar proyecto
-4. /make-it-pretty             # Mejorar legibilidad
-5. /format                     # Formatear todo
-6. /commit "chore: cleanup"    # Documentar limpieza
-```
-
-### Análisis Estratégico Completo
-
-```bash
-1. /deep "problema arquitectónico"           # Razonamiento profundo
-2. /agent:tech-lead-orchestrator             # Análisis estratégico multi-experto
-3. /understand                      # Mapear codebase
-4. /review                         # Revisar estado actual
-5. Implementar solución
-6. /docs                          # Documentar decisiones
+/git-github:issue-manager           # Dashboard
+/git-github:issue-manager <number>  # Deep dive
+/utils:understand                   # Si es necesario
 ```
 
 ---
 
 ## 💡 Tips de Uso
 
-- **Combina comandos**: Usa flujos secuenciales para mayor eficiencia
-- **Iterativo**: Los comandos recuerdan contexto entre ejecuciones
-- **Seguridad primero**: Siempre usa /agent:security-reviewer antes de production
-- **Test frecuente**: Ejecuta /test después de cambios significativos
-- **QA automation**: Usa /agent:qa-playwright para validación comprehensiva de features críticas
-- **E2E testing**: Incluye /agent:qa-playwright para detección sistemática de edge cases
-- **Documenta cambios**: Usa /docs para mantener documentación actualizada
-- **Análisis profundo**: Usa /deep para decisiones arquitectónicas críticas
-- **Gestión de deuda**: Convierte TODOs en issues con /todos:to-issues
+### Flujo Óptimo
+
+- **Siempre** iniciar con `/utils:session-start`
+- **Siempre** usar worktrees (evita branch pollution)
+- **Nunca** saltarse `/SDD-cycle:clarify` (reduce rework 70%)
+- **Siempre** dejar `/git-github:pr` ejecutar security review
+
+### Comandos Pre-Production
+
+1. `/SDD-cycle:implement` - TDD enforcement automático
+2. `/git-github:pr` - Security review blocking
+3. `/utils:changelog` - Keep a Changelog compliance
+
+### Parallel Execution
+
+- `/SDD-cycle:implement` y `/git-github:pr` ejecutan agents en paralelo automáticamente
+- Tasks marcadas `[P]` se ejecutan concurrentemente
+
+---
+
+## 🎓 Jerarquía por Frecuencia
+
+**Uso Diario** (>5x/día):
+`/utils:session-start` • `/git-github:commit` • `/SDD-cycle:implement`
+
+**Uso Regular** (1-3x/día):
+`/git-github:worktree:create` • `/SDD-cycle:specify` • `/git-github:pr` • `/utils:understand`
+
+**Uso Semanal**:
+`/SDD-cycle:clarify` • `/utils:changelog` • `/utils:docs` • `/git-github:issue-manager`
+
+**Uso Mensual/Setup**:
+`/PRD-cycle:prd-new` • `/utils:three-experts` • `/SDD-cycle:constitution` • `/utils:deep-research`
+
+---
+
+_Última actualización: 2025-10-01 | 26 comandos documentados_
