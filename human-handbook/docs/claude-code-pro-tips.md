@@ -263,68 +263,29 @@ En `.claude/settings.json`:
 - Peligroso en uso interactivo
 - Solo úsalo si confías completamente en el contexto
 
-## 🔍 Análisis de Code Review
+## 🔍 Análisis de Pull Requests
 
-### Ver Hallazgos del Bot de Revisión
-
-Después de que Claude Bot revisa tu PR en GitHub, obtén los hallazgos directamente:
+Claude Code integra naturalmente con GitHub CLI para analizar PRs:
 
 ```bash
-# Para el PR asociado al branch actual
-gh pr view --json comments --jq '.comments[] | select(.author.login=="claude") | .body'
-
-# Para un PR específico
-gh pr view 210 --json comments --jq '.comments[] | select(.author.login=="claude") | .body'
+# Análisis conversacional directo
+"Analiza el PR #210 y evalúa los hallazgos objetivamente"
+"Revisa los comentarios del PR actual y sugiere qué corregir"
 ```
 
-### Workflow de Análisis Objetivo
+**Capacidades:**
 
-**1. Fetch findings** (comando arriba)
+- Consulta estado, comentarios, checks via `gh pr view`
+- Evalúa hallazgos crítica-mente (validez técnica, contexto, ROI)
+- Aplica correcciones y commitea cambios
 
-**2. Análisis conversacional**
+**Workflow natural:**
 
 ```text
-Analiza estos hallazgos objetivamente considerando:
-- ¿Es técnicamente válido?
-- ¿El contexto justifica el cambio?
-- ¿El ROI de la corrección es positivo?
-
-¿Qué hallazgos debo corregir?
-```
-
-**3. Aplicar correcciones** (proceso natural con Edit/Write)
-
-**4. Commit cambios**
-
-```bash
-/git-github:commit "fix(review): resolve PR findings"
-```
-
-### Evaluación Crítica de Hallazgos
-
-No todos los hallazgos requieren acción. Evalúa cada uno:
-
-**Preguntas clave:**
-
-- ¿El hallazgo malinterpreta el contexto?
-- ¿Sugiere corrección que viola principios del proyecto?
-- ¿La complejidad de la corrección > valor agregado?
-
-**Ejemplo:** Un hallazgo sobre "violación de complexity budget" en documentación estática es técnicamente inválido - el presupuesto aplica a código ejecutable, no a líneas de markdown.
-
-### Template de Análisis
-
-```text
-ultrathink analiza estos hallazgos del code review
-
-[pegar findings]
-
-Para cada hallazgo, evalúa:
-1. Validez técnica
-2. Contexto del cambio
-3. ROI de corrección
-
-Recomienda qué corregir y qué rechazar con justificación.
+1. "Analiza PR #210"     → Claude usa gh para obtener datos
+2. Claude presenta evaluación crítica de hallazgos
+3. "Corrige X e Y"       → Aplica solo fixes confirmados
+4. Claude commitea con /git-github:commit
 ```
 
 ## 🚀 Workflow Optimization
