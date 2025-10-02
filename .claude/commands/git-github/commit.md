@@ -39,9 +39,10 @@ $ARGUMENTS
 **Analyze change details**:
 
 - Execute: `git diff --cached --name-only` to get staged files
-- Execute: `git diff --name-only` to get unstaged files
+- Execute: `git diff --name-only` to get unstaged modified files
+- Execute: `git ls-files --others --exclude-standard` to get untracked new files
 - Execute: `git status --short` to show change summary
-- Display summary of files to be processed
+- Display summary of files to be processed (including new, modified, and staged)
 
 ### 3. Handle Staging Strategy
 
@@ -49,9 +50,9 @@ $ARGUMENTS
 
 - Execute: `git diff --cached --quiet` to check if anything is staged
 - If nothing staged and unstaged changes exist:
-  - Show: "No files staged. Staging modified files..."
-  - Execute: `git add -u` to stage tracked modified files only
-  - Show: "✓ Staged modified files (excluding untracked)"
+  - Show: "No files staged. Staging all changes..."
+  - Execute: `git add -A` to stage all changes (modified, new, deleted)
+  - Show: "✓ Staged all changes (including new files)"
 - If files already staged, show: "✓ Using existing staged files"
 
 **Display staging status**:
@@ -142,6 +143,7 @@ For each category with files (in order: security, config, docs, test, main):
 - No AI signatures, attributions, or generated markers in commits
 - Maintains full commit ownership and authenticity
 - Preserves conventional commit message format
+- Stages ALL changes when no files are pre-staged: modified, new (untracked), and deleted
 - Automatic grouping triggers: 2+ categories with 2+ files each, or any security changes
 - Categories: config, docs, security, test, main (processed in priority order)
 - Fallback to single commit when grouping provides no benefit

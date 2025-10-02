@@ -122,13 +122,13 @@ Add more: [MCP Registry](https://github.com/modelcontextprotocol/servers)
 
 After setup, explore the **Human Handbook** at `human-handbook/docs/`:
 
-| Guide                                                                            | Purpose                               |
-| -------------------------------------------------------------------------------- | ------------------------------------- |
-| **[quickstart.md](human-handbook/docs/quickstart.md)**                           | Your first 15-minute AI-first session |
-| **[ai-first-workflow.md](human-handbook/docs/ai-first-workflow.md)**             | Complete workflow from PR to merge    |
-| **[commands-guide.md](human-handbook/docs/commands-guide.md)**                   | 30+ commands organized by impact      |
-| **[agents-guide.md](human-handbook/docs/agents-guide.md)**                       | 40+ specialized AI agents             |
-| **[ai-first-best-practices.md](human-handbook/docs/ai-first-best-practices.md)** | Advanced mastery techniques           |
+| Guide                                                                      | Purpose                               |
+| -------------------------------------------------------------------------- | ------------------------------------- |
+| **[quickstart.md](human-handbook/docs/quickstart.md)**                     | Your first 15-minute AI-first session |
+| **[ai-first-workflow.md](human-handbook/docs/ai-first-workflow.md)**       | Complete workflow from PR to merge    |
+| **[commands-guide.md](human-handbook/docs/commands-guide.md)**             | 30+ commands organized by impact      |
+| **[agents-guide.md](human-handbook/docs/agents-guide.md)**                 | 40+ specialized AI agents             |
+| **[claude-code-pro-tips.md](human-handbook/docs/claude-code-pro-tips.md)** | Claude Code power-user features       |
 
 ---
 

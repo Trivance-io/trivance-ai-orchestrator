@@ -1,373 +1,396 @@
-# Guía Práctica de Agentes Especializados
+# Guía de Agentes Especializados
 
-_Agentes organizados por importancia y casos de uso prácticos_
-
-## ⚡ Agentes de Alto Valor (ESENCIALES)
-
-### 🎯 `/agent:tech-lead-orchestrator` - Coordinación Estratégica
-
-```bash
-/agent:tech-lead-orchestrator
-```
-
-**Qué hace**: Análisis estratégico multi-paso, coordinación de equipos de especialistas y decisiones arquitectónicas complejas.
-**Cuándo usarlo**: Features complejas, decisiones arquitectónicas, coordinación de múltiples especialistas.
-**ROI**: Reduce planning de horas a minutos con análisis experto multi-perspectiva.
-
-### 🔍 `/agent:code-quality-reviewer` - Quality Assurance Integral
-
-```bash
-/agent:code-quality-reviewer
-```
-
-**Qué hace**: Revisión exhaustiva de code quality, security patterns, performance issues y best practices.
-**Cuándo usarlo**: Antes de PRs importantes, auditorías de código, validation de arquitectura.
-**ROI**: Previene bugs críticos y deuda técnica con análisis preventivo.
-
-### ⚡ `/agent:performance-optimizer` - Optimización Inteligente
-
-```bash
-/agent:performance-optimizer
-```
-
-**Qué hace**: Identifica bottlenecks, optimiza queries, reduce resource usage y mejora performance general.
-**Cuándo usarlo**: Cuando hay issues de performance, antes de production, optimización de recursos.
-**ROI**: Convierte aplicaciones lentas en experiencias rápidas con cambios quirúrgicos.
+_44 agentes organizados por dominio y frecuencia de uso_
 
 ---
 
-## 🚀 Agentes Fundamentales
+## 🏗️ Architecture & System Design
 
-### 💻 `/agent:backend-developer` - Backend Universal
+### `backend-architect`
 
-```bash
-/agent:backend-developer
-```
+Design RESTful APIs, microservice boundaries, database schemas. Reviews architecture for scalability and performance bottlenecks.
 
-**Qué hace**: Implementación backend agnóstica de framework, APIs, services y lógica de servidor.
-**Cuándo usarlo**: Desarrollo backend cuando no hay especialista específico del framework.
-**Casos**: APIs REST, microservices, integrations, business logic.
+**Cuándo**: New backend services or APIs.
 
-### 🎨 `/agent:frontend-developer` - Frontend Universal
+### `frontend-developer`
 
-```bash
-/agent:frontend-developer
-```
+Build React components, responsive layouts, client-side state management. React 19, Next.js 15, modern frontend architecture.
 
-**Qué hace**: Implementación frontend multi-stack, componentes UI y lógica de cliente.
-**Cuándo usarlo**: Desarrollo frontend agnóstico de framework, componentes reutilizables.
-**Casos**: UI components, client logic, state management genérico.
+**Cuándo**: UI components or frontend fixes.
 
-### 🗄️ `/agent:database-expert` - Arquitectura de Datos
+### `mobile-developer`
 
-```bash
-/agent:database-expert
-```
+React Native, Flutter, native mobile apps. Cross-platform development, native integrations, offline sync.
 
-**Qué hace**: Diseño de schemas, optimización de queries, migrations y estrategias de datos.
-**Cuándo usarlo**: Decisiones de base de datos, performance issues, migrations complejas.
-**Casos**: Schema design, query optimization, indexing strategies.
+**Cuándo**: Mobile features, cross-platform code, app optimization.
 
-### 🔗 `/agent:api-architect` - Diseño de APIs
+### `cloud-architect`
 
-```bash
-/agent:api-architect
-```
+AWS/Azure/GCP multi-cloud infrastructure, IaC (Terraform/OpenTofu/CDK), FinOps cost optimization, serverless, microservices.
 
-**Qué hace**: Diseña APIs REST y GraphQL con versioning, documentation y best practices.
-**Cuándo usarlo**: Nuevo diseño de API, refactoring de endpoints, standardización.
-**Casos**: API design, OpenAPI specs, GraphQL schemas, API versioning.
+**Cuándo**: Cloud architecture, cost optimization, migrations.
 
----
+### `hybrid-cloud-architect`
 
-## 🔧 Agentes de Desarrollo por Framework
+Multi-cloud solutions across AWS/Azure/GCP and private clouds (OpenStack/VMware). Hybrid connectivity, workload placement, edge computing.
 
-### React Ecosystem
+**Cuándo**: Hybrid architecture, multi-cloud strategy.
 
-```bash
-/agent:react-component-architect  # Arquitectura de componentes React
-/agent:react-nextjs-expert       # Next.js SSR/SSG applications
-/agent:react-native-expert       # Mobile con React Native
-```
+### `kubernetes-architect`
 
-### Vue Ecosystem
+Cloud-native infrastructure, GitOps workflows (ArgoCD/Flux), container orchestration. EKS/AKS/GKE, service mesh (Istio/Linkerd).
 
-```bash
-/agent:vue-component-architect   # Composition API y componentes Vue 3
-/agent:vue-nuxt-expert          # Nuxt.js applications
-/agent:vue-state-manager        # State management especializado
-```
+**Cuándo**: K8s architecture, GitOps implementation.
 
-### Backend Frameworks
+### `graphql-architect`
 
-```bash
-/agent:nestjs-backend-expert     # Node.js con NestJS
-/agent:django-backend-expert    # Python Django applications
-/agent:django-api-developer     # Django REST Framework
-/agent:rails-backend-expert     # Ruby on Rails applications
-/agent:laravel-backend-expert   # PHP Laravel applications
-```
+GraphQL federation, performance optimization, enterprise security. Scalable schemas, caching, real-time systems.
 
-### ORM/Database Specialists
+**Cuándo**: GraphQL architecture or performance.
 
-```bash
-/agent:django-orm-expert         # Django ORM optimization
-/agent:rails-activerecord-expert # ActiveRecord optimization
-/agent:laravel-eloquent-expert   # Eloquent ORM optimization
-```
+### `agent-assignment-analyzer`
 
-### API Development
+Intelligent task analysis and agent selection for parallel execution. Analyzes dependencies, generates optimal assignment strategies.
 
-```bash
-/agent:django-api-developer      # Django REST APIs
-/agent:rails-api-developer       # Rails API development
-```
+**Cuándo**: Multi-task workflows requiring optimal distribution.
 
 ---
 
-## 🔍 Agentes de Análisis y Revisión
+## 🔍 Code Review & Security
 
-### 🏛️ `/agent:code-archaeologist` - Exploración de Codebase
+### `code-quality-reviewer`
 
-```bash
-/agent:code-archaeologist
-```
+Universal code quality principles preventing technical debt. Reviews maintainability, reliability, architectural soundness.
 
-**Qué hace**: Mapea y documenta codebases complejos, legacy code analysis, architectural archaeology.
-**Cuándo usarlo**: Nuevos proyectos, legacy refactoring, onboarding en codebase complejo.
-**ROI**: Convierte meses de exploración en días de comprensión sistemática.
+**Cuándo**: Before PRs, code audits, architecture validation.
 
-### 🔒 `/agent:config-security-expert` - Seguridad de Configuración
+**Tools**: LS, Read, Grep, Glob, Bash
 
-```bash
-/agent:config-security-expert
-```
+### `architect-reviewer`
 
-**Qué hace**: Audita configuraciones, detecta vulnerabilities en configs, security hardening.
-**Cuándo usarlo**: Antes de production, auditorías de seguridad, compliance reviews.
-**Casos**: Environment configs, security policies, access controls.
+Modern architecture patterns, clean architecture, microservices, event-driven systems, DDD. Reviews system designs for integrity.
 
-### 🎯 `/agent:edge-case-detector` - Detección de Edge Cases
+**Cuándo**: Architectural decisions, system design reviews.
 
-```bash
-/agent:edge-case-detector
-```
+### `security-reviewer`
 
-**Qué hace**: Identifica casos extremos, boundary conditions y failure scenarios.
-**Cuándo usarlo**: Testing crítico, validation exhaustiva, scenarios de failure.
-**ROI**: Previene bugs silenciosos y corruption de datos con análisis preventivo.
+Security review of pending changes. Detects vulnerabilities, exposed credentials, authorization flaws, input validation issues.
 
-### 🛡️ `/agent:security-reviewer` - Security Review de Cambios
+**Cuándo**: Before merge, after critical changes, security audits.
 
-```bash
-/agent:security-reviewer
-```
+### `config-security-expert`
 
-**Qué hace**: Revisión completa de seguridad de cambios pendientes en la branch actual, enfocado en vulnerabilidades específicas.
-**Cuándo usarlo**: Antes de merge de PRs, después de cambios en código crítico, auditorías de seguridad.
-**Casos**: Security vulnerabilities, exposed credentials, authorization flaws, input validation.
-**ROI**: Detecta vulnerabilidades críticas antes de production con análisis especializado.
+Configuration security preventing production outages through vigilant config review.
+
+**Cuándo**: Before production, audits, compliance.
+
+**Tools**: LS, Read, Grep, Glob, Bash
+
+### `edge-case-detector`
+
+Production-critical edge cases causing silent failures and data corruption.
+
+**Cuándo**: Critical testing, validation, failure scenarios.
+
+**Tools**: LS, Read, Grep, Glob, Bash
 
 ---
 
-## 🧪 Agentes de QA y Testing
+## 🗄️ Database Management
 
-### 🎭 `/agent:qa-playwright` - E2E Testing & Visual Analysis
+### `database-optimizer`
 
-```bash
-/agent:qa-playwright
-```
+Performance tuning, query optimization, scalable architectures. Indexing, N+1 resolution, multi-tier caching.
 
-**Qué hace**: E2E testing con herramientas MCP nativas de Playwright, detección sistemática de edge cases y reportes ejecutivos con análisis de impacto de negocio.
-**Cuándo usarlo**: Testing visual comprehensivo, validación de workflows de usuario, detección de problemas de UI ocultos.
-**Casos**: Mobile usability issues, loading state problems, accessibility validation, cross-browser testing.
-**ROI**: Detecta problemas críticos de UX antes de production con análisis cuantificado de impacto.
+**Cuándo**: Database optimization, performance issues, scalability.
 
-### 🤖 `/agent:playwright-test-generator` - Generación Automática de Tests
+### `database-admin`
 
-```bash
-/agent:playwright-test-generator
-```
+Cloud databases, automation, reliability engineering. AWS/Azure/GCP database services, IaC, high availability.
 
-**Qué hace**: Generador AI-driven que crea test files atómicos siguiendo workflow oficial de Playwright Agent. Análisis automático de código y generación de suites e2e estándar.
-**Cuándo usarlo**: Creación rápida de test suites, automatización de testing patterns, validación de funcionalidad específica.
-**Casos**: Test generation para nuevas features, regression testing, automated test creation.
-**ROI**: Convierte horas de escritura manual de tests en minutos de generación automática.
+**Cuándo**: Database architecture, operations, reliability.
 
 ---
 
-## 🎨 Agentes de Design y UX
+## 🚀 DevOps & Deployment
 
-### 🖼️ `/agent:ui-designer` - Diseño de Interfaces
+### `deployment-engineer`
 
-```bash
-/agent:ui-designer
-```
+CI/CD pipelines, GitOps workflows, deployment automation. GitHub Actions, ArgoCD/Flux, progressive delivery, container security.
 
-**Qué hace**: Creación de interfaces, design systems, componentes visuales consistentes.
-**Cuándo usarlo**: Nuevas interfaces, redesigns, consistency de design system.
+**Cuándo**: CI/CD design, GitOps implementation.
 
-### 👥 `/agent:ux-researcher` - Investigación de Usuario
+### `devops-troubleshooter`
 
-```bash
-/agent:ux-researcher
-```
+Rapid incident response, debugging, observability. Log analysis, distributed tracing, Kubernetes debugging.
 
-**Qué hace**: Análisis de user experience, journey mapping, usability optimization.
-**Cuándo usarlo**: Product discovery, user flow optimization, usability audits.
+**Cuándo**: Debugging, incident response, troubleshooting.
 
-### 🎭 `/agent:brand-guardian` - Consistencia de Marca
+### `dx-optimizer`
 
-```bash
-/agent:brand-guardian
-```
+Developer Experience. Improves tooling, setup, workflows.
 
-**Qué hace**: Mantiene coherencia visual y tonal, brand guidelines, identity consistency.
-**Cuándo usarlo**: Brand compliance, visual consistency, tone of voice validation.
+**Cuándo**: Project setup, team feedback, development friction.
 
-### ✨ `/agent:whimsy-injector` - Elementos Delightful
+### `terraform-specialist`
 
-```bash
-/agent:whimsy-injector
-```
+Terraform/OpenTofu IaC automation, state management, infrastructure patterns. Module design, multi-cloud deployments.
 
-**Qué hace**: Añade elementos de delight, micro-interactions, personality a la interfaz.
-**Cuándo usarlo**: Después de UI funcional, para diferenciación y engagement.
-
-### 📊 `/agent:visual-storyteller` - Narrativa Visual
-
-```bash
-/agent:visual-storyteller
-```
-
-**Qué hace**: Crea infographics, data visualization, storytelling visual efectivo.
-**Cuándo usarlo**: Presentaciones, dashboards, comunicación de datos complejos.
+**Cuándo**: IaC automation, state management.
 
 ---
 
-## 🎯 Agentes Especializados
+## 📚 Documentation & Technical Writing
 
-### 📱 `/agent:mobile-developer` - Desarrollo Mobile
+### `docs-architect`
 
-```bash
-/agent:mobile-developer
-```
+Technical documentation from codebases. Analyzes architecture, design patterns, implementation for long-form technical manuals.
 
-**Qué hace**: Apps nativas iOS/Android, performance mobile, platform-specific optimization.
-**Cuándo usarlo**: Desarrollo mobile nativo, optimización mobile, features específicas de plataforma.
+**Cuándo**: System documentation, architecture guides.
 
-### 🎨 `/agent:tailwind-css-expert` - Styling con Tailwind
+### `api-documenter`
 
-```bash
-/agent:tailwind-css-expert
-```
+API documentation with OpenAPI 3.1, AI-powered tools, developer experience. Interactive docs, SDK generation, developer portals.
 
-**Qué hace**: Utility-first CSS, responsive design, design system con Tailwind.
-**Cuándo usarlo**: Styling con Tailwind, componentes responsive, design system implementation.
+**Cuándo**: API documentation, developer portals.
 
----
+### `reference-builder`
 
-## 📚 Agentes de Soporte
+Exhaustive technical references and API documentation. Parameter listings, configuration guides, searchable reference materials.
 
-### 📖 `/agent:documentation-specialist` - Documentación Técnica
+**Cuándo**: API docs, configuration references.
 
-```bash
-/agent:documentation-specialist
-```
+### `tutorial-engineer`
 
-**Qué hace**: Crea y mantiene documentación técnica, APIs docs, architectural documentation.
-**Cuándo usarlo**: Después de features importantes, API changes, onboarding documentation.
-**ROI**: Convierte conocimiento tribal en documentation searchable y maintainable.
+Step-by-step tutorials and educational content from code. Transforms complex concepts into progressive learning experiences.
+
+**Cuándo**: Onboarding guides, feature tutorials.
+
+### `mermaid-expert`
+
+Mermaid diagrams for flowcharts, sequences, ERDs, architectures. All diagram types and styling.
+
+**Cuándo**: Visual documentation, system diagrams.
 
 ---
 
-## 🎯 Flujos Típicos
+## 🚨 Incident Response & Network
 
-### **🏆 Feature Compleja Multi-Stack**
+### `incident-responder`
+
+SRE incident response. Rapid problem resolution, observability, incident management. Incident command, blameless post-mortems.
+
+**Cuándo**: Production incidents, SRE practices.
+
+### `network-engineer`
+
+Cloud networking, security architectures, performance optimization. Multi-cloud connectivity, service mesh, zero-trust networking.
+
+**Cuándo**: Network design, connectivity issues.
+
+---
+
+## ⚡ Performance & Observability
+
+### `performance-engineer`
+
+Observability, application optimization, scalable system performance. OpenTelemetry, distributed tracing, load testing.
+
+**Cuándo**: Performance optimization, observability, scalability.
+
+### `observability-engineer`
+
+Production-ready monitoring, logging, tracing. Observability strategies, SLI/SLO management, incident response workflows.
+
+**Cuándo**: Monitoring infrastructure, production reliability.
+
+### `web-search-specialist`
+
+Web research using search techniques and synthesis. Search operators, result filtering, multi-source verification.
+
+**Cuándo**: Deep research, information gathering.
+
+---
+
+## 🎨 Shadcn-UI Components
+
+### `shadcn-requirements-analyzer`
+
+Analyze UI feature requests and break down into structured shadcn component requirements. Translates design concepts into component specifications.
+
+**Cuándo**: Complex UI features requiring component analysis.
+
+### `shadcn-component-researcher`
+
+Research shadcn/ui components for implementation. Component details, examples, installation commands.
+
+**Cuándo**: UI features requiring specific shadcn components.
+
+### `shadcn-implementation-builder`
+
+Production-ready UI components using shadcn/ui with TypeScript, state management, validation.
+
+**Cuándo**: shadcn/ui implementation with TypeScript.
+
+### `shadcn-quick-helper`
+
+Rapid shadcn/ui component assistance. Installation commands and basic usage examples.
+
+**Cuándo**: Quick shadcn/ui component help.
+
+---
+
+## 🧪 Testing & Debugging
+
+### `test-automator`
+
+AI-powered test automation with modern frameworks, self-healing tests, quality engineering. Scalable testing strategies with CI/CD.
+
+**Cuándo**: Testing automation, quality assurance.
+
+### `playwright-test-generator`
+
+AI-driven test generation following Playwright Agent workflow. Atomic tests, code review, debugging, reporting.
+
+**Cuándo**: Automated Playwright test generation.
+
+### `tdd-orchestrator`
+
+TDD orchestrator. Red-green-refactor discipline, multi-agent workflow coordination, test-driven development practices.
+
+**Cuándo**: TDD implementation, governance.
+
+### `systematic-debugger`
+
+Systematic bug identification and root cause analysis using methodical debugging. Delegates implementation to sub-agents.
+
+**Cuándo**: Complex debugging requiring systematic approach.
+
+---
+
+## 🎨 User Experience & Design
+
+### `premium-ux-designer`
+
+Premium, polished user interfaces or optimize complex user experiences. Sophisticated styling, animations, premium design elements.
+
+**Cuándo**: Premium interfaces, UX optimization.
+
+### `design-review`
+
+Design review on front-end PRs or UI changes. Verifies visual consistency, accessibility compliance, user experience quality.
+
+**Cuándo**: PRs modifying UI components, styles.
+
+---
+
+## 💻 Web & Application
+
+### `typescript-pro`
+
+TypeScript with types, generics, strict type safety. Complex type systems, decorators, enterprise patterns.
+
+**Cuándo**: TypeScript architecture, type optimization.
+
+### `python-pro`
+
+Python 3.12+ with modern features, async programming, performance optimization. Production-ready practices. Tools: uv, ruff, pydantic, FastAPI.
+
+**Cuándo**: Python development, optimization.
+
+### `javascript-pro`
+
+Modern JavaScript with ES6+, async patterns, Node.js APIs. Promises, event loops, browser/Node compatibility.
+
+**Cuándo**: JavaScript optimization, async debugging.
+
+### `php-pro`
+
+Idiomatic PHP code with generators, iterators, SPL data structures, modern OOP features.
+
+**Cuándo**: High-performance PHP applications.
+
+### `ruby-pro`
+
+Idiomatic Ruby code with metaprogramming, Rails patterns, performance optimization. Ruby on Rails, gem development, testing frameworks.
+
+**Cuándo**: Ruby refactoring, optimization.
+
+---
+
+## 🎯 Workflows Típicos
+
+### Feature Completa
 
 ```bash
-1. /agent:tech-lead-orchestrator          # Análisis estratégico y planning
-2. /agent:api-architect                   # Diseño de API
-3. /agent:backend-developer               # Implementation backend
-4. /agent:react-component-architect      # Frontend components
-5. /agent:code-quality-reviewer          # Quality assurance
-6. /agent:documentation-specialist       # Documentation
+1. backend-architect               # API design
+2. frontend-developer              # UI components
+3. database-optimizer              # Schema optimization
+4. code-quality-reviewer          # Quality assurance
+5. security-reviewer              # Security review
 ```
 
-### **🔍 Code Review Profundo**
+### Code Review Profundo
 
 ```bash
-1. /agent:code-quality-reviewer          # Quality general
-2. /agent:security-reviewer              # Security review de cambios
-3. /agent:config-security-expert         # Security audit
-4. /agent:performance-optimizer          # Performance review
-5. /agent:edge-case-detector             # Edge cases analysis
+1. code-quality-reviewer          # Universal principles
+2. architect-reviewer             # Architecture integrity
+3. security-reviewer              # Security audit
+4. edge-case-detector            # Boundary testing
 ```
 
-### **🏛️ Legacy Codebase Analysis**
+### Production Readiness
 
 ```bash
-1. /agent:code-archaeologist            # Map architecture
-2. /agent:tech-lead-orchestrator        # Strategic refactoring plan
-3. /agent:performance-optimizer         # Identify bottlenecks
-4. /agent:documentation-specialist      # Document findings
+1. security-reviewer              # Security review
+2. config-security-expert         # Config hardening
+3. performance-engineer           # Performance optimization
+4. observability-engineer         # Monitoring setup
 ```
 
-### **🎨 UI/UX Enhancement**
+### Testing Completo
 
 ```bash
-1. /agent:ux-researcher                 # User experience audit
-2. /agent:ui-designer                   # Interface improvements
-3. /agent:whimsy-injector              # Delight elements
-4. /agent:brand-guardian               # Brand consistency
+1. test-automator                 # Test automation strategy
+2. playwright-test-generator      # E2E test generation
+3. tdd-orchestrator              # TDD workflow
 ```
 
-### **🧪 Visual QA Integration**
+### UI Development (Shadcn)
 
 ```bash
-1. /agent:qa-playwright                # E2E testing & visual analysis
-2. /agent:edge-case-detector           # Boundary testing
-3. /agent:performance-optimizer        # Performance validation
-4. /agent:code-quality-reviewer        # Quality gates
-```
-
-### **🚀 Production Readiness**
-
-```bash
-1. /agent:security-reviewer             # Security review completo
-2. /agent:config-security-expert        # Security hardening
-3. /agent:performance-optimizer         # Performance optimization
-4. /agent:edge-case-detector           # Failure scenarios
-5. /agent:documentation-specialist     # Production documentation
+1. shadcn-requirements-analyzer   # Component requirements
+2. shadcn-component-researcher    # Component research
+3. shadcn-implementation-builder  # Implementation
+4. premium-ux-designer           # Premium polish
 ```
 
 ---
 
-## 💡 Tips de Uso Estratégico
+## 💡 Tips de Uso
 
-- **Orquestación inteligente**: Usa `tech-lead-orchestrator` para coordinar múltiples especialistas
-- **Quality gates**: Siempre incluye `code-quality-reviewer` antes de PRs críticos
-- **Framework expertise**: Prefiere especialistas específicos (react-component-architect vs frontend-developer)
-- **Security by design**: Incluye `config-security-expert` en flows de production
-- **Performance proactivo**: Usa `performance-optimizer` durante desarrollo, no solo debugging
-- **E2E Testing**: Integra `qa-playwright` para testing visual comprehensive con reportes ejecutivos
-- **Cross-browser validation**: Combina QA specialist con edge-case detection
-- **Documentation ongoing**: Involucra `documentation-specialist` durante desarrollo, no al final
-- **Edge case thinking**: `edge-case-detector` es especialmente valioso en features críticas
-- **Design cohesion**: Combina múltiples design agents para experiences coherentes
+### Selección de Agentes
 
-### **Principios de Selección**
+- **Simple**: Agentes generales (backend-architect, frontend-developer)
+- **Complex**: Múltiples especialistas + quality reviewers
+- **Production-critical**: SIEMPRE incluir security, performance, observability
 
-- **Complejidad baja**: Usa agentes universales (backend-developer, frontend-developer)
-- **Complejidad media**: Combina universal + especialista específico
-- **Complejidad alta**: Orquestador + múltiples especialistas + quality agents
-- **Production critical**: Siempre incluye security, performance, edge-case y QA agents
-- **User-facing features**: Siempre incluye QA specialist para validation
+### Combinaciones Poderosas
 
-### **Combinaciones Poderosas**
+- `backend-architect` + `database-optimizer` = Scalable architecture
+- `code-quality-reviewer` + `security-reviewer` = Quality + Security gates
+- `test-automator` + `playwright-test-generator` = Complete testing automation
+- `shadcn-*` agents = Complete UI component implementation
 
-- `tech-lead-orchestrator` + `code-quality-reviewer` = Strategic quality
-- `performance-optimizer` + framework-specific = Optimized implementation
-- `ux-researcher` + `ui-designer` + `whimsy-injector` = Delightful experience
-- `qa-playwright` + `playwright-test-generator` = E2E testing + automated test generation
-- `code-archaeologist` + `documentation-specialist` = Knowledge transfer
+### Flujo Óptimo
+
+1. **Diseño**: Architecture/design agents
+2. **Implementación**: Development agents
+3. **Quality**: Review agents (quality, security, edge-case)
+4. **Testing**: Test automation agents
+5. **Deployment**: DevOps agents
+6. **Observability**: Performance/observability agents
+
+---
+
+_Última actualización: 2025-10-01 | 44 agentes documentados_

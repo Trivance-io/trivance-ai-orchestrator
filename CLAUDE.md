@@ -1,6 +1,6 @@
-# Trivance-AI-Orchestrator: Master configuration repo for Trivance Platform
+# Project Configuration
 
-<!-- repo: trivance-ai-orchestrator | role: master_orchestrator | scope: enterprise_ecosystem -->
+AI-first development workspace with constitutional governance framework.
 
 ## Operating Protocol
 
@@ -94,6 +94,15 @@ _If you expect to exceed the budget: **stop and ask**._
 - Module-specific design tactics for data tables, moderation, and configuration
 - CSS architecture and responsive design best practices
 
+**Effective AI Agents**: @.claude/rules/effective-agents-guide.md
+
+- Golden Rule: smallest set of high-signal tokens for desired outcome
+- System prompts: Right Altitude Principle (clear signals, flexible heuristics)
+- Tool design: decisiveness test, token efficiency, single responsibility
+- Dynamic context: just-in-time loading, progressive disclosure
+- Long-horizon strategies: compaction, note-taking, sub-agents
+- **MUST follow when creating/using agents via Task tool or sub-agent architectures**
+
 ## guidelines for code review (claude bot review)
 
 - Priority: **SECURITY**, **BUG**, **RELIABILITY**, **PERFORMANCE** with production impact.
@@ -125,6 +134,11 @@ _If you expect to exceed the budget: **stop and ask**._
 
 ### Agent Integration
 
+- **Design Requirements**: All agents SHOULD follow @.claude/rules/effective-agents-guide.md for optimal context efficiency
+  - System prompts at "right altitude" (clear signals, not hardcoded logic)
+  - Tools with unambiguous decisiveness (human must know which tool to use)
+  - Just-in-time context loading (references, not full content)
+  - Appropriate long-horizon strategy (compaction/notes/sub-agents)
 - **Contextual Suggestions**: Suggest proactively specialists based on challenge type, never mandate usage.
 - **Orchestrator Priority**: Use `tech-lead-orchestrator` for multi-step challenges and strategic coordination.
 - **Specialist Selection**: Core specialists for quality, framework specialists for implementation.
