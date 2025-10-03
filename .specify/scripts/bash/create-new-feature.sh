@@ -74,16 +74,18 @@ WORDS=$(echo "$BRANCH_NAME" | tr '-' '\n' | grep -v '^$' | head -3 | tr '\n' '-'
 BRANCH_NAME="${FEATURE_NUM}-${WORDS}"
 
 if [ "$HAS_GIT" = true ]; then
-	# Check if we're in the main repository by checking git-dir type
-	# Main repo has .git directory, worktrees have .git/worktrees/* file
-	GIT_DIR=$(git rev-parse --git-dir)
-	GIT_DIR_BASE=$(basename "$GIT_DIR")
-	IS_MAIN_REPO=false
-
-	# If git-dir basename is exactly ".git", we're in main repo
-	# Worktrees return "worktrees" or worktree name as basename
-	if [ "$GIT_DIR_BASE" = ".git" ]; then
+	# Check if we're in the main repository by checking .git type
+	# Main repo: .git is a directory
+	# Worktree: .git is a file containing gitdir reference
+	if [ -f "$REPO_ROOT/.git" ]; then
+		# Worktree: .git is a file with gitdir reference
+		IS_MAIN_REPO=false
+	elif [ -d "$REPO_ROOT/.git" ]; then
+		# Main repo: .git is a directory
 		IS_MAIN_REPO=true
+	else
+		echo "Error: Invalid git repository structure at $REPO_ROOT" >&2
+		exit 1
 	fi
 
 	if [ "$IS_MAIN_REPO" = true ]; then
@@ -113,7 +115,14 @@ mkdir -p "$FEATURE_DIR"
 
 TEMPLATE="$REPO_ROOT/.specify/templates/spec-template.md"
 SPEC_FILE="$FEATURE_DIR/spec.md"
-if [ -f "$TEMPLATE" ]; then cp "$TEMPLATE" "$SPEC_FILE"; else touch "$SPEC_FILE"; fi
+
+if [ -f "$TEMPLATE" ]; then
+	cp "$TEMPLATE" "$SPEC_FILE"
+else
+	echo "⚠️  Warning: Template not found at $TEMPLATE" >&2
+	echo "   Creating empty spec.md. Please populate manually." >&2
+	touch "$SPEC_FILE"
+fi
 
 # Set the SPECIFY_FEATURE environment variable for the current session
 export SPECIFY_FEATURE="$BRANCH_NAME"

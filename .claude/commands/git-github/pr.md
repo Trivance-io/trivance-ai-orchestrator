@@ -100,7 +100,7 @@ Ejecutar simultáneamente:
 
   ```bash
   # Si security_result contiene HIGH severity findings con confidence >= 8.0:
-  if [[ "$security_result" =~ "SEVERITY: HIGH" ]] && [[ "$security_result" =~ "CONFIDENCE: [8-9]" ]]; then
+  if [[ "$security_result" =~ SEVERITY:[[:space:]]*HIGH ]] && [[ "$security_result" =~ CONFIDENCE:[[:space:]]*[89] ]]; then
       echo "❌ Security Review BLOQUEÓ el PR: vulnerabilidades críticas encontradas"
       echo "$security_result"
       exit 1
@@ -166,9 +166,10 @@ Ejecutar simultáneamente:
       tema_central=$(echo "$messages" | tr '[:upper:]' '[:lower:]' | tr -cs '[:alnum:]' '\n' | grep -vE '^(add|fix|update|implement|the|and|or|for|to|in|of|with)$' | sort | uniq -c | sort -rn | head -1 | awk '{print $2}')
   fi
   ```
-- Generar timestamp en formato ISO 8601 UTC adaptado para branch names:
+- Generar timestamp UTC en formato branch-safe:
   ```bash
-  # Formato: YYYYMMDD-HHMMSS (compatible con nombres de branch)
+  # Formato: YYYYMMDD-HHMMSS (branch-safe, NO es ISO 8601 estándar)
+  # ISO 8601 real usa YYYY-MM-DDTHH:MM:SSZ pero los colons no son válidos en branch names
   timestamp=$(date -u +"%Y%m%d-%H%M%S")
   ```
 - Construir nombre:
