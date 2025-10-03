@@ -35,17 +35,36 @@ graph TD
 
 ### Configuración de Workspace
 
-**Desde main/develop**:
+**Opción A: Feature con SDD tracking** (recomendado):
 
 ```bash
-# 1. Iniciar sesión
+# 1. Iniciar sesión desde main/develop
+/utils:session-start
+
+# 2. Crear worktree con ciclo SDD
+/SDD-cycle:specify "implement OAuth authentication"
+# → Crea: ../feature-001-implement-oauth/
+# → Rama: 001-implement-oauth
+# → Spec: specs/001-implement-oauth/spec.md
+
+# 3. Cambiar al worktree
+cd ../feature-001-implement-oauth
+
+# 4. Nueva sesión en worktree
+/utils:session-start
+```
+
+**Opción B: Trabajo ad-hoc sin SDD** (fixes rápidos, POCs):
+
+```bash
+# 1. Iniciar sesión desde main/develop
 /utils:session-start
 
 # 2. Crear worktree aislado
-/git-github:worktree:create "feature-oauth" develop
+/git-github:worktree:create "fix-payment-bug" main
 
 # 3. Cambiar al worktree
-cd ../worktree-feature-oauth
+cd ../worktree-fix-payment-bug
 
 # 4. Nueva sesión en worktree
 /utils:session-start
@@ -54,9 +73,29 @@ cd ../worktree-feature-oauth
 **Validación - estás listo cuando**:
 
 ```bash
-git branch    # Muestra: * feature-oauth (NO main/develop)
-pwd           # Muestra: .../worktree-feature-oauth
+git branch    # Muestra rama numerada o worktree-* (NO main/develop)
+pwd           # Muestra directorio del worktree (NO repo principal)
 ```
+
+### ⚠️ Comportamiento según Contexto
+
+**Desde main/develop (repo principal)**:
+
+- `/SDD-cycle:specify "feature X"` → Crea nuevo worktree en `../feature-001-feature-x/`
+- Worktree incluye nueva rama `001-feature-x`
+- Specs creados en `../feature-001-feature-x/specs/`
+
+**Desde worktree existente**:
+
+- `/SDD-cycle:specify "sub-feature Y"` → NO crea nuevo worktree
+- Usa rama actual del worktree donde estás
+- Specs creados en directorio actual `./specs/`
+- ⚠️ Para feature independiente, regresa a main primero
+
+**Desde subdirectorio** (ej: `/src/components/`):
+
+- El script detecta automáticamente el repo root
+- Comportamiento igual que ejecutar desde root
 
 ---
 
@@ -257,10 +296,11 @@ Después de aprobar y mergear el PR:
 # → Keep a Changelog format
 
 # 2. Limpiar worktree
-/git-github:worktree:cleanup worktree-feature-oauth
+/git-github:worktree:cleanup feature-001-implement-oauth
 # → Validación de ownership
 # → Triple cleanup (worktree/local/remote)
 # → Regresa automáticamente a main
+# Nota: Funciona con cualquier worktree (SDD o ad-hoc)
 
 # 3. Actualizar documentación (si necesario)
 /utils:docs
@@ -347,7 +387,8 @@ cd ../worktree-fix-bug
 
 ```bash
 /utils:session-start                    # Análisis + issues activos
-/git-github:worktree:create <purpose> <parent-branch>
+/SDD-cycle:specify "feature"            # Crear worktree + SDD (recomendado)
+/git-github:worktree:create <purpose> <parent-branch>  # Worktree ad-hoc (opcional)
 ```
 
 ### Desde worktree (desarrollo activo)
@@ -404,12 +445,21 @@ cd ../worktree-fix-bug
 - Cambios que requieren aprobación de producto
 - Features complejas con múltiples epics
 
-**¿Cuándo ir directo a SDD-cycle?**
+**¿Cuándo usar SDD-cycle directo?**
 
 - Bug fixes técnicos
 - Refactorings internos
 - Features puramente técnicas
 - Mejoras de performance
+
+**¿Cuándo usar /git-github:worktree:create?**
+
+- Trabajo exploratorio sin SDD formal
+- Prototipos y POCs rápidos
+- Fixes urgentes sin tracking
+- Desarrollo paralelo de múltiples features
+
+**Regla de Oro**: Un worktree = una rama = un contexto aislado. **NUNCA** cambies de rama dentro de un worktree; crea nuevo worktree si necesitas trabajar en otra rama.
 
 ---
 
