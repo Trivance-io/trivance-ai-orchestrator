@@ -1,5 +1,6 @@
 ---
 description: Execute the implementation planning workflow using the plan template to generate design artifacts.
+model: claude-opus-4-1
 ---
 
 The user input to you can be provided directly by the agent or as a command argument - you **MUST** consider it before proceeding with the prompt (if not empty).
