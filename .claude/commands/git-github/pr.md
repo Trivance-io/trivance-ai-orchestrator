@@ -34,8 +34,16 @@ Crea PR usando branch actual hacia el target branch especificado.
   fi
   ```
 - Ejecutar `git fetch origin`
+- Capturar rama actual: `current_branch=$(git branch --show-current)`
 - Verificar que el branch objetivo existe: `git branch -r | grep origin/<target_branch>`
 - Si no existe, mostrar error y terminar
+- Validar que rama actual no sea igual al target:
+  ```bash
+  if [[ "$current_branch" == "$target_branch" ]]; then
+      echo "❌ Error: No puedes crear un PR de una rama hacia sí misma"
+      exit 1
+  fi
+  ```
 - Verificar divergencia:
   ```bash
   commits_behind=$(git rev-list --count HEAD..origin/$target_branch 2>/dev/null || echo "0")
@@ -76,12 +84,43 @@ Ejecutar simultáneamente:
   files_changed=$(git diff --name-only "origin/$target_branch..HEAD" | wc -l)
   ```
 - Variables preparadas para uso posterior
+- Validar que hay commits nuevos:
+  ```bash
+  if [[ "$commit_count" -eq 0 ]]; then
+      echo "❌ Error: No hay commits nuevos entre origin/$target_branch y HEAD"
+      exit 1
+  fi
+  ```
 
 **Sincronización**
 
-- Esperar completion del security review (timeout: 80s)
-- Validar resultados antes de continuar
-- Solo proceder si security review pasa o timeout occurs
+- Esperar a que el Task `security-reviewer` termine (máximo 80s)
+- Capturar resultado del security review: `security_result`
+- Evaluar resultado:
+
+  ```bash
+  # Si security_result contiene HIGH severity findings con confidence >= 0.80:
+  if [[ "$security_result" =~ ([Ss]everity|SEVERITY|Severidad|SEVERIDAD)[[:space:]]*:[[:space:]]*HIGH ]] && \
+     [[ "$security_result" =~ ([Cc]onfidence|CONFIDENCE|Confianza|CONFIANZA)[[:space:]]*:[[:space:]]*(0\.[89][0-9]*|1\.0[0-9]*) ]]; then
+      echo "❌ Security Review BLOQUEÓ el PR: vulnerabilidades críticas encontradas"
+      echo "$security_result"
+      exit 1
+  fi
+
+  # Si timeout (80s excedidos):
+  if [[ "$security_timeout" == "true" ]]; then
+      echo "⚠️ Security Review timeout - creando PR con flag SECURITY_REVIEW_TIMEOUT"
+      security_flag="SECURITY_REVIEW_TIMEOUT"
+  fi
+
+  # Si error del sistema (Task falló):
+  if [[ "$security_error" == "true" ]]; then
+      echo "❌ Security Review falló - reintenta: /pr $target_branch"
+      exit 1
+  fi
+  ```
+
+- Solo proceder si security review pasa (sin HIGH findings) o timeout occurs
 
 ### 3. Procesar PR existente
 
@@ -94,52 +133,88 @@ Ejecutar simultáneamente:
   - Si elige "2": continuar con paso 4
 - Si no existe PR o está cerrado: continuar con paso 4
 
-### 4. Detectar contexto de worktree
+### 4. Detectar tipo de rama y decidir acción
 
-- Ejecutar:
-  ```bash
-  if git worktree list --porcelain | grep -qF "worktree $(pwd)"; then
-      is_worktree="yes"
-  else
-      is_worktree="no"
-  fi
-  ```
+- Definir ramas protegidas: `PROTECTED_BRANCHES="^(main|master|develop|dev|staging|production|prod|qa|release/.+|hotfix/.+)$"`
+- Evaluar tipo de rama usando `current_branch` del paso 1: `[[ "$current_branch" =~ $PROTECTED_BRANCHES ]]`
 
-### 5. Completar análisis y crear/usar rama
+**SI es rama protegida (main, master, develop, etc.):**
 
-**SI es worktree ($is_worktree = "yes"):**
-
-- Capturar rama actual: `branch_name=$(git branch --show-current)`
-- Mostrar: "📍 Detectado worktree - usando rama existente: $branch_name"
-- Push a remoto:
-  ```bash
-  if ! git config "branch.$branch_name.remote" > /dev/null 2>&1; then
-      git push origin "$branch_name" --set-upstream
-  else
-      git push origin "$branch_name"
-  fi
-  ```
-
-**SI NO es worktree ($is_worktree = "no"):**
-
+- Mostrar: "⚠️ Rama protegida detectada: $current_branch"
+- Mostrar: "📍 Creando nueva feature branch para el PR..."
 - Usar datos del paso 2: `git_data`, `files_data`, `commit_count`, `files_changed`
-- Extraer commits: `commits=$(echo "$git_data")`
-- Extraer mensajes: `messages=$(echo "$git_data" | cut -d' ' -f2-)`
-- Detectar tipo principal: `primary_type` (feat/fix/docs/refactor/style/test/chore)
-- Analizar palabras clave: identificar sustantivos y verbos relevantes (ignorar: add, fix, update, implement)
-- Detectar tema central: palabra/concepto más frecuente → `tema_central`
-- Generar timestamp: `timestamp` formato HHMMSS
+- Validar que git_data tiene contenido:
+  ```bash
+  if [[ -z "$git_data" ]]; then
+      echo "❌ Error: No hay commits para analizar entre origin/$target_branch y HEAD"
+      exit 1
+  fi
+  ```
+- Extraer mensajes: `messages=$(echo "$git_data" | sed 's/^[^ ]* //')`
+- Detectar tipo principal usando conventional commits:
+  ```bash
+  # Extraer tipos de commits convencionales (feat, fix, docs, etc.)
+  primary_type=$(echo "$messages" | grep -Eo '^(feat|fix|docs|refactor|style|test|chore)' | sort | uniq -c | sort -rn | head -1 | awk '{print $2}')
+  # Si no se detectó tipo: usar 'feat' por defecto
+  [[ -z "$primary_type" ]] && primary_type="feat"
+  ```
+- Detectar tema central: extraer scope de conventional commits o palabra más frecuente
+  ```bash
+  # Intentar extraer scope de commits: feat(auth), fix(api), etc.
+  tema_central=$(echo "$messages" | sed -n 's/^[a-z]*(\([^)]*\)).*/\1/p' | sort | uniq -c | sort -rn | head -1 | awk '{print $2}')
+  # Si no hay scope, analizar palabras frecuentes (excluir stopwords)
+  if [[ -z "$tema_central" ]]; then
+      tema_central=$(echo "$messages" | tr '[:upper:]' '[:lower:]' | tr -cs '[:alnum:]' '\n' | grep -vE '^(add|fix|update|implement|the|and|or|for|to|in|of|with)$' | sort | uniq -c | sort -rn | head -1 | awk '{print $2}')
+  fi
+  ```
+- Generar timestamp UTC en formato branch-safe:
+  ```bash
+  # Formato: YYYYMMDD-HHMMSS (branch-safe, NO es ISO 8601 estándar)
+  # ISO 8601 real usa YYYY-MM-DDTHH:MM:SSZ pero los colons no son válidos en branch names
+  timestamp=$(date -u +"%Y%m%d-%H%M%S")
+  ```
 - Construir nombre:
   - Si tema claro: `branch_name="${tema_central}-${timestamp}"`
   - Si no tema claro: `branch_name="${primary_type}-improvements-${timestamp}"`
 - Validar: `[[ "$branch_name" =~ ^[a-zA-Z0-9_-]+$ ]] || { echo "❌ Error: Branch name inválido"; exit 1; }`
-- Ejecutar `git checkout -b "$branch_name"`
-- Ejecutar `git push origin "$branch_name" --set-upstream`
-- Si algún comando falla, mostrar error y terminar
+- Crear nueva rama con validación y rollback:
 
-### 6. Preparar contenido del PR
+  ```bash
+  # Guardar rama actual para rollback
+  original_branch="$current_branch"
 
-- Analizar tema común de commits usando variables extraídas
+  # Intentar crear nueva rama
+  if ! git checkout -b "$branch_name"; then
+      echo "❌ Error: No se pudo crear la rama $branch_name"
+      exit 1
+  fi
+
+  # Intentar push con rollback en caso de fallo
+  if ! git push origin "$branch_name" --set-upstream; then
+      echo "❌ Error: No se pudo hacer push de la rama $branch_name"
+      echo "🔄 Rollback: volviendo a $original_branch"
+      git checkout "$original_branch"
+      git branch -d "$branch_name" 2>/dev/null
+      exit 1
+  fi
+  ```
+
+**SI NO es rama protegida (feature branch):**
+
+- Mostrar: "📍 Feature branch detectada: $current_branch"
+- Mostrar: "✅ Usando rama actual para el PR"
+- Asignar: `branch_name="$current_branch"`
+- Push a remoto:
+  ```bash
+  if ! git config "branch.$current_branch.remote" > /dev/null 2>&1; then
+      git push origin "$current_branch" --set-upstream
+  else
+      git push origin "$current_branch"
+  fi
+  ```
+
+### 5. Preparar contenido del PR
+
 - Generar título:
   - Si commits tienen tema común: usar ese tema
   - Si commits diversos: crear título que unifique el propósito
@@ -148,8 +223,6 @@ Ejecutar simultáneamente:
 - Contar líneas: `echo "$files_data" | awk '{adds+=$1; dels+=$2} END {print adds, dels}'`
 - Identificar áreas afectadas: `scope_areas` (directorios del proyecto)
 - Detectar breaking changes: buscar keywords BREAKING/deprecated/removed en commits
-- Generar summary basado en tema unificado y `primary_type`
-- Generar test plan apropiado para el tipo de cambio
 - Construir body:
 
   ```bash
@@ -171,12 +244,12 @@ Ejecutar simultáneamente:
   [Auto-detected breaking commits or \"None\"]"
   ```
 
-### 7. Crear PR
+### 6. Crear PR
 
 - Ejecutar: `gh pr create --title "$pr_title" --body "$pr_body" --base "$target_branch"`
 - Capturar URL del PR del output
 
-### 8. Mostrar resultado
+### 7. Mostrar resultado
 
 - Mostrar URL del PR creado
 - Confirmar: "✅ PR creado: $branch_name → $target_branch"
