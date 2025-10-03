@@ -99,8 +99,9 @@ Ejecutar simultáneamente:
 - Evaluar resultado:
 
   ```bash
-  # Si security_result contiene HIGH severity findings con confidence >= 8.0:
-  if [[ "$security_result" =~ SEVERITY:[[:space:]]*HIGH ]] && [[ "$security_result" =~ CONFIDENCE:[[:space:]]*[89] ]]; then
+  # Si security_result contiene HIGH severity findings con confidence >= 0.80:
+  if [[ "$security_result" =~ ([Ss]everity|SEVERITY|Severidad|SEVERIDAD)[[:space:]]*:[[:space:]]*HIGH ]] && \
+     [[ "$security_result" =~ ([Cc]onfidence|CONFIDENCE|Confianza|CONFIANZA)[[:space:]]*:[[:space:]]*(0\.[89][0-9]*|1\.0[0-9]*) ]]; then
       echo "❌ Security Review BLOQUEÓ el PR: vulnerabilidades críticas encontradas"
       echo "$security_result"
       exit 1
