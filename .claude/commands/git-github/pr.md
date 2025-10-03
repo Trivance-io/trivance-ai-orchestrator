@@ -40,8 +40,16 @@ Crea PR usando branch actual hacia el target branch especificado.
 - Validar que rama actual no sea igual al target:
   ```bash
   if [[ "$current_branch" == "$target_branch" ]]; then
-      echo "❌ Error: No puedes crear un PR de una rama hacia sí misma"
-      exit 1
+      # Excepción: permitir si es rama protegida (se creará feature branch automáticamente)
+      PROTECTED_BRANCHES="^(main|master|develop|dev|staging|production|prod|qa|release/.+|hotfix/.+)$"
+      if [[ "$current_branch" =~ $PROTECTED_BRANCHES ]]; then
+          echo "⚠️ Rama protegida detectada: $current_branch (igual a target: $target_branch)"
+          echo "📍 Se creará una feature branch automáticamente en el siguiente paso..."
+      else
+          echo "❌ Error: No puedes crear un PR de una rama hacia sí misma"
+          echo "   (current: $current_branch, target: $target_branch)"
+          exit 1
+      fi
   fi
   ```
 - Verificar divergencia:
