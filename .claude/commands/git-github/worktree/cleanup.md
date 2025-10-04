@@ -154,7 +154,7 @@ For each processed target, add line to JSONL file:
 - Add entry to: `"$log_dir/worktree_operations.jsonl"`
 
 ```bash
-{"timestamp":"'`date -Iseconds`'","operation":"worktree_cleanup","target":"$target","user":"'`whoami`'","my_email":"'`git config user.email`'","worktree_removed":"$worktree_removed","local_removed":"$local_removed","local_only":true,"commit_sha":"'`git rev-parse HEAD`'"}
+{"timestamp":"`date -Iseconds`","operation":"worktree_cleanup","target":"$target","user":"`whoami`","my_email":"`git config user.email`","worktree_removed":"$worktree_removed","local_removed":"$local_removed","local_only":true,"commit_sha":"`git rev-parse HEAD`"}
 ```
 
 ## Implementation Principles

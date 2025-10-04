@@ -55,7 +55,7 @@ When executing this command with `$ARGUMENTS`, follow these steps:
 ### 4. Generate consistent names
 
 - Convert `objetivo_descripcion` to valid slug using optimized transformation:
-  - Execute `echo "$objetivo_descripcion" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g; s/--*/-/g; s/^-\|-$//g'`
+  - Execute `echo "$objetivo_descripcion" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g; s/--*/-/g; s/^-//; s/-$//'`
   - Capture result as `objetivo_slug`
 - Build `worktree_name` as: "worktree-$objetivo_slug"
 - Build `branch_name` identical to `worktree_name`
@@ -131,7 +131,7 @@ Para operación exitosa, agregar línea al archivo JSONL:
 ### Worktree Creation Log:
 
 ```bash
-{"timestamp":"'`date -Iseconds`'","operation":"worktree_create","objetivo_descripcion":"$objetivo_descripcion","parent_branch":"$parent_branch","worktree_path":"$worktree_path","branch_name":"$branch_name","local_only":true,"user":"'`whoami`'","commit_sha":"'`git rev-parse HEAD`'"}
+{"timestamp":"`date -Iseconds`","operation":"worktree_create","objetivo_descripcion":"$objetivo_descripcion","parent_branch":"$parent_branch","worktree_path":"$worktree_path","branch_name":"$branch_name","local_only":true,"user":"`whoami`","commit_sha":"`git rev-parse HEAD`"}
 ```
 
 **IMPORTANTE**:
