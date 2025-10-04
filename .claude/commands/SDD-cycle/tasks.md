@@ -77,7 +77,7 @@ The tasks.md should be immediately executable - each task must be specific enoug
 # Read spec.md to extract parent issue number
 spec_file="$FEATURE_DIR/spec.md"
 if [ -f "$spec_file" ] && grep -q "GitHub Issue #" "$spec_file"; then
-  parent_issue=$(grep "GitHub Issue #" "$spec_file" | sed 's/.*GitHub Issue #\([0-9]\+\).*/\1/')
+  parent_issue=\`grep "GitHub Issue #" "$spec_file" | sed -E 's/.*GitHub Issue #([0-9]+).*/\1/'\`
   echo "📝 Parent Issue detected: #$parent_issue"
 else
   echo "ℹ️ No parent issue detected, skipping GitHub sub-issues creation"
@@ -88,7 +88,7 @@ fi
 epic_file="$FEATURE_DIR/epic.md"
 milestone_number=""
 if [ -f "$epic_file" ]; then
-  milestone_number=$(grep "^milestone:" "$epic_file" 2>/dev/null | awk '{print $2}')
+  milestone_number=\`grep "^milestone:" "$epic_file" 2>/dev/null | awk '{print $2}'\`
   [ -n "$milestone_number" ] && [ "$milestone_number" != "null" ] && echo "📝 Using milestone: #$milestone_number"
 fi
 ```
@@ -116,8 +116,8 @@ mkdir -p "$temp_dir"
 # Parse each task (format: - [ ] T001 [P] Task Description)
 grep "^- \[ \] T[0-9]" "$tasks_file" | while IFS= read -r line; do
   # Extract task ID and description
-  task_id=$(echo "$line" | grep -o "T[0-9]\+")
-  task_desc=$(echo "$line" | sed 's/^- \[ \] T[0-9]\+\s*\(\[P\]\s*\)\?//')
+  task_id=\`echo "$line" | grep -oE "T[0-9]+"\`
+  task_desc=\`echo "$line" | sed -E 's/^- \[ \] T[0-9]+ *(\[P\] *)?//'\`
 
   # Create task body file
   task_body="$temp_dir/${task_id}-body.md"
@@ -136,7 +136,7 @@ done
 
 ```bash
 # Count tasks to determine strategy
-task_count=$(wc -l < "$temp_dir/tasks-list.txt")
+task_count=\`wc -l < "$temp_dir/tasks-list.txt"\`
 
 if [ "$task_count" -lt 5 ]; then
   echo "📝 Creating $task_count sub-issues sequentially..."
@@ -144,18 +144,18 @@ if [ "$task_count" -lt 5 ]; then
   # Sequential creation for small batches
   while IFS=: read -r task_id task_desc task_body; do
     if [ "$use_subissues" = true ]; then
-      issue_number=$(gh sub-issue create \
+      issue_number=\`gh sub-issue create \
         --parent "$parent_issue" \
         --title "$task_desc" \
         --body-file "$task_body" \
         --label "task,sdd" \
-        --json number -q .number)
+        --json number -q .number\`
     else
-      issue_number=$(gh issue create \
+      issue_number=\`gh issue create \
         --title "$task_desc" \
         --body-file "$task_body" \
         --label "task,sdd,parent:$parent_issue" \
-        --json number -q .number)
+        --json number -q .number\`
     fi
 
     echo "$task_id:$issue_number" >> "$temp_dir/mapping.txt"
@@ -184,7 +184,7 @@ fi
 # Update tasks.md to replace T001 format with actual GitHub issue numbers
 while IFS=: read -r task_id issue_number; do
   # Replace T001 with actual issue number in tasks.md
-  sed -i.bak "s/T$task_id\b/#$issue_number/g" "$tasks_file"
+  sed -i.bak "s/[[:<:]]T$task_id[[:>:]]/#$issue_number/g" "$tasks_file"
   echo "📝 Updated $task_id → #$issue_number in tasks.md"
 done < "$temp_dir/mapping.txt"
 
@@ -195,9 +195,9 @@ rm "${tasks_file}.bak"
 rm -rf "$temp_dir"
 
 echo "✅ GitHub sub-issues created and tasks.md updated with issue numbers"
-echo "🔗 Parent Issue: https://github.com/$(gh repo view --json nameWithOwner -q .nameWithOwner)/issues/$parent_issue"
+echo "🔗 Parent Issue: https://github.com/\`gh repo view --json nameWithOwner -q .nameWithOwner\`/issues/$parent_issue"
 if [ -n "$milestone_number" ]; then
-  milestone_url=$(grep "^milestone_url:" "$epic_file" | cut -d' ' -f2)
+  milestone_url=\`grep "^milestone_url:" "$epic_file" | cut -d' ' -f2\`
   echo "🎯 Milestone: #$milestone_number - $milestone_url"
 fi
 echo ""

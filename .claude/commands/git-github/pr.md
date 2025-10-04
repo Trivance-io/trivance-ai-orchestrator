@@ -34,7 +34,7 @@ Crea PR usando branch actual hacia el target branch especificado.
   fi
   ```
 - Ejecutar `git fetch origin`
-- Capturar rama actual: `current_branch=$(git branch --show-current)`
+- Capturar rama actual: `current_branch=\`git branch --show-current\``
 - Verificar que el branch objetivo existe: `git branch -r | grep origin/<target_branch>`
 - Si no existe, mostrar error y terminar
 - Validar que rama actual no sea igual al target:
@@ -54,7 +54,7 @@ Crea PR usando branch actual hacia el target branch especificado.
   ```
 - Verificar divergencia:
   ```bash
-  commits_behind=$(git rev-list --count HEAD..origin/$target_branch 2>/dev/null || echo "0")
+  commits_behind=\`git rev-list --count HEAD..origin/$target_branch 2>/dev/null || echo "0"\`
   if [[ "$commits_behind" -gt 0 ]]; then
       echo "⚠️  Tu rama está $commits_behind commits atrás de origin/$target_branch"
       echo "   GitHub puede detectar conflictos al intentar mergear"
@@ -86,11 +86,11 @@ Ejecutar simultáneamente:
 
 - Comandos git combinados:
   ```bash
-  git_data=$(git log --pretty=format:'%h %s' "origin/$target_branch..HEAD");
-  files_data=$(git diff --numstat "origin/$target_branch..HEAD");
-  commit_count=$(git rev-list --count "origin/$target_branch..HEAD");
+  git_data=\`git log --pretty=format:'%h %s' "origin/$target_branch..HEAD"\`;
+  files_data=\`git diff --numstat "origin/$target_branch..HEAD"\`;
+  commit_count=\`git rev-list --count "origin/$target_branch..HEAD"\`;
   git diff --name-only "origin/$target_branch..HEAD" > /tmp/pr_files.txt;
-  files_changed=$(wc -l < /tmp/pr_files.txt | tr -d ' ')
+  files_changed=\`wc -l < /tmp/pr_files.txt | tr -d ' '\`
   ```
 - Variables preparadas para uso posterior
 - Validar que hay commits nuevos:
@@ -169,7 +169,7 @@ Ejecutar simultáneamente:
   # Extraer tipos de commits convencionales (feat, fix, docs, etc.)
   cat /tmp/pr_messages.txt | grep -Eo '^(feat|fix|docs|refactor|style|test|chore)' > /tmp/pr_types.txt;
   cat /tmp/pr_types.txt | sort | uniq -c | sort -rn | head -1 | awk '{print $2}' > /tmp/primary.txt;
-  primary_type=$(cat /tmp/primary.txt);
+  primary_type=\`cat /tmp/primary.txt\`;
   # Si no se detectó tipo: usar 'feat' por defecto
   [[ -z "$primary_type" ]] && primary_type="feat"
   ```
@@ -178,19 +178,19 @@ Ejecutar simultáneamente:
   # Intentar extraer scope de commits: feat(auth), fix(api), etc.
   cat /tmp/pr_messages.txt | sed -n 's/^[a-z]*(\([^)]*\)).*/\1/p' > /tmp/pr_scopes.txt;
   cat /tmp/pr_scopes.txt | sort | uniq -c | sort -rn | head -1 | awk '{print $2}' > /tmp/tema.txt;
-  tema_central=$(cat /tmp/tema.txt);
+  tema_central=\`cat /tmp/tema.txt\`;
   # Si no hay scope, analizar palabras frecuentes (excluir stopwords)
   if [[ -z "$tema_central" ]]; then
       cat /tmp/pr_messages.txt | tr '[:upper:]' '[:lower:]' | tr -cs '[:alnum:]' '\n' | grep -vE '^(add|fix|update|implement|the|and|or|for|to|in|of|with)$' > /tmp/pr_words.txt;
       cat /tmp/pr_words.txt | sort | uniq -c | sort -rn | head -1 | awk '{print $2}' > /tmp/tema.txt;
-      tema_central=$(cat /tmp/tema.txt)
+      tema_central=\`cat /tmp/tema.txt\`
   fi
   ```
 - Generar timestamp UTC en formato branch-safe:
   ```bash
   # Formato: YYYYMMDD-HHMMSS (branch-safe, NO es ISO 8601 estándar)
   # ISO 8601 real usa YYYY-MM-DDTHH:MM:SSZ pero los colons no son válidos en branch names
-  timestamp=$(date -u +"%Y%m%d-%H%M%S")
+  timestamp=\`date -u +"%Y%m%d-%H%M%S"\`
   ```
 - Construir nombre:
   - Si tema claro: `branch_name="${tema_central}-${timestamp}"`
@@ -279,13 +279,13 @@ Ejecutar simultáneamente:
 Para cada operación, agregar línea al archivo JSONL:
 
 ```bash
-mkdir -p .claude/logs/$(date +%Y-%m-%d)
+mkdir -p .claude/logs/\`date +%Y-%m-%d\`
 
 # Security review
-echo '{"timestamp":"'$(date -Iseconds)'","operation":"security_review","status":"pass|fail|timeout"}' >> .claude/logs/$(date +%Y-%m-%d)/security.jsonl
+echo '{"timestamp":"'\`date -Iseconds\`'","operation":"security_review","status":"pass|fail|timeout"}' >> .claude/logs/\`date +%Y-%m-%d\`/security.jsonl
 
 # PR operations
-echo '{"timestamp":"'$(date -Iseconds)'","operation":"pr_create|pr_update|branch_create","status":"success|failed"}' >> .claude/logs/$(date +%Y-%m-%d)/pr_operations.jsonl
+echo '{"timestamp":"'\`date -Iseconds\`'","operation":"pr_create|pr_update|branch_create","status":"success|failed"}' >> .claude/logs/\`date +%Y-%m-%d\`/pr_operations.jsonl
 ```
 
 ## Notas
