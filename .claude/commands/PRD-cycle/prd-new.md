@@ -1,5 +1,6 @@
 ---
 allowed-tools: Bash(date -u +"%Y-%m-%dT%H:%M:%SZ"), Read, Write, LS
+model: claude-opus-4-1
 ---
 
 # PRD New
