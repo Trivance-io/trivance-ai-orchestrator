@@ -1,19 +1,16 @@
 <!--
-Sync Impact Report - Constitution v2.0.0
-Version change: v1.0.0 → v2.0.0 (Major architectural upgrade with formal governance framework)
-Modified principles: All 5 core principles preserved and enhanced within formal constitutional structure
-Added sections: Preamble, Fundamental Rights, Constitutional Tests, Separation of Powers, Exception Process, Subordinate Statutes, Glossary
-Removed sections: None (all content preserved but restructured)
-Templates requiring updates:
-  ✅ plan-template.md (updated with Constitutional Tests and Rights Framework)
-  ✅ spec-template.md (updated with Constitutional Compliance checklist)
-  ✅ tasks-template.md (updated with Developer Rights and governance framework)
-Follow-up TODOs: None (all templates updated and validated)
+Sync Impact Report - Constitution v2.1.0
+Version change: v2.0.0 → v2.1.0 (Technical Stack Standards addition)
+Modified principles: All 5 core principles preserved
+Added sections: Article IX — Technical Stack Standards (Shell Scripting rules for Claude Commands, Project-Specific Stacks placeholder)
+Removed sections: None
+Templates requiring updates: None (additive change, no breaking modifications)
+Follow-up TODOs: None
 -->
 
 # Trivance AI Orchestrator Constitution
 
-**Version**: 2.0.0 | **Ratified**: 2025-09-20 | **Last Amended**: 2025-09-22
+**Version**: 2.1.0 | **Ratified**: 2025-09-20 | **Last Amended**: 2025-10-04
 
 > This Constitution is the _highest law_ of how Trivance AI Orchestrator conceives, designs, builds, and operates digital products with and for AI. It defines purpose, rights, duties, powers, limits, due process, and amendment. Everything else—policies, playbooks, checklists—derives authority from here and is void where it conflicts.
 
@@ -151,6 +148,16 @@ A proposal **must** satisfy all tests below to be legitimate:
 
 ---
 
+## Article IX — Technical Stack Standards
+
+**Section 1. Shell Scripting (Claude Commands).** All shell commands in Claude Commands must follow macOS/zsh standards:
+
+- **Command Substitution**: Use backticks `` `...` `` instead of `$(...)` for universal compatibility with the Bash tool execution context
+- **POSIX Compliance**: Prefer POSIX-compatible syntax where possible for cross-shell compatibility
+- **Error Handling**: Always use `2>/dev/null` for suppressing errors and validate command outputs
+
+---
+
 ## Annex — Recognized Statutes
 
 The following **Statutes** are _normative_ and derive authority from this Constitution:
@@ -169,6 +176,7 @@ The following **Statutes** are _normative_ and derive authority from this Consti
 **Constitutional Tests** — Six mandatory checks any proposal must pass.
 **Complexity Budget** — Formal limits on implementation scope to prevent over-engineering.
 **ROI** — Return on Investment calculated as benefit minus complexity (both scored 1-5).
+**Command Substitution** — Shell syntax for capturing command output; use backticks `` `...` `` in Claude Commands for macOS/zsh compatibility.
 
 ---
 
