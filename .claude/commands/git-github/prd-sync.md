@@ -113,7 +113,7 @@ Next steps:
   - Technical specification: /SDD-cycle:specify --from-issue <issue_number>
   [If milestone provided] - View milestone: <milestone_url>
   - View PRD issue: <issue_url>
-  [If sdd-input.md exists] - Or use optimized input: /SDD-cycle:specify "$(cat .claude/prds/<feature_name>/sdd-input.md)"
+  [If sdd-input.md exists] - Or use optimized input: /SDD-cycle:specify "\`cat .claude/prds/<feature_name>/sdd-input.md\`"
 ```
 
 ## Error Handling

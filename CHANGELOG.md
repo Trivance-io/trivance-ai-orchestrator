@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2025-10-04]
+
+### Fixed
+
+- fix(pr): correct bash syntax errors for zsh compatibility (PR #213)
+- fix(pr): allow protected branches when current equals target (PR #212)
+
+### Changed
+
+- refactor(pr): improve workflow and validation logic (PR #211)
+- docs(handbook): comprehensive audit and verification of documentation (PR #210)
+
 ## [2025-09-30]
 
 ### Added

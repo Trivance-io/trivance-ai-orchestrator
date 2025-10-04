@@ -140,5 +140,5 @@ Focus on creating an SDD-optimized feature description that eliminates 80-100% o
 
 - Optimize specifically for SDD-cycle:specify input to minimize clarification rounds
 - Pre-resolve ambiguities rather than leaving them for clarify.md
-- Ensure output is immediately consumable by `/SDD-cycle:specify "$(cat .claude/prds/$ARGUMENTS/sdd-input.md)"`
+- Ensure output is immediately consumable by `/SDD-cycle:specify "\`cat .claude/prds/$ARGUMENTS/sdd-input.md\`"`
 - Maintain constitutional compliance throughout transformation

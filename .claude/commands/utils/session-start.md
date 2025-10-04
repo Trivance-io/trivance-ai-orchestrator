@@ -36,7 +36,7 @@ Mostrar exactamente este texto:
 
 **Detectar rama padre:**
 
-- Ejecutar: `parent_branch=\`git branch --list main develop master | head -1 | sed 's/^[* ]//'\``
+- Ejecutar: `parent_branch=\`git branch --list main develop master | head -1 | sed 's/^[* ]\*//'\``
 - Si comando falla o no hay output: continuar sin sincronización (repositorio sin remoto o sin internet)
 
 **Intentar sincronización (solo si hay rama padre detectada):**

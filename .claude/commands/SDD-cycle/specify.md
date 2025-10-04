@@ -19,7 +19,7 @@ Given that input, do this:
 
 1. **Parse input type and extract content:**
    - If `$ARGUMENTS` starts with `--from-issue`:
-     - Extract issue number: `ISSUE_NUM=$(echo "$ARGUMENTS" | sed 's/--from-issue *//')`
+     - Extract issue number: `ISSUE_NUM=\`echo "$ARGUMENTS" | sed 's/--from-issue \*//'\``
      - Run: `gh issue view $ISSUE_NUM --json body,title --jq '.title + "\n\n" + .body'`
      - Use the GitHub Issue content as feature description
    - Otherwise: Use `$ARGUMENTS` directly as natural language feature description
