@@ -1,8 +1,8 @@
 <!--
-Sync Impact Report - Constitution v2.1.1
-Version change: v2.1.0 → v2.1.1 (POSIX compliance enforcement)
+Sync Impact Report - Constitution v2.1.2
+Version change: v2.1.1 → v2.1.2 (Command substitution rationale documentation)
 Modified principles: All 5 core principles preserved
-Modified sections: Article IX §1 (Shell Scripting) - strengthened POSIX compliance from "Prefer" to "MUST use", added prohibited operators
+Modified sections: Article IX §1 (Shell Scripting) - added technical rationale for backticks mandate, documented parser limitation with examples
 Added sections: None
 Removed sections: None
 Templates requiring updates: None (clarification only, no breaking changes)
@@ -11,7 +11,7 @@ Follow-up TODOs: None
 
 # Trivance AI Orchestrator Constitution
 
-**Version**: 2.1.1 | **Ratified**: 2025-09-20 | **Last Amended**: 2025-10-04
+**Version**: 2.1.2 | **Ratified**: 2025-09-20 | **Last Amended**: 2025-10-04
 
 > This Constitution is the _highest law_ of how Trivance AI Orchestrator conceives, designs, builds, and operates digital products with and for AI. It defines purpose, rights, duties, powers, limits, due process, and amendment. Everything else—policies, playbooks, checklists—derives authority from here and is void where it conflicts.
 
@@ -153,7 +153,7 @@ A proposal **must** satisfy all tests below to be legitimate:
 
 **Section 1. Shell Scripting (Claude Commands).** All shell commands in Claude Commands must follow macOS/zsh standards:
 
-- **Command Substitution**: Use backticks `` `...` `` instead of `$(...)` for universal compatibility with the Bash tool execution context
+- **Command Substitution**: MUST use backticks `` `...` `` instead of `$(...)`. Rationale: Claude Code's Bash tool parser cannot handle `$(...)` syntax when combined with pipelines (`|`), causing `parse error near ')'`. This is an execution environment limitation, not a style preference. Example: `result=$(git log | grep "fix")` fails; `` result=`git log | grep "fix"` `` works. Note: POSIX.1-2017 recommends `$(...)` for general use, but backticks are mandatory here due to parser constraints.
 - **POSIX Compliance**: MUST use POSIX-compliant syntax only; prohibited: `[[ ]]` (use `[ ]`), `==` (use `=`), `=~` (use `grep -E`)
 - **Error Handling**: Always use `2>/dev/null` for suppressing errors and validate command outputs
 
