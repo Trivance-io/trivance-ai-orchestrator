@@ -51,7 +51,7 @@ Lists available worktrees with suggested commands.
 
 **2a. Format validation:**
 
-- Execute: `[[ "$target" =~ ^[a-zA-Z0-9][a-zA-Z0-9_-]*$ ]] && echo "valid" || echo "invalid"`
+- Execute: `echo "$target" | grep -Eq '^[a-zA-Z0-9][a-zA-Z0-9_-]*$' && echo "valid" || echo "invalid"`
 - If output is "invalid": skip with "Formato de nombre inválido"
 
 **2b. Protected branch validation:**
@@ -97,7 +97,7 @@ Lists available worktrees with suggested commands.
 - If target not found: continue (handled by other validation)
 - Get: `target_path="\`realpath \"$target_path\" 2>/dev/null\`"`
 - If fails: error "❌ Error: No se pudo resolver path del worktree target" and skip
-- Execute: `[[ "$current_dir" == "$target_path" ]] && echo "match" || echo "no_match"`
+- Execute: `[ "$current_dir" = "$target_path" ] && echo "match" || echo "no_match"`
 - If output is "match":
   - Error: "❌ Error: No puedes eliminar el worktree donde estás actualmente"
   - Show current location and solution
@@ -107,9 +107,9 @@ Lists available worktrees with suggested commands.
 
 Get file owner and compare:
 
-- Execute: `[[ "$OSTYPE" =~ ^darwin ]] && stat -f %Su "$path" 2>/dev/null || stat -c %U "$path" 2>/dev/null`
+- Execute: `echo "$OSTYPE" | grep -Eq '^darwin' && stat -f %Su "$path" 2>/dev/null || stat -c %U "$path" 2>/dev/null`
 - Capture owner in variable
-- Execute: `[[ "$owner" == "\`whoami\`" ]] && echo "match" || echo "no_match"`
+- Execute: `[ "$owner" = "\`whoami\`" ] && echo "match" || echo "no_match"`
 - If output is "no_match": skip with "No es tu worktree"
 
 ### 5. User confirmation
