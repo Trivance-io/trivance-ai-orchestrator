@@ -51,13 +51,13 @@ Lists available worktrees with suggested commands.
 
 **2a. Format validation:**
 
-- Verify: `[[ "$target" =~ ^[a-zA-Z0-9][a-zA-Z0-9_-]*$ ]]`
-- If fails: skip with "Formato de nombre inválido"
+- Execute: `[[ "$target" =~ ^[a-zA-Z0-9][a-zA-Z0-9_-]*$ ]] && echo "valid" || echo "invalid"`
+- If output is "invalid": skip with "Formato de nombre inválido"
 
 **2b. Protected branch validation:**
 
-- Check if in: `("main" "develop" "qa" "staging" "master")`
-- If protected: skip with "Rama protegida"
+- Check: `echo "$target" | grep -qE "^(main|develop|qa|staging|master)$" && echo "protected" || echo "not_protected"`
+- If output is "protected": skip with "Rama protegida"
 
 **2c. Current directory validation:**
 
@@ -97,19 +97,20 @@ Lists available worktrees with suggested commands.
 - If target not found: continue (handled by other validation)
 - Get: `target_path="\`realpath \"$target_path\" 2>/dev/null\`"`
 - If fails: error "❌ Error: No se pudo resolver path del worktree target" and skip
-- If `"$current_dir" == "$target_path"`:
+- Execute: `[[ "$current_dir" == "$target_path" ]] && echo "match" || echo "no_match"`
+- If output is "match":
   - Error: "❌ Error: No puedes eliminar el worktree donde estás actualmente"
   - Show current location and solution
   - Skip with warning
 
 ### 4. Cross-platform compatibility
 
-OS detection for file ownership:
+Get file owner and compare:
 
-- If `"$OSTYPE"` starts with "darwin": `stat -f %Su "$path"`
-- Else (Linux): `stat -c %U "$path"`
-- Compare with `\`whoami\``
-- If doesn't match: skip with ownership warning
+- Execute: `[[ "$OSTYPE" =~ ^darwin ]] && stat -f %Su "$path" 2>/dev/null || stat -c %U "$path" 2>/dev/null`
+- Capture owner in variable
+- Execute: `[[ "$owner" == "\`whoami\`" ]] && echo "match" || echo "no_match"`
+- If output is "no_match": skip with "No es tu worktree"
 
 ### 5. User confirmation
 
