@@ -1,16 +1,17 @@
 <!--
-Sync Impact Report - Constitution v2.1.0
-Version change: v2.0.0 → v2.1.0 (Technical Stack Standards addition)
+Sync Impact Report - Constitution v2.1.1
+Version change: v2.1.0 → v2.1.1 (POSIX compliance enforcement)
 Modified principles: All 5 core principles preserved
-Added sections: Article IX — Technical Stack Standards (Shell Scripting rules for Claude Commands, Project-Specific Stacks placeholder)
+Modified sections: Article IX §1 (Shell Scripting) - strengthened POSIX compliance from "Prefer" to "MUST use", added prohibited operators
+Added sections: None
 Removed sections: None
-Templates requiring updates: None (additive change, no breaking modifications)
+Templates requiring updates: None (clarification only, no breaking changes)
 Follow-up TODOs: None
 -->
 
 # Trivance AI Orchestrator Constitution
 
-**Version**: 2.1.0 | **Ratified**: 2025-09-20 | **Last Amended**: 2025-10-04
+**Version**: 2.1.1 | **Ratified**: 2025-09-20 | **Last Amended**: 2025-10-04
 
 > This Constitution is the _highest law_ of how Trivance AI Orchestrator conceives, designs, builds, and operates digital products with and for AI. It defines purpose, rights, duties, powers, limits, due process, and amendment. Everything else—policies, playbooks, checklists—derives authority from here and is void where it conflicts.
 
@@ -153,7 +154,7 @@ A proposal **must** satisfy all tests below to be legitimate:
 **Section 1. Shell Scripting (Claude Commands).** All shell commands in Claude Commands must follow macOS/zsh standards:
 
 - **Command Substitution**: Use backticks `` `...` `` instead of `$(...)` for universal compatibility with the Bash tool execution context
-- **POSIX Compliance**: Prefer POSIX-compatible syntax where possible for cross-shell compatibility
+- **POSIX Compliance**: MUST use POSIX-compliant syntax only; prohibited: `[[ ]]` (use `[ ]`), `==` (use `=`), `=~` (use `grep -E`)
 - **Error Handling**: Always use `2>/dev/null` for suppressing errors and validate command outputs
 
 ---
