@@ -86,10 +86,11 @@ Ejecutar simultáneamente:
 
 - Comandos git combinados:
   ```bash
-  git_data=$(git log --pretty=format:"%h %s" "origin/$target_branch..HEAD")
-  files_data=$(git diff --numstat "origin/$target_branch..HEAD")
-  commit_count=$(git rev-list --count "origin/$target_branch..HEAD")
-  files_changed=$(git diff --name-only "origin/$target_branch..HEAD" | wc -l)
+  git_data=$(git log --pretty=format:'%h %s' "origin/$target_branch..HEAD");
+  files_data=$(git diff --numstat "origin/$target_branch..HEAD");
+  commit_count=$(git rev-list --count "origin/$target_branch..HEAD");
+  git diff --name-only "origin/$target_branch..HEAD" > /tmp/pr_files.txt;
+  files_changed=$(wc -l < /tmp/pr_files.txt | tr -d ' ')
   ```
 - Variables preparadas para uso posterior
 - Validar que hay commits nuevos:
@@ -108,8 +109,9 @@ Ejecutar simultáneamente:
 
   ```bash
   # Si security_result contiene HIGH severity findings con confidence >= 0.80:
-  if [[ "$security_result" =~ ([Ss]everity|SEVERITY|Severidad|SEVERIDAD)[[:space:]]*:[[:space:]]*HIGH ]] && \
-     [[ "$security_result" =~ ([Cc]onfidence|CONFIDENCE|Confianza|CONFIANZA)[[:space:]]*:[[:space:]]*(0\.[89][0-9]*|1\.0[0-9]*) ]]; then
+  # Regex simplificado: severity HIGH + confidence 0.8-1.0
+  if [[ "$security_result" =~ [Ss]everity.*:.*HIGH ]] && \
+     [[ "$security_result" =~ [Cc]onfidence.*:.*(0\.[89]|1\.0) ]]; then
       echo "❌ Security Review BLOQUEÓ el PR: vulnerabilidades críticas encontradas"
       echo "$security_result"
       exit 1
@@ -158,21 +160,30 @@ Ejecutar simultáneamente:
       exit 1
   fi
   ```
-- Extraer mensajes: `messages=$(echo "$git_data" | sed 's/^[^ ]* //')`
+- Extraer mensajes a archivo temporal:
+  ```bash
+  echo "$git_data" | sed 's/^[^ ]* //' > /tmp/pr_messages.txt
+  ```
 - Detectar tipo principal usando conventional commits:
   ```bash
   # Extraer tipos de commits convencionales (feat, fix, docs, etc.)
-  primary_type=$(echo "$messages" | grep -Eo '^(feat|fix|docs|refactor|style|test|chore)' | sort | uniq -c | sort -rn | head -1 | awk '{print $2}')
+  cat /tmp/pr_messages.txt | grep -Eo '^(feat|fix|docs|refactor|style|test|chore)' > /tmp/pr_types.txt;
+  cat /tmp/pr_types.txt | sort | uniq -c | sort -rn | head -1 | awk '{print $2}' > /tmp/primary.txt;
+  primary_type=$(cat /tmp/primary.txt);
   # Si no se detectó tipo: usar 'feat' por defecto
   [[ -z "$primary_type" ]] && primary_type="feat"
   ```
 - Detectar tema central: extraer scope de conventional commits o palabra más frecuente
   ```bash
   # Intentar extraer scope de commits: feat(auth), fix(api), etc.
-  tema_central=$(echo "$messages" | sed -n 's/^[a-z]*(\([^)]*\)).*/\1/p' | sort | uniq -c | sort -rn | head -1 | awk '{print $2}')
+  cat /tmp/pr_messages.txt | sed -n 's/^[a-z]*(\([^)]*\)).*/\1/p' > /tmp/pr_scopes.txt;
+  cat /tmp/pr_scopes.txt | sort | uniq -c | sort -rn | head -1 | awk '{print $2}' > /tmp/tema.txt;
+  tema_central=$(cat /tmp/tema.txt);
   # Si no hay scope, analizar palabras frecuentes (excluir stopwords)
   if [[ -z "$tema_central" ]]; then
-      tema_central=$(echo "$messages" | tr '[:upper:]' '[:lower:]' | tr -cs '[:alnum:]' '\n' | grep -vE '^(add|fix|update|implement|the|and|or|for|to|in|of|with)$' | sort | uniq -c | sort -rn | head -1 | awk '{print $2}')
+      cat /tmp/pr_messages.txt | tr '[:upper:]' '[:lower:]' | tr -cs '[:alnum:]' '\n' | grep -vE '^(add|fix|update|implement|the|and|or|for|to|in|of|with)$' > /tmp/pr_words.txt;
+      cat /tmp/pr_words.txt | sort | uniq -c | sort -rn | head -1 | awk '{print $2}' > /tmp/tema.txt;
+      tema_central=$(cat /tmp/tema.txt)
   fi
   ```
 - Generar timestamp UTC en formato branch-safe:
