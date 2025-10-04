@@ -5,8 +5,6 @@ description: Crea PR desde rama actual hacia target branch
 
 # Pull Request
 
-Crea PR usando branch actual hacia el target branch especificado.
-
 ## Uso
 
 ```bash
@@ -23,10 +21,17 @@ Crea PR usando branch actual hacia el target branch especificado.
 
 ## Ejecución
 
+### Variables de Estado
+
+```bash
+PROTECTED_BRANCHES="^(main|master|develop|dev|staging|production|prod|qa|release/.+|hotfix/.+)$"
+AUTO_CREATE_BRANCH=false
+```
+
 ### 1. Validación del target branch
 
-- Si no se proporciona argumento, mostrar error: "❌ Error: Target branch requerido. Uso: /pr <target_branch>"
-- Validar formato del target branch:
+- Validar argumento: `[[ -z "$target_branch" ]] && { echo "❌ Error: Uso /pr <target_branch>"; exit 1; }`
+- Validar formato:
   ```bash
   if [[ ! "$target_branch" =~ ^[a-zA-Z0-9/_-]+$ ]]; then
       echo "❌ Error: Nombre de target branch inválido"
@@ -41,8 +46,8 @@ Crea PR usando branch actual hacia el target branch especificado.
   ```bash
   if [[ "$current_branch" == "$target_branch" ]]; then
       # Excepción: permitir si es rama protegida (se creará feature branch automáticamente)
-      PROTECTED_BRANCHES="^(main|master|develop|dev|staging|production|prod|qa|release/.+|hotfix/.+)$"
       if [[ "$current_branch" =~ $PROTECTED_BRANCHES ]]; then
+          AUTO_CREATE_BRANCH=true
           echo "⚠️ Rama protegida detectada: $current_branch (igual a target: $target_branch)"
           echo "📍 Se creará una feature branch automáticamente en el siguiente paso..."
       else
@@ -63,8 +68,6 @@ Crea PR usando branch actual hacia el target branch especificado.
 
 ### 2. Operaciones en paralelo
 
-Ejecutar simultáneamente:
-
 **Security Review (BLOCKING)**
 
 - Iniciar `/agent:security-reviewer` para analizar cambios en branch actual
@@ -84,19 +87,28 @@ Ejecutar simultáneamente:
 
 **Análisis de commits**
 
-- Comandos git combinados:
+- Comandos git combinados (modo-consciente):
   ```bash
-  git_data=\`git log --pretty=format:'%h %s' "origin/$target_branch..HEAD"\`;
-  files_data=\`git diff --numstat "origin/$target_branch..HEAD"\`;
-  commit_count=\`git rev-list --count "origin/$target_branch..HEAD"\`;
-  git diff --name-only "origin/$target_branch..HEAD" > /tmp/pr_files.txt;
-  files_changed=\`wc -l < /tmp/pr_files.txt | tr -d ' '\`
+  if [[ "$AUTO_CREATE_BRANCH" == "true" ]]; then
+      # Modo AUTO: analizar últimos 10 commits de HEAD (no diff con target)
+      commit_count=\`git rev-list --count HEAD\`
+      git_data=\`git log --pretty=format:'%h %s' -n 10 HEAD\`
+      files_data=\`git diff --numstat HEAD~10..HEAD 2>/dev/null || echo ""\`
+      files_changed=\`git diff --name-only HEAD~10..HEAD 2>/dev/null | wc -l | tr -d ' '\`
+  else
+      # Modo NORMAL: diff contra target
+      git_data=\`git log --pretty=format:'%h %s' "origin/$target_branch..HEAD"\`
+      files_data=\`git diff --numstat "origin/$target_branch..HEAD"\`
+      commit_count=\`git rev-list --count "origin/$target_branch..HEAD"\`
+      git diff --name-only "origin/$target_branch..HEAD" > /tmp/pr_files.txt
+      files_changed=\`wc -l < /tmp/pr_files.txt | tr -d ' '\`
+  fi
   ```
 - Variables preparadas para uso posterior
-- Validar que hay commits nuevos:
+- Validar que hay commits:
   ```bash
   if [[ "$commit_count" -eq 0 ]]; then
-      echo "❌ Error: No hay commits nuevos entre origin/$target_branch y HEAD"
+      echo "❌ Error: No hay commits para crear PR"
       exit 1
   fi
   ```
@@ -134,7 +146,6 @@ Ejecutar simultáneamente:
 
 ### 3. Procesar PR existente
 
-- Usar datos del paso 2 para evaluar PR existente
 - Si existe PR abierto (`state: "open"`):
   - Mostrar: "⚠️ Esta rama ya tiene un PR abierto (#{number}): {title}"
   - "[1] Actualizar PR #{number} [ENTER]"
@@ -145,21 +156,11 @@ Ejecutar simultáneamente:
 
 ### 4. Detectar tipo de rama y decidir acción
 
-- Definir ramas protegidas: `PROTECTED_BRANCHES="^(main|master|develop|dev|staging|production|prod|qa|release/.+|hotfix/.+)$"`
-- Evaluar tipo de rama usando `current_branch` del paso 1: `[[ "$current_branch" =~ $PROTECTED_BRANCHES ]]`
+- Evaluar: `[[ "$current_branch" =~ $PROTECTED_BRANCHES ]]`
 
 **SI es rama protegida (main, master, develop, etc.):**
 
-- Mostrar: "⚠️ Rama protegida detectada: $current_branch"
-- Mostrar: "📍 Creando nueva feature branch para el PR..."
-- Usar datos del paso 2: `git_data`, `files_data`, `commit_count`, `files_changed`
-- Validar que git_data tiene contenido:
-  ```bash
-  if [[ -z "$git_data" ]]; then
-      echo "❌ Error: No hay commits para analizar entre origin/$target_branch y HEAD"
-      exit 1
-  fi
-  ```
+- Mostrar: "⚠️ Rama protegida: creando feature branch automática..."
 - Extraer mensajes a archivo temporal:
   ```bash
   echo "$git_data" | sed 's/^[^ ]* //' > /tmp/pr_messages.txt
@@ -186,10 +187,8 @@ Ejecutar simultáneamente:
       tema_central=\`cat /tmp/tema.txt\`
   fi
   ```
-- Generar timestamp UTC en formato branch-safe:
+- Generar timestamp UTC:
   ```bash
-  # Formato: YYYYMMDD-HHMMSS (branch-safe, NO es ISO 8601 estándar)
-  # ISO 8601 real usa YYYY-MM-DDTHH:MM:SSZ pero los colons no son válidos en branch names
   timestamp=\`date -u +"%Y%m%d-%H%M%S"\`
   ```
 - Construir nombre:
@@ -220,8 +219,7 @@ Ejecutar simultáneamente:
 
 **SI NO es rama protegida (feature branch):**
 
-- Mostrar: "📍 Feature branch detectada: $current_branch"
-- Mostrar: "✅ Usando rama actual para el PR"
+- Mostrar: "📍 Feature branch: usando rama actual para el PR"
 - Asignar: `branch_name="$current_branch"`
 - Push a remoto:
   ```bash
@@ -234,11 +232,7 @@ Ejecutar simultáneamente:
 
 ### 5. Preparar contenido del PR
 
-- Generar título:
-  - Si commits tienen tema común: usar ese tema
-  - Si commits diversos: crear título que unifique el propósito
-  - Mantener formato convencional: `{type}({scope}): {description}` cuando aplique
-- Usar datos del paso 2: `commit_count`, `files_changed`
+- Generar título: `{type}({scope}): {description}` basado en commits
 - Contar líneas: `echo "$files_data" | awk '{adds+=$1; dels+=$2} END {print adds, dels}'`
 - Identificar áreas afectadas: `scope_areas` (directorios del proyecto)
 - Detectar breaking changes: buscar keywords BREAKING/deprecated/removed en commits
@@ -287,9 +281,3 @@ echo '{"timestamp":"'\`date -Iseconds\`'","operation":"security_review","status"
 # PR operations
 echo '{"timestamp":"'\`date -Iseconds\`'","operation":"pr_create|pr_update|branch_create","status":"success|failed"}' >> .claude/logs/\`date +%Y-%m-%d\`/pr_operations.jsonl
 ```
-
-## Notas
-
-- No solicitar confirmación al usuario
-- Ejecutar pasos secuencialmente
-- Si algún paso falla, detener y mostrar error claro
