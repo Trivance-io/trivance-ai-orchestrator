@@ -1,11 +1,15 @@
 ---
-allowed-tools: Bash(git *), Bash(test *), Bash(mkdir *), Bash(date *), Bash(whoami), Bash(echo *), Bash([[ ]])
+allowed-tools: Bash(git *), Bash(test *), Bash(mkdir *), Bash(date *), Bash(whoami), Bash([[ ]]), Bash(realpath *), Bash(stat *)
 description: Safe removal of specific worktrees with ownership validation and discovery mode
 ---
 
 # Worktree Cleanup
 
 Safe removal of specific worktrees with ownership validation and discovery mode.
+
+## Output Convention
+
+**CRITICAL**: Unless explicitly stated otherwise, all "show", "display", "output" instructions refer to **normal Claude text output**, NOT bash echo commands. Use bash tools ONLY for git operations, file system queries, and data processing. User interaction and status messages are normal Claude-User communication.
 
 ## Usage
 
@@ -102,11 +106,15 @@ To verify file ownership, use automatic OS detection:
 - Compare result with `\`whoami\`` to verify ownership
 - If doesn't match: skip this target with ownership warning
 
-### 5. User confirmation
+### 5. User confirmation (Claude-User interaction, NOT bash)
 
-- Show summary of valid targets
-- Request confirmation: "Escribir 'ELIMINAR' para confirmar:"
-- If confirmation != "ELIMINAR": cancel and terminate
+**CRITICAL**: This is normal Claude-User interaction, NOT a bash command.
+
+- Output summary of valid targets as normal text (NOT using bash echo)
+- Ask user directly in your response: "¿Confirmas la eliminación? Responde 'ELIMINAR' para proceder:"
+- WAIT for user response in chat
+- If user response != "ELIMINAR": show cancellation message and terminate
+- If user response == "ELIMINAR": proceed to step 6
 
 ### 6. Dual atomic cleanup
 
@@ -131,7 +139,8 @@ For each confirmed target:
 
 When executed without arguments, follow these steps:
 
-- Mostrar: "🔍 Tus worktrees disponibles para eliminar:"
+**Phase 1: Discovery (using bash tools)**
+
 - Get canonical path of current directory: `current_canonical="\`realpath \"\`pwd\`\" 2>/dev/null\`"`
 - If fails to get current path: show error and terminate
 - Execute `git worktree list --porcelain` and process each line:
@@ -141,8 +150,13 @@ When executed without arguments, follow these steps:
   - If `worktree_canonical` equals `current_canonical`: skip (it's current directory)
   - Verify basic ownership using cross-platform function
   - If owner is current user: add to numbered list
+
+**Phase 2: User Interaction (normal Claude output, NOT bash)**
+
+- Output as normal text: "🔍 Tus worktrees disponibles para eliminar:"
 - Show numbered list: `"   1. $worktree_name"`
-- Request selection: "Selecciona números separados por espacios (ej: 1 2) o 'todos':"
+- Ask user directly: "Selecciona números separados por espacios (ej: 1 2) o 'todos':"
+- WAIT for user response in chat
 - Parse user input and convert to worktree names
 - Continue with normal cleanup flow for selected worktrees
 
