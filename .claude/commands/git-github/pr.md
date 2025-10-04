@@ -30,10 +30,10 @@ AUTO_CREATE_BRANCH=false
 
 ### 1. Validación del target branch
 
-- Validar argumento: `[[ -z "$target_branch" ]] && { echo "❌ Error: Uso /pr <target_branch>"; exit 1; }`
+- Validar argumento: `[ -z "$target_branch" ] && { echo "❌ Error: Uso /pr <target_branch>"; exit 1; }`
 - Validar formato:
   ```bash
-  if [[ ! "$target_branch" =~ ^[a-zA-Z0-9/_-]+$ ]]; then
+  if ! echo "$target_branch" | grep -Eq '^[a-zA-Z0-9/_-]+$'; then
       echo "❌ Error: Nombre de target branch inválido"
       exit 1
   fi
@@ -44,9 +44,9 @@ AUTO_CREATE_BRANCH=false
 - Si no existe, mostrar error y terminar
 - Validar que rama actual no sea igual al target:
   ```bash
-  if [[ "$current_branch" == "$target_branch" ]]; then
+  if [ "$current_branch" = "$target_branch" ]; then
       # Excepción: permitir si es rama protegida (se creará feature branch automáticamente)
-      if [[ "$current_branch" =~ $PROTECTED_BRANCHES ]]; then
+      if echo "$current_branch" | grep -Eq "$PROTECTED_BRANCHES"; then
           AUTO_CREATE_BRANCH=true
           echo "⚠️ Rama protegida detectada: $current_branch (igual a target: $target_branch)"
           echo "📍 Se creará una feature branch automáticamente en el siguiente paso..."
@@ -60,7 +60,7 @@ AUTO_CREATE_BRANCH=false
 - Verificar divergencia:
   ```bash
   commits_behind=\`git rev-list --count HEAD..origin/$target_branch 2>/dev/null || echo "0"\`
-  if [[ "$commits_behind" -gt 0 ]]; then
+  if [ "$commits_behind" -gt 0 ]; then
       echo "⚠️  Tu rama está $commits_behind commits atrás de origin/$target_branch"
       echo "   GitHub puede detectar conflictos al intentar mergear"
   fi
@@ -89,7 +89,7 @@ AUTO_CREATE_BRANCH=false
 
 - Comandos git combinados (modo-consciente):
   ```bash
-  if [[ "$AUTO_CREATE_BRANCH" == "true" ]]; then
+  if [ "$AUTO_CREATE_BRANCH" = "true" ]; then
       # Modo AUTO: analizar últimos 10 commits de HEAD (no diff con target)
       commit_count=\`git rev-list --count HEAD\`
       git_data=\`git log --pretty=format:'%h %s' -n 10 HEAD\`
@@ -107,7 +107,7 @@ AUTO_CREATE_BRANCH=false
 - Variables preparadas para uso posterior
 - Validar que hay commits:
   ```bash
-  if [[ "$commit_count" -eq 0 ]]; then
+  if [ "$commit_count" -eq 0 ]; then
       echo "❌ Error: No hay commits para crear PR"
       exit 1
   fi
@@ -122,21 +122,21 @@ AUTO_CREATE_BRANCH=false
   ```bash
   # Si security_result contiene HIGH severity findings con confidence >= 0.80:
   # Regex simplificado: severity HIGH + confidence 0.8-1.0
-  if [[ "$security_result" =~ [Ss]everity.*:.*HIGH ]] && \
-     [[ "$security_result" =~ [Cc]onfidence.*:.*(0\.[89]|1\.0) ]]; then
+  if echo "$security_result" | grep -Eq '[Ss]everity.*:.*HIGH' && \
+     echo "$security_result" | grep -Eq '[Cc]onfidence.*:.*(0\.[89]|1\.0)'; then
       echo "❌ Security Review BLOQUEÓ el PR: vulnerabilidades críticas encontradas"
       echo "$security_result"
       exit 1
   fi
 
   # Si timeout (80s excedidos):
-  if [[ "$security_timeout" == "true" ]]; then
+  if [ "$security_timeout" = "true" ]; then
       echo "⚠️ Security Review timeout - creando PR con flag SECURITY_REVIEW_TIMEOUT"
       security_flag="SECURITY_REVIEW_TIMEOUT"
   fi
 
   # Si error del sistema (Task falló):
-  if [[ "$security_error" == "true" ]]; then
+  if [ "$security_error" = "true" ]; then
       echo "❌ Security Review falló - reintenta: /pr $target_branch"
       exit 1
   fi
@@ -156,7 +156,7 @@ AUTO_CREATE_BRANCH=false
 
 ### 4. Detectar tipo de rama y decidir acción
 
-- Evaluar: `[[ "$current_branch" =~ $PROTECTED_BRANCHES ]]`
+- Evaluar: `echo "$current_branch" | grep -Eq "$PROTECTED_BRANCHES"`
 
 **SI es rama protegida (main, master, develop, etc.):**
 
@@ -172,7 +172,7 @@ AUTO_CREATE_BRANCH=false
   cat /tmp/pr_types.txt | sort | uniq -c | sort -rn | head -1 | awk '{print $2}' > /tmp/primary.txt;
   primary_type=\`cat /tmp/primary.txt\`;
   # Si no se detectó tipo: usar 'feat' por defecto
-  [[ -z "$primary_type" ]] && primary_type="feat"
+  [ -z "$primary_type" ] && primary_type="feat"
   ```
 - Detectar tema central: extraer scope de conventional commits o palabra más frecuente
   ```bash
@@ -181,7 +181,7 @@ AUTO_CREATE_BRANCH=false
   cat /tmp/pr_scopes.txt | sort | uniq -c | sort -rn | head -1 | awk '{print $2}' > /tmp/tema.txt;
   tema_central=\`cat /tmp/tema.txt\`;
   # Si no hay scope, analizar palabras frecuentes (excluir stopwords)
-  if [[ -z "$tema_central" ]]; then
+  if [ -z "$tema_central" ]; then
       cat /tmp/pr_messages.txt | tr '[:upper:]' '[:lower:]' | tr -cs '[:alnum:]' '\n' | grep -vE '^(add|fix|update|implement|the|and|or|for|to|in|of|with)$' > /tmp/pr_words.txt;
       cat /tmp/pr_words.txt | sort | uniq -c | sort -rn | head -1 | awk '{print $2}' > /tmp/tema.txt;
       tema_central=\`cat /tmp/tema.txt\`
@@ -194,7 +194,7 @@ AUTO_CREATE_BRANCH=false
 - Construir nombre:
   - Si tema claro: `branch_name="${tema_central}-${timestamp}"`
   - Si no tema claro: `branch_name="${primary_type}-improvements-${timestamp}"`
-- Validar: `[[ "$branch_name" =~ ^[a-zA-Z0-9_-]+$ ]] || { echo "❌ Error: Branch name inválido"; exit 1; }`
+- Validar: `echo "$branch_name" | grep -Eq '^[a-zA-Z0-9_-]+$' || { echo "❌ Error: Branch name inválido"; exit 1; }`
 - Crear nueva rama con validación y rollback:
 
   ```bash
