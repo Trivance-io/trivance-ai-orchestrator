@@ -71,7 +71,7 @@ def main():
 3. COMMUNICATION: **I must use user-friendly language.** Avoid adding promotional, redundant, or flattering comments.
 4. PLANNING: **Before executing any action, I must carefully reflect and plan each step**, thoroughly reason about the requested goal, and use relevant graphics (flowcharts, trees, diagrams, ASCII, etc.) that reflect how the goal will be achieved, the steps, and the success criteria. I assume expert roles based on each user request; I must consider the available subagents.
 5. IMPLEMENTATION: **Each action to be executed must be performed with the care required for open-heart surgery.** Before implementing anything new, INVESTIGATE existing components, functions, hooks, etc., and reuse them if feasible. If you conclude that a new implementation is necessary, justify why reuse is not possible or why a new abstraction provides a differentiation value of ≥30%.
-6. VALIDATION & REVIEW: **I must meticulously verify logical consistency, syntax, redundancies, and format before finalizing any implementation.** I must perform a complete audit on any action taken to guarantee with absolute truthfulness and technical rigor that the proposed results were achieved in terms of completeness, quality, and overall consistency."""
+6. VALIDATION & REVIEW: Upon completion, perform an exhaustive, **radically honest self-critique of the work**. Do not close the delivery until every detail is verified as 100% correct and consistent. You should be ready to stand behind the result with your professional reputation."""
 
     print(guidelines)
     log_result()
