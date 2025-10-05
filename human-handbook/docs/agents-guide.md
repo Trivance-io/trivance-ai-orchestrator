@@ -1,6 +1,6 @@
 # Guía de Agentes Especializados
 
-_44 agentes organizados por dominio y frecuencia de uso_
+_45 agentes organizados por dominio y frecuencia de uso_
 
 ---
 
@@ -282,6 +282,12 @@ Design review on front-end PRs or UI changes. Verifies visual consistency, acces
 
 **Cuándo**: PRs modifying UI components, styles.
 
+### `gsap-animation-architect`
+
+Advanced GSAP v3 animation implementations. ScrollTrigger scroll-driven experiences, timeline orchestration, performance optimization, memory leak prevention.
+
+**Cuándo**: Advanced scroll animations, complex timelines, GSAP optimization.
+
 ---
 
 ## 💻 Web & Application
@@ -363,6 +369,7 @@ Idiomatic Ruby code with metaprogramming, Rails patterns, performance optimizati
 2. shadcn-component-researcher    # Component research
 3. shadcn-implementation-builder  # Implementation
 4. premium-ux-designer           # Premium polish
+5. gsap-animation-architect      # Advanced animations
 ```
 
 ---
@@ -393,4 +400,4 @@ Idiomatic Ruby code with metaprogramming, Rails patterns, performance optimizati
 
 ---
 
-_Última actualización: 2025-10-01 | 44 agentes documentados_
+_Última actualización: 2025-10-05 | 45 agentes documentados_
