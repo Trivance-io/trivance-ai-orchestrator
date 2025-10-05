@@ -41,17 +41,22 @@ graph TD
 # 1. Iniciar sesión desde main/develop
 /utils:session-start
 
-# 2. Crear worktree con ciclo SDD
+# 2. Crear worktree con ciclo SDD (automático)
 /SDD-cycle:specify "implement OAuth authentication"
 # → Crea: ../feature-001-implement-oauth/
 # → Rama: 001-implement-oauth
 # → Spec: specs/001-implement-oauth/spec.md
+# → Abre IDE automáticamente en nueva ventana
 
-# 3. Cambiar al worktree
-cd ../feature-001-implement-oauth
+# 3. CRÍTICO: En la nueva ventana del IDE
+#    (NO en la ventana anterior de Claude)
+Cmd+` (o View → Terminal) para abrir terminal integrado
 
-# 4. Nueva sesión en worktree
-/utils:session-start
+# 4. Verificar directorio correcto
+pwd  # DEBE mostrar: ../feature-001-implement-oauth/
+
+# 5. Continuar workflow SDD
+/SDD-cycle:plan
 ```
 
 **Opción B: Trabajo ad-hoc sin SDD** (fixes rápidos, POCs):
@@ -62,11 +67,16 @@ cd ../feature-001-implement-oauth
 
 # 2. Crear worktree aislado
 /git-github:worktree:create "fix-payment-bug" main
+# → Crea: ../worktree-fix-payment-bug/
+# → Abre IDE automáticamente en nueva ventana
 
-# 3. Cambiar al worktree
-cd ../worktree-fix-payment-bug
+# 3. CRÍTICO: En la nueva ventana del IDE
+Cmd+` para abrir terminal integrado
 
-# 4. Nueva sesión en worktree
+# 4. Verificar directorio correcto
+pwd  # DEBE mostrar: ../worktree-fix-payment-bug/
+
+# 5. Iniciar sesión Claude en worktree
 /utils:session-start
 ```
 
@@ -87,15 +97,59 @@ pwd           # Muestra directorio del worktree (NO repo principal)
 
 **Desde worktree existente**:
 
-- `/SDD-cycle:specify "sub-feature Y"` → NO crea nuevo worktree
-- Usa rama actual del worktree donde estás
-- Specs creados en directorio actual `./specs/`
-- ⚠️ Para feature independiente, regresa a main primero
+- `/SDD-cycle:specify "sub-feature Y"` → **NO crea nuevo worktree**
+- Usa la rama actual del worktree donde estás trabajando
+- Specs creados en directorio actual: `./specs/002-sub-feature-y/`
+- IDE **NO se reabre** (ya estás en el directorio correcto)
+- Siguiente paso: `/SDD-cycle:plan` (sin verificación de directorio)
+
+**⚠️ Para feature INDEPENDIENTE (nueva rama):**
+
+- Regresa a `main` primero: `cd` al repo principal
+- Ejecuta `/SDD-cycle:specify` desde allí
+- Esto creará nuevo worktree con nueva rama
 
 **Desde subdirectorio** (ej: `/src/components/`):
 
 - El script detecta automáticamente el repo root
 - Comportamiento igual que ejecutar desde root
+
+### ⚠️ Advertencia Crítica: Verificación de Directorio
+
+**PROBLEMA COMÚN:** Claude trabaja en el directorio equivocado
+
+**SÍNTOMAS:**
+
+- Los archivos se crean en el repo principal en lugar del worktree
+- Los cambios afectan la rama `main` en lugar de la rama de feature
+- El comando `git status` muestra archivos inesperados
+
+**SOLUCIÓN:**
+Después de que el IDE se abra automáticamente:
+
+1. **Abrir terminal integrado en la NUEVA ventana del IDE**
+   - Cmd+` (macOS) o Ctrl+` (Linux/Windows)
+   - NO reutilizar terminal de la ventana anterior
+
+2. **Verificar directorio**
+
+   ```bash
+   pwd
+   # Debe mostrar: ../feature-XXX-nombre/ o ../worktree-nombre/
+   # NO debe mostrar: el directorio del repo principal
+   ```
+
+3. **Si el directorio es incorrecto:**
+
+   ```bash
+   # Opción A: Navegar manualmente
+   cd ../feature-XXX-nombre/
+
+   # Opción B: Cerrar ventana y abrir correctamente
+   code ../feature-XXX-nombre --new-window
+   ```
+
+**Por qué es importante:** El directorio correcto garantiza que todos los comandos SDD funcionen sobre el worktree aislado, no sobre el repo principal.
 
 ---
 
@@ -363,7 +417,10 @@ Después de aprobar y mergear el PR:
 ```bash
 # Setup
 /git-github:worktree:create fix-bug main
-cd ../worktree-fix-bug
+# → Abre IDE automáticamente en nueva ventana
+
+# En la nueva ventana del IDE: Abrir terminal (Cmd+`)
+# Verificar: pwd debe mostrar ../worktree-fix-bug/
 
 # Implementation
 /utils:understand "specific problem"

@@ -90,11 +90,11 @@ AUTO_CREATE_BRANCH=false
 - Comandos git combinados (modo-consciente):
   ```bash
   if [ "$AUTO_CREATE_BRANCH" = "true" ]; then
-      # Modo AUTO: analizar últimos 10 commits de HEAD (no diff con target)
-      commit_count=\`git rev-list --count HEAD\`
-      git_data=\`git log --pretty=format:'%h %s' -n 10 HEAD\`
-      files_data=\`git diff --numstat HEAD~10..HEAD 2>/dev/null || echo ""\`
-      files_changed=\`git diff --name-only HEAD~10..HEAD 2>/dev/null | wc -l | tr -d ' '\`
+      # Modo AUTO: analizar commits locales NO en origin/$target_branch (únicos en el PR)
+      commit_count=\`git rev-list --count "origin/$target_branch..HEAD"\`
+      git_data=\`git log --pretty=format:'%h %s' "origin/$target_branch..HEAD"\`
+      files_data=\`git diff --numstat "origin/$target_branch..HEAD" 2>/dev/null || echo ""\`
+      files_changed=\`git diff --name-only "origin/$target_branch..HEAD" 2>/dev/null | wc -l | tr -d ' '\`
   else
       # Modo NORMAL: diff contra target
       git_data=\`git log --pretty=format:'%h %s' "origin/$target_branch..HEAD"\`
@@ -108,7 +108,10 @@ AUTO_CREATE_BRANCH=false
 - Validar que hay commits:
   ```bash
   if [ "$commit_count" -eq 0 ]; then
-      echo "❌ Error: No hay commits para crear PR"
+      echo "❌ Error: No hay commits nuevos para crear PR"
+      if [ "$AUTO_CREATE_BRANCH" = "true" ]; then
+          echo "   La rama $current_branch está sincronizada con origin/$target_branch"
+      fi
       exit 1
   fi
   ```
