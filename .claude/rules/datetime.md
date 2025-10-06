@@ -119,4 +119,4 @@ This rule has **HIGHEST PRIORITY** and must be followed by all commands that:
 - Track timestamps or progress
 - Log any time-based information
 
-Commands affected: prd-new, prd-parse, epic-decompose, prd-sync, issue-start, issue-sync, and any other command that writes timestamps.
+Commands affected: prd-new, prd-sync, issue-start, issue-sync, and any other command that writes timestamps.

@@ -1,6 +1,6 @@
 # Guía de Comandos Claude Code
 
-**25 comandos disponibles** (22 principales + 3 comandos de sincronización)
+**23 comandos disponibles** (reorganizados por flujo de desarrollo)
 
 _Comandos organizados por flujo de desarrollo y frecuencia de uso_
 
@@ -60,19 +60,20 @@ _Comandos organizados por flujo de desarrollo y frecuencia de uso_
 /PRD-cycle:prd-new <feature_name>
 ```
 
-**Qué hace**: Brainstorming para crear Product Requirements Document estructurado.
+**Qué hace**: Brainstorming para crear Product Requirements Document estructurado (minimalista, business-focused).
 
 **Cuándo**: Planificación de nueva feature desde cero.
 
-### `/PRD-cycle:prd-parse`
+### `/PRD-cycle:prd-sync`
 
 ```bash
-/PRD-cycle:prd-parse <feature_name>
+/PRD-cycle:prd-sync <feature_name>
+/PRD-cycle:prd-sync <feature_name> --milestone <number>
 ```
 
-**Qué hace**: Convierte PRD a descripción SDD-ready, pre-resuelve ambigüedades.
+**Qué hace**: Sincroniza PRD a GitHub como Parent Issue.
 
-**Cuándo**: Después de aprobar PRD, antes de SDD-cycle.
+**Cuándo**: Después de aprobar PRD, para tracking en GitHub.
 
 ---
 
@@ -203,24 +204,6 @@ _Comandos organizados por flujo de desarrollo y frecuencia de uso_
 
 Comandos para sincronizar artifacts locales a GitHub:
 
-#### `/git-github:epic-sync`
-
-```bash
-/git-github:epic-sync <epic_name>
-/git-github:epic-sync <epic_name> --milestone <number>
-```
-
-Push epic como parent issue con optional milestone.
-
-#### `/git-github:prd-sync`
-
-```bash
-/git-github:prd-sync <feature_name>
-/git-github:prd-sync <feature_name> --milestone <number>
-```
-
-Push PRD como parent issue con optional milestone.
-
 #### `/git-github:issue-sync`
 
 ```bash
@@ -336,7 +319,7 @@ claude /utils:session-start
 ### Feature desde PRD
 
 ```bash
-/PRD-cycle:prd-parse <feature_name>
+/PRD-cycle:prd-sync <feature_name>
 /SDD-cycle:specify --from-issue <number>
 # Continuar con workflow SDD desde clarify
 ```
@@ -401,4 +384,4 @@ claude /utils:session-start
 
 ---
 
-_Última actualización: 2025-10-01 | 26 comandos documentados_
+_Última actualización: 2025-10-06 | 23 comandos documentados_

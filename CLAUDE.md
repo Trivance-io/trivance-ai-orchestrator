@@ -87,7 +87,15 @@ _If you expect to exceed the budget: **stop and ask**._
 - Anti-over-engineering principles and complexity budget enforcement
 - Systematic approach to ensure production-ready solutions
 
-**Design Principles**: @.specify/memory/design-principles.md
+**Product Design Principles**: @.specify/memory/product-design-principles.md
+
+- Steve Jobs design philosophy: simplicity as ultimate sophistication
+- User experience first, technology second
+- Focus and saying no to 1,000 things
+- Perfection in details and obsessive craft
+- Innovation through seeing what others can't see
+
+**UIX Design Principles**: @.specify/memory/uix-design-principles.md
 
 - S-Tier SaaS dashboard design checklist (Stripe/Airbnb/Linear standards)
 - Complete design system foundation and UI component specifications

@@ -12,6 +12,7 @@ The user input can be either:
 
 - **Natural language**: `/SDD-cycle:specify "Create user authentication system"`
 - **GitHub Issue**: `/SDD-cycle:specify --from-issue 456`
+- **PRD file**: `/SDD-cycle:specify --from-prd <feature_name>`
 
 Assume you always have it available in this conversation even if `$ARGUMENTS` appears literally below. Do not ask the user to repeat it unless they provided an empty command.
 
@@ -22,6 +23,11 @@ Given that input, do this:
      - Extract issue number: `ISSUE_NUM=\`echo "$ARGUMENTS" | sed 's/--from-issue \*//'\``
      - Run: `gh issue view $ISSUE_NUM --json body,title --jq '.title + "\n\n" + .body'`
      - Use the GitHub Issue content as feature description
+   - If `$ARGUMENTS` starts with `--from-prd`:
+     - Extract feature name: `FEATURE_NAME=\`echo "$ARGUMENTS" | sed 's/--from-prd \*//'\``
+     - Read: `.claude/prds/$FEATURE_NAME/prd.md`
+     - Strip frontmatter (everything between `---` lines)
+     - Use clean PRD content as feature description
    - Otherwise: Use `$ARGUMENTS` directly as natural language feature description
 
 2. Run the script `.specify/scripts/bash/create-new-feature.sh --json "$FEATURE_DESCRIPTION"` from repo root and parse its JSON output for BRANCH_NAME and SPEC_FILE. All file paths must be absolute.
@@ -29,11 +35,12 @@ Given that input, do this:
 3. Load `.specify/templates/spec-template.md` to understand required sections.
 4. Write the specification to SPEC_FILE using the template structure, replacing placeholders with concrete details derived from the feature description while preserving section order and headings.
 
-   **IMPORTANT**: If input came from `--from-issue`, update the **Input** field to include parent issue reference:
-   - Replace: `**Input**: User description: "$ARGUMENTS"`
-   - With: `**Input**: GitHub Issue #$ISSUE_NUM: "$FEATURE_DESCRIPTION"`
+   **IMPORTANT**: Update the **Input** field based on source:
+   - If from `--from-issue`: Replace with `**Input**: GitHub Issue #$ISSUE_NUM: "$FEATURE_DESCRIPTION"`
+   - If from `--from-prd`: Replace with `**Input**: PRD (.claude/prds/$FEATURE_NAME/prd.md): "$FEATURE_DESCRIPTION"`
+   - Otherwise: Keep as `**Input**: User description: "$ARGUMENTS"`
 
-   This enables the tasks workflow to create GitHub sub-issues under the parent issue.
+   This enables the tasks workflow to track the source and create GitHub sub-issues when applicable.
 
 5. Open IDE automatically to enhance developer experience:
    - **Primary IDE (VS Code)**: Check if VS Code is available using `which code > /dev/null 2>&1`
