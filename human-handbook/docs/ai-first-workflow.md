@@ -163,25 +163,20 @@ Para features nuevas que requieren planificación de negocio:
 # === FASE 1: PRD (Business Layer) ===
 /PRD-cycle:prd-new <feature_name>
 # → Brainstorming completo
-# → Crea PRD estructurado en .claude/prds/<feature>/prd.md
+# → Crea PRD minimalista (50-100 líneas) en .claude/prds/<feature>/prd.md
 
-# Optimizar PRD para SDD
-/PRD-cycle:prd-parse <feature_name>
-# → Pre-resuelve ambigüedades
-# → Genera sdd-input.md optimizado
-
-# Sincronizar a GitHub (opcional)
-/git-github:prd-sync <feature_name>
+# Sincronizar a GitHub
+/PRD-cycle:prd-sync <feature_name>
 # → Crea parent issue en GitHub
 # → Trackea progreso de negocio
 
 # === FASE 2: SDD (Engineering Layer) ===
 /SDD-cycle:specify --from-issue <issue_number>
-# O usar sdd-input.md:
-/SDD-cycle:specify "$(cat .claude/prds/<feature>/sdd-input.md)"
+# O usar PRD local:
+/SDD-cycle:specify --from-prd <feature_name>
 # → Crea especificación técnica
 # → Genera branch automáticamente
-# → Crea spec.md
+# → Crea spec.md con [NEEDS CLARIFICATION] markers
 
 /SDD-cycle:clarify
 # → Detecta ambigüedades (5 preguntas max)
@@ -371,8 +366,7 @@ Después de aprobar y mergear el PR:
 ```bash
 # Business Planning
 /PRD-cycle:prd-new feature-name
-/PRD-cycle:prd-parse feature-name
-/git-github:prd-sync feature-name
+/PRD-cycle:prd-sync feature-name
 
 # Engineering Implementation
 /SDD-cycle:specify --from-issue <number>
@@ -526,14 +520,9 @@ Después de aprobar y mergear el PR:
 
 ```bash
 # PRD → GitHub Issue
-/git-github:prd-sync <feature_name>
+/PRD-cycle:prd-sync <feature_name>
 # → Crea parent issue
 # → Trackea progreso de negocio
-
-# Epic → GitHub Issue
-/git-github:epic-sync <epic_name>
-# → Crea parent issue para epic
-# → Milestone assignment opcional
 
 # Updates → GitHub Comments
 /git-github:issue-sync <issue_number>
@@ -563,10 +552,10 @@ Después de aprobar y mergear el PR:
 
 ### PRD-cycle (Business Layer)
 
-| Comando                | Propósito             |
-| ---------------------- | --------------------- |
-| `/PRD-cycle:prd-new`   | Crear nuevo PRD       |
-| `/PRD-cycle:prd-parse` | PRD → SDD-ready input |
+| Comando               | Propósito                      |
+| --------------------- | ------------------------------ |
+| `/PRD-cycle:prd-new`  | Crear PRD minimalista          |
+| `/PRD-cycle:prd-sync` | Sincronizar PRD a GitHub Issue |
 
 ### SDD-cycle (Engineering Layer)
 
@@ -590,8 +579,6 @@ Después de aprobar y mergear el PR:
 | `/git-github:pr`               | Crear PR con security review |
 | `/git-github:switch`           | Cambio seguro de rama        |
 | `/git-github:issue-manager`    | Gestionar issues             |
-| `/git-github:prd-sync`         | Sincronizar PRD              |
-| `/git-github:epic-sync`        | Sincronizar epic             |
 | `/git-github:issue-sync`       | Sincronizar updates          |
 
 ---

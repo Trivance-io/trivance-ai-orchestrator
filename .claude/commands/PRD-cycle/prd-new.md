@@ -5,7 +5,7 @@ model: claude-opus-4-1
 
 # PRD New
 
-Launch brainstorming for new product requirement document.
+Launch brainstorming for new product requirement document (minimalista, business-focused).
 
 ## Usage
 
@@ -36,7 +36,7 @@ Do not bother the user with preflight checks progress ("I'm not going to ..."). 
    - Check if `.claude/prds/$ARGUMENTS/prd.md` already exists
    - If it exists, ask user: "⚠️ PRD '$ARGUMENTS' already exists. Do you want to overwrite it? (yes/no)"
    - Only proceed with explicit 'yes' confirmation
-   - If user says no, suggest: "Use a different name or run: /PRD-cycle:prd-parse $ARGUMENTS to create SDD-ready description from the existing PRD"
+   - If user says no, suggest: "Use a different name or sync existing PRD: /PRD-cycle:prd-sync $ARGUMENTS"
 
 3. **Verify directory structure:**
    - Ensure `.claude/prds/$ARGUMENTS/` directory exists or can be created
@@ -44,70 +44,104 @@ Do not bother the user with preflight checks progress ("I'm not going to ..."). 
 
 ## Instructions
 
-You are a product manager creating a comprehensive Product Requirements Document (PRD) for: **$ARGUMENTS**
+You are a product manager creating a **lean, business-focused** Product Requirements Document (PRD) for: **$ARGUMENTS**
 
-Follow this structured approach:
+### Design Philosophy (Steve Jobs Principles)
 
-### 1. Discovery & Context
+**"Simplicity is the ultimate sophistication"**
 
-- Ask clarifying questions about the feature/product "$ARGUMENTS"
-- Understand the problem being solved
-- Identify target users and use cases
-- Gather constraints and requirements
+- PRD describes WHAT and WHY, not HOW
+- Target: 50-100 lines (vs typical 300+ line PRDs)
+- Say NO to implementation details (stack, architecture, config)
+- Focus on user value and business outcomes
 
-### 2. PRD Structure
+### Discovery & Context
 
-Create a comprehensive PRD with these sections:
+Ask clarifying questions about:
 
-#### Executive Summary
+- **Problem**: What specific problem are we solving? Why now?
+- **Users**: Who experiences this problem? Primary personas?
+- **Impact**: What happens if we DON'T solve this?
+- **Success**: How do we measure if this works?
+- **Constraints**: Budget, timeline, compliance requirements?
+- **Scope**: What are we explicitly NOT building in V1?
 
-- Brief overview and value proposition
+### PRD Structure (Minimalista)
 
-#### Problem Statement
+Create a lean PRD with ONLY these sections:
 
-- What problem are we solving?
-- Why is this important now?
+#### 1. Problem Statement (5-10 lines)
 
-#### User Stories
+- What problem exists today?
+- Who experiences this problem?
+- Why is it important to solve NOW?
+- What's the cost of NOT solving it?
 
-- Primary user personas
-- Detailed user journeys
-- Pain points being addressed
+#### 2. User Impact (10-20 lines)
 
-#### Requirements
+**Primary Users**
 
-**Functional Requirements**
+- [Persona 1]: [Their need in one sentence]
+- [Persona 2]: [Their need in one sentence]
 
-- Core features and capabilities
-- UX/UI interactions and flows
+**User Journey (Happy Path)**
 
-**Non-Functional Requirements**
+1. User does X
+2. System provides Y
+3. User achieves outcome Z
 
-- Performance expectations
-- Security considerations
-- Scalability needs
+**User Pain Points**
 
-#### Success Criteria
+- Current friction point 1
+- Current friction point 2
 
-- Measurable outcomes
-- Key metrics and KPIs
+#### 3. Success Criteria (5-10 lines)
 
-#### Constraints & Assumptions
+**Quantitative**
 
-- Technical limitations
-- Timeline constraints
-- Resource limitations
+- Metric 1: [Baseline] → [Target] (e.g., "Onboarding time: 30min → 5min")
+- Metric 2: [Baseline] → [Target]
 
-#### Out of Scope
+**Qualitative**
 
-- What we're explicitly NOT building
+- Observable outcome 1 (e.g., "Zero Slack questions about 'where is X documented?'")
+- Observable outcome 2
 
-#### Dependencies
+#### 4. Constraints (5-10 lines)
 
-- External dependencies
-- Internal team dependencies
+- **Budget**: $X or "zero cost"
+- **Timeline**: [Deadline] or "immediate"
+- **Team**: [Size/skills available]
+- **Compliance**: [Regulatory requirements if any]
+- **Complexity Budget**: Size S/M/L (S: ≤80 LOC, M: ≤250 LOC, L: ≤600 LOC)
 
-### 3. File Format with Frontmatter
+#### 5. Out of Scope (V1) (5-10 lines)
+
+Explicitly list what we're NOT building:
+
+- [Feature X]: Why excluded (defer to V2, complexity, etc.)
+- [Feature Y]: Why excluded
+- [Feature Z]: Why excluded
+
+### What NOT to Include (Critical)
+
+**❌ DO NOT include these (belong in SDD-cycle):**
+
+- Stack decisions (e.g., "Use Jekyll", "Use React")
+- Architecture diagrams or technical design
+- Domain entities and data models
+- API endpoints or database schemas
+- Configuration files (e.g., `_config.yml`)
+- Performance targets (e.g., "<200ms latency") - keep high-level only
+- Edge cases and error handling (technical details)
+- Integration dependencies (technical details)
+
+**✅ Keep it business-level:**
+
+- "Users need to find documentation quickly" ✅
+- "System must use Algolia search with <200ms response" ❌
+
+### File Format with Frontmatter
 
 Save the completed PRD to: `.claude/prds/$ARGUMENTS/prd.md` with this exact structure:
 
@@ -121,18 +155,32 @@ created: [Current ISO date/time]
 
 # PRD: $ARGUMENTS
 
-## Executive Summary
-
-[Content...]
-
 ## Problem Statement
 
 [Content...]
 
-[Continue with all sections...]
+## User Impact
+
+[Content...]
+
+## Success Criteria
+
+[Content...]
+
+## Constraints
+
+[Content...]
+
+## Out of Scope (V1)
+
+[Content...]
+
+---
+
+**Next Steps**: Run `/PRD-cycle:prd-sync $ARGUMENTS` to sync to GitHub as Parent Issue
 ```
 
-### 4. Frontmatter Guidelines
+### Frontmatter Guidelines
 
 - **name**: Use the exact feature name (same as $ARGUMENTS)
 - **description**: Write a concise one-line summary of what this PRD covers
@@ -141,23 +189,28 @@ created: [Current ISO date/time]
   - Never use placeholder text
   - Must be actual system time in ISO 8601 format
 
-### 5. Quality Checks
+### Quality Checks
 
 Before saving the PRD, verify:
 
-- [ ] All sections are complete (no placeholder text)
-- [ ] User stories include acceptance criteria
+- [ ] Total length: 50-100 lines (excluding frontmatter)
+- [ ] No implementation details (no stack, no config, no architecture)
+- [ ] Problem and user impact are crystal clear
 - [ ] Success criteria are measurable
-- [ ] Dependencies are clearly identified
-- [ ] Out of scope items are explicitly listed
+- [ ] Out of scope explicitly defined
+- [ ] All sections complete (no placeholder text like "TBD")
+- [ ] Written for business stakeholders (non-technical language)
 
-### 6. Post-Creation
+### Post-Creation
 
 After successfully creating the PRD:
 
 1. Confirm: "✅ PRD created: .claude/prds/$ARGUMENTS/prd.md"
-2. Show brief summary of what was captured
-3. Suggest next step: "Ready to create SDD-ready description? Run: /PRD-cycle:prd-parse $ARGUMENTS"
+2. Show brief summary:
+   - Problem: [One sentence]
+   - Target: [Primary metric]
+   - Complexity: Size S/M/L
+3. Suggest next step: "Ready to sync to GitHub? Run: `/PRD-cycle:prd-sync $ARGUMENTS`"
 
 ## Error Recovery
 
@@ -167,4 +220,6 @@ If any step fails:
 - Provide specific steps to fix the issue
 - Never leave partial or corrupted files
 
-Conduct a thorough brainstorming session before writing the PRD. Ask questions, explore edge cases, and ensure comprehensive coverage of the feature requirements for "$ARGUMENTS".
+**Target**: Create a lean, business-focused PRD that fits on one screen (50-100 lines). Technical details are handled by SDD-cycle, not here.
+
+Conduct a thorough brainstorming session before writing the PRD. Ask questions, explore trade-offs, and ensure comprehensive coverage of the **business requirements** (not technical implementation) for "$ARGUMENTS".
