@@ -1,12 +1,12 @@
 # Workflow AI-First
 
-_Guía completa del ecosistema PRD → SDD → GitHub_
+_Guía del ecosistema PRD → SDD → GitHub_
 
 ---
 
 ## 🎯 Arquitectura del Ecosistema
 
-El ecosistema está diseñado en 3 capas integradas:
+El ecosistema opera en 3 capas integradas:
 
 ```
 📋 PRD-cycle (Business Layer)
@@ -55,8 +55,11 @@ Cmd+` (o View → Terminal) para abrir terminal integrado
 # 4. Verificar directorio correcto
 pwd  # DEBE mostrar: ../feature-001-implement-oauth/
 
-# 5. Continuar workflow SDD
-/SDD-cycle:plan
+# 5. Continuar workflow SDD (SECUENCIAL, OBLIGATORIO)
+/SDD-cycle:clarify   # Reducir ambigüedades (NUNCA omitir)
+/SDD-cycle:plan      # Genera plan.md + tasks.md
+/SDD-cycle:analyze   # Valida consistencia
+/SDD-cycle:implement # Ejecuta implementación
 ```
 
 **Opción B: Trabajo ad-hoc sin SDD** (fixes rápidos, POCs):
@@ -101,7 +104,7 @@ pwd           # Muestra directorio del worktree (NO repo principal)
 - Usa la rama actual del worktree donde estás trabajando
 - Specs creados en directorio actual: `./specs/002-sub-feature-y/`
 - IDE **NO se reabre** (ya estás en el directorio correcto)
-- Siguiente paso: `/SDD-cycle:plan` (sin verificación de directorio)
+- Siguiente paso: `/SDD-cycle:clarify` (OBLIGATORIO, sin verificación de directorio)
 
 **⚠️ Para feature INDEPENDIENTE (nueva rama):**
 
@@ -170,7 +173,7 @@ Para features nuevas que requieren planificación de negocio:
 # → Crea parent issue en GitHub
 # → Trackea progreso de negocio
 
-# === FASE 2: SDD (Engineering Layer) ===
+# === FASE 2: SDD (Engineering Layer - SECUENCIAL OBLIGATORIO) ===
 /SDD-cycle:specify --from-issue <issue_number>
 # O usar PRD local:
 /SDD-cycle:specify --from-prd <feature_name>
@@ -181,19 +184,15 @@ Para features nuevas que requieren planificación de negocio:
 /SDD-cycle:clarify
 # → Detecta ambigüedades (5 preguntas max)
 # → Actualiza spec con respuestas
-# → CRÍTICO: reduce rework 70%
+# → OBLIGATORIO: nunca omitir este paso
 
 /SDD-cycle:plan
 # → Genera artifacts de diseño
 # → research.md, data-model.md, contracts/, quickstart.md
-
-/SDD-cycle:tasks
-# → Genera tasks.md con dependency order
-# → Marca tareas paralelas [P]
-# → Crea GitHub sub-issues si hay parent
+# → IMPORTANTE: genera tasks.md automáticamente (Phase 2)
 
 /SDD-cycle:analyze
-# → Validación cross-artifact
+# → Validación cross-artifact (spec.md, plan.md, tasks.md)
 # → Detección de inconsistencias
 # → Plan de coordinación
 
@@ -218,7 +217,7 @@ Para features nuevas que requieren planificación de negocio:
 Para features técnicas o bug fixes que no requieren PRD:
 
 ```bash
-# === FASE 1: SDD (Engineering Layer) ===
+# === FASE 1: SDD (Engineering Layer - SECUENCIAL OBLIGATORIO) ===
 /utils:understand
 # → Mapea arquitectura existente
 # → Identifica patrones y convenciones
@@ -227,12 +226,11 @@ Para features técnicas o bug fixes que no requieren PRD:
 # → Crea especificación técnica directamente
 # → Branch automático + spec.md
 
-# Continuar con ciclo SDD completo
-/SDD-cycle:clarify
-/SDD-cycle:plan
-/SDD-cycle:tasks
-/SDD-cycle:analyze
-/SDD-cycle:implement
+# Continuar con ciclo SDD completo (SECUENCIAL)
+/SDD-cycle:clarify   # OBLIGATORIO
+/SDD-cycle:plan      # Genera plan.md + tasks.md
+/SDD-cycle:analyze   # Valida consistencia
+/SDD-cycle:implement # Ejecuta tasks.md
 
 # === FASE 2: GitHub Integration ===
 /git-github:commit "all changes"
@@ -368,11 +366,10 @@ Después de aprobar y mergear el PR:
 /PRD-cycle:prd-new feature-name
 /PRD-cycle:prd-sync feature-name
 
-# Engineering Implementation
+# Engineering Implementation (SECUENCIAL)
 /SDD-cycle:specify --from-issue <number>
 /SDD-cycle:clarify
 /SDD-cycle:plan
-/SDD-cycle:tasks
 /SDD-cycle:analyze
 /SDD-cycle:implement
 
@@ -388,12 +385,11 @@ Después de aprobar y mergear el PR:
 ### Feature Técnica (Sin PRD)
 
 ```bash
-# Engineering Direct
+# Engineering Direct (SECUENCIAL)
 /utils:understand
 /SDD-cycle:specify "feature description"
 /SDD-cycle:clarify
 /SDD-cycle:plan
-/SDD-cycle:tasks
 /SDD-cycle:analyze
 /SDD-cycle:implement
 
@@ -416,12 +412,11 @@ Después de aprobar y mergear el PR:
 # En la nueva ventana del IDE: Abrir terminal (Cmd+`)
 # Verificar: pwd debe mostrar ../worktree-fix-bug/
 
-# Implementation
+# Implementation (SECUENCIAL)
 /utils:understand "specific problem"
 /SDD-cycle:specify "fix bug description"
 /SDD-cycle:clarify
 /SDD-cycle:plan
-/SDD-cycle:tasks
 /SDD-cycle:analyze
 /SDD-cycle:implement
 
@@ -447,7 +442,9 @@ Después de aprobar y mergear el PR:
 ```bash
 /utils:understand                       # Context mapping
 /SDD-cycle:specify "feature"            # Inicia ciclo SDD
-/SDD-cycle:clarify                      # Reduce rework 70%
+/SDD-cycle:clarify                      # OBLIGATORIO
+/SDD-cycle:plan                         # Genera plan.md + tasks.md
+/SDD-cycle:analyze                      # Valida consistencia
 /SDD-cycle:implement                    # Motor de implementación
 /git-github:commit "message"            # Commit semántico
 /git-github:pr <target-branch>          # Crear PR
@@ -474,7 +471,7 @@ Después de aprobar y mergear el PR:
 
 ### DO (Hacer)
 
-- ✅ Usar `/SDD-cycle:clarify` SIEMPRE (reduce rework 70%)
+- ✅ Usar `/SDD-cycle:clarify` SIEMPRE (nunca omitir)
 - ✅ Ejecutar security review antes de PR (`/git-github:pr` lo hace automático)
 - ✅ Mantener un PR por worktree
 - ✅ Usar commits semánticos con referencias: `fix: Closes #77`
@@ -482,7 +479,7 @@ Después de aprobar y mergear el PR:
 
 ### DON'T (No Hacer)
 
-- ❌ Saltarse `/SDD-cycle:clarify` (causa rework masivo)
+- ❌ Saltarse `/SDD-cycle:clarify`
 - ❌ Crear múltiples PRs para una feature
 - ❌ Desarrollar en main/develop directamente
 - ❌ Mergear sin security review aprobado
@@ -557,17 +554,18 @@ Después de aprobar y mergear el PR:
 | `/PRD-cycle:prd-new`  | Crear PRD minimalista          |
 | `/PRD-cycle:prd-sync` | Sincronizar PRD a GitHub Issue |
 
-### SDD-cycle (Engineering Layer)
+### SDD-cycle (Engineering Layer - SECUENCIAL OBLIGATORIO)
 
-| Comando                   | Propósito                         |
-| ------------------------- | --------------------------------- |
-| `/SDD-cycle:specify`      | Crear especificación técnica      |
-| `/SDD-cycle:clarify`      | Clarificar ambigüedades (CRÍTICO) |
-| `/SDD-cycle:plan`         | Generar artifacts de diseño       |
-| `/SDD-cycle:tasks`        | Generar tareas ejecutables        |
-| `/SDD-cycle:analyze`      | Validación cross-artifact         |
-| `/SDD-cycle:implement`    | Motor de implementación           |
-| `/SDD-cycle:constitution` | Actualizar constitución           |
+| Comando                   | Propósito                                              |
+| ------------------------- | ------------------------------------------------------ |
+| `/SDD-cycle:specify`      | Crear especificación técnica                           |
+| `/SDD-cycle:clarify`      | Clarificar ambigüedades (OBLIGATORIO, nunca omitir)    |
+| `/SDD-cycle:plan`         | Generar artifacts de diseño + tasks.md (automático)    |
+| `/SDD-cycle:analyze`      | Validación cross-artifact (spec.md, plan.md, tasks.md) |
+| `/SDD-cycle:implement`    | Motor de implementación (ejecuta tasks.md)             |
+| `/SDD-cycle:constitution` | Actualizar constitución                                |
+
+**NOTA CRÍTICA**: `tasks.md` es generado automáticamente por `/SDD-cycle:plan` (Phase 2). NO existe comando `/SDD-cycle:tasks`.
 
 ### git-github (Delivery Layer)
 
@@ -583,4 +581,4 @@ Después de aprobar y mergear el PR:
 
 ---
 
-_Última actualización: 2025-10-01 | Ecosistema PRD-SDD-GitHub_
+_Última actualización: 2025-10-06 | Ecosistema PRD-SDD-GitHub_
