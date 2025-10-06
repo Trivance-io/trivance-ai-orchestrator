@@ -79,7 +79,8 @@ git branch   # DEBE mostrar: rama de feature (NO main/develop)
 # === SDD (Engineering - SECUENCIAL OBLIGATORIO) ===
 /SDD-cycle:specify --from-issue <issue_number>
 /SDD-cycle:clarify   # OBLIGATORIO (detecta ambigüedades, actualiza spec)
-/SDD-cycle:plan      # Genera plan.md + tasks.md (automático)
+/SDD-cycle:plan      # Genera research.md, data-model.md, contracts/, quickstart.md
+/SDD-cycle:tasks     # Genera tasks.md con GitHub sub-issues integration
 /SDD-cycle:analyze   # Valida consistencia cross-artifact
 /SDD-cycle:implement # Ejecuta tasks.md (TDD + parallelization)
 
@@ -96,7 +97,8 @@ git branch   # DEBE mostrar: rama de feature (NO main/develop)
 /utils:understand    # Mapea arquitectura existente
 /SDD-cycle:specify "Implement OAuth authentication"
 /SDD-cycle:clarify   # OBLIGATORIO
-/SDD-cycle:plan      # Genera plan.md + tasks.md
+/SDD-cycle:plan      # Genera research.md, data-model.md, contracts/, quickstart.md
+/SDD-cycle:tasks     # Genera tasks.md
 /SDD-cycle:analyze   # Valida consistencia
 /SDD-cycle:implement # Ejecuta tasks.md
 
@@ -117,6 +119,7 @@ git branch   # DEBE mostrar: rama de feature (NO main/develop)
 /SDD-cycle:specify "fix bug description"
 /SDD-cycle:clarify   # OBLIGATORIO
 /SDD-cycle:plan
+/SDD-cycle:tasks
 /SDD-cycle:analyze
 /SDD-cycle:implement
 
@@ -221,16 +224,15 @@ git push
 
 ### SDD-cycle (Engineering Layer - SECUENCIAL OBLIGATORIO)
 
-| Comando                   | Propósito                                 |
-| ------------------------- | ----------------------------------------- |
-| `/SDD-cycle:specify`      | Crear especificación técnica              |
-| `/SDD-cycle:clarify`      | Clarificar ambigüedades (OBLIGATORIO)     |
-| `/SDD-cycle:plan`         | Generar plan.md + tasks.md (automático)   |
-| `/SDD-cycle:analyze`      | Validación cross-artifact                 |
-| `/SDD-cycle:implement`    | Ejecutar tasks.md (TDD + parallelization) |
-| `/SDD-cycle:constitution` | Actualizar constitución                   |
-
-**NOTA**: `tasks.md` generado por `/SDD-cycle:plan` (Phase 2). NO existe comando `/SDD-cycle:tasks`.
+| Comando                   | Propósito                                                     |
+| ------------------------- | ------------------------------------------------------------- |
+| `/SDD-cycle:specify`      | Crear especificación técnica                                  |
+| `/SDD-cycle:clarify`      | Clarificar ambigüedades (OBLIGATORIO)                         |
+| `/SDD-cycle:plan`         | Generar research.md, data-model.md, contracts/, quickstart.md |
+| `/SDD-cycle:tasks`        | Generar tasks.md con GitHub sub-issues                        |
+| `/SDD-cycle:analyze`      | Validación cross-artifact                                     |
+| `/SDD-cycle:implement`    | Ejecutar tasks.md (TDD + parallelization)                     |
+| `/SDD-cycle:constitution` | Actualizar constitución                                       |
 
 ### git-github (Delivery Layer)
 

@@ -84,10 +84,18 @@ Detecta ambigüedades en spec, hace hasta 5 preguntas targeted. **ANTES** de `/S
 
 ### `/SDD-cycle:plan`
 
-Genera artifacts de diseño (research.md, data-model.md, contracts/, quickstart.md) + tasks.md. Después de spec clarificada.
+Genera artifacts de diseño (research.md, data-model.md, contracts/, quickstart.md). Describe estrategia para tasks pero NO los crea. Después de spec clarificada.
 
 ```bash
 /SDD-cycle:plan
+```
+
+### `/SDD-cycle:tasks`
+
+Genera tasks.md ejecutable con dependency ordering y GitHub sub-issues integration. Después de plan, antes de analyze.
+
+```bash
+/SDD-cycle:tasks
 ```
 
 ### `/SDD-cycle:analyze`
@@ -226,12 +234,12 @@ Actualiza CHANGELOG.md con PRs mergeados (Keep a Changelog format), detecta dupl
 
 Ver workflows completos en @ai-first-workflow.md
 
-| Workflow          | Comandos Core                                            |
-| ----------------- | -------------------------------------------------------- |
-| **Feature nueva** | `specify` → `clarify` → `plan` → `analyze` → `implement` |
-| **Con PRD**       | `prd-new` → `prd-sync` → `specify --from-issue` → ...    |
-| **Bug fix**       | `worktree:create` → `understand` → fix → `commit` → `pr` |
-| **Análisis**      | `issue-manager` → `understand` (si necesario)            |
+| Workflow          | Comandos Core                                                                                            |
+| ----------------- | -------------------------------------------------------------------------------------------------------- |
+| **Feature nueva** | `specify` → `clarify` → `plan` → `tasks` → `analyze` → `implement`                                       |
+| **Con PRD**       | `prd-new` → `prd-sync` → `specify --from-issue` → `clarify` → `plan` → `tasks` → `analyze` → `implement` |
+| **Bug fix**       | `worktree:create` → `understand` → fix → `commit` → `pr`                                                 |
+| **Análisis**      | `issue-manager` → `understand` (si necesario)                                                            |
 
 ---
 
