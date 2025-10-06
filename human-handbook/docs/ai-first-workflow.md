@@ -163,7 +163,7 @@ git push
 | `frontend-developer`    | React/Vue components, state management |
 | `database-optimizer`    | Query optimization, schema design      |
 
-📖 Referencia completa: @human-handbook/docs/agents-guide.md (44 agentes)
+📖 Referencia completa: @agents-guide.md (45 agentes)
 
 ---
 

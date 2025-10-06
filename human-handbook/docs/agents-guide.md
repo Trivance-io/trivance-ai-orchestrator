@@ -324,56 +324,6 @@ Idiomatic Ruby code with metaprogramming, Rails patterns, performance optimizati
 
 ---
 
-## 🎯 Workflows Típicos
-
-### Feature Completa
-
-```bash
-1. backend-architect               # API design
-2. frontend-developer              # UI components
-3. database-optimizer              # Schema optimization
-4. code-quality-reviewer          # Quality assurance
-5. security-reviewer              # Security review
-```
-
-### Code Review Profundo
-
-```bash
-1. code-quality-reviewer          # Universal principles
-2. architect-reviewer             # Architecture integrity
-3. security-reviewer              # Security audit
-4. edge-case-detector            # Boundary testing
-```
-
-### Production Readiness
-
-```bash
-1. security-reviewer              # Security review
-2. config-security-expert         # Config hardening
-3. performance-engineer           # Performance optimization
-4. observability-engineer         # Monitoring setup
-```
-
-### Testing Completo
-
-```bash
-1. test-automator                 # Test automation strategy
-2. playwright-test-generator      # E2E test generation
-3. tdd-orchestrator              # TDD workflow
-```
-
-### UI Development (Shadcn)
-
-```bash
-1. shadcn-requirements-analyzer   # Component requirements
-2. shadcn-component-researcher    # Component research
-3. shadcn-implementation-builder  # Implementation
-4. premium-ux-designer           # Premium polish
-5. gsap-animation-architect      # Advanced animations
-```
-
----
-
 ## 💡 Tips de Uso
 
 ### Selección de Agentes
@@ -400,4 +350,4 @@ Idiomatic Ruby code with metaprogramming, Rails patterns, performance optimizati
 
 ---
 
-_Última actualización: 2025-10-05 | 45 agentes documentados_
+_Última actualización: 2025-10-06 | 45 agentes documentados_
