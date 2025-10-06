@@ -33,7 +33,15 @@ Given that input, do this:
 2. Run the script `.specify/scripts/bash/create-new-feature.sh --json "$FEATURE_DESCRIPTION"` from repo root and parse its JSON output for BRANCH_NAME and SPEC_FILE. All file paths must be absolute.
    **IMPORTANT** You must only ever run this script once. The JSON is provided in the terminal as output - always refer to it to get the actual content you're looking for.
 3. Load `.specify/templates/spec-template.md` to understand required sections.
-4. Write the specification to SPEC_FILE using the template structure, replacing placeholders with concrete details derived from the feature description while preserving section order and headings.
+4. Replace the template in SPEC_FILE with the actual specification using bash heredoc (avoids Write/Edit ownership conflicts since script already created the file):
+
+   ```bash
+   cat > "$SPEC_FILE" <<'SPEC_EOF'
+   [Complete specification content here]
+   SPEC_EOF
+   ```
+
+   Populate the specification using the template structure, replacing placeholders with concrete details derived from the feature description while preserving section order and headings.
 
    **IMPORTANT**: Update the **Input** field based on source:
    - If from `--from-issue`: Replace with `**Input**: GitHub Issue #$ISSUE_NUM: "$FEATURE_DESCRIPTION"`
