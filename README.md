@@ -120,7 +120,30 @@ Add more: [MCP Registry](https://github.com/modelcontextprotocol/servers)
 
 ## 📚 Documentation
 
-After setup, explore the **Human Handbook** at `human-handbook/docs/`:
+### **Documentation Site**
+
+🌐 **[Trivance AI Handbook](https://trivance-io.github.io/trivance-ai-orchestrator/)**
+
+Interactive documentation site deployed on GitHub Pages with:
+
+- ✨ Spanish UI with local search
+- 🌙 Dark mode support
+- 📱 Mobile responsive
+- 🚀 Auto-deploys on push to main
+
+### **Local Development**
+
+Run the documentation site locally:
+
+```bash
+npm run docs:dev      # Start dev server (http://localhost:5173)
+npm run docs:build    # Build for production
+npm run docs:preview  # Preview production build
+```
+
+### **Source Documentation**
+
+Raw markdown files at `human-handbook/docs/`:
 
 | Guide                                                                      | Purpose                               |
 | -------------------------------------------------------------------------- | ------------------------------------- |

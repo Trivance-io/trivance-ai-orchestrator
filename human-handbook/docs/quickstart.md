@@ -12,7 +12,7 @@ cd trivance-ai-orchestrator
 
 **Troubleshooting:** The script provides exact installation links for missing dependencies.
 
-**Full dependency list:** [README.md](../../README.md#-prerequisites)
+**Full dependency list:** Ver README.md del repositorio (sección Prerequisites)
 
 ---
 
