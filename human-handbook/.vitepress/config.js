@@ -4,6 +4,7 @@ export default defineConfig({
   lang: "es-ES",
   title: "Trivance AI Handbook",
   description: "Guía completa para desarrollo AI-first con Claude Code",
+  base: "/trivance-ai-orchestrator/",
   appearance: true,
 
   themeConfig: {
