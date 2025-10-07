@@ -9,8 +9,8 @@ build/
 .expo/
 
 # VitePress
-.vitepress/cache/
-.vitepress/dist/
+**/.vitepress/cache/
+**/.vitepress/dist/
 
 # Specs directory
 specs/

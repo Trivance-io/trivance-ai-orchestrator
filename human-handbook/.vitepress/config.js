@@ -7,6 +7,10 @@ export default defineConfig({
   base: "/trivance-ai-orchestrator/",
   appearance: true,
 
+  head: [
+    ["link", { rel: "icon", href: "/trivance-ai-orchestrator/favicon.png" }],
+  ],
+
   themeConfig: {
     search: {
       provider: "local",
