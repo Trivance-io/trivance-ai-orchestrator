@@ -3,34 +3,46 @@ layout: home
 
 hero:
   name: "Trivance AI Handbook"
-  text: "Desarrollo AI-First"
-  tagline: "Guía completa para ingenieros sin experiencia en IA"
+  text: "AI-First Development"
+  tagline: "Constitutional framework para desarrollo orquestado por Claude Code"
   actions:
     - theme: brand
-      text: Comenzar
+      text: Setup
       link: /docs/quickstart
     - theme: alt
-      text: Ver Workflows
+      text: Workflows
       link: /docs/ai-first-workflow
 
 features:
-  - icon: 🚀
+  - icon:
+      src: /icons/rocket.svg
+      width: 48
+      height: 48
     title: Quickstart
-    details: Configura tu entorno y ejecuta tu primer proyecto AI-first en minutos
+    details: Validación de dependencias, configuración de ambiente, primer ciclo SDD
     link: /docs/quickstart
 
-  - icon: 🔄
+  - icon:
+      src: /icons/workflow.svg
+      width: 48
+      height: 48
     title: AI-First Workflow
-    details: Metodología completa para desarrollo con Claude Code
+    details: Ecosistema PRD → SDD → GitHub con TDD enforcement
     link: /docs/ai-first-workflow
 
-  - icon: 🤖
-    title: Agentes Especializados
-    details: Guía de 20+ agentes para tareas específicas
+  - icon:
+      src: /icons/cpu.svg
+      width: 48
+      height: 48
+    title: Specialized Agents
+    details: 45 agentes categorizados por dominio técnico
     link: /docs/agents-guide
 
-  - icon: 💡
-    title: Tips Profesionales
-    details: Mejores prácticas y trucos avanzados
+  - icon:
+      src: /icons/shield-check.svg
+      width: 48
+      height: 48
+    title: Best Practices
+    details: Patterns profesionales para workflows AI-First
     link: /docs/claude-code-pro-tips
 ---
