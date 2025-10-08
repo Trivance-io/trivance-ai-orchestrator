@@ -242,7 +242,6 @@ git push
 | `/git-github:worktree:cleanup` | Cleanup triple (worktree/local/remote) |
 | `/git-github:commit`           | Commits semánticos agrupados           |
 | `/git-github:pr`               | Crear PR con security review           |
-| `/git-github:switch`           | Cambio seguro de rama                  |
 | `/git-github:issue-manager`    | Analizar issues/PRs                    |
 | `/git-github:issue-sync`       | Sincronizar updates a GitHub           |
 
@@ -257,4 +256,4 @@ git push
 
 ---
 
-_Última actualización: 2025-10-06 | Ecosistema PRD-SDD-GitHub_
+_Última actualización: 2025-10-07 | Ecosistema PRD-SDD-GitHub_

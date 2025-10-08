@@ -1,6 +1,6 @@
 # Guía de Comandos Claude Code
 
-**23 comandos disponibles** organizados por flujo de desarrollo
+**22 comandos disponibles** organizados por flujo de desarrollo
 
 ---
 
@@ -145,14 +145,6 @@ Crea PR con security review BLOCKING, push seguro y metadata completa. Para PRs 
 /git-github:pr <target_branch>
 ```
 
-### `/git-github:switch`
-
-Valida PR mergeado, cambia a rama objetivo y limpia workspace temporal. Al finalizar PRs mergeados.
-
-```bash
-/git-github:switch <target_branch>
-```
-
 ### `/git-github:issue-manager`
 
 Dashboard inteligente o análisis detallado con complejidad, prioridad y próximos pasos. Visión de workload o análisis pre-implementación.
@@ -281,4 +273,4 @@ Ver workflows completos en @ai-first-workflow.md
 
 ---
 
-_Última actualización: 2025-10-06 | 23 comandos documentados_
+_Última actualización: 2025-10-07 | 22 comandos documentados_
