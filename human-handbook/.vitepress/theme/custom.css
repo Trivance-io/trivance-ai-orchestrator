@@ -83,3 +83,9 @@
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
+/* ===== DARK MODE ICON FIX ===== */
+/* Invert feature icons in dark mode for visibility */
+.dark .VPFeature .box > img.VPImage {
+  filter: invert(1);
+}
