@@ -245,7 +245,7 @@ git commit -m "checkpoint: antes de refactor X"
 ### Uso de Ecosistema
 
 **Agentes especializados**: @agents-guide.md (45 agentes)
-**Comandos disponibles**: @commands-guide.md (23 comandos)
+**Comandos disponibles**: @commands-guide.md (22 comandos)
 **Workflows completos**: @ai-first-workflow.md
 
 ---
