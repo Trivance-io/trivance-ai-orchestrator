@@ -29,26 +29,28 @@ Mostrar exactamente este texto:
 
 - Ejecutar: `pwd` para detectar si estamos en worktree (contiene "worktree-")
 - Ejecutar: `git status --porcelain` para ver cambios pendientes
-- Ejecutar: `git branch --show-current` para rama actual
+- Ejecutar: `current_branch=\`git branch --show-current\`` para capturar rama actual
 - Ejecutar: `git fetch --quiet 2>/dev/null` para actualizar referencias remotas (ignorar errores)
 
 ### 3.5. Sincronización proactiva con remoto
 
-**Detectar rama padre:**
+**Verificar upstream y sincronizar:**
 
-- Ejecutar: `parent_branch=\`git branch --list main develop master | head -1 | sed 's/^[* ]\*//'\``
-- Si comando falla o no hay output: continuar sin sincronización (repositorio sin remoto o sin internet)
+- Ejecutar: `git config "branch.$current_branch.remote" > /dev/null 2>&1`
+- Capturar exit code: `has_upstream=$?`
 
-**Intentar sincronización (solo si hay rama padre detectada):**
+**Intentar sincronización (solo si rama tiene upstream y nombre válido):**
 
-- Ejecutar: `git pull --ff-only origin "$parent_branch" 2>&1`
-- Capturar exit code: `sync_status=$?`
+- Si `has_upstream = 0` Y `current_branch` no está vacío:
+  - Ejecutar: `git pull --ff-only origin "$current_branch" 2>&1`
+  - Capturar exit code: `sync_status=$?`
+- Si `has_upstream != 0` O `current_branch` está vacío: asignar `sync_status=2` (rama sin upstream o detached HEAD)
 
 **Mostrar resultado:**
 
-- Si `sync_status = 0`: agregar a output del paso 4: "✅ Sincronizado con origin/$parent_branch"
-- Si `sync_status != 0`: agregar a output del paso 4: "⚠️ No se pudo sincronizar - verificar: git status"
-- Si no hay rama padre: no mostrar nada (continuar silenciosamente)
+- Si `sync_status = 0`: agregar a output del paso 4: "✅ Sincronizado con origin/$current_branch"
+- Si `sync_status = 1`: agregar a output del paso 4: "⚠️ No se pudo sincronizar $current_branch - verificar: git status"
+- Si `sync_status = 2`: agregar a output del paso 4: "ℹ️ Rama local sin upstream remoto"
 
 **IMPORTANTE:**
 
@@ -79,7 +81,7 @@ Mostrar exactamente este texto:
 **SI NO estamos en worktree (pwd no contiene "worktree-")**, mostrar:
 
 ```
-⚙️ **Worflow:**
+⚙️ **Workflow:**
 Para desarrollo, usamos worktrees para mantener branches limpias:
 
 1. Crear worktree: /worktree:create <purpose> <parent-branch>
@@ -120,12 +122,12 @@ Comandos típicos:
 
 ### 7. Recomendación crítica de sincronización
 
-Mostrar siempre:
+**Solo mostrar si `sync_status != 0` (sincronización falló o no aplicó):**
 
 ```
-🚨 Antes de iniciar, sincroniza con el repositorio remoto:
-• git pull origin <rama-padre> (ej: main, develop, master, etc.)
-• git pull (si tienes upstream configurado)
+🚨 Si vas a hacer cambios, verifica estar sincronizado:
+• git pull (si tu rama tiene upstream configurado)
+• Resuelve cualquier conflicto antes de comenzar
 
 Esto previene conflictos costosos y garantiza código actualizado.
 ```
