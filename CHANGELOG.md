@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2025-10-09]
+
+### Added
+
+- feat: VitePress documentation site on GitHub Pages (PR #237)
+- feat(config): enforce zsh/macOS shell standards in Claude Commands (PR #214)
+
+### Fixed
+
+- fix(pr): corregir análisis de commits y actualizar documentación (PR #217)
+- fix(config): enforce shell syntax standards and improve command workflows (PR #215)
+
+### Changed
+
+- refactor(prd-cycle): minimalista PRD workflow + design docs reorganization (PR #218)
+
 ## [2025-10-04]
 
 ### Fixed
