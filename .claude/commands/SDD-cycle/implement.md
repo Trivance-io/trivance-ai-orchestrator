@@ -10,11 +10,9 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
-1. Run `.specify/scripts/bash/check-prerequisites.sh --json --require-tasks --include-tasks` from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list. All paths must be absolute.
+## Outline
 
-2. Load and analyze the implementation context:
-   - **REQUIRED**: Read tasks.md for the complete task list and execution plan
-   - **REQUIRED**: Read plan.md for tech stack, architecture, and file structure
+1. Run `.specify/scripts/bash/check-prerequisites.sh --json --require-tasks --include-tasks` from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list. All paths must be absolute. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
 
 2. **Check checklists status** (if FEATURE_DIR/checklists/ exists):
    - Scan all checklist files in the checklists/ directory
@@ -45,66 +43,80 @@ You **MUST** consider the user input before proceeding (if not empty).
      * Display the table showing all checklists passed
      * Automatically proceed to step 3
 
+3. Load and analyze the implementation context:
+   - **REQUIRED**: Read tasks.md for the complete task list and execution plan
+   - **REQUIRED**: Read plan.md for tech stack, architecture, and file structure
    - **IF EXISTS**: Read data-model.md for entities and relationships
    - **IF EXISTS**: Read contracts/ for API specifications and test requirements
    - **IF EXISTS**: Read research.md for technical decisions and constraints
    - **IF EXISTS**: Read quickstart.md for integration scenarios
 
-3. Parse tasks.md structure and extract:
+4. **Project Setup Verification**:
+   - **REQUIRED**: Create/verify ignore files based on actual project setup:
+   
+   **Detection & Creation Logic**:
+   - Check if the following command succeeds to determine if the repository is a git repo (create/verify .gitignore if so):
+
+     ```sh
+     git rev-parse --git-dir 2>/dev/null
+     ```
+   - Check if Dockerfile* exists or Docker in plan.md → create/verify .dockerignore
+   - Check if .eslintrc* or eslint.config.* exists → create/verify .eslintignore
+   - Check if .prettierrc* exists → create/verify .prettierignore
+   - Check if .npmrc or package.json exists → create/verify .npmignore (if publishing)
+   - Check if terraform files (*.tf) exist → create/verify .terraformignore
+   - Check if .helmignore needed (helm charts present) → create/verify .helmignore
+   
+   **If ignore file already exists**: Verify it contains essential patterns, append missing critical patterns only
+   **If ignore file missing**: Create with full pattern set for detected technology
+   
+   **Common Patterns by Technology** (from plan.md tech stack):
+   - **Node.js/JavaScript**: `node_modules/`, `dist/`, `build/`, `*.log`, `.env*`
+   - **Python**: `__pycache__/`, `*.pyc`, `.venv/`, `venv/`, `dist/`, `*.egg-info/`
+   - **Java**: `target/`, `*.class`, `*.jar`, `.gradle/`, `build/`
+   - **C#/.NET**: `bin/`, `obj/`, `*.user`, `*.suo`, `packages/`
+   - **Go**: `*.exe`, `*.test`, `vendor/`, `*.out`
+   - **Universal**: `.DS_Store`, `Thumbs.db`, `*.tmp`, `*.swp`, `.vscode/`, `.idea/`
+   
+   **Tool-Specific Patterns**:
+   - **Docker**: `node_modules/`, `.git/`, `Dockerfile*`, `.dockerignore`, `*.log*`, `.env*`, `coverage/`
+   - **ESLint**: `node_modules/`, `dist/`, `build/`, `coverage/`, `*.min.js`
+   - **Prettier**: `node_modules/`, `dist/`, `build/`, `coverage/`, `package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`
+   - **Terraform**: `.terraform/`, `*.tfstate*`, `*.tfvars`, `.terraform.lock.hcl`
+
+5. Parse tasks.md structure and extract:
    - **Task phases**: Setup, Tests, Core, Integration, Polish
    - **Task dependencies**: Sequential vs parallel execution rules
    - **Task details**: ID, description, file paths, parallel markers [P]
    - **Execution flow**: Order and dependency requirements
 
-4. Load coordination plan from prior analysis (if available):
-   - **Check for analysis output**: Look for previous `/SDD-cycle:analyze` execution results or parallel execution plan
-   - **Agent assignments**: Map tasks to optimal specialized agents (test-automator, backend-architect, frontend-developer, etc.)
-   - **Stream coordination**: Identify which tasks can run in parallel vs sequential
-   - **File conflict detection**: Note shared files that require coordination between agents
-   - **Fallback**: If no coordination plan available, proceed with single-agent sequential execution
+6. Execute implementation following the task plan:
+   - **Phase-by-phase execution**: Complete each phase before moving to the next
+   - **Respect dependencies**: Run sequential tasks in order, parallel tasks [P] can run together  
+   - **Follow TDD approach**: Execute test tasks before their corresponding implementation tasks
+   - **File-based coordination**: Tasks affecting the same files must run sequentially
+   - **Validation checkpoints**: Verify each phase completion before proceeding
 
-5. Execute implementation with intelligent parallelization:
-   - **Phase-by-phase execution**: Complete each phase before moving to the next (PRESERVED)
-   - **TDD approach**: Execute test tasks before their corresponding implementation tasks (PRESERVED)
-   - **Intelligent agent dispatch**:
-     - For parallel tasks [P] with different files: Launch specialized Task agents simultaneously
-     - For sequential dependencies: Execute one agent at a time in dependency order
-     - Use agent assignments from coordination plan (test-automator, backend-architect, etc.)
-   - **Coordination management**:
-     - Monitor shared file access across parallel streams
-     - Implement coordination checkpoints for file conflicts
-     - Synchronize agents at phase boundaries
-   - **Validation checkpoints**: Verify each phase completion before proceeding (PRESERVED)
-
-6. Implementation execution rules:
+7. Implementation execution rules:
    - **Setup first**: Initialize project structure, dependencies, configuration
    - **Tests before code**: If you need to write tests for contracts, entities, and integration scenarios
    - **Core development**: Implement models, services, CLI commands, endpoints
    - **Integration work**: Database connections, middleware, logging, external services
    - **Polish and validation**: Unit tests, performance optimization, documentation
 
-7. Progress tracking and error handling:
-   - **Sequential tasks**: Report progress after each completed task (PRESERVED)
-   - **Parallel agent coordination**:
-     - Monitor progress across multiple Task agents simultaneously
-     - Aggregate status reports from parallel streams
-     - Track completion of coordination checkpoints
-   - **Error handling strategy**:
-     - Halt execution if any non-parallel task fails (PRESERVED)
-     - For parallel tasks [P], continue with successful tasks, report failed ones (PRESERVED)
-     - Handle agent coordination failures gracefully
-     - Provide clear error messages with context for debugging (PRESERVED)
-   - **Task completion tracking**:
-     - Mark completed tasks as [X] in tasks.md (PRESERVED)
-     - Update task status for both sequential and parallel execution
-     - Synchronize task file updates across agents
-   - Suggest next steps if implementation cannot proceed (PRESERVED)
+8. Progress tracking and error handling:
+   - Report progress after each completed task
+   - Halt execution if any non-parallel task fails
+   - For parallel tasks [P], continue with successful tasks, report failed ones
+   - Provide clear error messages with context for debugging
+   - Suggest next steps if implementation cannot proceed
+   - **IMPORTANT** For completed tasks, make sure to mark the task off as [X] in the tasks file.
 
-8. Completion validation:
+9. Completion validation:
    - Verify all required tasks are completed
    - Check that implemented features match the original specification
    - Validate that tests pass and coverage meets requirements
    - Confirm the implementation follows the technical plan
    - Report final status with summary of completed work
 
-Note: This command assumes a complete task breakdown exists in tasks.md. If tasks are incomplete or missing, suggest running `/SDD-cycle:tasks` first to regenerate the task list.
+Note: This command assumes a complete task breakdown exists in tasks.md. If tasks are incomplete or missing, suggest running `/tasks` first to regenerate the task list.
