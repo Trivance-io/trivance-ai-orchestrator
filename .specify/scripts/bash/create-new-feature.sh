@@ -93,7 +93,26 @@ if [ "$HAS_GIT" = true ]; then
 		WORKTREE_DIR="../feature-$BRANCH_NAME"
 		git worktree add "$WORKTREE_DIR" -b "$BRANCH_NAME"
 		echo "✅ Created worktree: $WORKTREE_DIR"
-		echo "📁 Switch to worktree: cd $WORKTREE_DIR"
+
+		# Auto-open IDE in new worktree
+		IDE_FOUND=false
+		if which code >/dev/null 2>&1; then
+			IDE_CMD="code"
+			IDE_FOUND=true
+		elif which cursor >/dev/null 2>&1; then
+			IDE_CMD="cursor"
+			IDE_FOUND=true
+		fi
+
+		if $IDE_FOUND; then
+			(cd "$WORKTREE_DIR" && $IDE_CMD . --new-window) &
+			echo "✅ IDE opened automatically: $WORKTREE_DIR"
+			echo "⚠️  IMPORTANTE: Inicia nueva sesión Claude en el IDE abierto"
+		else
+			echo "📁 Switch to worktree: cd $WORKTREE_DIR"
+			echo "⚠️  Abre IDE manualmente en: $WORKTREE_DIR"
+		fi
+
 		# Use specs in the worktree, not main repo
 		SPECS_DIR="$WORKTREE_DIR/specs"
 	else
