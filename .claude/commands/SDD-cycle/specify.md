@@ -18,7 +18,7 @@ The user input can be either:
 - **GitHub Issue**: `/SDD-cycle:specify --from-issue 456`
 - **PRD file**: `/SDD-cycle:specify --from-prd <feature_name>`
 
-Assume you always have it available in this conversation even if `$ARGUMENTS` appears literally below. Do not ask the user to repeat it unless they provided an empty command.
+The text the user typed after `/speckit.specify` in the triggering message **is** the feature description. Assume you always have it available in this conversation even if `{ARGS}` appears literally below. Do not ask the user to repeat it unless they provided an empty command.
 
 Given that input, do this:
 
@@ -34,10 +34,7 @@ Given that input, do this:
      - Use clean PRD content as feature description
    - Otherwise: Use `$ARGUMENTS` directly as natural language feature description
 
-
-1. Run the script `.specify/scripts/bash/create-new-feature.sh --json "$ARGUMENTS"` from repo root and parse its JSON output for BRANCH_NAME and SPEC_FILE. All file paths must be absolute.
-  **IMPORTANT** You must only ever run this script once. The JSON is provided in the terminal as output - always refer to it to get the actual content you're looking for. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
-2. Load `.specify/templates/spec-template.md` to understand required sections.
+2. Load `templates/spec-template.md` to understand required sections.
 
 3. Follow this execution flow:
 
@@ -66,7 +63,6 @@ Given that input, do this:
     8. Return: SUCCESS (spec ready for planning)
 
 4. Write the specification to SPEC_FILE using the template structure, replacing placeholders with concrete details derived from the feature description (arguments) while preserving section order and headings.
-
 
 5. **Specification Quality Validation**: After writing the initial spec, validate it against quality criteria:
 
@@ -162,36 +158,7 @@ Given that input, do this:
 
 6. Report completion with branch name, spec file path, checklist results, and readiness for the next phase (`/speckit.clarify` or `/speckit.plan`).
 
-5. Open IDE automatically to enhance developer experience:
-   - **Primary IDE (VS Code)**: Check if VS Code is available using `which code > /dev/null 2>&1`
-     - If found, verify permissions: `timeout 3 code --version >/dev/null 2>&1`
-     - If accessible, execute: `(cd "." && code . --new-window)`
-     - If successful, show: "✅ IDE abierto en nueva ventana para especificación"
-   - **Alternative IDEs**: If VS Code is not available, attempt to open the worktree in any other available IDE
-     - Try to open the worktree directory in a new window using the detected IDE
-     - If this fails or no alternative IDE is found, show: "⚠️ Asegúrate de abrir manualmente el worktree en tu IDE preferido y continuar allí"
-   - **Fallback**: If all IDE attempts fail, continue with the workflow and advise manual opening
-
-
-6. Report completion with branch name, spec file path, IDE status, and readiness for the next phase:
-
-   ```
-   ✅ Feature specification created:
-   - Branch: [BRANCH_NAME]
-   - Spec file: [SPEC_FILE]
-   - IDE: Opened automatically / Manual opening required
-
-   ⚠️  NEXT STEPS:
-   PASO 1 - En la nueva ventana del IDE (si se abrió automáticamente):
-     Abrir Terminal integrado (Cmd+` o View → Terminal)
-
-   PASO 2 - Continuar con el workflow SDD:
-     /SDD-cycle:plan
-
-   ✅ Ready for planning phase of SDD-cycle workflow.
-   ```
-
-**Note**: Checklist validation results included in output above.
+**NOTE:** The script creates and checks out the new branch and initializes the spec file before writing.
 
 ## General Guidelines
 

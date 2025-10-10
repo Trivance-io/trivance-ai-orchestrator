@@ -64,39 +64,7 @@ Load only the minimal necessary context from each artifact:
 
 - Load `.specify/memory/constitution.md` for principle validation
 
-### 3. Parallel Stream Analysis
-
-   **DELEGATE TO SPECIALIST**: Use Task tool to invoke `agent-assignment-analyzer` with tasks.md content to generate intelligent agent assignments and parallel execution recommendations.
-
-   Use Task tool: `agent-assignment-analyzer` → Analyze tasks.md content and generate:
-   - Task-to-agent intelligent mapping
-   - File dependency conflict detection
-   - Parallel execution streams identification
-   - Coordination points analysis
-   - Parallelization optimization recommendations
-     A. Task categorization by agent expertise:
-   - Setup tasks → general-purpose
-   - Test tasks (unit/integration) → test-automator
-   - API/Service tasks → backend-architect
-   - Frontend/UI tasks → frontend-developer
-   - Database/Schema tasks → database-optimizer
-   - DevOps/Infrastructure → devops-troubleshooter
-   - Documentation → docs-architect
-     B. File dependency mapping:
-   - Parse file paths referenced in tasks.md
-   - Identify shared files across multiple tasks
-   - Mark file conflicts that require coordination
-     C. Coordination point identification:
-   - Tasks affecting same files = sequential execution required
-   - Tasks with [P] marker + different files = parallel eligible
-   - Dependencies between task phases (Setup → Tests → Core → Integration → Polish)
-     D. Generate execution coordination plan:
-   - Group parallel-eligible tasks into streams
-   - Assign optimal agent type per stream
-   - Document coordination checkpoints
-   - Estimate parallelization factor (sequential time / parallel time)
-
-### 9. Build Semantic Models
+### 3. Build Semantic Models
 
 Create internal representations (do not include raw artifacts in output):
 
@@ -105,7 +73,7 @@ Create internal representations (do not include raw artifacts in output):
 - **Task coverage mapping**: Map each task to one or more requirements or stories (inference by keyword / explicit reference patterns like IDs or key phrases)
 - **Constitution rule set**: Extract principle names and MUST/SHOULD normative statements
 
-### 9. Detection Passes (Token-Efficient Analysis)
+### 4. Detection Passes (Token-Efficient Analysis)
 
 Focus on high-signal findings. Limit to 50 findings total; aggregate remainder in overflow summary.
 
@@ -143,7 +111,7 @@ Focus on high-signal findings. Limit to 50 findings total; aggregate remainder i
 - Task ordering contradictions (e.g., integration tasks before foundational setup tasks without dependency note)
 - Conflicting requirements (e.g., one requires Next.js while other specifies Vue)
 
-### 9. Severity Assignment
+### 5. Severity Assignment
 
 Use this heuristic to prioritize findings:
 
@@ -152,7 +120,7 @@ Use this heuristic to prioritize findings:
 - **MEDIUM**: Terminology drift, missing non-functional task coverage, underspecified edge case
 - **LOW**: Style/wording improvements, minor redundancy not affecting execution order
 
-### 9. Produce Compact Analysis Report
+### 6. Produce Compact Analysis Report
 
 Output a Markdown report (no file writes) with the following structure:
 
@@ -182,7 +150,7 @@ Output a Markdown report (no file writes) with the following structure:
 - Duplication Count
 - Critical Issues Count
 
-### 9. Provide Next Actions
+### 7. Provide Next Actions
 
 At end of report, output a concise Next Actions block:
 
@@ -190,7 +158,7 @@ At end of report, output a concise Next Actions block:
 - If only LOW/MEDIUM: User may proceed, but provide improvement suggestions
 - Provide explicit command suggestions: e.g., "Run /specify with refinement", "Run /plan to adjust architecture", "Manually edit tasks.md to add coverage for 'performance-metrics'"
 
-### 9. Offer Remediation
+### 8. Offer Remediation
 
 Ask the user: "Would you like me to suggest concrete remediation edits for the top N issues?" (Do NOT apply them automatically.)
 
