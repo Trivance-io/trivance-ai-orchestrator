@@ -97,10 +97,10 @@ if [ "$HAS_GIT" = true ]; then
 		# Use specs in the worktree, not main repo
 		SPECS_DIR="$WORKTREE_DIR/specs"
 	else
-		# We're already in a worktree - use existing branch (DON'T create new one)
-		# This preserves the "one worktree = one branch" principle
-		CURRENT_BRANCH=$(git branch --show-current)
-		echo "✅ Using existing branch: $CURRENT_BRANCH"
+		# We're already in a worktree - create new branch for new feature
+		# This allows sequential features in the same worktree
+		git checkout -b "$BRANCH_NAME" 2>/dev/null || git checkout "$BRANCH_NAME"
+		echo "✅ Created/switched to branch: $BRANCH_NAME in current worktree"
 		# Use specs in current worktree
 		SPECS_DIR="$(pwd)/specs"
 	fi
