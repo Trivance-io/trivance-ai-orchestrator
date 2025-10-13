@@ -66,6 +66,32 @@ AUTO_CREATE_BRANCH=false
   fi
   ```
 
+### 1.5. Validación de sincronización de rama actual
+
+**Verificar upstream de rama actual:**
+
+- Ejecutar: `git config "branch.$current_branch.remote" > /dev/null 2>&1`
+- Capturar exit code: `has_upstream=$?`
+
+**Si rama tiene upstream (has_upstream = 0):**
+
+- Verificar si está atrás del remoto (referencia ya actualizada por git fetch origin en paso 1):
+
+  ```bash
+  commits_behind_own=\`git rev-list --count HEAD..origin/$current_branch 2>/dev/null || echo "0"\`
+
+  if [ "$commits_behind_own" -gt 0 ]; then
+      echo "❌ Tu rama $current_branch está $commits_behind_own commits atrás de origin/$current_branch"
+      echo "   Debes sincronizar antes de crear el PR:"
+      echo "   → git pull origin $current_branch"
+      exit 1
+  fi
+  ```
+
+**Si rama NO tiene upstream (has_upstream != 0):**
+
+- Continuar silenciosamente (rama nueva que se subirá por primera vez)
+
 ### 2. Operaciones en paralelo
 
 **Security Review (BLOCKING)**
