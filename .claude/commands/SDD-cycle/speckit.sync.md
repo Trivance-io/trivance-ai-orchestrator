@@ -41,18 +41,29 @@ $ARGUMENTS
 - Extract feature directory name (e.g., `001-documentation-changelog-visibility`)
 - Or check `SPECIFY_FEATURE` environment variable if set
 
+**Validate spec.md exists:**
+
+- Check if `specs/<feature>/spec.md` exists
+- If spec.md missing, show error "❌ Spec file not found: specs/<feature>/spec.md" and stop
+
+**Verify not already synced (prevent duplicates):**
+
+- Read frontmatter from `specs/<feature>/spec.md`
+- Check if `github:` field exists in frontmatter
+- If `github:` field exists:
+  - Extract the GitHub issue URL from the field
+  - Show error: "❌ Spec already synced to <issue_url>. To re-sync, manually remove the 'github:' line from spec.md frontmatter and re-run this command."
+  - Stop execution
+
 **Validate parent issue exists:**
 
 - Run `gh issue view <parent_issue_number> --json number,title` to verify issue exists
 - If issue doesn't exist: Show error "❌ Parent issue #<number> not found" and stop
 
-**Validate required files exist:**
+**Validate optional files:**
 
-- `specs/<feature>/spec.md` (REQUIRED)
-- `specs/<feature>/plan.md` (optional)
-- `specs/<feature>/tasks.md` (optional)
-
-If spec.md missing, show error "❌ Spec file not found: specs/<feature>/spec.md" and stop.
+- Check if `specs/<feature>/plan.md` exists (optional)
+- Check if `specs/<feature>/tasks.md` exists (optional)
 
 ### 2. Prepare Issue Content
 
@@ -169,7 +180,8 @@ Next steps:
 ## Error Handling
 
 - **If no parent issue number provided**: Show usage error and stop
-- **If parent issue doesn't exist**: Verify with `gh issue view` before proceeding
+- **If spec already synced**: Show error with existing issue URL and stop (prevents duplicates)
+- **If parent issue doesn't exist**: Verify with `gh issue view` before proceeding and stop
 - **If spec.md not found**: Show clear error message with correct path and stop
 - **If issue creation fails**: Report what succeeded, don't rollback local changes
 - **If file updates fail**: Report specific file and continue with others
@@ -179,10 +191,11 @@ Next steps:
 - **Parent PRD issue is REQUIRED** (enforces correct workflow: PRD → Spec)
 - **Recommended timing: AFTER implementation** (documents what was built, not what was planned)
 - **Single sync per feature** (run once at the end, eliminates re-sync complexity)
+- **Duplicate prevention**: Command fails if spec already synced (checks frontmatter `github:` field)
+- **Manual re-sync**: To re-sync, remove `github:` line from spec.md frontmatter first
 - Trust GitHub CLI authentication (no pre-auth checks)
 - Update files only after successful GitHub operations
 - Keep operations atomic and simple
-- Re-running command creates duplicate issue (close old one manually if needed)
 - Spec represents technical documentation, PRD represents business requirement
 - All data in Issue body/labels (100% portable to Linear)
 
