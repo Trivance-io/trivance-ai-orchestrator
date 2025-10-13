@@ -1,17 +1,18 @@
 ---
 allowed-tools: Read, Edit, Write, Bash(gh), Bash(date)
-description: Push spec to GitHub as issue with optional parent PRD reference
+description: Push spec to GitHub as child issue linked to parent PRD
 ---
 
 # Spec Sync
 
-Push spec to GitHub as issue with optional parent PRD reference.
+Push spec to GitHub as child issue linked to parent PRD.
+
+**IMPORTANT:** This command REQUIRES a parent PRD issue. Specs must always be linked to a PRD. If you don't have a PRD issue yet, run `/PRD-cycle:prd-sync` first.
 
 ## Usage
 
 ```
-/SDD-cycle:speckit.sync
-/SDD-cycle:speckit.sync --parent <issue_number>
+/SDD-cycle:speckit.sync <parent_issue_number>
 ```
 
 ## User Input
@@ -27,7 +28,12 @@ $ARGUMENTS
 
 ## Instructions
 
-### 1. Detect Current Feature and Parse Arguments
+### 1. Parse Arguments and Validate
+
+**Parse parent issue number** from `$ARGUMENTS`:
+
+- **Parent issue number**: Extract the issue number (REQUIRED)
+- If no argument provided: Show error "❌ Parent issue number required. Usage: /SDD-cycle:speckit.sync <issue_number>" and stop
 
 **Detect feature from current branch:**
 
@@ -35,18 +41,18 @@ $ARGUMENTS
 - Extract feature directory name (e.g., `001-documentation-changelog-visibility`)
 - Or check `SPECIFY_FEATURE` environment variable if set
 
-**Parse arguments** from `$ARGUMENTS`:
+**Validate parent issue exists:**
 
-- **Parent PRD**: Extract parent issue number if `--parent <number>` provided
-- If no parent provided: Create standalone spec issue
+- Run `gh issue view <parent_issue_number> --json number,title` to verify issue exists
+- If issue doesn't exist: Show error "❌ Parent issue #<number> not found" and stop
 
 **Validate required files exist:**
 
-- `specs/<feature>/spec.md` (mandatory)
+- `specs/<feature>/spec.md` (REQUIRED)
 - `specs/<feature>/plan.md` (optional)
 - `specs/<feature>/tasks.md` (optional)
 
-If spec.md missing, show error and stop.
+If spec.md missing, show error "❌ Spec file not found: specs/<feature>/spec.md" and stop.
 
 ### 2. Prepare Issue Content
 
@@ -60,56 +66,54 @@ If spec.md missing, show error and stop.
 
 **Format for GitHub Issue body:**
 
+If only spec.md exists:
+
 ```markdown
 # Feature Specification: <Title from spec>
 
-[If --parent provided]
 **Parent PRD**: #<parent_number>
 
 ---
 
-## Specification
-
 <spec.md content without frontmatter>
-
-## [If plan.md exists]
-
-## Implementation Plan
-
-<plan.md content>
-
-## [If tasks.md exists]
-
-## Task Breakdown
-
-<tasks.md content>
 
 ---
 
 _Synced from local specs at <timestamp>_
 ```
 
-### 3. Create GitHub Issue
+If plan.md and/or tasks.md also exist, append:
 
-**Prepare issue creation:**
+```markdown
+---
+## Implementation Plan
+
+<plan.md content>
+---
+
+## Task Breakdown
+
+<tasks.md content>
+```
+
+### 3. Create GitHub Issue and Link to Parent
+
+**Create GitHub issue:**
 
 - **Title**: "Spec: <feature-name>" (convert kebab-case to Title Case)
 - **Body**: Formatted content from step 2
-- **Labels**: `spec`, `sdd`
-- **Additional labels**: `technical` if no parent, or `feature` if parent exists
-
-**Create GitHub issue:**
+- **Labels**: `spec`, `sdd`, `feature`
 
 ```bash
 gh issue create \
   --title "<title>" \
   --body "<formatted_body>" \
-  --label spec,sdd,<additional_labels>
+  --label spec,sdd,feature
 ```
 
-**If parent PRD provided:**
+**Notify parent PRD:**
 
-- Add comment to parent issue notifying of spec creation:
+- Add comment to parent issue:
 
 ```bash
 gh issue comment <parent_number> \
@@ -122,7 +126,7 @@ gh issue comment <parent_number> \
 
 - `github: <issue_url>`
 - `github_synced: <current_timestamp>`
-- `parent_prd: #<parent_number>` (only if parent provided)
+- `parent_prd: #<parent_number>`
 
 Use current timestamp in ISO format: `YYYY-MM-DDTHH:MM:SSZ`
 
@@ -135,9 +139,7 @@ Use current timestamp in ISO format: `YYYY-MM-DDTHH:MM:SSZ`
 ```markdown
 # GitHub Issue Mapping
 
-[If parent provided]
 Parent PRD: #<parent_number> - <parent_url>
-
 Spec Issue: #<issue_number> - <issue_url>
 
 Note: Implementation tasks tracked via this spec issue
@@ -153,42 +155,43 @@ Synced: <current_timestamp>
 ✅ Spec synced to GitHub
 
   - Spec Issue: #<issue_number> - <feature_name>
-  [If parent provided] - Parent PRD: #<parent_number>
+  - Parent PRD: #<parent_number>
   - Files synced: spec.md[, plan.md][, tasks.md]
 
 Next steps:
   - View spec: <issue_url>
-  - Update spec: Edit specs/<feature>/spec.md and re-run /SDD-cycle:speckit.sync
+  - Update spec: Edit specs/<feature>/spec.md and re-run /SDD-cycle:speckit.sync <parent_number>
   - Implement: /SDD-cycle:speckit.implement
 ```
 
 ## Error Handling
 
-- **If spec.md not found**: Show clear error message with correct path
-- **If parent issue invalid**: Show error that parent issue doesn't exist
-- **If issue creation fails**: Report what succeeded, don't rollback
+- **If no parent issue number provided**: Show usage error and stop
+- **If parent issue doesn't exist**: Verify with `gh issue view` before proceeding
+- **If spec.md not found**: Show clear error message with correct path and stop
+- **If issue creation fails**: Report what succeeded, don't rollback local changes
 - **If file updates fail**: Report specific file and continue with others
 
 ## Important Notes
 
+- Parent PRD issue is REQUIRED (enforces correct workflow)
 - Trust GitHub CLI authentication (no pre-auth checks)
-- Don't pre-check for duplicates (let GitHub handle conflicts)
 - Update files only after successful GitHub operations
 - Keep operations atomic and simple
-- Re-running command updates existing GitHub issue (manual for now)
-- Use `--parent N` to link spec to existing PRD issue
+- Re-running command creates duplicate issue (user must close old one manually)
 - Spec represents technical implementation, PRD represents business requirement
+- All data in Issue body/labels (100% portable to Linear)
 
 ## Implementation Approach
 
 This command uses **natural language instructions** processed by Claude Code's native capabilities rather than complex bash scripting. Claude will:
 
-1. **Detect feature** from branch name or env var
-2. **Parse arguments** intelligently from `$ARGUMENTS`
-3. **Read spec content** using the Read tool
+1. **Validate parent issue** exists via `gh issue view`
+2. **Detect feature** from branch name
+3. **Read spec artifacts** using the Read tool
 4. **Execute GitHub operations** using simple Bash commands
 5. **Update files** using Edit tool for surgical changes
-6. **Create new files** using Write tool when needed
+6. **Create mapping file** using Write tool
 
 This approach is more robust than bash scripting because:
 
@@ -200,35 +203,27 @@ This approach is more robust than bash scripting because:
 
 ## Relationship to PRD Workflow
 
-**PRD → Spec Integration:**
+**Required Flow (Parent PRD → Child Spec):**
 
 ```
-PRD.md → [prd-sync] → GitHub Issue #247 (PRD)
+PRD.md → [prd-sync] → GitHub Issue #247 (PRD - parent)
                            ↓
-                    [SDD-cycle:specify --from-issue 247]
+                    [speckit.specify --from-issue 247]
                            ↓
                     specs/001-feature/spec.md (local)
                            ↓
-                    [SDD-cycle:speckit.sync --parent 247]
+                    [speckit.sync 247]
                            ↓
-                    GitHub Issue #248 (Spec, linked to #247)
+                    GitHub Issue #248 (Spec - child of #247)
 ```
 
 **Stakeholder View:**
 
-- Business team tracks PRD issue #247
-- Tech team tracks Spec issue #248
-- Both linked via "Parent PRD: #247" in spec body
-- Clear separation of concerns
+- Business team tracks PRD issue #247 (parent)
+- Tech team tracks Spec issue #248 (child)
+- Parent-child relationship via "Parent PRD: #247" in spec body
+- Clear separation of concerns: business (PRD) vs technical (Spec)
 
-## Portability Notes
+## Portability to Linear
 
-**This design is 100% portable to Linear:**
-
-- All data in Issue body/title/labels (Linear imports these)
-- Zero GitHub Projects custom fields (Linear doesn't import these)
-- Standard markdown formatting (Linear supports this)
-- Labels follow common conventions (spec, sdd, technical, feature)
-- Parent reference in body text (parseable by any system)
-
-**Migration path:** When moving to Linear, issues import cleanly with full context preserved.
+Issues created by this command import cleanly to Linear with full context preserved. Zero lock-in to GitHub Projects.
