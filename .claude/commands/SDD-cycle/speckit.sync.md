@@ -107,19 +107,31 @@ If plan.md and/or tasks.md also exist, append:
 <tasks.md content>
 ```
 
+**Write formatted body to temporary file:**
+
+For safety with complex markdown content (quotes, special chars), write the formatted body to a temporary file instead of passing directly to `--body` flag.
+
 ### 3. Create GitHub Issue and Link to Parent
 
 **Create GitHub issue:**
 
 - **Title**: "Spec: <feature-name>" (convert kebab-case to Title Case)
-- **Body**: Formatted content from step 2
+- **Body**: Write formatted content to temporary file, use `--body-file`
 - **Labels**: `spec`, `sdd`, `feature`
 
 ```bash
+# Write body to temp file
+temp_file=$(mktemp /tmp/spec-issue-XXXXXX.md)
+echo "<formatted_body_content>" > "$temp_file"
+
+# Create issue with body-file (safer for complex markdown)
 gh issue create \
   --title "<title>" \
-  --body "<formatted_body>" \
+  --body-file "$temp_file" \
   --label spec,sdd,feature
+
+# Cleanup temp file
+rm "$temp_file"
 ```
 
 **Notify parent PRD:**
