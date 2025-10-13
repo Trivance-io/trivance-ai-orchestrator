@@ -90,7 +90,7 @@ Use current timestamp in ISO format: `YYYY-MM-DDTHH:MM:SSZ`
 [If no milestone] No milestone assigned
 Parent Issue: #<issue_number> - <issue_url>
 
-Note: Sub-issues will be created by SDD workflow via /SDD-cycle:specify --from-issue <issue_number>
+Note: Technical specification will be created via /SDD-cycle:specify --from-issue <issue_number>
 
 Synced: <current_timestamp>
 ```
@@ -125,7 +125,7 @@ Next steps:
 - Don't pre-check for duplicates (let GitHub handle conflicts)
 - Update files only after successful GitHub operations
 - Keep operations atomic and simple
-- Sub-issues handled by SDD workflow, not this command
+- Technical specification handled by SDD workflow, not this command
 - Use `--milestone N` to assign PRD to existing milestone
 - Milestones provide optional business-level progress tracking
 - PRD represents business requirement, not technical implementation
@@ -153,13 +153,13 @@ This approach is more robust than bash scripting because:
 **PRD as Parent Issue Strategy**:
 
 - PRD represents the business requirement being tracked
-- GitHub issue becomes the central hub for all technical sub-issues
-- SDD workflow creates technical specification and implementation sub-issues
+- GitHub issue becomes the central hub for technical specification tracking
+- SDD workflow creates technical specification for implementation
 - Business stakeholders track progress via parent PRD issue
-- Technical team tracks implementation via SDD sub-issues
+- Technical team tracks implementation via SDD workflow
 
 **Workflow Integration**:
 
 ```
-PRD.md → [prd-sync] → GitHub Parent Issue → [SDD-cycle:specify --from-issue] → Technical Spec + Sub-Issues
+PRD.md → [prd-sync] → GitHub Parent Issue → [SDD-cycle:specify --from-issue] → Technical Spec
 ```
