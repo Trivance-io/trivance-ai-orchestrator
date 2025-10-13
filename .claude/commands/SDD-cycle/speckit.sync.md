@@ -158,10 +158,12 @@ Synced: <current_timestamp>
   - Parent PRD: #<parent_number>
   - Files synced: spec.md[, plan.md][, tasks.md]
 
+Documentation complete. Stakeholders can now review what was built.
+
 Next steps:
   - View spec: <issue_url>
-  - Update spec: Edit specs/<feature>/spec.md and re-run /SDD-cycle:speckit.sync <parent_number>
-  - Implement: /SDD-cycle:speckit.implement
+  - Close feature branch: Merge PR or delete branch
+  - Start next feature: /PRD-cycle:prd-new <feature_name>
 ```
 
 ## Error Handling
@@ -174,12 +176,14 @@ Next steps:
 
 ## Important Notes
 
-- Parent PRD issue is REQUIRED (enforces correct workflow)
+- **Parent PRD issue is REQUIRED** (enforces correct workflow: PRD → Spec)
+- **Recommended timing: AFTER implementation** (documents what was built, not what was planned)
+- **Single sync per feature** (run once at the end, eliminates re-sync complexity)
 - Trust GitHub CLI authentication (no pre-auth checks)
 - Update files only after successful GitHub operations
 - Keep operations atomic and simple
-- Re-running command creates duplicate issue (user must close old one manually)
-- Spec represents technical implementation, PRD represents business requirement
+- Re-running command creates duplicate issue (close old one manually if needed)
+- Spec represents technical documentation, PRD represents business requirement
 - All data in Issue body/labels (100% portable to Linear)
 
 ## Implementation Approach
@@ -203,7 +207,7 @@ This approach is more robust than bash scripting because:
 
 ## Relationship to PRD Workflow
 
-**Required Flow (Parent PRD → Child Spec):**
+**Recommended Flow (Sync After Implementation):**
 
 ```
 PRD.md → [prd-sync] → GitHub Issue #247 (PRD - parent)
@@ -212,17 +216,32 @@ PRD.md → [prd-sync] → GitHub Issue #247 (PRD - parent)
                            ↓
                     specs/001-feature/spec.md (local)
                            ↓
-                    [speckit.sync 247]
+                    [speckit.plan] → plan.md (local)
                            ↓
-                    GitHub Issue #248 (Spec - child of #247)
+                    [speckit.tasks] → tasks.md (local)
+                           ↓
+                    [speckit.implement] → CODE (validated)
+                           ↓
+                    [speckit.sync 247] ← SYNC AFTER IMPLEMENTATION
+                           ↓
+                    GitHub Issue #248 (Spec - documents what was built)
 ```
+
+**Timing Recommendation:**
+
+Run `/speckit.sync` AFTER implementation is complete and validated. This ensures:
+
+- GitHub Issue documents what was actually built (not speculation)
+- Spec + Plan + Tasks are 100% accurate with final code
+- Stakeholders see results, not work-in-progress
+- Zero need for re-sync or duplicate issues
 
 **Stakeholder View:**
 
-- Business team tracks PRD issue #247 (parent)
-- Tech team tracks Spec issue #248 (child)
+- Business team tracks PRD issue #247 (parent) - high-level requirements
+- Tech team tracks Spec issue #248 (child) - technical documentation of what was built
 - Parent-child relationship via "Parent PRD: #247" in spec body
-- Clear separation of concerns: business (PRD) vs technical (Spec)
+- Clear separation of concerns: business requirements (PRD) vs technical implementation (Spec)
 
 ## Portability to Linear
 
